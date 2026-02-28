@@ -16,12 +16,14 @@ import {
   DEFAULT_SELECTIONS,
   BASE_CLOTHES_MAP,
   DEFAULT_CLOTHES_PATH,
+  DEFAULT_BASE_PATH,
+  DEFAULT_MOUTHBASE_PATH,
 } from '@/lib/layerRegistry';
 import type { LayerConfig, RandomizationConfig } from '@/types/generator';
 
 // Re-export for consumers that need registry data
 export type { UILayerName } from '@/lib/layerRegistry';
-export { UI_ORDER, RENDER_ORDER, REQUIRED_LAYERS_FOR_EXPORT, DEFAULT_SELECTIONS, BASE_CLOTHES_MAP, DEFAULT_CLOTHES_PATH };
+export { UI_ORDER, RENDER_ORDER, REQUIRED_LAYERS_FOR_EXPORT, DEFAULT_SELECTIONS, BASE_CLOTHES_MAP, DEFAULT_CLOTHES_PATH, DEFAULT_BASE_PATH, DEFAULT_MOUTHBASE_PATH };
 
 // ============ Layer Config (LayerConfig shape for existing consumers) ============
 // order = index in RENDER_ORDER (Background 0, Base 1, ... Head 8)

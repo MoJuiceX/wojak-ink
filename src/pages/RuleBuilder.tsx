@@ -6,6 +6,7 @@
  */
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { type UILayerName } from '@/lib/layerRegistry';
+import { LAYER_BASE } from '@/config/layerAssetBase';
 import { buildRenderLayers } from '@/services/canvasRendererLayerBuilder';
 import { renderToCanvas } from '@/services/canvasRenderer';
 import { getUnifiedTraits, type UnifiedTrait } from '@/services/generatorService';
@@ -779,7 +780,7 @@ export default function RuleBuilder() {
 
     // Build selections from stack
     const sel: SelectedLayers = {
-      Base: '/assets/wojak-layers/BASE/Wojak-skin-full.png',
+      Base: `${LAYER_BASE}/BASE/Wojak-skin-full.png`,
     };
     for (const item of layerStack) {
       sel[item.layerName] = item.path;

@@ -29,6 +29,8 @@ dist-ssr
 *.sln
 *.sw?
 public/assets/wojak-layers/*.md
+# Uncomment after R2 migration is deployed (layers served from layers.wojak.ink)
+# public/assets/wojak-layers/
 
 # Temp clone for skill install
 .mattpocock-skills-tmp

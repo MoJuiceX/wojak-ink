@@ -14,13 +14,13 @@ import { traitGridVariants, traitCardStaggerVariants } from '@/config/generatorA
 import type { LayerImage } from '@/services/generatorService';
 import type { UnifiedTrait } from '@/services/generatorService';
 import { getG1MouthTransform, getG2MouthTransform } from './mouthPreviewPositions';
+import { DEFAULT_BASE_PATH, DEFAULT_CLOTHES_PATH, DEFAULT_MOUTHBASE_PATH } from '@/lib/layerRegistry';
+import { G2_LAYER_BASE } from '@/config/layerAssetBase';
 
-const G2_BASE_PATH = '/assets/wojak-layers/YourWojak-layers';
+const G2_BASE_PATH = G2_LAYER_BASE;
 
 // Default layer paths for preview composites (same as TraitSelector)
-const DEFAULT_BASE_PATH = '/assets/wojak-layers/BASE/BASE_Base-Wojak_classic.png';
-const DEFAULT_CLOTHES_PATH = '/assets/wojak-layers/CLOTHES/CLOTHES_Tee_blue.png';
-const DEFAULT_MOUTH_PATH = '/assets/wojak-layers/MOUTH/MOUTH_numb.png';
+const DEFAULT_MOUTH_PATH = DEFAULT_MOUTHBASE_PATH;
 
 interface MouthLayerSelectorProps {
   className?: string;

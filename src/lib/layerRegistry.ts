@@ -6,6 +6,8 @@
  * See docs/GENERATOR-ARCHITECTURE.md and docs/GENERATOR-CHECKLIST.md.
  */
 
+import { LAYER_BASE } from '@/config/layerAssetBase';
+
 // ============ UI Layer Name Type ============
 
 export type UILayerName =
@@ -120,63 +122,63 @@ export const REQUIRED_LAYERS_FOR_EXPORT: UILayerName[] = ['Base', 'Clothes', 'Mo
 
 /** Default selections when user first visits or clears all (path per layer) */
 export const DEFAULT_SELECTIONS: Partial<Record<UILayerName, string>> = {
-  MouthBase: '/assets/wojak-layers/MOUTH/MOUTH_numb.png',
-  Clothes: '/assets/wojak-layers/CLOTHES/CLOTHES_Tee_blue.png',
+  MouthBase: `${LAYER_BASE}/MOUTH/MOUTH_numb.png`,
+  Clothes: `${LAYER_BASE}/CLOTHES/CLOTHES_Tee_blue.png`,
 };
 
 /** Base variant key → clothes path for preview consistency */
 export const BASE_CLOTHES_MAP: Record<string, string> = {
-  classic: '/assets/wojak-layers/CLOTHES/CLOTHES_Tee_blue.png',
-  rekt: '/assets/wojak-layers/CLOTHES/CLOTHES_Tee_blue.png',
-  rugged: '/assets/wojak-layers/CLOTHES/CLOTHES_Tee_blue.png',
-  bleeding: '/assets/wojak-layers/CLOTHES/CLOTHES_Tee_blue.png',
-  terminator: '/assets/wojak-layers/CLOTHES/CLOTHES_Tee_blue.png',
+  classic: `${LAYER_BASE}/CLOTHES/CLOTHES_Tee_blue.png`,
+  rekt: `${LAYER_BASE}/CLOTHES/CLOTHES_Tee_blue.png`,
+  rugged: `${LAYER_BASE}/CLOTHES/CLOTHES_Tee_blue.png`,
+  bleeding: `${LAYER_BASE}/CLOTHES/CLOTHES_Tee_blue.png`,
+  terminator: `${LAYER_BASE}/CLOTHES/CLOTHES_Tee_blue.png`,
 };
 
-export const DEFAULT_CLOTHES_PATH = '/assets/wojak-layers/CLOTHES/CLOTHES_Tee_blue.png';
+export const DEFAULT_CLOTHES_PATH = `${LAYER_BASE}/CLOTHES/CLOTHES_Tee_blue.png`;
 
 /** Default path for Base when rules force it */
-export const DEFAULT_BASE_PATH = '/assets/wojak-layers/BASE/BASE_Base-Wojak_classic.png';
+export const DEFAULT_BASE_PATH = `${LAYER_BASE}/BASE/BASE_Base-Wojak_classic.png`;
 
 /** Default path for MouthBase when rules force it */
-export const DEFAULT_MOUTHBASE_PATH = '/assets/wojak-layers/MOUTH/MOUTH_numb.png';
+export const DEFAULT_MOUTHBASE_PATH = `${LAYER_BASE}/MOUTH/MOUTH_numb.png`;
 
 // ============ Scene Backgrounds (for random default) ============
 
 export const SCENE_BACKGROUNDS: string[] = [
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Bepe Barracks.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Chia Farm.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Colosseum.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Crystal.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Dark Alley.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Deep Ocean.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Dragons Lair.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Frozen Tundra.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Graveyard.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Heaven.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Hell.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Jungle.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Matrix.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Moms Basement.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Moon.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Morning-Routine.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Nesting Grounds.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_NYSE Dump.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_NYSE Pump.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_One Market.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Orange Grove.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Pirate-ship.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Rainforest.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Rome.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Ronin Dojo.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Route 66.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Silicon.net Data Center.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Sky Fortress.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Spell Room.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Steel Forge.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Stone Temple.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Thunderstorm.png',
-  '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_White House.png',
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Bepe Barracks.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Chia Farm.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Colosseum.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Crystal.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Dark Alley.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Deep Ocean.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Dragons Lair.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Frozen Tundra.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Graveyard.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Heaven.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Hell.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Jungle.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Matrix.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Moms Basement.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Moon.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Morning-Routine.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Nesting Grounds.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_NYSE Dump.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_NYSE Pump.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_One Market.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Orange Grove.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Pirate-ship.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Rainforest.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Rome.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Ronin Dojo.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Route 66.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Silicon.net Data Center.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Sky Fortress.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Spell Room.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Steel Forge.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Stone Temple.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Thunderstorm.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_White House.png`,
 ];
 
 // ============ Helpers ============

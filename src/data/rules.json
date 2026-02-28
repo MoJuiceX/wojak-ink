@@ -1,0 +1,637 @@
+{
+  "$schema": "1.0",
+  "rules": [
+    {
+      "id": "base-never-none",
+      "priority": 10,
+      "description": "Base must never be None — auto-default to Classic when any other trait is selected",
+      "when": {
+        "all": [
+          { "fact": "isEmpty", "layer": "Base" },
+          { "fact": "hasAnySelection", "excludeLayers": ["Base"] }
+        ]
+      },
+      "then": [
+        { "action": "force", "target": "Base", "value": "$default" }
+      ]
+    },
+    {
+      "id": "mouthbase-never-none",
+      "priority": 20,
+      "description": "MouthBase must never be None — auto-default to Numb",
+      "when": {
+        "all": [
+          { "fact": "isEmpty", "layer": "MouthBase" }
+        ]
+      },
+      "then": [
+        { "action": "force", "target": "MouthBase", "value": "$default" }
+      ]
+    },
+    {
+      "id": "clothes-never-none",
+      "priority": 30,
+      "description": "Clothes must never be None — auto-default to Tee blue",
+      "when": {
+        "all": [
+          { "fact": "isEmpty", "layer": "Clothes" }
+        ]
+      },
+      "then": [
+        { "action": "force", "target": "Clothes", "value": "$default" }
+      ]
+    },
+
+    {
+      "id": "copium-mask-disables-mouthitem",
+      "priority": 40,
+      "description": "Copium Mask disables MouthItem and blocks certain MouthBase options",
+      "when": {
+        "all": [
+          { "fact": "path", "layer": "Mask", "operator": "contains", "value": "copium" }
+        ]
+      },
+      "then": [
+        { "action": "disable", "target": "MouthItem", "reason": "Remove Copium Mask" },
+        { "action": "clear", "target": "MouthItem" },
+        { "action": "force", "target": "MouthItem", "value": "" },
+        { "action": "disableOption", "target": "MouthBase", "options": ["Pizza", "Bubble-Gum", "Bubble Gum", "Pipe"], "reason": "Remove Copium Mask" }
+      ]
+    },
+    {
+      "id": "copium-mask-force-valid-mouthbase",
+      "priority": 41,
+      "description": "Copium Mask forces MouthBase to Numb when current MouthBase is blocked or empty",
+      "when": {
+        "all": [
+          { "fact": "path", "layer": "Mask", "operator": "contains", "value": "copium" },
+          {
+            "any": [
+              { "fact": "traitId", "layer": "MouthBase", "operator": "in", "value": ["Mouth_Pipe", "g1_Pizza", "Mouth_BubbleGum"] },
+              { "fact": "isEmpty", "layer": "MouthBase" }
+            ]
+          }
+        ]
+      },
+      "then": [
+        { "action": "force", "target": "MouthBase", "value": "$default" }
+      ]
+    },
+
+    {
+      "id": "hannibal-mask-mouth-options",
+      "priority": 50,
+      "description": "Hannibal Mask: only Numb MouthBase allowed; blocks all others and forces MouthItem clear",
+      "when": {
+        "all": [
+          { "fact": "isNotEmpty", "layer": "Mask" },
+          { "fact": "path", "layer": "Mask", "operator": "notContains", "value": "copium" },
+          { "fact": "path", "layer": "Mask", "operator": "contains", "value": "hannibal" }
+        ]
+      },
+      "then": [
+        { "action": "force", "target": "MouthItem", "value": "" },
+        { "action": "disableOption", "target": "MouthBase", "options": ["Pizza", "Bubble-Gum", "Bubble Gum", "Pipe", "BubbleGum", "Gold Teeth", "Gold-Teeth", "Teeth", "Smile", "Screaming", "Screeming"], "reason": "Remove Hannibal Mask" }
+      ]
+    },
+    {
+      "id": "hannibal-mask-force-numb",
+      "priority": 51,
+      "description": "Hannibal Mask forces MouthBase to Numb when not already Numb",
+      "when": {
+        "all": [
+          { "fact": "isNotEmpty", "layer": "Mask" },
+          { "fact": "path", "layer": "Mask", "operator": "notContains", "value": "copium" },
+          { "fact": "path", "layer": "Mask", "operator": "contains", "value": "hannibal" },
+          { "fact": "path", "layer": "MouthBase", "operator": "notContains", "value": "numb" }
+        ]
+      },
+      "then": [
+        { "action": "force", "target": "MouthBase", "value": "$default" }
+      ]
+    },
+    {
+      "id": "mask-mouth-blocked-options",
+      "priority": 52,
+      "description": "Non-Copium non-Hannibal masks block certain MouthBase options and force MouthItem clear",
+      "when": {
+        "all": [
+          { "fact": "isNotEmpty", "layer": "Mask" },
+          { "fact": "path", "layer": "Mask", "operator": "notContains", "value": "copium" },
+          { "fact": "path", "layer": "Mask", "operator": "notContains", "value": "hannibal" }
+        ]
+      },
+      "then": [
+        { "action": "force", "target": "MouthItem", "value": "" },
+        { "action": "disableOption", "target": "MouthBase", "options": ["Pizza", "Bubble-Gum", "Bubble Gum", "Pipe", "BubbleGum"], "reason": "Remove Mask" }
+      ]
+    },
+    {
+      "id": "mask-force-numb-mouth",
+      "priority": 53,
+      "description": "Non-Copium non-Hannibal masks force MouthBase to Numb when not in allowed list",
+      "when": {
+        "all": [
+          { "fact": "isNotEmpty", "layer": "Mask" },
+          { "fact": "path", "layer": "Mask", "operator": "notContains", "value": "copium" },
+          { "fact": "path", "layer": "Mask", "operator": "notContains", "value": "hannibal" },
+          { "fact": "path", "layer": "MouthBase", "operator": "notContainsAny", "value": ["numb", "gold-teeth", "teeth", "smile", "screeming"] }
+        ]
+      },
+      "then": [
+        { "action": "force", "target": "MouthBase", "value": "$default" }
+      ]
+    },
+
+    {
+      "id": "pipe-disables-mouthitem",
+      "priority": 60,
+      "description": "Pipe MouthBase disables MouthItem",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "MouthBase", "operator": "equals", "value": "Mouth_Pipe" }
+        ]
+      },
+      "then": [
+        { "action": "disable", "target": "MouthItem", "reason": "Deselect Pipe" },
+        { "action": "clear", "target": "MouthItem" }
+      ]
+    },
+
+    {
+      "id": "vampire-disables-mouthitem",
+      "priority": 70,
+      "description": "Vampire MouthBase disables MouthItem — Cig, Cohiba, Joint specifically blocked",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "MouthBase", "operator": "equals", "value": "g1_Drac" }
+        ]
+      },
+      "then": [
+        { "action": "disable", "target": "MouthItem", "reason": "Vampire cannot have cig, cohiba, or joint" },
+        { "action": "disableOption", "target": "MouthItem", "options": ["Cig", "Cohiba", "Joint"], "reason": "Not available with Vampire Teeth" }
+      ]
+    },
+    {
+      "id": "vampire-clears-smoke-item",
+      "priority": 71,
+      "description": "Vampire MouthBase clears MouthItem when Cig/Joint/Cohiba is selected",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "MouthBase", "operator": "equals", "value": "g1_Drac" },
+          { "fact": "traitId", "layer": "MouthItem", "operator": "in", "value": ["g1_EXTRA_MOUTH_Cig", "g1_EXTRA_MOUTH_Joint", "g1_EXTRA_MOUTH_Cohiba"] }
+        ]
+      },
+      "then": [
+        { "action": "clear", "target": "MouthItem" },
+        { "action": "force", "target": "MouthItem", "value": "" }
+      ]
+    },
+
+    {
+      "id": "vampire-disables-neckbeard-option",
+      "priority": 80,
+      "description": "Vampire MouthBase disables Neckbeard option (Stache allowed)",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "MouthBase", "operator": "equals", "value": "g1_Drac" }
+        ]
+      },
+      "then": [
+        { "action": "disableOption", "target": "FacialHair", "options": ["Neckbeard", "neckbeard"], "reason": "Not available with Vampire Teeth" }
+      ]
+    },
+    {
+      "id": "vampire-clears-neckbeard",
+      "priority": 81,
+      "description": "Vampire MouthBase clears Neckbeard when selected",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "MouthBase", "operator": "equals", "value": "g1_Drac" },
+          { "fact": "path", "layer": "FacialHair", "operator": "contains", "value": "neckbeard" }
+        ]
+      },
+      "then": [
+        { "action": "clear", "target": "FacialHair" },
+        { "action": "force", "target": "FacialHair", "value": "" }
+      ]
+    },
+
+    {
+      "id": "cig-joint-cohiba-requires-mouthbase",
+      "priority": 90,
+      "description": "Cig/Joint/Cohiba MouthItem requires a MouthBase — auto-default to Numb",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "MouthItem", "operator": "in", "value": ["g1_EXTRA_MOUTH_Cig", "g1_EXTRA_MOUTH_Joint", "g1_EXTRA_MOUTH_Cohiba"] },
+          { "fact": "isEmpty", "layer": "MouthBase" }
+        ]
+      },
+      "then": [
+        { "action": "force", "target": "MouthBase", "value": "$default" }
+      ]
+    },
+
+    {
+      "id": "pizza-disables-mouthitem",
+      "priority": 100,
+      "description": "Pizza MouthBase disables MouthItem",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "MouthBase", "operator": "equals", "value": "g1_Pizza" }
+        ]
+      },
+      "then": [
+        { "action": "disable", "target": "MouthItem", "reason": "Deselect Pizza" },
+        { "action": "clear", "target": "MouthItem" }
+      ]
+    },
+
+    {
+      "id": "bubblegum-disables-mouthitem",
+      "priority": 110,
+      "description": "Bubble Gum MouthBase disables MouthItem",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "MouthBase", "operator": "equals", "value": "Mouth_BubbleGum" }
+        ]
+      },
+      "then": [
+        { "action": "disable", "target": "MouthItem", "reason": "Deselect Bubble Gum" },
+        { "action": "clear", "target": "MouthItem" }
+      ]
+    },
+
+    {
+      "id": "bubblegum-disables-facialhair",
+      "priority": 120,
+      "description": "Bubble Gum MouthBase disables FacialHair",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "MouthBase", "operator": "equals", "value": "Mouth_BubbleGum" }
+        ]
+      },
+      "then": [
+        { "action": "disable", "target": "FacialHair", "reason": "Deselect Bubble Gum" },
+        { "action": "clear", "target": "FacialHair" }
+      ]
+    },
+
+    {
+      "id": "astronaut-disables-mouthitem",
+      "priority": 130,
+      "description": "Astronaut suit disables MouthItem and blocks certain MouthBase options",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "Clothes", "operator": "equals", "value": "Clothes_Astronaut" }
+        ]
+      },
+      "then": [
+        { "action": "disable", "target": "MouthItem", "reason": "Deselect Astronaut" },
+        { "action": "clear", "target": "MouthItem" },
+        { "action": "force", "target": "MouthItem", "value": "" },
+        { "action": "disableOption", "target": "MouthBase", "options": ["Pipe", "Pizza", "Bubble-Gum", "Bubble Gum"], "reason": "Deselect Astronaut" }
+      ]
+    },
+    {
+      "id": "astronaut-forces-valid-mouthbase",
+      "priority": 131,
+      "description": "Astronaut suit forces MouthBase to Numb when current MouthBase is blocked",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "Clothes", "operator": "equals", "value": "Clothes_Astronaut" },
+          { "fact": "traitId", "layer": "MouthBase", "operator": "in", "value": ["Mouth_Pipe", "g1_Pizza", "Mouth_BubbleGum"] }
+        ]
+      },
+      "then": [
+        { "action": "force", "target": "MouthBase", "value": "$default" }
+      ]
+    },
+
+    {
+      "id": "suit-disables-bandana-option",
+      "priority": 140,
+      "description": "Sonic/Pickle/Goose suits disable Bandana mask option",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "Clothes", "operator": "in", "value": ["Clothes_Sonic-suit", "Clothes_Pickle-suit", "Clothes_Goose-suit"] }
+        ]
+      },
+      "then": [
+        { "action": "disableOption", "target": "Mask", "options": ["Bandana-mask", "Bandana mask", "Bandana"], "reason": "Not available with this suit" }
+      ]
+    },
+    {
+      "id": "suit-clears-bandana",
+      "priority": 141,
+      "description": "Sonic/Pickle/Goose suits clear Bandana mask when selected",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "Clothes", "operator": "in", "value": ["Clothes_Sonic-suit", "Clothes_Pickle-suit", "Clothes_Goose-suit"] },
+          { "fact": "path", "layer": "Mask", "operator": "contains", "value": "bandana" }
+        ]
+      },
+      "then": [
+        { "action": "clear", "target": "Mask" },
+        { "action": "force", "target": "Mask", "value": "" }
+      ]
+    },
+
+    {
+      "id": "suit-disables-hannibal-option",
+      "priority": 150,
+      "description": "Sonic/Pickle/Goose suits disable Hannibal mask option",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "Clothes", "operator": "in", "value": ["Clothes_Sonic-suit", "Clothes_Pickle-suit", "Clothes_Goose-suit"] }
+        ]
+      },
+      "then": [
+        { "action": "disableOption", "target": "Mask", "options": ["Hannibal-Mask", "Hannibal mask", "Hannibal"], "reason": "Not available with this suit" }
+      ]
+    },
+    {
+      "id": "suit-clears-hannibal",
+      "priority": 151,
+      "description": "Sonic/Pickle/Goose suits clear Hannibal mask when selected",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "Clothes", "operator": "in", "value": ["Clothes_Sonic-suit", "Clothes_Pickle-suit", "Clothes_Goose-suit"] },
+          { "fact": "path", "layer": "Mask", "operator": "contains", "value": "hannibal" }
+        ]
+      },
+      "then": [
+        { "action": "clear", "target": "Mask" },
+        { "action": "force", "target": "Mask", "value": "" }
+      ]
+    },
+    {
+      "id": "hannibal-disables-suit-options",
+      "priority": 152,
+      "description": "Hannibal mask disables Sonic/Pickle/Goose suit options",
+      "when": {
+        "all": [
+          { "fact": "path", "layer": "Mask", "operator": "contains", "value": "hannibal" }
+        ]
+      },
+      "then": [
+        { "action": "disableOption", "target": "Clothes", "options": ["Sonic-suit", "Sonic suit", "Sonic", "Pickle-suit", "Pickle suit", "Pickle", "Goose-suit", "Goose suit", "Goose"], "reason": "Not available with Hannibal mask" }
+      ]
+    },
+
+    {
+      "id": "full-body-suit-no-head",
+      "priority": 160,
+      "description": "Full-body suits (Astronaut, Bepe, Pepe, Goose, Pickle, Proof of Prayer, Sonic, Gopher) disable Head",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "Clothes", "operator": "in", "value": [
+            "Clothes_Astronaut", "Clothes_Bepe-suit", "Clothes_Pepe-suit",
+            "Clothes_Goose-suit", "Clothes_Pickle-suit", "Clothes_Proof-of-prayer",
+            "Clothes_Sonic-suit", "Clothes_gopher-suit"
+          ]}
+        ]
+      },
+      "then": [
+        { "action": "disable", "target": "Head", "reason": "Suit includes helmet" },
+        { "action": "clear", "target": "Head" },
+        { "action": "force", "target": "Head", "value": "" }
+      ]
+    },
+
+    {
+      "id": "facialhair-incompatible-mouthbase",
+      "priority": 170,
+      "description": "FacialHair is disabled when MouthBase is not compatible",
+      "when": {
+        "all": [
+          { "fact": "isNotEmpty", "layer": "MouthBase" },
+          { "fact": "path", "layer": "MouthBase", "operator": "notContainsAny", "value": ["numb", "teeth", "gold", "smile", "screeming", "screaming", "pizza", "pipe", "drac"] },
+          { "fact": "isNotEmpty", "layer": "FacialHair" }
+        ]
+      },
+      "then": [
+        { "action": "disable", "target": "FacialHair", "reason": "Select compatible mouth" },
+        { "action": "clear", "target": "FacialHair" }
+      ]
+    },
+    {
+      "id": "facialhair-requires-mouthbase",
+      "priority": 171,
+      "description": "FacialHair forces MouthBase to Numb when MouthBase is empty",
+      "when": {
+        "all": [
+          { "fact": "isNotEmpty", "layer": "FacialHair" },
+          { "fact": "isEmpty", "layer": "MouthBase" }
+        ]
+      },
+      "then": [
+        { "action": "force", "target": "MouthBase", "value": "$default" }
+      ]
+    },
+
+    {
+      "id": "mask-blocks-mouthitem-facialhair",
+      "priority": 180,
+      "description": "Non-Copium masks block MouthItem and FacialHair",
+      "when": {
+        "all": [
+          { "fact": "isNotEmpty", "layer": "Mask" },
+          { "fact": "path", "layer": "Mask", "operator": "notContains", "value": "copium" }
+        ]
+      },
+      "then": [
+        { "action": "disable", "target": "MouthItem", "reason": "Deselect Mask" },
+        { "action": "disable", "target": "FacialHair", "reason": "Deselect Mask" }
+      ]
+    },
+    {
+      "id": "copium-mask-allows-facialhair",
+      "priority": 181,
+      "description": "Copium mask blocks only MouthItem (FacialHair allowed — mask draws on top)",
+      "when": {
+        "all": [
+          { "fact": "path", "layer": "Mask", "operator": "contains", "value": "copium" }
+        ]
+      },
+      "then": [
+        { "action": "disable", "target": "MouthItem", "reason": "Deselect Mask" }
+      ]
+    },
+
+    {
+      "id": "hannibal-mask-disables-facialhair",
+      "priority": 190,
+      "description": "Hannibal Mask disables FacialHair and blocks Neckbeard/Stache options",
+      "when": {
+        "all": [
+          { "fact": "path", "layer": "Mask", "operator": "contains", "value": "hannibal" }
+        ]
+      },
+      "then": [
+        { "action": "disable", "target": "FacialHair", "reason": "Deselect Hannibal Mask" },
+        { "action": "disableOption", "target": "FacialHair", "options": ["Neckbeard", "neckbeard", "Stache", "stach"], "reason": "Deselect Hannibal Mask" }
+      ]
+    },
+    {
+      "id": "hannibal-mask-clears-facialhair",
+      "priority": 191,
+      "description": "Hannibal Mask clears FacialHair when Neckbeard or Stache is selected",
+      "when": {
+        "all": [
+          { "fact": "path", "layer": "Mask", "operator": "contains", "value": "hannibal" },
+          {
+            "any": [
+              { "fact": "path", "layer": "FacialHair", "operator": "contains", "value": "neckbeard" },
+              { "fact": "path", "layer": "FacialHair", "operator": "contains", "value": "stach" }
+            ]
+          }
+        ]
+      },
+      "then": [
+        { "action": "clear", "target": "FacialHair" },
+        { "action": "force", "target": "FacialHair", "value": "" }
+      ]
+    },
+
+    {
+      "id": "bandana-mask-disables-neckbeard-option",
+      "priority": 200,
+      "description": "Bandana Mask disables Neckbeard option",
+      "when": {
+        "all": [
+          { "fact": "path", "layer": "Mask", "operator": "contains", "value": "bandana" }
+        ]
+      },
+      "then": [
+        { "action": "disableOption", "target": "FacialHair", "options": ["Neckbeard", "neckbeard"], "reason": "Remove Bandana Mask" }
+      ]
+    },
+    {
+      "id": "bandana-mask-clears-neckbeard",
+      "priority": 201,
+      "description": "Bandana Mask clears Neckbeard when selected",
+      "when": {
+        "all": [
+          { "fact": "path", "layer": "Mask", "operator": "contains", "value": "bandana" },
+          { "fact": "path", "layer": "FacialHair", "operator": "contains", "value": "neckbeard" }
+        ]
+      },
+      "then": [
+        { "action": "clear", "target": "FacialHair" },
+        { "action": "force", "target": "FacialHair", "value": "" }
+      ]
+    },
+
+    {
+      "id": "clothes-addon-requires-tee",
+      "priority": 210,
+      "description": "Legacy ClothesAddon (Chia Farmer) requires Tee or Tanktop",
+      "when": {
+        "all": [
+          { "fact": "isNotEmpty", "layer": "ClothesAddon" },
+          {
+            "any": [
+              { "fact": "path", "layer": "ClothesAddon", "operator": "contains", "value": "Chia-Farmer" },
+              { "fact": "path", "layer": "ClothesAddon", "operator": "contains", "value": "Chia Farmer" }
+            ]
+          },
+          {
+            "not": {
+              "any": [
+                {
+                  "all": [
+                    { "fact": "path", "layer": "Clothes", "operator": "containsAny", "value": ["Tee", "Tank-Top", "tank-top"] },
+                    { "fact": "path", "layer": "Clothes", "operator": "notContains", "value": "Chia-Farmer" }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "then": [
+        { "action": "force", "target": "Clothes", "value": "$default" }
+      ]
+    },
+
+    {
+      "id": "suit-disables-neckbeard-option",
+      "priority": 220,
+      "description": "Sonic/Pickle suits disable Neckbeard option",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "Clothes", "operator": "in", "value": ["Clothes_Sonic-suit", "Clothes_Pickle-suit"] }
+        ]
+      },
+      "then": [
+        { "action": "disableOption", "target": "FacialHair", "options": ["Neckbeard", "neckbeard"], "reason": "Not available with this suit" }
+      ]
+    },
+    {
+      "id": "suit-clears-neckbeard",
+      "priority": 221,
+      "description": "Sonic/Pickle suits clear Neckbeard when selected",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "Clothes", "operator": "in", "value": ["Clothes_Sonic-suit", "Clothes_Pickle-suit"] },
+          { "fact": "path", "layer": "FacialHair", "operator": "contains", "value": "neckbeard" }
+        ]
+      },
+      "then": [
+        { "action": "clear", "target": "FacialHair" },
+        { "action": "force", "target": "FacialHair", "value": "" }
+      ]
+    },
+    {
+      "id": "neckbeard-disables-suit-options",
+      "priority": 222,
+      "description": "Neckbeard disables Sonic/Pickle suit options",
+      "when": {
+        "all": [
+          { "fact": "path", "layer": "FacialHair", "operator": "contains", "value": "neckbeard" }
+        ]
+      },
+      "then": [
+        { "action": "disableOption", "target": "Clothes", "options": ["Sonic-suit", "Sonic suit", "Sonic", "Pickle-suit", "Pickle suit", "Pickle"], "reason": "Remove Neckbeard" }
+      ]
+    },
+
+    {
+      "id": "straitjacket-disables-hand-extras",
+      "priority": 230,
+      "description": "Straitjacket disables all hand extras (hands are tied)",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "Clothes", "operator": "equals", "value": "Clothes_Straigth-jacket" }
+        ]
+      },
+      "then": [
+        { "action": "disableOption", "target": "Mask", "options": [
+          "Coffee", "Diamond", "GFY Left", "GFY Right", "Goose",
+          "Handgun", "Seedling", "Orange", "TangTalk", "Hand Mask"
+        ], "reason": "Deselect Straitjacket" }
+      ]
+    },
+    {
+      "id": "straitjacket-clears-hand-mask",
+      "priority": 231,
+      "description": "Straitjacket clears Hand Mask when selected",
+      "when": {
+        "all": [
+          { "fact": "traitId", "layer": "Clothes", "operator": "equals", "value": "Clothes_Straigth-jacket" },
+          {
+            "any": [
+              { "fact": "path", "layer": "Mask", "operator": "contains", "value": "hand_mask" },
+              { "fact": "path", "layer": "Mask", "operator": "contains", "value": "hand-mask" }
+            ]
+          }
+        ]
+      },
+      "then": [
+        { "action": "clear", "target": "Mask" },
+        { "action": "force", "target": "Mask", "value": "" }
+      ]
+    }
+  ]
+}

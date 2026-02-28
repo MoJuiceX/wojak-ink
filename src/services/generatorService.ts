@@ -11,6 +11,7 @@ import { formatDisplayLabel, cleanDisplayName } from '@/lib/traitOptions';
 import { G1_TO_G2_MAP, normalizeTraitName } from '@/lib/traitMapping';
 import { G2_CATEGORY_TO_UI, G1_FOLDER_TO_UI } from '@/config/generatorLayerMapping';
 import { MOUTH_BASE_PATTERNS, MOUTH_ITEM_PATTERNS, MASK_PATTERNS, FACIAL_HAIR_PATTERNS } from '@/lib/generatorTraitIds';
+import { LAYER_BASE, G2_LAYER_BASE } from '@/config/layerAssetBase';
 
 // ============ Types ============
 
@@ -41,7 +42,7 @@ async function loadManifest(): Promise<ManifestData> {
   if (manifestCache) return manifestCache;
 
   try {
-    const response = await fetch('/assets/wojak-layers/manifest.json');
+    const response = await fetch(`${LAYER_BASE}/manifest.json`);
     if (!response.ok) throw new Error('Failed to load layer manifest');
     manifestCache = await response.json();
     return manifestCache!;
@@ -119,7 +120,7 @@ function buildLayerImages(manifest: ManifestData): void {
       const isPriceDown = filepath === '__price_down__';
       const isOverlay = isPriceUp || isPriceDown;
       return {
-        path: isSolid ? '__solid__' : isOverlay ? filepath : `/assets/wojak-layers/BACKGROUND/${filepath}`,
+        path: isSolid ? '__solid__' : isOverlay ? filepath : `${LAYER_BASE}/BACKGROUND/${filepath}`,
         name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
         displayName: isSolid ? 'Solid color' : isPriceUp ? 'Price up' : isPriceDown ? 'Price down' : parseDisplayName(filepath),
         category: isSolid ? 'custom' : isOverlay ? 'overlay' : (filepath.includes('/') ? filepath.split('/')[0] : undefined),
@@ -161,7 +162,7 @@ function buildLayerImages(manifest: ManifestData): void {
   const baseLayer = G1_FOLDER_TO_UI['BASE'];
   if (baseLayer && manifest['BASE']) {
     const images: LayerImage[] = manifest['BASE'].map((filepath) => ({
-      path: `/assets/wojak-layers/BASE/${filepath}`,
+      path: `${LAYER_BASE}/BASE/${filepath}`,
       name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
       displayName: parseDisplayName(filepath),
     }));
@@ -179,7 +180,7 @@ function buildLayerImages(manifest: ManifestData): void {
   const clothesLayer = G1_FOLDER_TO_UI['CLOTHES'];
   if (clothesLayer && manifest['CLOTHES']) {
     const images: LayerImage[] = manifest['CLOTHES'].map((filepath) => ({
-      path: `/assets/wojak-layers/CLOTHES/${filepath}`,
+      path: `${LAYER_BASE}/CLOTHES/${filepath}`,
       name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
       displayName: parseDisplayName(filepath),
     }));
@@ -190,7 +191,7 @@ function buildLayerImages(manifest: ManifestData): void {
   const eyesLayer = G1_FOLDER_TO_UI['EYE'];
   if (eyesLayer && manifest['EYE']) {
     const images: LayerImage[] = manifest['EYE'].map((filepath) => ({
-      path: `/assets/wojak-layers/EYE/${filepath}`,
+      path: `${LAYER_BASE}/EYE/${filepath}`,
       name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
       displayName: parseDisplayName(filepath),
     }));
@@ -201,7 +202,7 @@ function buildLayerImages(manifest: ManifestData): void {
   const headLayer = G1_FOLDER_TO_UI['HEAD'];
   if (headLayer && manifest['HEAD']) {
     const images: LayerImage[] = manifest['HEAD'].map((filepath) => ({
-      path: `/assets/wojak-layers/HEAD/${filepath}`,
+      path: `${LAYER_BASE}/HEAD/${filepath}`,
       name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
       displayName: parseDisplayName(filepath),
     }));
@@ -218,7 +219,7 @@ function buildLayerImages(manifest: ManifestData): void {
     for (const filepath of manifest['MOUTH']) {
       const category = classifyMouthItem(filepath);
       const image: LayerImage = {
-        path: `/assets/wojak-layers/MOUTH/${filepath}`,
+        path: `${LAYER_BASE}/MOUTH/${filepath}`,
         name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
         displayName: parseDisplayName(filepath),
       };
@@ -250,7 +251,7 @@ function buildLayerImages(manifest: ManifestData): void {
   if (maskLayer && manifest['MASK']) {
     const existingMaskImages = layerImagesCache.get(maskLayer) || [];
     const newMaskImages: LayerImage[] = manifest['MASK'].map((filepath) => ({
-      path: `/assets/wojak-layers/MASK/${filepath}`,
+      path: `${LAYER_BASE}/MASK/${filepath}`,
       name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
       displayName: parseDisplayName(filepath),
     }));
@@ -261,7 +262,7 @@ function buildLayerImages(manifest: ManifestData): void {
   if (manifest['EXTRA']) {
     const existingMaskImages = layerImagesCache.get('Mask') || [];
     const newExtraImages: LayerImage[] = manifest['EXTRA'].map((filepath) => ({
-      path: `/assets/wojak-layers/EXTRA/${filepath}`,
+      path: `${LAYER_BASE}/EXTRA/${filepath}`,
       name: filepath.split('/').pop()?.replace(/\.(png|jpg|jpeg|webp)$/i, '') || '',
       displayName: parseDisplayName(filepath),
     }));
@@ -465,7 +466,7 @@ let g2ManifestCache: G2Manifest | null = null;
 let g2TraitIndex: Map<string, G2ManifestTrait> | null = null;
 const unifiedTraitsCache: Map<UILayerName, UnifiedTrait[]> = new Map();
 
-const G2_BASE_PATH = '/assets/wojak-layers/YourWojak-layers';
+const G2_BASE_PATH = G2_LAYER_BASE;
 
 async function loadG2Manifest(): Promise<G2Manifest | null> {
   if (g2ManifestCache) return g2ManifestCache;

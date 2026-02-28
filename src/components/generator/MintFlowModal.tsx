@@ -13,6 +13,7 @@ import { useMint } from '@/contexts/MintContext';
 import { useMetadataAttributes } from './MetadataPreview';
 import { generateRandomName, validateName, MAX_NAME_LENGTH } from '@/lib/nameGenerator';
 import { FighterRevealCard } from './FighterRevealCard';
+import { MintPreviewPanel } from './MintPreviewPanel';
 
 interface MintFlowModalProps {
   isOpen: boolean;
@@ -316,30 +317,29 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                 const isFreeConfirm = pendingMintType === 'free';
                 return (
                   <div className="w-full flex flex-col gap-3">
+                    {/* NFT Preview Panel — image, traits, price, supply */}
+                    <MintPreviewPanel
+                      imageUrl={revealImageUrl}
+                      attributes={metadataAttributes}
+                      price={price}
+                      isFree={isFreeConfirm}
+                      creditCost={creditCost}
+                      totalMinted={totalMinted}
+                      maxSupply={maxSupply}
+                    />
+
+                    {/* Mint type context */}
                     {isFreeConfirm ? (
-                      <>
-                        <p className="text-secondary text-sm">
-                          This will use <span className="font-semibold text-accent">{creditCost} credits</span> from your balance of {balance}.
-                        </p>
-                        {creditCost > 100 && (
-                          <p className="text-muted text-xs">
-                            Popular traits cost more credits ({price.surchargeTraitName} surcharge).
-                          </p>
-                        )}
-                        <p className="text-muted text-xs">
-                          Your Wojak will be minted instantly — no wallet signing needed.
-                        </p>
-                      </>
+                      <p className="text-muted text-xs text-center">
+                        Uses <span className="font-semibold text-accent">{creditCost} credits</span> from your balance of {balance}.
+                        {' '}No wallet signing needed.
+                      </p>
                     ) : (
-                      <>
-                        <p className="text-secondary text-sm">
-                          Ready to mint for <span className="font-semibold text-accent">{price.totalXch.toFixed(2)} XCH</span>?
-                        </p>
-                        <p className="text-muted text-xs">
-                          You'll have 15 minutes to accept the offer in your Sage Wallet.
-                        </p>
-                      </>
+                      <p className="text-muted text-xs text-center">
+                        You'll have 15 minutes to accept the offer in your Sage Wallet.
+                      </p>
                     )}
+
                     {/* Name your Wojak */}
                     <div className="flex flex-col gap-2 w-full">
                       <label className="text-xs text-secondary uppercase tracking-wider">

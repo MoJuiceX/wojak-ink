@@ -11,8 +11,10 @@
 const CACHE_NAME = 'wojak-games-v3';
 const STATIC_CACHE = 'wojak-static-v3';
 const DYNAMIC_CACHE = 'wojak-dynamic-v5';
+const LAYER_CACHE = 'wojak-layers-v1';
 const NFT_IMAGE_CACHE = 'wojak-nft-images-v1';
 const NFT_CACHE_MAX = 500;
+const LAYER_CACHE_MAX = 600;
 
 // Assets to cache immediately on install
 const STATIC_ASSETS = [
@@ -45,7 +47,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activating...');
 
-  const KEEP_CACHES = [STATIC_CACHE, DYNAMIC_CACHE, NFT_IMAGE_CACHE];
+  const KEEP_CACHES = [STATIC_CACHE, DYNAMIC_CACHE, LAYER_CACHE, NFT_IMAGE_CACHE];
 
   event.waitUntil(
     caches.keys()
@@ -100,6 +102,37 @@ async function handleIPFSImage(request) {
   }
 }
 
+// R2 layer image handler — cache-first with LRU eviction (immutable assets)
+async function handleLayerImage(request) {
+  const cache = await caches.open(LAYER_CACHE);
+
+  // Check cache first (layer images are immutable — filename changes when content changes)
+  const cached = await cache.match(request);
+  if (cached) {
+    return cached;
+  }
+
+  // Cache miss — fetch with CORS mode
+  try {
+    const response = await fetch(request, { mode: 'cors' });
+    if (response.ok) {
+      const clone = response.clone();
+      cache.put(request, clone).then(async () => {
+        const keys = await cache.keys();
+        if (keys.length > LAYER_CACHE_MAX) {
+          const toDelete = keys.length - LAYER_CACHE_MAX;
+          for (let i = 0; i < toDelete; i++) {
+            await cache.delete(keys[i]);
+          }
+        }
+      });
+    }
+    return response;
+  } catch (error) {
+    return new Response('Layer image unavailable offline', { status: 503 });
+  }
+}
+
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -111,6 +144,12 @@ self.addEventListener('fetch', (event) => {
   // Handle IPFS NFT images (cross-origin) with dedicated cache
   if (url.hostname.endsWith('.ipfs.w3s.link')) {
     event.respondWith(handleIPFSImage(request));
+    return;
+  }
+
+  // Handle R2 layer images (cross-origin) with dedicated cache — cache-first (immutable content-addressed)
+  if (url.hostname === 'layers.wojak.ink') {
+    event.respondWith(handleLayerImage(request));
     return;
   }
 

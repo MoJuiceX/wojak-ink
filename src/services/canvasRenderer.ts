@@ -15,6 +15,7 @@ import { getFillSlotBehavior } from '@/lib/g2FillTreatments';
 import { buildRenderLayers } from '@/services/canvasRendererLayerBuilder';
 import { LAYER_Z_INDEX, MOUTH_OVER_BEER_HAT } from '@/services/canvasRendererConstants';
 import type { RenderLayer, G2LayerData, G2DrawItem, RenderResult, LayerRenderOverride } from '@/services/canvasRendererTypes';
+import { LAYER_BASE, COIN_LOGOS_BASE as COIN_LOGOS_BASE_CFG } from '@/config/layerAssetBase';
 
 /** Default color for solid color backgrounds - sky blue */
 const SOLID_BG_DEFAULT_COLOR = '#38BDF8';
@@ -451,7 +452,7 @@ const CAP_LOGO_POS = { cx: 565, cy: 211, r: 65 };         // Front panel of cap 
 const BEPA_ARMY_NAME1_POS = { x: 216, y: 897, w: 180, h: 60, fontSize: 38 };  // left chest
 const BEPA_ARMY_NAME2_POS = { x: 605, y: 897, w: 180, h: 60, fontSize: 38 };  // right chest
 
-const COIN_LOGOS_BASE = '/assets/wojak-layers/CHIA_coin_logos';
+const COIN_LOGOS_BASE = COIN_LOGOS_BASE_CFG;
 
 /**
  * Generate crisp SVG flag as data URL. Uses declarative SVG (CSS-like) for clean rendering
@@ -2029,8 +2030,8 @@ const BACKGROUND_SOLID_PATH = '__solid__';
 /** Price overlay paths */
 const PRICE_UP_OVERLAY = '__price_up__';
 const PRICE_DOWN_OVERLAY = '__price_down__';
-const PRICE_UP_IMAGE_PATH = '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Price-up.png';
-const PRICE_DOWN_IMAGE_PATH = '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Price-down.png';
+const PRICE_UP_IMAGE_PATH = `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Price-up.png`;
+const PRICE_DOWN_IMAGE_PATH = `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Price-down.png`;
 
 /** Parse solid background path for optional overlay */
 function parseSolidBackgroundPath(path: string): { isSolid: boolean; overlay: 'up' | 'down' | null } {
@@ -2963,6 +2964,7 @@ export function hasRequiredSelections(selectedLayers: SelectedLayers): boolean {
 export function getImageDimensions(src: string): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
     const img = new Image();
+    img.crossOrigin = 'anonymous';
     img.onload = () => resolve({ width: img.width, height: img.height });
     img.onerror = reject;
     img.src = src;

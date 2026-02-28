@@ -6,6 +6,7 @@
  */
 
 import type { GameConfig } from '@/systems/game-ui/types';
+import { LAYER_BASE } from '@/config/layerAssetBase';
 
 // Round configuration - pairs and optional base filter
 export const ROUND_CONFIG: { pairs: number; baseFilter?: string }[] = [
@@ -67,7 +68,7 @@ export const MEMORY_MATCH_CONFIG: GameConfig = {
   emoji: '🧠',
   primaryColor: '#8b5cf6',
   secondaryColor: '#a855f7',
-  backgroundImage: '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Orange Grove.png',
+  backgroundImage: `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Orange Grove.png`,
 
   rewards: {
     baseOranges: 10,

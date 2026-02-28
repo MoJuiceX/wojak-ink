@@ -20,7 +20,7 @@ import {
 import type { FavoriteWojak, ExportOptions, G2Selection, G2Selections, SelectionsSnapshot, SelectionKey } from '@/types/generator';
 import { isFavoriteV2, isSelectionPathEmpty } from '@/types/generator';
 import { getDisabledLayers, type SelectedLayers, type UILayerName } from '@/lib/wojakRules';
-import { DEFAULT_SELECTIONS } from '@/config/layers';
+import { DEFAULT_SELECTIONS, DEFAULT_BASE_PATH, DEFAULT_CLOTHES_PATH, DEFAULT_MOUTHBASE_PATH } from '@/config/layers';
 import { SCENE_BACKGROUNDS } from '@/lib/layerRegistry';
 import { G2_DEFAULT_COLORS } from '@/config/g2DefaultColors';
 import { generatorService, type LayerImage, type UnifiedTrait, getUnifiedTraits, getPathToTraitIdMap, ensurePathToTraitIdMapReady } from '@/services/generatorService';
@@ -244,9 +244,9 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
   useEffect(() => {
     let cancelled = false;
     const layersForBeerHat: SelectedLayers = {
-      Base: '/assets/wojak-layers/BASE/BASE_Base-Wojak_classic.png',
-      Clothes: '/assets/wojak-layers/CLOTHES/CLOTHES_Tee_blue.png',
-      MouthBase: '/assets/wojak-layers/MOUTH/MOUTH_numb.png',
+      Base: DEFAULT_BASE_PATH,
+      Clothes: DEFAULT_CLOTHES_PATH,
+      MouthBase: DEFAULT_MOUTHBASE_PATH,
       Head: '/g2/Head/Beer-Hat',
     } as SelectedLayers;
     const g2ForBeerHat: G2Selections = { Head: BEER_HAT_CARD_G2 };

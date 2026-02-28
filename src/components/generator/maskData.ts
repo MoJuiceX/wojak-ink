@@ -4,7 +4,9 @@
  * Shared between MaskVariantPicker (UI) and GeneratorRightPanel (guard logic).
  */
 
-export const MASK_BASE_PATH = '/assets/wojak-layers/MASK';
+import { MASK_LAYER_BASE } from '@/config/layerAssetBase';
+
+export const MASK_BASE_PATH = MASK_LAYER_BASE;
 
 /** Mask categories with their variants */
 export type MaskCategory = 'tanginium' | 'medievalBepe' | 'skull';

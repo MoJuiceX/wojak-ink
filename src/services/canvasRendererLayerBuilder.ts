@@ -25,6 +25,7 @@ function isTrumpHair(selectedLayers: SelectedLayers): boolean {
 import type { RenderLayer } from '@/services/canvasRendererTypes';
 import { pathContains } from '@/lib/pathHelpers';
 import { isSelectionPathEmpty } from '@/types/generator';
+import { LAYER_BASE } from '@/config/layerAssetBase';
 
 // ============ Helpers ============
 
@@ -1079,14 +1080,14 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
   // Rekt base + specific mouths: extra detail overlay on top of base
   if (hasBubble && hasRekt) {
     layers.push({
-      path: '/assets/wojak-layers/MOUTH/MOUTH_Bubble-Gum_rekt.png',
+      path: `${LAYER_BASE}/MOUTH/MOUTH_Bubble-Gum_rekt.png`,
       zIndex: LAYER_Z_INDEX.RektMouthOverlay,
       layerName: 'BubbleGumRekt',
     });
   }
   if (hasRekt && pathContains(selectedLayers.MouthBase, 'Pipe')) {
     layers.push({
-      path: '/assets/wojak-layers/MOUTH/MOUTH_Pipe-when-rekt.png',
+      path: `${LAYER_BASE}/MOUTH/MOUTH_Pipe-when-rekt.png`,
       zIndex: LAYER_Z_INDEX.RektMouthOverlay,
       layerName: 'PipeWhenRekt',
     });

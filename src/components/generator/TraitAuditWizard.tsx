@@ -10,6 +10,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import type { UILayerName } from '@/lib/layerRegistry';
 import type { UnifiedTrait } from '@/services/generatorService';
+import { LAYER_BASE } from '@/config/layerAssetBase';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -48,7 +49,7 @@ const AUDIT_TEST_CASES: AuditTestCase[] = [
       'Astronaut is selected first, then Copium Mask. These should be mutually exclusive. If BOTH are visible, the rule is broken. One should be cleared or blocked.',
     traits: [
       { layer: 'Clothes', id: 'Clothes_Astronaut', mode: 'g2' },
-      { layer: 'Mask', id: '/assets/wojak-layers/MOUTH/EXTRA_MOUTH_Copium-Mask.png', mode: 'g1' },
+      { layer: 'Mask', id: `${LAYER_BASE}/MOUTH/EXTRA_MOUTH_Copium-Mask.png`, mode: 'g1' },
     ],
   },
   {
@@ -58,8 +59,8 @@ const AUDIT_TEST_CASES: AuditTestCase[] = [
     lookFor:
       'Pizza is selected first, then Copium Mask. Copium should force the mouth to Numb. If Pizza mouth is still visible, the rule is broken.',
     traits: [
-      { layer: 'MouthBase', id: '/assets/wojak-layers/MOUTH/MOUTH_Pizza.png', mode: 'g1' },
-      { layer: 'Mask', id: '/assets/wojak-layers/MOUTH/EXTRA_MOUTH_Copium-Mask.png', mode: 'g1' },
+      { layer: 'MouthBase', id: `${LAYER_BASE}/MOUTH/MOUTH_Pizza.png`, mode: 'g1' },
+      { layer: 'Mask', id: `${LAYER_BASE}/MOUTH/EXTRA_MOUTH_Copium-Mask.png`, mode: 'g1' },
     ],
   },
 
@@ -71,7 +72,7 @@ const AUDIT_TEST_CASES: AuditTestCase[] = [
     lookFor: 'Does the cigarette clip with the Clown red nose? Check the mouth/nose area for visual overlap.',
     traits: [
       { layer: 'Head', id: 'Head_Clown', mode: 'g2' },
-      { layer: 'MouthItem', id: '/assets/wojak-layers/MOUTH/EXTRA_MOUTH_Cig_.png', mode: 'g1' },
+      { layer: 'MouthItem', id: `${LAYER_BASE}/MOUTH/EXTRA_MOUTH_Cig_.png`, mode: 'g1' },
     ],
   },
   {
@@ -81,7 +82,7 @@ const AUDIT_TEST_CASES: AuditTestCase[] = [
     lookFor: 'Does the joint clip with the Clown red nose? Check for visual overlap in the mouth area.',
     traits: [
       { layer: 'Head', id: 'Head_Clown', mode: 'g2' },
-      { layer: 'MouthItem', id: '/assets/wojak-layers/MOUTH/EXTRA_MOUTH_Joint_.png', mode: 'g1' },
+      { layer: 'MouthItem', id: `${LAYER_BASE}/MOUTH/EXTRA_MOUTH_Joint_.png`, mode: 'g1' },
     ],
   },
   {
@@ -91,7 +92,7 @@ const AUDIT_TEST_CASES: AuditTestCase[] = [
     lookFor: 'Does the pipe overlap badly with the Clown head? Check the left side of the face.',
     traits: [
       { layer: 'Head', id: 'Head_Clown', mode: 'g2' },
-      { layer: 'MouthBase', id: '/assets/wojak-layers/MOUTH/MOUTH_Pipe.png', mode: 'g1' },
+      { layer: 'MouthBase', id: `${LAYER_BASE}/MOUTH/MOUTH_Pipe.png`, mode: 'g1' },
     ],
   },
   {
@@ -101,7 +102,7 @@ const AUDIT_TEST_CASES: AuditTestCase[] = [
     lookFor: 'Does the pizza overlap with Clown hair or nose? Check for z-order issues.',
     traits: [
       { layer: 'Head', id: 'Head_Clown', mode: 'g2' },
-      { layer: 'MouthBase', id: '/assets/wojak-layers/MOUTH/MOUTH_Pizza.png', mode: 'g1' },
+      { layer: 'MouthBase', id: `${LAYER_BASE}/MOUTH/MOUTH_Pizza.png`, mode: 'g1' },
     ],
   },
 
@@ -113,7 +114,7 @@ const AUDIT_TEST_CASES: AuditTestCase[] = [
     lookFor: 'The Cig should render on top of the Centurion cheek guards. Check that it is visible and not hidden behind the helmet.',
     traits: [
       { layer: 'Head', id: 'Head_Centurion', mode: 'g2' },
-      { layer: 'MouthItem', id: '/assets/wojak-layers/MOUTH/EXTRA_MOUTH_Cig_.png', mode: 'g1' },
+      { layer: 'MouthItem', id: `${LAYER_BASE}/MOUTH/EXTRA_MOUTH_Cig_.png`, mode: 'g1' },
     ],
   },
   {
@@ -123,7 +124,7 @@ const AUDIT_TEST_CASES: AuditTestCase[] = [
     lookFor: 'The Pipe should render correctly with the Centurion helmet. Check for clipping at the left cheek guard area.',
     traits: [
       { layer: 'Head', id: 'Head_Centurion', mode: 'g2' },
-      { layer: 'MouthBase', id: '/assets/wojak-layers/MOUTH/MOUTH_Pipe.png', mode: 'g1' },
+      { layer: 'MouthBase', id: `${LAYER_BASE}/MOUTH/MOUTH_Pipe.png`, mode: 'g1' },
     ],
   },
   {
@@ -133,7 +134,7 @@ const AUDIT_TEST_CASES: AuditTestCase[] = [
     lookFor: 'The Joint should render on top of the Centurion helmet. Check for visibility issues around the cheek guards.',
     traits: [
       { layer: 'Head', id: 'Head_Centurion', mode: 'g2' },
-      { layer: 'MouthItem', id: '/assets/wojak-layers/MOUTH/EXTRA_MOUTH_Joint_.png', mode: 'g1' },
+      { layer: 'MouthItem', id: `${LAYER_BASE}/MOUTH/EXTRA_MOUTH_Joint_.png`, mode: 'g1' },
     ],
   },
 
@@ -155,7 +156,7 @@ const AUDIT_TEST_CASES: AuditTestCase[] = [
     lookFor:
       'Check the right side of the face where Pirate Hat brim overlaps the Ninja Turtle mask. There is a 22% clip applied. Is the mask partially hidden? Does it look acceptable?',
     traits: [
-      { layer: 'Head', id: '/assets/wojak-layers/HEAD/HEAD_Pirate-Hat_.png', mode: 'g1' },
+      { layer: 'Head', id: `${LAYER_BASE}/HEAD/HEAD_Pirate-Hat_.png`, mode: 'g1' },
       { layer: 'Eyes', id: 'Face-wear_Ninja-Turtle-Mask', mode: 'g2' },
     ],
   },
@@ -165,7 +166,7 @@ const AUDIT_TEST_CASES: AuditTestCase[] = [
     title: 'Pirate Hat + VR Headset',
     lookFor: 'Check if VR Headset is partially covered by the Pirate Hat brim. Look for z-order issues on the right eye area.',
     traits: [
-      { layer: 'Head', id: '/assets/wojak-layers/HEAD/HEAD_Pirate-Hat_.png', mode: 'g1' },
+      { layer: 'Head', id: `${LAYER_BASE}/HEAD/HEAD_Pirate-Hat_.png`, mode: 'g1' },
       { layer: 'Eyes', id: 'Face-wear_VR-headset', mode: 'g2' },
     ],
   },
@@ -178,8 +179,8 @@ const AUDIT_TEST_CASES: AuditTestCase[] = [
     lookFor:
       'Skull Mask is selected first, then Laser Eyes. The rule should block Laser Eyes when a full-face mask is active. If both are visible, the rule is broken.',
     traits: [
-      { layer: 'Mask', id: '/assets/wojak-layers/MASK/Skull_mask_orange.png', mode: 'g1' },
-      { layer: 'Eyes', id: '/assets/wojak-layers/EYE/EYE_Laser-Eyes_red.png', mode: 'g1' },
+      { layer: 'Mask', id: `${LAYER_BASE}/MASK/Skull_mask_orange.png`, mode: 'g1' },
+      { layer: 'Eyes', id: `${LAYER_BASE}/EYE/EYE_Laser-Eyes_red.png`, mode: 'g1' },
     ],
   },
   {
@@ -189,8 +190,8 @@ const AUDIT_TEST_CASES: AuditTestCase[] = [
     lookFor:
       'MedievalBepe mask is selected first, then Laser Eyes. The rule should block Laser Eyes. If both are visible, the rule is broken.',
     traits: [
-      { layer: 'Mask', id: '/assets/wojak-layers/MASK/MedievalBepe_cowboy.png', mode: 'g1' },
-      { layer: 'Eyes', id: '/assets/wojak-layers/EYE/EYE_Laser-Eyes_red.png', mode: 'g1' },
+      { layer: 'Mask', id: `${LAYER_BASE}/MASK/MedievalBepe_cowboy.png`, mode: 'g1' },
+      { layer: 'Eyes', id: `${LAYER_BASE}/EYE/EYE_Laser-Eyes_red.png`, mode: 'g1' },
     ],
   },
 ];

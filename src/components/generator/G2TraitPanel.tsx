@@ -12,8 +12,9 @@ import { getUnifiedTraitById, getG2BasePath, type UnifiedTrait } from '@/service
 import { getFlagSvgDataUrl } from '@/services/canvasRenderer';
 import { DetailSelector } from './DetailSelector';
 import type { G2Selection } from '@/types/generator';
+import { COIN_LOGOS_BASE as COIN_LOGOS_BASE_CFG } from '@/config/layerAssetBase';
 
-const COIN_LOGOS_BASE = '/assets/wojak-layers/CHIA_coin_logos';
+const COIN_LOGOS_BASE = COIN_LOGOS_BASE_CFG;
 
 const ASTRONAUT_LOGOS = ['BEPE', 'CASTER', 'CAT', 'CHAD', 'XCH', 'CNI', 'COOKIES', 'Dexi Bucks', 'DIG', 'DWB', 'G4M', 'GYATT', 'HOA', 'HONK', 'JOCK', 'LOVE', 'MAX', 'MIRROR', 'MMM', 'MOG', 'MonkeyZoo', 'MRMT', 'NeckCoin', 'NWO', 'PEPEcoin', 'PIZZA', 'PP', 'Spacebucks', 'SPELLPOWER', 'SPROUT', 'STONKS', 'TANG', 'TVL', 'WITCHER', 'WOJAK'];
 

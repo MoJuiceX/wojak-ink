@@ -9,12 +9,12 @@ import type { UnifiedTrait } from '@/services/generatorService';
 import { getG2DefaultColor } from '@/config/g2DefaultColors';
 import { getPreviewColorForLayeredFill, isLayerFill } from '@/utils/layeredTraitPreviewColors';
 import { getDerivedColor, getFlagSvgDataUrl } from '@/services/canvasRenderer';
-import { DEFAULT_CLOTHES_PATH } from '@/config/layers';
+import { DEFAULT_CLOTHES_PATH, DEFAULT_BASE_PATH, DEFAULT_MOUTHBASE_PATH } from '@/lib/layerRegistry';
 import { getFillSlotBehavior, type DerivedFillSlotConfig } from '@/lib/g2FillTreatments';
+import { G2_LAYER_BASE, COIN_LOGOS_BASE } from '@/config/layerAssetBase';
 
-const G2_BASE_PATH = '/assets/wojak-layers/YourWojak-layers';
-const DEFAULT_BASE_PATH = '/assets/wojak-layers/BASE/BASE_Base-Wojak_classic.png';
-const DEFAULT_MOUTH_PATH = '/assets/wojak-layers/MOUTH/MOUTH_numb.png';
+const G2_BASE_PATH = G2_LAYER_BASE;
+const DEFAULT_MOUTH_PATH = DEFAULT_MOUTHBASE_PATH;
 
 // ============ Shared sub-components ============
 
@@ -231,7 +231,7 @@ function renderAstronaut({ trait }: PreviewProps) {
       <Img src={DEFAULT_MOUTH_PATH} />
       <Img src={`${G2_BASE_PATH}/Clothes_Astronaut_default.png`} />
       <div className="absolute" style={{ left: '28.7%', top: '84.4%', width: '13.6%', height: '13.6%', borderRadius: '50%', overflow: 'hidden' }}>
-        <img src="/assets/wojak-layers/CHIA_coin_logos/CAT.webp" alt="" className="w-full h-full object-cover" loading="lazy" />
+        <img src={`${COIN_LOGOS_BASE}/CAT.webp`} alt="" className="w-full h-full object-cover" loading="lazy" />
       </div>
       <Img src={`${G2_BASE_PATH}/Clothes_Astronaut_detail1.1.png`} />
       <div className="absolute" style={{ left: '62.6%', top: '86.1%', width: '13.4%', height: '9.2%', overflow: 'hidden', borderRadius: '2px' }}>

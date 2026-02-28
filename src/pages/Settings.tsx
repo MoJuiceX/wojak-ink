@@ -4,6 +4,7 @@
  * Theme, audio, and app information settings.
  */
 
+import { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Monitor } from 'lucide-react';
 import { PageTransition } from '@/components/layout/PageTransition';
@@ -16,6 +17,7 @@ import {
   DisplayNameEditor,
 } from '@/components/settings';
 import { settingsPageVariants, settingsSectionVariants } from '@/config/settingsAnimations';
+import { isWizardComplete, resetWizard } from '@/components/generator/wizardHelpers';
 
 export default function Settings() {
   const { contentPadding, isDesktop } = useLayout();
@@ -30,6 +32,13 @@ export default function Settings() {
   } = useSettings();
 
   const skipBoot = settings.app.skipBootSequence;
+  const [wizardReset, setWizardReset] = useState(false);
+  const wizardDone = isWizardComplete();
+
+  const handleResetWizard = () => {
+    resetWizard();
+    setWizardReset(true);
+  };
 
   return (
     <PageTransition>
@@ -158,6 +167,33 @@ export default function Settings() {
                     }}
                   />
                 </div>
+              </div>
+
+              {/* Wizard Reset */}
+              <div
+                className="flex items-center justify-between gap-4 pt-3 mt-3"
+                style={{ borderTop: '1px solid var(--color-border)' }}
+              >
+                <div>
+                  <p className="text-sm font-medium text-primary">
+                    Quick Start Wizard
+                  </p>
+                  <p className="text-xs mt-0.5 text-muted">
+                    {wizardReset
+                      ? 'Wizard will appear next time you visit the generator'
+                      : wizardDone
+                        ? 'Reset to replay the guided setup on your next visit'
+                        : 'Not yet completed'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-ghost text-xs"
+                  onClick={handleResetWizard}
+                  disabled={wizardReset || !wizardDone}
+                >
+                  {wizardReset ? 'Reset' : 'Reset Wizard'}
+                </button>
               </div>
             </div>
           </motion.section>

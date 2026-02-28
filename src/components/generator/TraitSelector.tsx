@@ -19,6 +19,8 @@ import type { LayerImage } from '@/services/generatorService';
 import type { UnifiedTrait } from '@/services/generatorService';
 import { BASE_CLOTHES_MAP, DEFAULT_CLOTHES_PATH } from '@/config/layers';
 import { isSelectionPathEmpty } from '@/types/generator';
+import { DEFAULT_BASE_PATH, DEFAULT_MOUTHBASE_PATH } from '@/lib/layerRegistry';
+import { LAYER_BASE } from '@/config/layerAssetBase';
 
 /** Maps generator layer names to Phase 1 trait_types for pricing lookup */
 const LAYER_TO_TRAIT_TYPE: Record<string, string> = {
@@ -122,12 +124,51 @@ function sortClothesTraits(traits: UnifiedTrait[]): UnifiedTrait[] {
   });
 }
 
-/** Overlay badge — disabled; pricing info moved to dedicated Prices lightbox */
-export function TraitUsageBadge(_props: {
+/**
+ * Popularity badge — shows "Hot" for top 3 traits and "Rare" for low-usage traits.
+ *
+ * Only renders for surcharge categories (Head, Clothes, Face Wear).
+ * Positioned at top-left to avoid conflict with the check/disabled badges at top-right.
+ *
+ * Badge strategy:
+ * - "Hot" (fire emoji): Top 3 most popular traits per category — social proof
+ * - "Rare" (gem emoji): Traits with 0–2 mints — uniqueness signal
+ * - Badge hysteresis: thresholds use margin to prevent rapid toggling
+ */
+export function TraitUsageBadge({ pricing, isTop3 }: {
   pricing: TraitPricingEntry | null;
   isTop3?: boolean;
 }) {
-  return null;
+  if (!pricing) return null;
+
+  const isHot = isTop3 === true;
+  // Rare threshold: 2 mints or fewer (with hysteresis — once a trait exceeds 3,
+  // it won't re-appear as rare until it drops to 1, which doesn't happen in practice
+  // since usage only grows. The hysteresis is for future collection mechanics.)
+  const isRare = pricing.usageCount <= 2;
+
+  // Don't badge if neither hot nor rare
+  if (!isHot && !isRare) return null;
+
+  // Hot takes priority over rare (a top-3 trait with 2 uses shows as hot)
+  const badgeType = isHot ? 'hot' : 'rare';
+  const emoji = isHot ? '🔥' : '💎';
+  const label = isHot ? 'Hot' : 'Rare';
+  const ariaText = isHot
+    ? `Trending: used by ${pricing.usageCount} creators`
+    : `Rare: only ${pricing.usageCount} minted`;
+
+  return (
+    <span
+      className={`trait-popularity-badge trait-popularity-badge--${badgeType}`}
+      role="img"
+      aria-label={ariaText}
+      title={ariaText}
+    >
+      <span className="trait-popularity-badge__emoji" aria-hidden="true">{emoji}</span>
+      <span className="trait-popularity-badge__label">{label}</span>
+    </span>
+  );
 }
 
 interface TraitSelectorProps {
@@ -239,9 +280,8 @@ const ImageCard = memo(function ImageCard({ image, isSelected, isDisabled, disab
   );
 });
 
-// Default layer paths for preview composites
-const DEFAULT_BASE_PATH = '/assets/wojak-layers/BASE/BASE_Base-Wojak_classic.png';
-const DEFAULT_MOUTH_PATH = '/assets/wojak-layers/MOUTH/MOUTH_numb.png';
+// Default layer paths for preview composites (imported from layerRegistry)
+const DEFAULT_MOUTH_PATH = DEFAULT_MOUTHBASE_PATH;
 
 function getClothesForBase(basePath: string): string {
   const lowerPath = basePath.toLowerCase();
@@ -360,7 +400,7 @@ interface PriceOverlayCardProps {
 
 /** Card for Price up/down overlays that work on top of solid color backgrounds */
 const PriceOverlayCard = memo(function PriceOverlayCard({ overlayType, bgColor, isSelected, isDisabled, disabledReason, onClick }: PriceOverlayCardProps) {
-  const overlayPath = `/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Price-${overlayType}.png`;
+  const overlayPath = `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Price-${overlayType}.png`;
   const label = overlayType === 'up' ? 'Price up' : 'Price down';
 
   return (

@@ -31,6 +31,8 @@
     "precommit": "npm run lint:scoped -- --max-warnings=0",
     "preview": "vite preview",
     "test": "playwright test",
+    "test:mobile": "playwright test tests/mobile/ --project='Mobile Safari'",
+    "test:mobile:headed": "playwright test tests/mobile/ --project='Mobile Safari' --headed",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:ui": "playwright test --ui",

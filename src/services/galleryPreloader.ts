@@ -57,6 +57,7 @@ function preloadImage(url: string): Promise<void> {
 
   return new Promise((resolve) => {
     const img = new Image();
+    img.crossOrigin = 'anonymous';
     img.onload = () => {
       preloadedImages.add(url);
       resolve();

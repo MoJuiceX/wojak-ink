@@ -13,8 +13,9 @@ if (unattendedNightRun && (!explicitBaseURL || resolvedBaseURL === PROD_BASE_URL
 }
 
 /**
- * Playwright configuration for wojak-ink game smoke tests
+ * Playwright configuration for wojak-ink smoke + mobile tests
  * Run with: npx playwright test
+ * Mobile only: npx playwright test --project='Mobile Safari'
  */
 export default defineConfig({
   testDir: './tests',
@@ -23,14 +24,14 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
-  
+
   use: {
     // Base URL for all tests - change to localhost for local testing
     baseURL: resolvedBaseURL,
-    
+
     // Collect trace on first retry
     trace: 'on-first-retry',
-    
+
     // Screenshot on failure
     screenshot: 'only-on-failure',
   },
@@ -43,6 +44,10 @@ export default defineConfig({
     {
       name: 'Mobile Chrome',
       use: { ...devices['Pixel 5'] },
+    },
+    {
+      name: 'Mobile Safari',
+      use: { ...devices['iPhone 12'] },
     },
   ],
 

@@ -290,6 +290,7 @@ class ImagePreloaderService {
     this.loading.add(url);
 
     const img = new Image();
+    img.crossOrigin = 'anonymous';
 
     img.onload = () => {
       this.loading.delete(url);

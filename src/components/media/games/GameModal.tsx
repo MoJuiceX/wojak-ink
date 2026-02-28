@@ -18,6 +18,7 @@ import { useIsMobile } from '@/hooks/useMediaQuery';
 import { LeaderboardOverlay } from './LeaderboardOverlay';
 import { useLeaderboard } from '@/hooks/data/useLeaderboard';
 import type { GameId } from '@/config/query/queryKeys';
+import { LAYER_BASE } from '@/config/layerAssetBase';
 import { Avatar } from '@/components/Avatar/Avatar';
 import { ArcadeFrame } from '@/components/ArcadeFrame';
 import type { LightSequence, LightOptions, PatternName } from '@/components/ArcadeButtonLights';
@@ -612,7 +613,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                           <div
                             className="arcade-intro-bg"
                             style={{
-                              backgroundImage: `url('${game.introBackground || '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Orange Grove.png'}')`,
+                              backgroundImage: `url('${game.introBackground || `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Orange Grove.png`}')`,
                             }}
                           />
 
@@ -824,7 +825,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
                 <div
                   className="game-intro-screen"
                   style={{
-                    backgroundImage: `url('${game.introBackground || '/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Orange Grove.png'}')`,
+                    backgroundImage: `url('${game.introBackground || `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Orange Grove.png`}')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                   }}
