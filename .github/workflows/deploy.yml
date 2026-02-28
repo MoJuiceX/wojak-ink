@@ -23,6 +23,16 @@ jobs:
         run: npm run build
         env:
           VITE_LAYER_BASE_URL: https://layers.wojak.ink
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
+          VITE_CLERK_JS_URL: ${{ secrets.VITE_CLERK_JS_URL }}
+          VITE_CLERK_FRONTEND_API: ${{ secrets.VITE_CLERK_FRONTEND_API }}
+          VITE_PARSE_APP_ID: ${{ secrets.VITE_PARSE_APP_ID }}
+          VITE_PARSE_JS_KEY: ${{ secrets.VITE_PARSE_JS_KEY }}
+          VITE_PARSE_SERVER_URL: ${{ secrets.VITE_PARSE_SERVER_URL }}
+          VITE_WALLETCONNECT_PROJECT_ID: ${{ secrets.VITE_WALLETCONNECT_PROJECT_ID }}
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_VAPID_PUBLIC_KEY: ${{ secrets.VITE_VAPID_PUBLIC_KEY }}
+          VITE_SPACESCAN_API_KEY: ${{ secrets.VITE_SPACESCAN_API_KEY }}
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:

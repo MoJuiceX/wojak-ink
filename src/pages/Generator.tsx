@@ -3,12 +3,9 @@
  *
  * Layer-based avatar composition (Base, Clothes, Mouth, Mask, Eyes, Head, Background, etc.).
  * Phase 1: Redesigned layout - 45/55 split on desktop, 3-col mobile grid.
- *
- * First-time visitors see a Quick Start Wizard that guides them through
- * each category step. Returning users go straight to the full generator.
  */
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Generator.css';
 import { PageTransition } from '@/components/layout/PageTransition';
@@ -27,8 +24,6 @@ import {
 } from '@/components/generator';
 import { MetadataPreview } from '@/components/generator/MetadataPreview';
 import { PageSEO } from '@/components/seo';
-import { QuickStartWizard } from '@/components/generator/QuickStartWizard';
-import { isWizardComplete, markWizardComplete } from '@/components/generator/wizardHelpers';
 
 type RightPanelMode = 'colors' | 'metadata';
 
@@ -60,26 +55,12 @@ function GeneratorErrorBanner() {
 function GeneratorContent() {
   // Use 1024px breakpoint to match Generator.css media queries
   const isDesktop = useMediaQuery('(min-width: 1024px)');
-  const { isInitialized, generatorError, randomize } = useGenerator();
+  const { isInitialized, generatorError } = useGenerator();
   const [rightPanelMode, setRightPanelMode] = useState<RightPanelMode>('colors');
   const mobileScrollRef = useRef<HTMLDivElement>(null);
 
-  // Wizard state: show wizard for first-time visitors
-  const [wizardActive, setWizardActive] = useState(() => !isWizardComplete());
-
-  const exitWizard = useCallback(() => {
-    markWizardComplete();
-    setWizardActive(false);
-  }, []);
-
-  const handleRandomizeAndCustomize = useCallback(() => {
-    randomize();
-    exitWizard();
-  }, [randomize, exitWizard]);
-
   const hasError = !isInitialized && generatorError;
 
-  // In wizard mode: replace category tabs + action bar with wizard UI
   const mainContent = hasError ? (
     <div
       className="card-static p-6 text-center mb-4"
@@ -99,29 +80,18 @@ function GeneratorContent() {
       <div className="generator-content">
         {/* Left: Preview Section */}
         <div className="generator-preview">
-          {/* Wizard mode: show wizard nav instead of action bar / category tabs */}
-          {wizardActive ? (
-            <QuickStartWizard
-              onComplete={exitWizard}
-              onSkip={exitWizard}
-              onRandomize={handleRandomizeAndCustomize}
-            />
-          ) : (
-            <>
-              {/* Mobile: Action Bar on top */}
-              {!isDesktop && (
-                <div className="generator-actions">
-                  <ActionBar />
-                </div>
-              )}
+          {/* Mobile: Action Bar on top */}
+          {!isDesktop && (
+            <div className="generator-actions">
+              <ActionBar />
+            </div>
+          )}
 
-              {/* Desktop: Category Tabs on top */}
-              {isDesktop && (
-                <div className="generator-categories">
-                  <LayerTabs />
-                </div>
-              )}
-            </>
+          {/* Desktop: Category Tabs on top */}
+          {isDesktop && (
+            <div className="generator-categories">
+              <LayerTabs />
+            </div>
           )}
 
           {/* Preview Canvas with zoom and background controls */}
@@ -129,26 +99,21 @@ function GeneratorContent() {
             <PreviewWithControls className="w-full" />
           </div>
 
-          {/* Normal mode bottom controls */}
-          {!wizardActive && (
-            <>
-              {/* Desktop: Action Bar on bottom */}
-              {isDesktop && (
-                <div className="generator-actions">
-                  <ActionBar
-                    rightPanelMode={rightPanelMode}
-                    onToggleRightPanel={() => setRightPanelMode((m) => m === 'colors' ? 'metadata' : 'colors')}
-                  />
-                </div>
-              )}
+          {/* Desktop: Action Bar on bottom */}
+          {isDesktop && (
+            <div className="generator-actions">
+              <ActionBar
+                rightPanelMode={rightPanelMode}
+                onToggleRightPanel={() => setRightPanelMode((m) => m === 'colors' ? 'metadata' : 'colors')}
+              />
+            </div>
+          )}
 
-              {/* Mobile: Category Tabs on bottom */}
-              {!isDesktop && (
-                <div className="generator-categories">
-                  <LayerTabs />
-                </div>
-              )}
-            </>
+          {/* Mobile: Category Tabs on bottom */}
+          {!isDesktop && (
+            <div className="generator-categories">
+              <LayerTabs />
+            </div>
           )}
 
         </div>
@@ -162,7 +127,7 @@ function GeneratorContent() {
           {/* Mobile only: color picker and G2 panel in their own visible box below the grid */}
           {!isDesktop && <GeneratorMobileColorPanel />}
           {/* Desktop: 4th column = colors/details or metadata preview */}
-          {isDesktop && !wizardActive && (
+          {isDesktop && (
             <div className="generator-details-panel">
               <AnimatePresence mode="wait" initial={false}>
                 {rightPanelMode === 'metadata' ? (

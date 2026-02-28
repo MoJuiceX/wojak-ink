@@ -9086,23 +9086,3 @@ body {
   gap: 2px;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   QUICK START WIZARD
-   Step-by-step guide for first-time generator visitors.
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.wizard-overlay {
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  padding: 8px 4px;
-}
-
-.wizard-header {
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 8px;
-}
-
-.wizard-nav {
-  padding-top: 4px;
-}

@@ -110,9 +110,6 @@ export class GeneratorPage {
 
         // Dismiss first-visit welcome dialog
         localStorage.setItem('wojak_generator_seen', 'true');
-
-        // Skip quick start wizard (tests exercise full generator)
-        localStorage.setItem('wojak-wizard-complete', 'true');
       } catch {
         // Ignore storage errors on about:blank
       }
