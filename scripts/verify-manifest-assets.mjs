@@ -12,6 +12,13 @@ import { join, dirname, relative } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Skip verification when assets are served from R2 (not local)
+if (process.env.VITE_LAYER_BASE_URL) {
+  console.log(`✅ Skipping local asset verification — assets served from ${process.env.VITE_LAYER_BASE_URL}`);
+  process.exit(0);
+}
+
 const manifestPath = join(__dirname, '../public/assets/wojak-layers/YourWojak-layers/manifest.json');
 const assetDir = join(__dirname, '../public/assets/wojak-layers/YourWojak-layers');
 
