@@ -269,6 +269,7 @@ const ImageCard = memo(function ImageCard({ image, isSelected, isDisabled, disab
           src={image.path}
           alt={image.displayName}
           className="absolute inset-0 w-full h-full object-cover"
+          crossOrigin="anonymous"
           loading="lazy"
         />
         <TraitUsageBadge pricing={pricing ?? null} isTop3={isTop3} />
@@ -321,6 +322,7 @@ const BaseImageCard = memo(function BaseImageCard({ image, isSelected, isDisable
           src={image.path}
           alt={image.displayName}
           className="absolute inset-0 w-full h-full object-cover"
+          crossOrigin="anonymous"
           loading="lazy"
         />
         {/* Clothes layer (varies by base) */}
@@ -328,6 +330,7 @@ const BaseImageCard = memo(function BaseImageCard({ image, isSelected, isDisable
           src={getClothesForBase(image.path)}
           alt="Clothes layer preview"
           className="absolute inset-0 w-full h-full object-cover"
+          crossOrigin="anonymous"
           loading="lazy"
         />
         {/* Mouth layer (Numb) */}
@@ -335,6 +338,7 @@ const BaseImageCard = memo(function BaseImageCard({ image, isSelected, isDisable
           src={DEFAULT_MOUTH_PATH}
           alt="Mouth layer preview"
           className="absolute inset-0 w-full h-full object-cover"
+          crossOrigin="anonymous"
           loading="lazy"
         />
         <TraitUsageBadge pricing={pricing ?? null} isTop3={isTop3} />
@@ -419,6 +423,7 @@ const PriceOverlayCard = memo(function PriceOverlayCard({ overlayType, bgColor, 
           src={overlayPath}
           alt={label}
           className="absolute inset-0 w-full h-full object-cover"
+          crossOrigin="anonymous"
           loading="lazy"
         />
       </div>
@@ -475,6 +480,7 @@ const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isS
           src={DEFAULT_BASE_PATH}
           alt="Base layer preview"
           className="absolute inset-0 w-full h-full object-cover"
+          crossOrigin="anonymous"
           loading="lazy"
         />
         {/* Clothes layer (blue Tee) — same as Base preview */}
@@ -482,6 +488,7 @@ const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isS
           src={DEFAULT_CLOTHES_PATH}
           alt="Clothes layer preview"
           className="absolute inset-0 w-full h-full object-cover"
+          crossOrigin="anonymous"
           loading="lazy"
         />
         {/* Mouth layer (Numb) */}
@@ -489,6 +496,7 @@ const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isS
           src={DEFAULT_MOUTH_PATH}
           alt="Mouth layer preview"
           className="absolute inset-0 w-full h-full object-cover"
+          crossOrigin="anonymous"
           loading="lazy"
         />
         {/* Trait layer (Head, Mask, Eyes, Background) on top */}
@@ -527,6 +535,7 @@ const ClothesImageCard = memo(function ClothesImageCard({ image, isSelected, isD
           src={DEFAULT_BASE_PATH}
           alt="Base layer preview"
           className="absolute inset-0 w-full h-full object-cover"
+          crossOrigin="anonymous"
           loading="lazy"
         />
         {/* Clothes layer (variable) */}
@@ -534,6 +543,7 @@ const ClothesImageCard = memo(function ClothesImageCard({ image, isSelected, isD
           src={image.path}
           alt={image.displayName}
           className="absolute inset-0 w-full h-full object-cover"
+          crossOrigin="anonymous"
           loading="lazy"
         />
         {/* Mouth layer (Numb) */}
@@ -541,6 +551,7 @@ const ClothesImageCard = memo(function ClothesImageCard({ image, isSelected, isD
           src={DEFAULT_MOUTH_PATH}
           alt="Mouth layer preview"
           className="absolute inset-0 w-full h-full object-cover"
+          crossOrigin="anonymous"
           loading="lazy"
         />
         <TraitUsageBadge pricing={pricing ?? null} isTop3={isTop3} />

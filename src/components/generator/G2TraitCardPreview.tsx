@@ -20,7 +20,7 @@ const DEFAULT_MOUTH_PATH = DEFAULT_MOUTHBASE_PATH;
 
 /** Full-size absolutely-positioned image */
 function Img({ src, alt = '' }: { src: string; alt?: string }) {
-  return <img src={src} alt={alt} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />;
+  return <img src={src} alt={alt} className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" loading="lazy" />;
 }
 
 /** Color overlay masked to a fill image (multiply blend) */
@@ -68,7 +68,7 @@ interface PreviewProps {
 }
 
 function renderLivePreview(url: string, name: string) {
-  return <img src={url} alt={name} className="absolute inset-0 w-full h-full object-contain" loading="lazy" />;
+  return <img src={url} alt={name} className="absolute inset-0 w-full h-full object-contain" crossOrigin="anonymous" loading="lazy" />;
 }
 
 function renderNinjaTurtleFit(
@@ -231,7 +231,7 @@ function renderAstronaut({ trait }: PreviewProps) {
       <Img src={DEFAULT_MOUTH_PATH} />
       <Img src={`${G2_BASE_PATH}/Clothes_Astronaut_default.png`} />
       <div className="absolute" style={{ left: '28.7%', top: '84.4%', width: '13.6%', height: '13.6%', borderRadius: '50%', overflow: 'hidden' }}>
-        <img src={`${COIN_LOGOS_BASE}/CAT.webp`} alt="" className="w-full h-full object-cover" loading="lazy" />
+        <img src={`${COIN_LOGOS_BASE}/CAT.webp`} alt="" className="w-full h-full object-cover" crossOrigin="anonymous" loading="lazy" />
       </div>
       <Img src={`${G2_BASE_PATH}/Clothes_Astronaut_detail1.1.png`} />
       <div className="absolute" style={{ left: '62.6%', top: '86.1%', width: '13.4%', height: '9.2%', overflow: 'hidden', borderRadius: '2px' }}>
