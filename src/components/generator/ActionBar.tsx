@@ -387,7 +387,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         <ActionButton
           onClick={undo}
           disabled={!canUndo}
-          icon={<Undo2 size={16} />}
+          icon={<Undo2 size={18} />}
           label="Undo"
         />
       </ActionBarTooltip>
@@ -395,7 +395,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         <ActionButton
           onClick={redo}
           disabled={!canRedo}
-          icon={<Redo2 size={16} />}
+          icon={<Redo2 size={18} />}
           label="Redo"
         />
       </ActionBarTooltip>
@@ -411,7 +411,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         <ActionButton
           onClick={handleSaveAndOpenFavorites}
           disabled={!hasSelection || isSaving}
-          icon={<Heart size={20} />}
+          icon={<Heart size={18} />}
           label="Save"
           badge={favorites.length}
         />
@@ -430,7 +430,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               }
             }}
             disabled={!hasSelection}
-            icon={<Download size={22} />}
+            icon={<Download size={18} />}
             label="Export"
           />
         </ActionBarTooltip>
@@ -464,7 +464,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
           <ActionButton
             onClick={() => setShowOverflowMenu((v) => !v)}
             isActive={showOverflowMenu}
-            icon={<MoreHorizontal size={20} />}
+            icon={<MoreHorizontal size={18} />}
             label="More options"
           />
         </ActionBarTooltip>
@@ -612,7 +612,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
           <ActionBarTooltip content="Connect to mint">
             <ActionButton
               onClick={handleMintClick}
-              icon={<Wallet size={22} />}
+              icon={<Wallet size={18} />}
               label="Connect"
             />
           </ActionBarTooltip>
@@ -624,7 +624,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               variant="primary"
               onClick={handleMintClick}
               disabled={!canMint}
-              icon={<Sparkles size={22} />}
+              icon={<Sparkles size={18} />}
               label="Mint"
             />
           </ActionBarTooltip>

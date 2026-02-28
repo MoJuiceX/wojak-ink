@@ -70,7 +70,7 @@ function LayerTab({
       title={isBlocked ? (blockedReason || `${config.label} is blocked`) : config.description}
     >
       <div className="relative">
-        <Icon className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2} />
+        <Icon strokeWidth={2} />
         {isBlocked && (
           <Lock
             size={8}
