@@ -5,7 +5,7 @@
  * Renders MouthLayerSelector for mouth-related layers.
  */
 
-import { useState, useEffect, useRef, useCallback, memo } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Ban } from 'lucide-react';
 import { useLayout } from '@/hooks/useLayout';
@@ -124,6 +124,65 @@ function sortClothesTraits(traits: UnifiedTrait[]): UnifiedTrait[] {
     // Everything else alphabetical by display name
     return a.name.localeCompare(b.name);
   });
+}
+
+/**
+ * Sort traits by mode: hot (most used), not (least used), or az (alphabetical).
+ * Background special cards (solid color, price overlays) keep their positions.
+ */
+function sortTraitsByMode(
+  traits: UnifiedTrait[],
+  mode: TraitSortMode,
+  lookupUsage: (traitName: string) => number,
+  layer: string,
+): UnifiedTrait[] {
+  // Background special cards should not be reordered
+  const isSpecialBgCard = (trait: UnifiedTrait): boolean =>
+    layer === 'Background' && !!(
+      trait.g1Path === '__solid__' ||
+      trait.g1Path?.includes('__solid__') ||
+      trait.g1Path === '__price_up__' ||
+      trait.g1Path === '__price_down__'
+    );
+
+  // Separate special cards from sortable ones
+  const specialCards: { index: number; trait: UnifiedTrait }[] = [];
+  const sortableTraits: UnifiedTrait[] = [];
+
+  traits.forEach((trait, index) => {
+    if (isSpecialBgCard(trait)) {
+      specialCards.push({ index, trait });
+    } else {
+      sortableTraits.push(trait);
+    }
+  });
+
+  // Sort the sortable traits
+  const sorted = [...sortableTraits].sort((a, b) => {
+    if (mode === 'az') {
+      return a.name.localeCompare(b.name);
+    }
+
+    const aUsage = lookupUsage(a.name);
+    const bUsage = lookupUsage(b.name);
+
+    if (aUsage !== bUsage) {
+      return mode === 'hot' ? bUsage - aUsage : aUsage - bUsage;
+    }
+
+    // Tiebreaker: preserve existing custom order (stable sort)
+    return 0;
+  });
+
+  // Re-insert special cards at their original positions
+  if (specialCards.length === 0) return sorted;
+
+  const result = [...sorted];
+  for (const { index, trait } of specialCards) {
+    const insertAt = Math.min(index, result.length);
+    result.splice(insertAt, 0, trait);
+  }
+  return result;
 }
 
 interface TraitSelectorProps {
@@ -619,7 +678,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
   const { isDesktop: _isDesktop } = useLayout();
   const prefersReducedMotion = useReducedMotion();
 
-  const [unifiedTraits, setUnifiedTraits] = useState<UnifiedTrait[]>([]);
+  const [rawTraits, setRawTraits] = useState<UnifiedTrait[]>([]);
   const [imagesForLayer, setImagesForLayer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [sortMode, setSortMode] = useState<TraitSortMode>('hot');
@@ -724,19 +783,32 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
       getUnifiedTraitsForLayer(activeLayer),
     ])
       .then(([_imgs, traits]) => {
-        // Apply custom sort order for Clothes layer
-        const sortedTraits = activeLayer === 'Clothes' ? sortClothesTraits(traits) : traits;
-        setUnifiedTraits(sortedTraits);
+        // Apply custom sort order for Clothes layer (base order for tiebreaking)
+        const customOrdered = activeLayer === 'Clothes' ? sortClothesTraits(traits) : traits;
+        setRawTraits(customOrdered);
         setImagesForLayer(activeLayer);
         setIsLoading(false);
       })
       .catch((err) => {
         console.error('Failed to load layer images:', err);
-        setUnifiedTraits([]);
+        setRawTraits([]);
         setImagesForLayer(activeLayer);
         setIsLoading(false);
       });
   }, [activeLayer, isInitialized, getLayerImages, getUnifiedTraitsForLayer, isMouthLayer]);
+
+  // Derive sorted traits from rawTraits + sortMode (no extra effect needed)
+  const unifiedTraits = useMemo(() => {
+    if (rawTraits.length === 0) return [];
+
+    const traitType = LAYER_TO_TRAIT_TYPE[activeLayer] || '';
+    const lookupUsage = (traitName: string): number => {
+      const p = getTraitPricing(traitType, traitName);
+      return p?.usageCount ?? 0;
+    };
+
+    return sortTraitsByMode(rawTraits, sortMode, lookupUsage, activeLayer);
+  }, [rawTraits, sortMode, activeLayer, getTraitPricing]);
 
   // All traits in one grid (no separate Customizable section)
 
