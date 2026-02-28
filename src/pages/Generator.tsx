@@ -80,41 +80,25 @@ function GeneratorContent() {
       <div className="generator-content">
         {/* Left: Preview Section */}
         <div className="generator-preview">
-          {/* Mobile: Action Bar on top */}
-          {!isDesktop && (
-            <div className="generator-actions">
-              <ActionBar />
-            </div>
-          )}
-
-          {/* Desktop: Category Tabs on top */}
-          {isDesktop && (
-            <div className="generator-categories">
-              <LayerTabs />
-            </div>
-          )}
+          {/* Category Tabs on top (both desktop and mobile) */}
+          <div className="generator-categories">
+            <LayerTabs />
+          </div>
 
           {/* Preview Canvas with zoom and background controls */}
           <div className="generator-preview-canvas-wrapper">
             <PreviewWithControls className="w-full" />
           </div>
 
-          {/* Desktop: Action Bar on bottom */}
-          {isDesktop && (
-            <div className="generator-actions">
-              <ActionBar
-                rightPanelMode={rightPanelMode}
-                onToggleRightPanel={() => setRightPanelMode((m) => m === 'colors' ? 'metadata' : 'colors')}
-              />
-            </div>
-          )}
-
-          {/* Mobile: Category Tabs on bottom */}
-          {!isDesktop && (
-            <div className="generator-categories">
-              <LayerTabs />
-            </div>
-          )}
+          {/* Action Bar on bottom (both desktop and mobile) */}
+          <div className="generator-actions">
+            <ActionBar
+              {...(isDesktop ? {
+                rightPanelMode,
+                onToggleRightPanel: () => setRightPanelMode((m) => m === 'colors' ? 'metadata' : 'colors'),
+              } : {})}
+            />
+          </div>
 
         </div>
 
