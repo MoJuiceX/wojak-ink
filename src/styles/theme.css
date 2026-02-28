@@ -627,27 +627,35 @@ body {
 
 .trait-sort-buttons {
   display: flex;
-  gap: 2px;
+  gap: 4px;
   margin-left: auto;
 }
 
+/* Emoji sort buttons — square 1:1 ratio */
 .trait-sort-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 30px;
-  min-width: 30px;
-  padding: 0 10px;
-  border-radius: 13px;
-  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1.5px solid transparent;
   background: transparent;
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
   line-height: 1;
   user-select: none;
+  padding: 0;
+}
+
+/* Text sort button (A→Z) — same height, wider */
+.trait-sort-btn--text {
+  width: auto;
+  padding: 0 8px;
+  font-size: 12px;
 }
 
 .trait-sort-btn:hover {
@@ -656,15 +664,14 @@ body {
 }
 
 .trait-sort-btn--active {
-  background: var(--color-primary);
-  color: white;
-  box-shadow: 0 0 12px rgba(255, 149, 0, 0.3), 0 0 4px rgba(255, 149, 0, 0.15);
+  border-color: var(--color-primary);
+  color: var(--color-text);
+  background: transparent;
 }
 
 .trait-sort-btn--active:hover {
-  background: var(--color-primary-hover);
-  color: white;
-  box-shadow: 0 0 16px rgba(255, 149, 0, 0.4), 0 0 6px rgba(255, 149, 0, 0.2);
+  border-color: var(--color-primary-hover);
+  background: rgba(255, 149, 0, 0.06);
 }
 
 .trait-sort-btn:focus-visible {
@@ -672,19 +679,19 @@ body {
   outline-offset: 2px;
 }
 
-/* Clear/None button */
+/* Clear/None button — matches sort button sizing */
 .trait-sort-clear {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 30px;
-  width: 30px;
-  border-radius: 13px;
-  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1.5px solid transparent;
   background: transparent;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -694,6 +701,7 @@ body {
 }
 
 .trait-sort-clear--active {
+  border-color: var(--color-primary);
   color: var(--color-primary);
 }
 

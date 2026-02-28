@@ -259,11 +259,11 @@ export function SortControls({ sortMode, onSortChange, canClear, isCleared, onCl
           aria-pressed={sortMode === 'not'}
           title="Least used first"
         >
-          💎
+          💀
         </button>
         <button
           type="button"
-          className={`trait-sort-btn ${isAlpha ? 'trait-sort-btn--active' : ''}`}
+          className={`trait-sort-btn trait-sort-btn--text ${isAlpha ? 'trait-sort-btn--active' : ''}`}
           onClick={handleAlphaClick}
           aria-label={sortMode === 'za' ? 'Z to A' : 'A to Z'}
           aria-pressed={isAlpha}
