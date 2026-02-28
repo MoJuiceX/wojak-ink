@@ -412,6 +412,9 @@ export function MouthLayerSelector({ className = '', sortMode = 'hot', onSortCha
     if (sortMode === 'az') {
       return [...rawMouthBase].sort((a, b) => a.name.localeCompare(b.name));
     }
+    if (sortMode === 'za') {
+      return [...rawMouthBase].sort((a, b) => b.name.localeCompare(a.name));
+    }
 
     return [...rawMouthBase].sort((a, b) => {
       const aUsage = lookupUsage(a.name);

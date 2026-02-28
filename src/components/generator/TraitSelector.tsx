@@ -22,7 +22,7 @@ import { isSelectionPathEmpty } from '@/types/generator';
 import { DEFAULT_BASE_PATH, DEFAULT_MOUTHBASE_PATH } from '@/lib/layerRegistry';
 import { LAYER_BASE } from '@/config/layerAssetBase';
 
-export type TraitSortMode = 'hot' | 'not' | 'az';
+export type TraitSortMode = 'hot' | 'not' | 'az' | 'za';
 
 /** Maps generator layer names to Phase 1 trait_types for pricing lookup */
 const LAYER_TO_TRAIT_TYPE: Record<string, string> = {
@@ -161,6 +161,9 @@ function sortTraitsByMode(
     if (mode === 'az') {
       return a.name.localeCompare(b.name);
     }
+    if (mode === 'za') {
+      return b.name.localeCompare(a.name);
+    }
 
     const aUsage = lookupUsage(a.name);
     const bUsage = lookupUsage(b.name);
@@ -200,88 +203,75 @@ function TraitCardSkeleton() {
   );
 }
 
-interface NoneCardProps {
-  isSelected: boolean;
-  onClick: () => void;
-}
-
-function NoneCard({ isSelected, onClick }: NoneCardProps) {
-  const prefersReducedMotion = useReducedMotion();
-
-  return (
-    <motion.button
-      className="w-full aspect-square relative rounded-xl overflow-hidden p-1"
-      style={{
-        background: 'var(--generator-trait-card-bg)',
-        border: isSelected
-          ? '2px solid var(--generator-selected-color, #F97316)'
-          : '1px solid var(--generator-trait-card-border)',
-        boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
-          : '0 2px 8px var(--color-black-20)',
-        transition: 'all 0.3s ease',
-      }}
-      whileHover={prefersReducedMotion ? undefined : { scale: 1.03 }}
-      whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
-      transition={{ duration: 0.2 }}
-      onClick={onClick}
-    >
-      <div
-        className="relative w-full h-full rounded-lg overflow-hidden flex items-center justify-center"
-        style={{
-          background: 'linear-gradient(180deg, rgba(40,40,48,0.6) 0%, rgba(24,24,30,0.8) 100%)',
-          border: '1px dashed var(--color-border)',
-        }}
-      >
-        <Ban
-          size={40}
-          style={{ color: isSelected ? 'var(--generator-selected-color, #F97316)' : 'var(--color-text-muted)' }}
-        />
-      </div>
-      {isSelected && (
-        <motion.div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
-          style={{ background: 'var(--generator-badge-color, #F97316)' }}
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
-          </svg>
-        </motion.div>
-      )}
-    </motion.button>
-  );
-}
-
 export interface SortControlsProps {
   sortMode: TraitSortMode;
   onSortChange: (mode: TraitSortMode) => void;
+  canClear?: boolean;
+  isCleared?: boolean;
+  onClear?: () => void;
 }
 
-export function SortControls({ sortMode, onSortChange }: SortControlsProps) {
-  const modes: { mode: TraitSortMode; icon: string; label: string }[] = [
-    { mode: 'hot', icon: '\u{1F525}', label: 'Most used first' },
-    { mode: 'not', icon: '\u{1F48E}', label: 'Least used first' },
-    { mode: 'az', icon: 'A\u2192Z', label: 'Alphabetical' },
-  ];
+export function SortControls({ sortMode, onSortChange, canClear, isCleared, onClear }: SortControlsProps) {
+  const isAlpha = sortMode === 'az' || sortMode === 'za';
+
+  const handleAlphaClick = () => {
+    if (sortMode === 'az') {
+      onSortChange('za');
+    } else if (sortMode === 'za') {
+      onSortChange('az');
+    } else {
+      onSortChange('az');
+    }
+  };
 
   return (
-    <div className="trait-sort-controls" role="toolbar" aria-label="Sort traits">
-      {modes.map(({ mode, icon, label }) => (
+    <div className="trait-sort-bar" role="toolbar" aria-label="Trait controls">
+      {/* Clear button — left side */}
+      {canClear && onClear && (
         <button
-          key={mode}
           type="button"
-          className={`trait-sort-btn ${sortMode === mode ? 'trait-sort-btn--active' : ''}`}
-          onClick={() => onSortChange(mode)}
-          aria-label={label}
-          aria-pressed={sortMode === mode}
-          title={label}
+          className={`trait-sort-clear ${isCleared ? 'trait-sort-clear--active' : ''}`}
+          onClick={onClear}
+          aria-label="Clear selection"
+          title="Clear selection"
         >
-          {icon}
+          <Ban size={14} />
         </button>
-      ))}
+      )}
+
+      {/* Sort buttons — right side */}
+      <div className="trait-sort-buttons">
+        <button
+          type="button"
+          className={`trait-sort-btn ${sortMode === 'hot' ? 'trait-sort-btn--active' : ''}`}
+          onClick={() => onSortChange('hot')}
+          aria-label="Most used first"
+          aria-pressed={sortMode === 'hot'}
+          title="Most used first"
+        >
+          🔥
+        </button>
+        <button
+          type="button"
+          className={`trait-sort-btn ${sortMode === 'not' ? 'trait-sort-btn--active' : ''}`}
+          onClick={() => onSortChange('not')}
+          aria-label="Least used first"
+          aria-pressed={sortMode === 'not'}
+          title="Least used first"
+        >
+          💎
+        </button>
+        <button
+          type="button"
+          className={`trait-sort-btn ${isAlpha ? 'trait-sort-btn--active' : ''}`}
+          onClick={handleAlphaClick}
+          aria-label={sortMode === 'za' ? 'Z to A' : 'A to Z'}
+          aria-pressed={isAlpha}
+          title={sortMode === 'za' ? 'Z to A' : 'A to Z'}
+        >
+          {sortMode === 'za' ? 'Z→A' : 'A→Z'}
+        </button>
+      </div>
     </div>
   );
 }
@@ -869,7 +859,16 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
 
       {/* Sort controls — above grid, only when traits are loaded */}
       {!isBlocked && unifiedTraits.length > 0 && (
-        <SortControls sortMode={sortMode} onSortChange={setSortMode} />
+        <SortControls
+          sortMode={sortMode}
+          onSortChange={setSortMode}
+          canClear={canDeselect}
+          isCleared={
+            isSelectionPathEmpty(selectedPath) &&
+            (activeLayer !== 'Mask' || (!selectedLayers['Extra1'] && !selectedLayers['Extra2'] && !selectedLayers['Extra3']))
+          }
+          onClear={handleClearSelection}
+        />
       )}
 
       {/* Single unified trait grid */}
@@ -881,20 +880,6 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
             initial="initial"
             animate="animate"
           >
-            {/* None option for layers that can be deselected */}
-            {canDeselect && (
-              <motion.div
-                variants={prefersReducedMotion ? undefined : traitCardStaggerVariants}
-              >
-                <NoneCard
-                  isSelected={
-                    isSelectionPathEmpty(selectedPath) &&
-                    (activeLayer !== 'Mask' || (!selectedLayers['Extra1'] && !selectedLayers['Extra2'] && !selectedLayers['Extra3']))
-                  }
-                  onClick={handleClearSelection}
-                />
-              </motion.div>
-            )}
             {unifiedTraits.map((trait) => {
               const disabled = isOptionDisabled(activeLayer, trait.name);
               const reason = disabled ? getOptionDisabledReason(activeLayer, trait.name) : null;
