@@ -25,6 +25,8 @@ jobs:
         run: npm run test:unit
       - name: Build
         run: npm run build
+        env:
+          VITE_LAYER_BASE_URL: https://layers.wojak.ink
       - name: Bundle Budget Report
         run: npm run bundle:report -- --enforce-hard --json-out=reports/bundle-budget-ci.json --md-out=reports/bundle-budget-ci.md
       - name: Upload bundle budget report
