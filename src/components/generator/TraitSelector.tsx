@@ -22,6 +22,8 @@ import { isSelectionPathEmpty } from '@/types/generator';
 import { DEFAULT_BASE_PATH, DEFAULT_MOUTHBASE_PATH } from '@/lib/layerRegistry';
 import { LAYER_BASE } from '@/config/layerAssetBase';
 
+export type TraitSortMode = 'hot' | 'not' | 'az';
+
 /** Maps generator layer names to Phase 1 trait_types for pricing lookup */
 const LAYER_TO_TRAIT_TYPE: Record<string, string> = {
   Base: 'Face',
@@ -192,6 +194,37 @@ function NoneCard({ isSelected, onClick }: NoneCardProps) {
         </motion.div>
       )}
     </motion.button>
+  );
+}
+
+interface SortControlsProps {
+  sortMode: TraitSortMode;
+  onSortChange: (mode: TraitSortMode) => void;
+}
+
+function SortControls({ sortMode, onSortChange }: SortControlsProps) {
+  const modes: { mode: TraitSortMode; icon: string; label: string }[] = [
+    { mode: 'hot', icon: '\u{1F525}', label: 'Most used first' },
+    { mode: 'not', icon: '\u{1F48E}', label: 'Least used first' },
+    { mode: 'az', icon: 'A\u2192Z', label: 'Alphabetical' },
+  ];
+
+  return (
+    <div className="trait-sort-controls" role="toolbar" aria-label="Sort traits">
+      {modes.map(({ mode, icon, label }) => (
+        <button
+          key={mode}
+          type="button"
+          className={`trait-sort-btn ${sortMode === mode ? 'trait-sort-btn--active' : ''}`}
+          onClick={() => onSortChange(mode)}
+          aria-label={label}
+          aria-pressed={sortMode === mode}
+          title={label}
+        >
+          {icon}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -589,6 +622,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
   const [unifiedTraits, setUnifiedTraits] = useState<UnifiedTrait[]>([]);
   const [imagesForLayer, setImagesForLayer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [sortMode, setSortMode] = useState<TraitSortMode>('hot');
 
   // Glow animation state for trait selection micro-interaction
   const [glowingTraitId, setGlowingTraitId] = useState<string | null>(null);
@@ -775,6 +809,11 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
             Select a different layer or try Randomize
           </p>
         </div>
+      )}
+
+      {/* Sort controls — above grid, only when traits are loaded */}
+      {!isBlocked && unifiedTraits.length > 0 && (
+        <SortControls sortMode={sortMode} onSortChange={setSortMode} />
       )}
 
       {/* Single unified trait grid */}

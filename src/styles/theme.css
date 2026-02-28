@@ -610,6 +610,49 @@ body {
   background: var(--generator-badge-color, #F97316);
 }
 
+/* ── Trait Sort Controls ────────────────────────────────────────────────── */
+
+.trait-sort-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.trait-sort-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  min-width: 28px;
+  padding: 0 8px;
+  border-radius: 14px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+  user-select: none;
+}
+
+.trait-sort-btn:hover {
+  background: var(--color-white-6);
+  color: var(--color-text-secondary);
+}
+
+.trait-sort-btn--active {
+  background: var(--color-primary);
+  color: white;
+}
+
+.trait-sort-btn--active:hover {
+  background: var(--color-primary-hover);
+  color: white;
+}
+
 /* ── Generator Layer Tabs ─────────────────────────────────────────────────── */
 
 .generator-layer-tab {
