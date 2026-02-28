@@ -16,7 +16,7 @@ import { getAllUserPickableFillSlots } from '@/lib/g2FillTreatments';
 import { getG2DefaultColor } from '@/config/g2DefaultColors';
 import type { UILayerName } from '@/lib/wojakRules';
 import type { UnifiedTrait } from '@/services/generatorService';
-import { CombatPreview } from './CombatPreview';
+
 import { MilitaryBeretSwatches } from './MilitaryBeretSwatches';
 import { MaskVariantPicker } from './MaskVariantPicker';
 import { isFullFaceMaskSelected } from './maskData';
@@ -205,9 +205,6 @@ export function GeneratorRightPanel() {
         maxHeight: '100%',
       }}
     >
-      {/* Combat Preview — shows type and nature based on current selections */}
-      <CombatPreview />
-
       {/* G1 Military Beret: "Pick a color to use new design" — swatches switch to G2 */}
       {isG1MilitaryBeret && (
         <div className="generator-panel-section flex-shrink-0">

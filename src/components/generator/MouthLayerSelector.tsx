@@ -26,6 +26,9 @@ interface MouthLayerSelectorProps {
   className?: string;
   sortMode?: TraitSortMode;
   onSortChange?: (mode: TraitSortMode) => void;
+  combatType?: string;
+  combatTypeEmoji?: string;
+  combatNature?: string;
 }
 
 function TraitCardSkeleton() {
@@ -348,7 +351,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick }:
   );
 }
 
-export function MouthLayerSelector({ className = '', sortMode = 'hot', onSortChange }: MouthLayerSelectorProps) {
+export function MouthLayerSelector({ className = '', sortMode = 'hot', onSortChange, combatType, combatTypeEmoji, combatNature }: MouthLayerSelectorProps) {
   const {
     selectedLayers,
     g2Selections,
@@ -527,7 +530,13 @@ export function MouthLayerSelector({ className = '', sortMode = 'hot', onSortCha
 
       {/* Sort controls — above grid, only when traits are loaded */}
       {!isBlocked && hasAnyOptions && onSortChange && (
-        <SortControls sortMode={sortMode} onSortChange={onSortChange} />
+        <SortControls
+          sortMode={sortMode}
+          onSortChange={onSortChange}
+          combatType={combatType}
+          combatTypeEmoji={combatTypeEmoji}
+          combatNature={combatNature}
+        />
       )}
 
       {/* Combined mouth trait grid */}

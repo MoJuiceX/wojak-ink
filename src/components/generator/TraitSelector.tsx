@@ -21,6 +21,8 @@ import { BASE_CLOTHES_MAP, DEFAULT_CLOTHES_PATH } from '@/config/layers';
 import { isSelectionPathEmpty } from '@/types/generator';
 import { DEFAULT_BASE_PATH, DEFAULT_MOUTHBASE_PATH } from '@/lib/layerRegistry';
 import { LAYER_BASE } from '@/config/layerAssetBase';
+import { TYPE_EMOJI, TYPE_NAME } from '@/lib/combat/combatDisplayNames';
+import { calculateCombatIdentity } from '@/lib/combat/identity-calculator';
 
 export type TraitSortMode = 'hot' | 'not' | 'az' | 'za';
 
@@ -209,9 +211,12 @@ export interface SortControlsProps {
   canClear?: boolean;
   isCleared?: boolean;
   onClear?: () => void;
+  combatType?: string;
+  combatTypeEmoji?: string;
+  combatNature?: string;
 }
 
-export function SortControls({ sortMode, onSortChange, canClear, isCleared, onClear }: SortControlsProps) {
+export function SortControls({ sortMode, onSortChange, canClear, isCleared, onClear, combatType, combatTypeEmoji, combatNature }: SortControlsProps) {
   const isAlpha = sortMode === 'az' || sortMode === 'za';
 
   const handleAlphaClick = () => {
@@ -237,6 +242,16 @@ export function SortControls({ sortMode, onSortChange, canClear, isCleared, onCl
         >
           <Ban size={14} />
         </button>
+      )}
+
+      {/* Combat type — center */}
+      {combatType && (
+        <div className="trait-sort-combat" aria-label={`Type: ${combatType}, Nature: ${combatNature || ''}`}>
+          <span className="trait-sort-combat-emoji">{combatTypeEmoji}</span>
+          <span className="trait-sort-combat-text">
+            {combatType}{combatNature ? ` \u00B7 ${combatNature}` : ''}
+          </span>
+        </div>
       )}
 
       {/* Sort buttons — right side */}
@@ -796,9 +811,64 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
 
   // All traits in one grid (no separate Customizable section)
 
+  // Combat identity — computed from all current selections for sort bar display
+  const combatIdentity = useMemo(() => {
+    const traits: { traitId: string; layer: string }[] = [];
+    const colors: Record<string, string> = {};
+    const details: Record<string, string> = {};
+    let logoOption: string | undefined;
+
+    if (g2Selections) {
+      for (const [layer, sel] of Object.entries(g2Selections)) {
+        if (!sel?.traitId) continue;
+        traits.push({ traitId: sel.traitId, layer });
+        if (sel.colors) {
+          for (const hex of Object.values(sel.colors)) {
+            if (hex) colors[sel.traitId] = hex;
+          }
+        }
+        if (sel.options.detail) details[sel.traitId] = sel.options.detail as string;
+        if (sel.options.logo) logoOption = sel.options.logo as string;
+      }
+    }
+
+    if (selectedLayers) {
+      for (const [layer, path] of Object.entries(selectedLayers)) {
+        if (!path || typeof path !== 'string' || path === '__solid__') continue;
+        const parts = path.split('/');
+        if (parts.length >= 2) {
+          const filename = parts[parts.length - 1].replace(/\.[^.]+$/, '');
+          const layerFolder = parts[parts.length - 2];
+          const traitId = `${layerFolder}_${filename}`;
+          if (!traits.some(t => t.layer === layer)) {
+            traits.push({ traitId, layer });
+            const layerColor = (selectedColors as Record<string, string | undefined>)?.[layer];
+            if (layerColor) colors[traitId] = layerColor;
+          }
+        }
+      }
+    }
+
+    if (traits.length === 0) return null;
+    try {
+      return calculateCombatIdentity({ traits, colors, details, logoOption });
+    } catch {
+      return null;
+    }
+  }, [selectedLayers, selectedColors, g2Selections]);
+
   // Use MouthLayerSelector for mouth-related layers (combines MouthBase + MouthItem)
   if (isMouthLayer) {
-    return <MouthLayerSelector className={className} sortMode={sortMode} onSortChange={setSortMode} />;
+    return (
+      <MouthLayerSelector
+        className={className}
+        sortMode={sortMode}
+        onSortChange={setSortMode}
+        combatType={combatIdentity ? TYPE_NAME[combatIdentity.type] : undefined}
+        combatTypeEmoji={combatIdentity ? TYPE_EMOJI[combatIdentity.type] : undefined}
+        combatNature={combatIdentity?.nature}
+      />
+    );
   }
 
   // Loading skeleton - also show when data is stale (from a different layer)
@@ -868,6 +938,9 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
             (activeLayer !== 'Mask' || (!selectedLayers['Extra1'] && !selectedLayers['Extra2'] && !selectedLayers['Extra3']))
           }
           onClear={handleClearSelection}
+          combatType={combatIdentity ? TYPE_NAME[combatIdentity.type] : undefined}
+          combatTypeEmoji={combatIdentity ? TYPE_EMOJI[combatIdentity.type] : undefined}
+          combatNature={combatIdentity?.nature}
         />
       )}
 

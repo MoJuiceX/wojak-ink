@@ -59,7 +59,7 @@ function LayerTab({
 
   return (
     <motion.button
-      className={`generator-layer-tab relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg flex-1 sm:flex-none sm:px-3 sm:py-2 sm:gap-1 sm:min-w-[60px]${isActive ? ' generator-layer-tab--active' : ''}${isBlocked ? ' generator-layer-tab--blocked' : ''}`}
+      className={`generator-layer-tab relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg flex-1 lg:flex-none lg:px-3 lg:py-2 lg:gap-1 lg:min-w-[60px]${isActive ? ' generator-layer-tab--active' : ''}${isBlocked ? ' generator-layer-tab--blocked' : ''}`}
       variants={prefersReducedMotion ? undefined : layerTabVariants}
       whileHover={isBlocked ? undefined : 'hover'}
       whileTap={isBlocked ? undefined : 'tap'}
@@ -74,7 +74,7 @@ function LayerTab({
         {isBlocked && (
           <Lock
             size={8}
-            className="absolute -top-1 -right-1 sm:w-2.5 sm:h-2.5 text-muted"
+            className="absolute -top-1 -right-1 lg:w-2.5 lg:h-2.5 text-muted"
           />
         )}
         {isActive && !isBlocked && (
@@ -83,7 +83,7 @@ function LayerTab({
           />
         )}
       </div>
-      <span className="text-[10px] sm:text-xs font-medium">{config.label}</span>
+      <span className="text-[10px] lg:text-xs font-medium">{config.label}</span>
     </motion.button>
   );
 }
@@ -109,7 +109,7 @@ export function LayerTabs({ className = '' }: LayerTabsProps) {
 
   return (
     <div
-      className={`generator-layer-tab-bar flex justify-between p-2 rounded-2xl overflow-x-auto w-full ${className}`}
+      className={`generator-layer-tab-bar flex justify-between px-2 py-1.5 rounded-2xl overflow-x-auto w-full ${className}`}
       role="tablist"
       aria-label="Layer selection tabs"
     >

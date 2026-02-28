@@ -90,7 +90,7 @@ function ActionBarTooltip({
       {visible && !disabled &&
         createPortal(
           <div
-            className="fixed px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap pointer-events-none z-[9999] -translate-x-1/2 text-secondary"
+            className="fixed px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap pointer-events-none z-[400] -translate-x-1/2 text-secondary"
             style={{
               left: pos.x,
               bottom: typeof window !== 'undefined' ? window.innerHeight - pos.y + 8 : 0,
@@ -288,7 +288,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     label,
     badge,
     children,
-    variant = 'secondary',
+    variant: _variant = 'secondary',
   }: {
     onClick: () => void;
     disabled?: boolean;
@@ -300,8 +300,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     variant?: 'primary' | 'secondary';
   }) => (
     <motion.button
-      className={`relative flex items-center justify-center rounded-lg shrink-0 ${variant === 'primary' ? 'w-9 h-9' : 'w-8 h-8'
-        }`}
+      className="relative flex items-center justify-center rounded-lg shrink-0 w-8 h-8"
       style={{
         background: isActive
           ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), var(--color-primary-10))'
@@ -350,8 +349,8 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       className={`flex items-center justify-between px-2 py-1.5 rounded-2xl flex-nowrap w-full ${className}`}
       style={{
         background: 'var(--color-black-30)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         border: '1px solid var(--color-border)',
       }}
     >
