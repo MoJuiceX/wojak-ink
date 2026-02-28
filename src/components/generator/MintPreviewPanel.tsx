@@ -64,6 +64,7 @@ export const MintPreviewPanel = memo(function MintPreviewPanel({
               src={imageUrl}
               alt="Wojak preview"
               className="w-full h-full object-contain"
+              crossOrigin="anonymous"
             />
           </div>
         </div>

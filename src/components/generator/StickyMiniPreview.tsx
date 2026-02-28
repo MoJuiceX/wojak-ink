@@ -84,6 +84,7 @@ export function StickyMiniPreview({
             src={previewImage}
             alt="Mini preview"
             className="w-full h-full object-cover"
+            crossOrigin="anonymous"
             style={{ objectPosition: '55% center' }}
           />
 

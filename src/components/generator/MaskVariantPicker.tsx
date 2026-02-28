@@ -63,6 +63,7 @@ export function MaskVariantPicker({ selectedPath, onSelect }: MaskVariantPickerP
                   alt={category.label}
                   className="w-10 h-10 rounded-lg object-contain"
                   style={{ background: 'var(--color-surface)' }}
+                  crossOrigin="anonymous"
                   loading="lazy"
                 />
                 <div className="flex-1 text-left">
@@ -107,6 +108,7 @@ export function MaskVariantPicker({ selectedPath, onSelect }: MaskVariantPickerP
                           src={path}
                           alt={variant.label}
                           className="w-full h-full object-contain"
+                          crossOrigin="anonymous"
                           loading="lazy"
                         />
                         {isVariantSelected && (

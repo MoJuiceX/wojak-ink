@@ -106,6 +106,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
             src={DEFAULT_BASE_PATH}
             alt="Base layer"
             className="absolute inset-0 w-full h-full object-cover"
+            crossOrigin="anonymous"
             loading="lazy"
           />
           {/* Clothes layer (blue tee) */}
@@ -113,6 +114,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
             src={DEFAULT_CLOTHES_PATH}
             alt="Clothes layer"
             className="absolute inset-0 w-full h-full object-cover"
+            crossOrigin="anonymous"
             loading="lazy"
           />
           {/* Numb mouth layer (for add-on items) */}
@@ -121,6 +123,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
               src={DEFAULT_MOUTH_PATH}
               alt="Mouth layer"
               className="absolute inset-0 w-full h-full object-cover"
+              crossOrigin="anonymous"
               loading="lazy"
             />
           )}
@@ -129,6 +132,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
             src={image.path}
             alt={image.displayName}
             className="absolute inset-0 w-full h-full object-cover"
+            crossOrigin="anonymous"
             loading="lazy"
           />
         </div>
@@ -276,6 +280,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick, p
             src={DEFAULT_BASE_PATH}
             alt="Base layer"
             className="absolute inset-0 w-full h-full object-cover"
+            crossOrigin="anonymous"
             loading="lazy"
           />
           {/* Clothes layer (blue tee) */}
@@ -283,6 +288,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick, p
             src={DEFAULT_CLOTHES_PATH}
             alt="Clothes layer"
             className="absolute inset-0 w-full h-full object-cover"
+            crossOrigin="anonymous"
             loading="lazy"
           />
           {/* Fill layer with default color (for colorable traits like Bubble Gum) */}
@@ -306,6 +312,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick, p
               src={outlineSrc}
               alt={trait.name}
               className="absolute inset-0 w-full h-full object-cover"
+              crossOrigin="anonymous"
               loading="lazy"
             />
           )}

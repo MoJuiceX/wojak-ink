@@ -168,6 +168,7 @@ export function FavoritesModal({ className = '' }: FavoritesModalProps) {
                           src={favorite.thumbnailDataUrl}
                           alt={favorite.name}
                           className="w-full h-full object-contain"
+                          crossOrigin="anonymous"
                         />
                       </button>
 

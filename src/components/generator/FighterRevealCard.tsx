@@ -93,7 +93,7 @@ export function FighterRevealCard({ mintNumber, customName, combat, imageUrl }: 
             className="fighter-reveal-image"
           >
             {imageUrl ? (
-              <img src={imageUrl} alt={displayName} />
+              <img src={imageUrl} alt={displayName} crossOrigin="anonymous" />
             ) : (
               <div className="fighter-reveal-placeholder">
                 <Swords size={48} style={{ color: typeColor }} />

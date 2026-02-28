@@ -61,6 +61,7 @@ export const TraitCard = memo(function TraitCard({
         src={trait.thumbnailPath}
         alt={trait.name}
         className="absolute inset-0 w-full h-full object-contain p-1"
+        crossOrigin="anonymous"
         loading="lazy"
         onError={(e) => {
           // Fallback to placeholder on error

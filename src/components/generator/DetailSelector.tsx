@@ -104,6 +104,7 @@ export const DetailSelector = memo(function DetailSelector({
                 src={`${basePath}/${opt.file}`}
                 alt={opt.name}
                 className="w-full h-full object-contain"
+                crossOrigin="anonymous"
                 style={zoom ? { transform: `scale(${zoom}) translate(-16%, -14%)`, transformOrigin: 'top left' } : undefined}
                 loading="lazy"
               />

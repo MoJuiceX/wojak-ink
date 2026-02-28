@@ -94,6 +94,7 @@ export function PreviewCanvas({
           src={fadingOutImage}
           alt=""
           className="absolute inset-0 w-full h-full object-contain"
+          crossOrigin="anonymous"
           style={{ zIndex: 1, opacity: 0, transition: 'opacity 150ms ease-out' }}
         />
       )}
@@ -103,6 +104,7 @@ export function PreviewCanvas({
           src={previewImage}
           alt="Wojak preview"
           className="absolute inset-0 w-full h-full object-contain"
+          crossOrigin="anonymous"
           style={{ zIndex: 2, opacity: fadingOutImage ? 1 : 1, transition: 'opacity 150ms ease-in' }}
         />
       )}

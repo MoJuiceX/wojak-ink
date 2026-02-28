@@ -472,6 +472,7 @@ const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isS
             src={image.path}
             alt={image.displayName}
             className="absolute inset-0 w-full h-full object-cover"
+            crossOrigin="anonymous"
             loading="lazy"
           />
         )}
@@ -505,6 +506,7 @@ const LayerWithBaseMouthCard = memo(function LayerWithBaseMouthCard({ image, isS
             src={image.path}
             alt={image.displayName}
             className="absolute inset-0 w-full h-full object-cover"
+            crossOrigin="anonymous"
             loading="lazy"
           />
         )}

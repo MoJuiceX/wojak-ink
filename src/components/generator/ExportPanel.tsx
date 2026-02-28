@@ -146,6 +146,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
                   src={displayPreview}
                   alt="Export preview"
                   className="w-full h-full object-contain"
+                  crossOrigin="anonymous"
                 />
               )}
 

@@ -103,7 +103,7 @@ function LogoButton({ name, isSelected, onClick }: { name: string; isSelected: b
         </span>
       )}
       {!imgError && (
-        <img src={src} alt="" style={{ display: 'none' }} onError={handleImgError} />
+        <img src={src} alt="" style={{ display: 'none' }} crossOrigin="anonymous" onError={handleImgError} />
       )}
     </button>
   );
@@ -439,7 +439,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
                     onClick={() => handleVariant(v.file)}
                     title={v.name}
                   >
-                    <img src={`${basePath}/${v.file}`} alt={v.name} className="w-full h-full object-contain" loading="lazy" />
+                    <img src={`${basePath}/${v.file}`} alt={v.name} className="w-full h-full object-contain" crossOrigin="anonymous" loading="lazy" />
                   </button>
                 );
               })}
@@ -464,7 +464,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
                 onClick={() => handleDetail(d.file)}
                 title={d.name}
               >
-                <img src={CAP_DETAIL_PREVIEW[d.file] || `${basePath}/${d.file}`} alt={d.name} className="w-full h-full object-contain" loading="lazy" />
+                <img src={CAP_DETAIL_PREVIEW[d.file] || `${basePath}/${d.file}`} alt={d.name} className="w-full h-full object-contain" crossOrigin="anonymous" loading="lazy" />
               </button>
             );
           })}
@@ -525,7 +525,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
             onClick={() => setConstructionHelmet(!chiaOn, cigPack)}
             title={chiaOn ? 'Remove Chia logo' : 'Add Chia logo'}
           >
-            <img src={`${basePath}/chia-TN.png`} alt="Chia" className="w-full h-full object-cover" loading="lazy" />
+            <img src={`${basePath}/chia-TN.png`} alt="Chia" className="w-full h-full object-cover" crossOrigin="anonymous" loading="lazy" />
           </button>
         </div>
         {!overrideG2Selection && (
@@ -556,7 +556,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
                   onClick={() => setConstructionHelmet(chiaOn, cig1Opt.file)}
                   title="Pack 1"
                 >
-                  <img src={CIG_PREVIEW[cig1Opt.file] || `${basePath}/${cig1Opt.file}`} alt="Pack 1" className="w-full h-full object-cover" loading="lazy" />
+                  <img src={CIG_PREVIEW[cig1Opt.file] || `${basePath}/${cig1Opt.file}`} alt="Pack 1" className="w-full h-full object-cover" crossOrigin="anonymous" loading="lazy" />
                 </button>
               )}
               {cig2Opt && (
@@ -570,7 +570,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
                   onClick={() => setConstructionHelmet(chiaOn, cig2Opt.file)}
                   title="Pack 2"
                 >
-                  <img src={CIG_PREVIEW[cig2Opt.file] || `${basePath}/${cig2Opt.file}`} alt="Pack 2" className="w-full h-full object-cover" loading="lazy" />
+                  <img src={CIG_PREVIEW[cig2Opt.file] || `${basePath}/${cig2Opt.file}`} alt="Pack 2" className="w-full h-full object-cover" crossOrigin="anonymous" loading="lazy" />
                 </button>
               )}
             </div>
