@@ -39,6 +39,9 @@ const LAYER_TO_TRAIT_TYPE: Record<string, string> = {
   Background: 'Background',
 };
 
+/** Trait types that have a price surcharge — sort by price. All others sort by usage count. */
+const SURCHARGED_TRAIT_TYPES = new Set(['Head', 'Clothes', 'Face Wear']);
+
 /** Default color for solid color backgrounds - sky blue */
 const SOLID_BG_DEFAULT_COLOR = '#38BDF8';
 
@@ -791,9 +794,10 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
     const traitType = LAYER_TO_TRAIT_TYPE[activeLayer] || '';
     const lookupUsage = (traitName: string): number => {
       const p = getTraitPricing(traitType, traitName);
-      // Use surchargeXch for sorting — it reflects effectiveUsage with decay,
-      // so sort order matches what users see in the price display
-      return p?.surchargeXch ?? 0;
+      if (!p) return 0;
+      // Surcharged categories (Head, Clothes, Face Wear): sort by price
+      // All others (Background, Mouth, Extra, etc.): sort by raw usage count
+      return SURCHARGED_TRAIT_TYPES.has(traitType) ? p.surchargeXch : p.usageCount;
     };
 
     return sortTraitsByMode(rawTraits, sortMode, lookupUsage, activeLayer);

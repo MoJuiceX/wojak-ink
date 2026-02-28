@@ -409,8 +409,9 @@ export function MouthLayerSelector({ className = '', sortMode = 'hot', onSortCha
 
     const lookupUsage = (traitName: string): number => {
       const p = getTraitPricing('Mouth', traitName);
-      // Use surchargeXch for sorting — matches visible price order
-      return p?.surchargeXch ?? 0;
+      if (!p) return 0;
+      // Mouth is not a surcharged category — sort by raw usage count
+      return p.usageCount;
     };
 
     if (sortMode === 'az') {
