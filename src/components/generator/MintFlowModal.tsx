@@ -179,12 +179,9 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   const handleShare = () => {
     if (!currentJob) return;
     const mintgardenUrl = currentJob.mintgardenUrl || 'https://mintgarden.io';
-    const text = [
-      `I minted an NFT on Wojak.ink (${currentJob.mintNumber ? `Wojak #${currentJob.mintNumber}` : 'Wojak'})`,
-      'Check it out on MintGarden.',
-      'Mint your own at wojak.ink/generator.',
-      '@mojuicex',
-    ].join(' ');
+    const wojakLabel = currentJob.mintNumber ? `Your Wojak #${currentJob.mintNumber}` : 'a Your Wojak';
+    const namePart = customName ? ` — ${customName}` : '';
+    const text = `🌱 I just minted ${wojakLabel}${namePart} 🍊\n\nCreate yours at wojak.ink/generator\n@mojuicex`;
     window.open(
       `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(mintgardenUrl)}`,
       '_blank',
@@ -220,7 +217,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
     if (isSuccess) {
       return {
         title: isFreeMint ? 'Free Mint Complete!' : 'Minted!',
-        icon: <CheckCircle size={40} className="text-success" />,
+        icon: <CheckCircle size={22} className="text-success" />,
       };
     }
     if (isError) {
@@ -256,7 +253,8 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
             aria-labelledby="mint-flow-title"
           >
             <div className="sticky top-0 z-10 flex items-center justify-between gap-4 mb-3 -mx-1 px-1 py-1 backdrop-blur-sm">
-              <h2 id="mint-flow-title" className="text-lg font-semibold">
+              <h2 id="mint-flow-title" className="text-lg font-semibold flex items-center gap-2">
+                {isSuccess && icon}
                 {title}
               </h2>
               <button
@@ -270,8 +268,8 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
             </div>
 
             <div className="flex flex-col items-center gap-2.5 text-center">
-              {/* Icon — hidden for confirming step (title is sufficient) */}
-              {!isConfirming && icon}
+              {/* Icon — hidden for confirming and success steps (shown inline with title) */}
+              {!isConfirming && !isSuccess && icon}
 
               {/* ── Progress bar (during submitted/awaiting_payment) ── */}
               {(isSubmitted || isAwaitingPayment) && currentJob && (
@@ -478,16 +476,6 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                         Your Wojak #{currentJob.mintNumber}
                       </p>
                     </>
-                  )}
-
-                  {/* Free mint credit info */}
-                  {isFreeMint && (
-                    <p className="text-muted text-xs">
-                      {currentJob.creditsSpent ?? 1} {(currentJob.creditsSpent ?? 1) === 1 ? 'credit' : 'credits'} used.
-                      {currentJob.creditsRemaining != null && (
-                        <> {currentJob.creditsRemaining} remaining.</>
-                      )}
-                    </p>
                   )}
 
                   {/* Supply */}
