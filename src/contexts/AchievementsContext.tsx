@@ -5,7 +5,6 @@
  * Tracks achievement progress and handles unlocking/claiming.
  * Uses server-side API for persistence to prevent "delete cache = claim again" issue.
  *
- * @see claude-specs/05-ACHIEVEMENT-SYSTEM-SPEC.md
  */
 
 import { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from 'react';

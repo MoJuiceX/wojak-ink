@@ -11,7 +11,6 @@
  *
  * Idempotent: Calling twice with same session returns same result.
  *
- * @see claude-specs/11-SERVER-STATE-SPEC.md
  */
 
 import { authenticateRequest } from '../../lib/auth';

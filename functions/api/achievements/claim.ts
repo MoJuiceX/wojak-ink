@@ -4,7 +4,6 @@
  * Claims a completed achievement. Idempotent.
  * Validates completion before awarding rewards.
  *
- * @see claude-specs/11-SERVER-STATE-SPEC.md
  */
 
 import { authenticateRequest } from '../../lib/auth';

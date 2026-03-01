@@ -1,6 +1,5 @@
 -- Economy System Migration
 -- Adds currency tracking, transactions, login streaks, daily challenges, and achievements
--- @see claude-specs/10-ECONOMY-MASTERPLAN-SPEC.md
 
 -- ============ USERS TABLE (if not exists) ============
 CREATE TABLE IF NOT EXISTS users (

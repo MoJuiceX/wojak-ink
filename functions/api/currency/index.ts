@@ -3,7 +3,6 @@
  *
  * Returns current currency balance for authenticated user.
  *
- * @see claude-specs/11-SERVER-STATE-SPEC.md
  */
 
 import { authenticateRequest } from '../../lib/auth';

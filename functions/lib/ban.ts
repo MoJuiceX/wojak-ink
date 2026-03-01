@@ -2,7 +2,6 @@
  * Ban System Utilities
  *
  * Zero-tolerance cheater ban system with immediate permanent bans.
- * @see claude-specs/11-SERVER-STATE-SPEC.md
  */
 
 // Env interface kept for documentation - DB binding used by functions

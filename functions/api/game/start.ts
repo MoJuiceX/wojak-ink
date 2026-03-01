@@ -4,7 +4,6 @@
  * Starts a new game session. Returns 409 Conflict if user already has active session.
  * Single-session enforcement - one active game per user.
  *
- * @see claude-specs/11-SERVER-STATE-SPEC.md
  */
 
 import { authenticateRequest } from '../../lib/auth';

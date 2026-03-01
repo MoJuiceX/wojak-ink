@@ -11,7 +11,6 @@
  *   target?: number (for update_progress)
  * }
  *
- * @see claude-specs/11-SERVER-STATE-SPEC.md
  */
 
 import { authenticateRequest } from '../../lib/auth';

@@ -109,16 +109,7 @@ When making changes to the **wojak generator**, **layer rules**, **layer order**
 
 ---
 
-## ACTIVE TASK: CSS Cleanup
-
-**Read these files before any CSS work:**
-- `.claude/instructions/CSS-CLEANUP.md` (quick reference)
-- `CSS-CLEANUP-AUDIT.md` (full audit)
-- `CSS-CLEANUP-EXECUTION.md` (step-by-step plan)
-
----
-
-## CSS Architecture (UPDATED)
+## CSS Architecture
 
 **ONE theme file** + **Tailwind for layout only**
 

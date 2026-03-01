@@ -4,7 +4,6 @@
  * Wraps game content in an arcade cabinet frame overlay.
  * The frame PNG has a transparent screen area where the game shows through.
  *
- * @see claude-specs/28-ARCADE-FRAME-OVERLAY.md
  */
 
 import { HelpCircle, X, Volume2, VolumeX } from 'lucide-react';

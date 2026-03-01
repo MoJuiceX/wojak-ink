@@ -4,7 +4,6 @@
  * Deducts currency for shop purchases.
  * Validates sufficient balance before deducting.
  *
- * @see claude-specs/11-SERVER-STATE-SPEC.md
  */
 
 import { authenticateRequest } from '../../lib/auth';

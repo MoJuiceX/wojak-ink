@@ -7,7 +7,6 @@
  * Resets at midnight UTC.
  *
  * @see src/config/economy.ts for challenge rewards
- * @see claude-specs/07-DAILY-CHALLENGES-SPEC.md
  */
 
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';

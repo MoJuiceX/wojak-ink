@@ -4,7 +4,6 @@
  * Accepts all scores but flags outliers for review.
  * Does not block players - just logs suspicious activity.
  *
- * @see claude-specs/11-SERVER-STATE-SPEC.md
  */
 
 export interface AnomalyCheck {

@@ -4,7 +4,6 @@
  * Initializes currency for a new user. Idempotent - safe to call multiple times.
  * Returns current balance (creates with starting balance if new).
  *
- * @see claude-specs/11-SERVER-STATE-SPEC.md
  */
 
 import { authenticateRequest } from '../../lib/auth';

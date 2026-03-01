@@ -4,7 +4,6 @@
  * Claims daily login reward. Idempotent per day.
  * Tracks streak and awards appropriate oranges/gems.
  *
- * @see claude-specs/11-SERVER-STATE-SPEC.md
  */
 
 import { authenticateRequest } from '../../lib/auth';

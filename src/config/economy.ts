@@ -5,8 +5,6 @@
  * All earning rates reduced 30% from initial estimates for sustainability.
  * Crypto conversion is a future feature - currently disabled.
  *
- * @see claude-specs/09-ECONOMY-CONFIG-SPEC.md
- * @see claude-specs/10-ECONOMY-MASTERPLAN-SPEC.md
  */
 
 // ============ STARTING BALANCE ============

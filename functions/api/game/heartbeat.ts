@@ -4,7 +4,6 @@
  * Updates the last_heartbeat timestamp for an active session.
  * Should be called every 30 seconds while playing.
  *
- * @see claude-specs/11-SERVER-STATE-SPEC.md
  */
 
 import { authenticateRequest } from '../../lib/auth';

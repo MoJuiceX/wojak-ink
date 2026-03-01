@@ -5,7 +5,6 @@
  * All currency operations go through the API.
  * Local state is just a cache of server state.
  *
- * @see claude-specs/11-SERVER-STATE-SPEC.md
  * @see src/config/economy.ts for economy constants
  */
 

@@ -5,15 +5,15 @@ alwaysApply: true
 
 # Agent Workflow Strategy
 
-Follow this strategy on every session. Read `tasks/lessons.md` at session start when present.
+Follow this strategy on every session. Read `LEARNINGS.md` at session start when present.
 
 ## Workflow Orchestration
 
 ### 1. Plan node default
-- **Non-trivial tasks (3+ steps or architectural decisions):** Enter plan mode. Write a plan (e.g. in `tasks/todo.md`) with checkable items before coding.
+- **Non-trivial tasks (3+ steps or architectural decisions):** Enter plan mode. Use TodoWrite to track checkable items before coding.
 - **Re-plan on blockers:** If unforeseen issues arise, STOP and re-plan. Do not push forward with a flawed approach.
 - **Verification in the plan:** Plan verification steps (tests, logs, diff) as well as implementation.
-- **Specs:** Write detailed specs upfront to reduce ambiguity.
+- **Specs:** Write detailed specs in `docs/plans/` upfront to reduce ambiguity.
 
 ### 2. Subagent strategy
 - Use subagents often to keep main context focused.
@@ -22,9 +22,9 @@ Follow this strategy on every session. Read `tasks/lessons.md` at session start 
 - One focused task per subagent.
 
 ### 3. Self-improvement loop
-- **After any user correction:** Update `tasks/lessons.md` with the lesson and a rule to prevent recurrence.
+- **After any user correction:** Update `LEARNINGS.md` with the lesson and a rule to prevent recurrence.
 - **Proactive rules:** Write or update internal rules from lessons; iterate until mistake rate drops.
-- **Pre-session:** Review `tasks/lessons.md` (and this rule) before starting a relevant project.
+- **Pre-session:** Review `LEARNINGS.md` (and this rule) before starting a relevant project.
 
 ### 4. Verification before done
 - **Proof of work:** Never mark a task complete without proof it works (tests, logs, manual check).
@@ -43,14 +43,14 @@ Follow this strategy on every session. Read `tasks/lessons.md` at session start 
 - **Zero context switching:** Resolve without asking for hand-holding.
 - **CI:** Fix failing CI tests proactively when they block the task.
 
-## Task management (6 steps)
+## Task management
 
-1. **Plan first:** Write plan with checkable items in `tasks/todo.md`.
+1. **Plan first:** Use TodoWrite to create checkable items.
 2. **Verify plan:** Check plan for completeness before implementation.
-3. **Track progress:** Mark items complete in `tasks/todo.md` as you go.
+3. **Track progress:** Mark items complete as you go.
 4. **Explain changes:** Provide a short summary of changes at each step.
-5. **Document results:** Add a review section to `tasks/todo.md` with outcomes.
-6. **Capture lessons:** Update `tasks/lessons.md` after corrections or successful patterns.
+5. **Document results:** Add outcomes to the relevant spec in `docs/plans/`.
+6. **Capture lessons:** Update `LEARNINGS.md` after corrections or successful patterns.
 
 ## Core principles
 
