@@ -4,8 +4,8 @@
 
 [![Live Site](https://img.shields.io/badge/Live-wojak.ink-orange?style=for-the-badge)](https://wojak.ink)
 [![Chia Blockchain](https://img.shields.io/badge/Blockchain-Chia-green?style=for-the-badge)](https://www.chia.net/)
-[![Wojak Farmers Plot](https://img.shields.io/badge/Wojak_Farmers_Plot-4,200_NFTs-blue?style=for-the-badge)](https://mintgarden.io/collections/wojak-farmers-plot)
-[![Your Wojak](https://img.shields.io/badge/Your_Wojak-Create_%26_Mint-purple?style=for-the-badge)](https://wojak.ink/generator)
+[![Wojak Farmers Plot](https://img.shields.io/badge/Wojak_Farmers_Plot-4,200_NFTs-blue?style=for-the-badge)](https://mintgarden.io/collections/wojak-farmers-plot-col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah)
+[![Your Wojak](https://img.shields.io/badge/Your_Wojak-Create_%26_Mint-purple?style=for-the-badge)](https://mintgarden.io/collections/your-wojak-col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up49lgpnge62ensr2tyfx)
 
 ---
 
@@ -13,9 +13,9 @@
 
 The community hub for two NFT collections on the Chia blockchain:
 
-**[Wojak Farmers Plot](https://mintgarden.io/collections/wojak-farmers-plot)** — 4,200 hand-crafted NFTs. The original collection. Browse them, analyze their traits, track their market.
+**[Wojak Farmers Plot](https://mintgarden.io/collections/wojak-farmers-plot-col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah)** — 4,200 hand-crafted NFTs. The original collection. Browse them, analyze their traits, track their market.
 
-**Your Wojak** — A new kind of NFT collection. You create your own art using the layers from Wojak Farmers Plot. Full artistic control over what you're making — and you earn **10% royalty on your creation forever**, enforced on-chain by the Chia blockchain.
+**[Your Wojak](https://mintgarden.io/collections/your-wojak-col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up49lgpnge62ensr2tyfx)** — A new kind of NFT collection. You create your own art using the layers from Wojak Farmers Plot. Full artistic control over what you're making — and you earn **10% royalty on your creation forever**, enforced on-chain by the Chia blockchain.
 
 Browse, create, analyze, compete. All of it on-chain, all of it community-built.
 
@@ -116,7 +116,8 @@ npx wrangler pages deploy dist --project-name=wojak-ink
 
 - [wojak.ink](https://wojak.ink) — Live app
 - [@MoJuiceX](https://twitter.com/MoJuiceX) — Twitter
-- [Wojak Farmers Plot](https://mintgarden.io/collections/wojak-farmers-plot) — Collection on MintGarden
+- [Wojak Farmers Plot](https://mintgarden.io/collections/wojak-farmers-plot-col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah) — Original collection on MintGarden
+- [Your Wojak](https://mintgarden.io/collections/your-wojak-col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up49lgpnge62ensr2tyfx) — User-created collection on MintGarden
 
 ---
 
