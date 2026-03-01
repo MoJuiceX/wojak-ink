@@ -46,10 +46,11 @@ public/assets/wojak-layers/
 playwright-report/
 test-results/
 
-# Night Shift runtime state (reports are kept)
+# Night Shift runtime state
 .nightshift/state/
-reports/nightshift-*.md
-reports/supervisor-*.md
+
+# Generated reports
+reports/
 
 # Local validation tool cache (terraform/actionlint downloaded binaries)
 .tmp/tools/
