@@ -715,25 +715,25 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
           });
           skipLayer = true;
         }
-        // Bepe / Pepe suit + any eyes: X split at 0.397, Y split at 0.373
+        // Bepe / Pepe suit + any eyes: X split at 0.417, Y split at 0.373
         if (!skipLayer && (isBepeSuit(selectedLayers) || isPepeSuit(selectedLayers)) && hasSuitEyesUnder && eyesPath) {
           layers.push({
             path: eyesPath,
             zIndex: LAYER_Z_INDEX.EyesUnderSuit,
             layerName: 'EyesUnderSuit',
-            clipPolygon: [[0.319, 0.171], [0.397, 0.171], [0.397, 1], [0.319, 1]],
+            clipPolygon: [[0.339, 0.171], [0.417, 0.171], [0.417, 1], [0.339, 1]],
           });
           layers.push({
             path: eyesPath,
             zIndex: LAYER_Z_INDEX.EyesUnderSuit,
             layerName: 'EyesUnderSuit2',
-            clipPolygon: [[0.397, 0.171], [1, 0.171], [1, 0.373], [0.397, 0.373]],
+            clipPolygon: [[0.417, 0.171], [1, 0.171], [1, 0.373], [0.417, 0.373]],
           });
           layers.push({
             path: eyesPath,
             zIndex: LAYER_Z_INDEX.Eyes,
             layerName: 'EyesOverSuit',
-            clipPolygon: [[0.397, 0.373], [1, 0.373], [1, 1], [0.397, 1]],
+            clipPolygon: [[0.417, 0.373], [1, 0.373], [1, 1], [0.417, 1]],
           });
           skipLayer = true;
         }
