@@ -4,13 +4,20 @@
 
 [![Live Site](https://img.shields.io/badge/Live-wojak.ink-orange?style=for-the-badge)](https://wojak.ink)
 [![Chia Blockchain](https://img.shields.io/badge/Blockchain-Chia-green?style=for-the-badge)](https://www.chia.net/)
-[![NFTs](https://img.shields.io/badge/Collection-4,200_Wojaks-blue?style=for-the-badge)](https://mintgarden.io/collections/wojak-farmers-plot)
+[![Wojak Farmers Plot](https://img.shields.io/badge/Wojak_Farmers_Plot-4,200_NFTs-blue?style=for-the-badge)](https://mintgarden.io/collections/wojak-farmers-plot)
+[![Your Wojak](https://img.shields.io/badge/Your_Wojak-Create_%26_Mint-purple?style=for-the-badge)](https://wojak.ink/generator)
 
 ---
 
 ## What is this?
 
-The community hub for [Wojak Farmers Plot](https://mintgarden.io/collections/wojak-farmers-plot) — 4,200 hand-crafted NFTs living on the Chia blockchain. Create custom Wojaks, analyze traits with AI, browse the full collection, and compete in 16 arcade games. All of it on-chain, all of it community-built.
+The community hub for two NFT collections on the Chia blockchain:
+
+**[Wojak Farmers Plot](https://mintgarden.io/collections/wojak-farmers-plot)** — 4,200 hand-crafted NFTs. The original collection. Browse them, analyze their traits, track their market.
+
+**Your Wojak** — A new kind of NFT collection. You create your own art using the layers from Wojak Farmers Plot. Full artistic control over what you're making — and you earn **10% royalty on your creation forever**, enforced on-chain by the Chia blockchain.
+
+Browse, create, analyze, compete. All of it on-chain, all of it community-built.
 
 **Live at** [wojak.ink](https://wojak.ink)
 
@@ -18,13 +25,15 @@ The community hub for [Wojak Farmers Plot](https://mintgarden.io/collections/woj
 
 ## Wojak Generator
 
-The main event. Build your own Wojak layer-by-layer, preview it in real-time, and mint it on-chain.
+The main event. Build your own Wojak layer-by-layer, preview it in real-time, and mint it as a **Your Wojak** NFT.
 
+- **Full artistic control** — You're the artist. Pick every layer, every detail
 - **Multi-layer composition** — Base, head, eyes, mouth, clothing, background + extras
 - **14 character types** — Wojak, Soyjak, Waifu, Baddie, Papa Tang, Chad, Bepe, and more
 - **Smart layer rules** — Masks hide mouths, hats adjust to heads, combinations just work
 - **Mood-aware naming** — Every Wojak gets a generated name based on its traits
 - **On-chain minting** — Connect your Sage wallet, mint your creation as a Chia NFT
+- **10% creator royalty** — Earn royalties on every resale, enforced on-chain forever
 - **Favorites** — Save and revisit your best builds
 
 ## BigPulp Intelligence
