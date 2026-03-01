@@ -95,7 +95,6 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   const [timeLeft, setTimeLeft] = useState('');
   const [isExpired, setIsExpired] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [shareCopied, setShareCopied] = useState(false);
   const [nameError, setNameError] = useState('');
   const [revealImageUrl, setRevealImageUrl] = useState<string>();
   const revealObjectUrlRef = useRef<string | null>(null);
@@ -191,18 +190,6 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
       '_blank',
       'noopener,noreferrer'
     );
-  };
-
-  const handleCopyLink = async () => {
-    if (!currentJob?.mintgardenUrl) return;
-    const nftUrl = currentJob.mintgardenUrl;
-    try {
-      await navigator.clipboard.writeText(nftUrl);
-      setShareCopied(true);
-      setTimeout(() => setShareCopied(false), 2000);
-    } catch {
-      window.open(nftUrl, '_blank');
-    }
   };
 
   // Derive display state
@@ -513,13 +500,13 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                   {/* Action buttons */}
                   {currentJob.mintgardenUrl && (
                     <a
-                      href={currentJob.mintgardenUrl.replace('mintgarden.io/nfts', 'nft.one/nft')}
+                      href={currentJob.mintgardenUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-ghost flex items-center justify-center gap-2 text-accent"
                     >
                       <ExternalLink size={16} />
-                      View on NFT One
+                      View on MintGarden
                     </a>
                   )}
 
@@ -541,15 +528,6 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                     </button>
                   </div>
 
-                  {currentJob.mintgardenUrl && (
-                    <button
-                      type="button"
-                      className="text-xs text-secondary underline hover:text-accent transition-colors"
-                      onClick={handleCopyLink}
-                    >
-                      {shareCopied ? 'Link copied!' : 'Copy link'}
-                    </button>
-                  )}
                 </div>
               )}
             </div>
