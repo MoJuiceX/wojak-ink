@@ -1327,9 +1327,9 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         zIndex: LAYER_Z_INDEX.EyesOverHead,
         layerName: 'EyesOverHead',
       });
-    // Super Saiyan + Night Vision: skip EyesOverHead so Saiyan hair renders on top
-    } else if (isSuperSaiyan(selectedLayers) && isNightVision(eyesPath)) {
-      // No EyesOverHead - Night Vision stays fully under Saiyan hair at default Eyes z-index
+    // Super Saiyan + Night Vision / Eye Patch: skip EyesOverHead so Saiyan hair renders on top
+    } else if (isSuperSaiyan(selectedLayers) && (isNightVision(eyesPath) || isEyePatch(eyesPath))) {
+      // No EyesOverHead - stays fully under Saiyan hair at default Eyes z-index
     } else {
       layers.push({
         path: eyesPath,

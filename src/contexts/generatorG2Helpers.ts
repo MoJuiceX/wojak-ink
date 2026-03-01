@@ -109,6 +109,9 @@ export function assembleG2Selection(
     options.constructionHelmetChiaLogo = true;
     options.constructionHelmetCigPack = trait.detailOptions?.find(d => d.file.endsWith('cig-pack.png'))?.file ?? 'Head_Construction-Helmet_detail_cig-pack.png';
   }
+  if (trait.id === KNOWN_TRAIT_IDS.Clothes_Tee) {
+    options.detail = undefined;
+  }
   if (trait.id === KNOWN_TRAIT_IDS.Clothes_Suit) {
     options.detail = trait.detailOptions?.[0]?.file;
   }

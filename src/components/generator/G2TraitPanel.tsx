@@ -571,6 +571,17 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
   const hasDetails = (trait.detailOptions && trait.detailOptions.length > 0) || false;
   if (!hasDetails) return null;
 
+  // Tee: custom preview images for detail picker thumbnails
+  const TEE_DETAIL_PREVIEW: Record<string, string> = {
+    'Clothes_Tee_detail_Chia-logo.png': `${basePath}/chia-TN.png`,
+    'Clothes_Tee_detail_McD-logo.png': `${basePath}/McDonalds-Logo.png`,
+    'Clothes_Tee_detail_Ferrari-logo.png': `${basePath}/preview-ferrari-logo.png`,
+    'Clothes_Tee_detail_classic-face.png': `${basePath}/preview-classic-face.png`,
+    'Clothes_Tee_detail_rekt-face.png': `${basePath}/preview-rekt-face.png`,
+    'Clothes_Tee_detail_rugged-face.png': `${basePath}/preview-rugged-face.png`,
+    'Clothes_Tee_detail_bleeding-bags-face.png': `${basePath}/preview-bleeding-bags-face.png`,
+  };
+
   return (
     <div
       className="rounded-xl p-4 flex flex-col gap-3"
@@ -591,6 +602,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
         }
         allowNone={trait.id !== 'Clothes_SWAT' && trait.id !== 'Head_Beer-Hat'}
         zoom={trait.id === 'Head_Beer-Hat' ? 6 : undefined}
+        previewOverrides={trait.id === 'Clothes_Tee' ? TEE_DETAIL_PREVIEW : undefined}
         onSelect={(file) => {
           let frameFile: string | undefined;
           if (file && trait.frameFiles) {

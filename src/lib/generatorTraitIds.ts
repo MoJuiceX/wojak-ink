@@ -12,6 +12,7 @@ export const KNOWN_TRAIT_IDS = {
   Clothes_NinjaTurtleFit: 'Clothes_Ninja-turtle-fit',
   Clothes_StraightJacket: 'Clothes_Straigth-jacket',
   Clothes_Suit: 'Clothes_Suit',
+  Clothes_Tee: 'Clothes_Tee',
   Clothes_WizardDrip: 'Clothes_Wizard-drip',
   Mask_Hannibal: 'Mask_Hannibal-Mask',
   Mask_Copium: 'Mask_Copium-mask',

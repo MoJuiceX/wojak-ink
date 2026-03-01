@@ -29,6 +29,8 @@ interface DetailSelectorProps {
   allowNone?: boolean;
   /** Zoom factor for preview images (e.g. 6 = 6x zoom centered on image) */
   zoom?: number;
+  /** Map detail filenames to custom preview image URLs for the picker thumbnails */
+  previewOverrides?: Record<string, string>;
 }
 
 export const DetailSelector = memo(function DetailSelector({
@@ -39,6 +41,7 @@ export const DetailSelector = memo(function DetailSelector({
   label = 'Detail',
   allowNone = true,
   zoom,
+  previewOverrides,
 }: DetailSelectorProps) {
   const prefersReducedMotion = useReducedMotion();
 
@@ -101,7 +104,7 @@ export const DetailSelector = memo(function DetailSelector({
               type="button"
             >
               <img
-                src={`${basePath}/${opt.file}`}
+                src={previewOverrides?.[opt.file] ?? `${basePath}/${opt.file}`}
                 alt={opt.name}
                 className="w-full h-full object-contain"
                 crossOrigin="anonymous"
