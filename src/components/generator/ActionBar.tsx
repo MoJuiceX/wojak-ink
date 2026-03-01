@@ -346,7 +346,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
   return (
     <div
-      className={`flex items-center justify-between px-1 lg:px-2 py-1.5 rounded-2xl flex-nowrap w-full ${className}`}
+      className={`flex items-center justify-between px-1 lg:px-2 py-1.5 rounded-none lg:rounded-2xl flex-nowrap w-full ${className}`}
       style={{
         background: 'var(--color-black-30)',
         backdropFilter: 'blur(12px)',
@@ -459,16 +459,14 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         </AnimatePresence>
       </div>
 
-      {/* How It Works — desktop only in main bar (mobile: in overflow) */}
-      {isDesktop && (
-        <ActionBarTooltip content="How It Works">
-          <ActionButton
-            onClick={() => setShowGeneratorInfo(true)}
-            icon={<Info size={18} />}
-            label="How It Works"
-          />
-        </ActionBarTooltip>
-      )}
+      {/* How It Works — visible on all screens */}
+      <ActionBarTooltip content="How It Works">
+        <ActionButton
+          onClick={() => setShowGeneratorInfo(true)}
+          icon={<Info size={18} />}
+          label="How It Works"
+        />
+      </ActionBarTooltip>
 
       {/* Overflow menu — secondary actions */}
       <div className="relative" ref={overflowMenuRef}>
@@ -516,23 +514,6 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
                       {favorites.length}
                     </span>
                   )}
-                </button>
-              )}
-
-              {/* How It Works — mobile only (desktop shows in main bar) */}
-              {!isDesktop && (
-                <button
-                  type="button"
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-white-5)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                  onClick={() => {
-                    setShowOverflowMenu(false);
-                    setShowGeneratorInfo(true);
-                  }}
-                >
-                  <Info size={16} className="text-accent" />
-                  <span>How It Works</span>
                 </button>
               )}
 

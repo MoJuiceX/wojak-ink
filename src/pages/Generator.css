@@ -16,10 +16,10 @@
   .generator-page {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 56px);
-    height: calc(100dvh - 56px);
-    max-height: calc(100vh - 56px);
-    max-height: calc(100dvh - 56px);
+    height: calc(100vh - 56px - 60px);
+    height: calc(100dvh - 56px - 60px);
+    max-height: calc(100vh - 56px - 60px);
+    max-height: calc(100dvh - 56px - 60px);
     overflow: hidden;
   }
 
@@ -57,11 +57,13 @@
   overflow: hidden;
 }
 
-/* Mobile: content flows naturally inside scroll view (no height trap) */
+/* Mobile: content flows naturally inside scroll view; edge-to-edge (no side padding) */
 @media (max-width: 1023px) {
   .generator-content {
     flex: none;
     min-height: 0;
+    padding: 4px 0;
+    gap: 6px;
   }
 }
 
@@ -91,10 +93,10 @@
     position: relative;
     z-index: 2;
     background: var(--color-bg);
-    /* Subtle separator between preview section and trait grid below */
-    padding-bottom: 8px;
+    /* Small side padding for canvas centering; edge-to-edge for tabs+action bar */
+    padding: 0 6px 6px;
     border-bottom: 1px solid var(--color-border);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
   }
 
   .generator-preview-canvas-wrapper {
@@ -270,14 +272,17 @@
     min-height: 0;
   }
 
-  /* Trait grid: no inner scroll; full grid height is in the page scroll */
+  /* Trait grid: no inner scroll; edge-to-edge on mobile (no side radius/border) */
   .generator-options-grid-container {
     flex: none;
     min-height: 0;
     overflow: visible;
-    border-radius: 16px;
+    border-radius: 0;
     background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    border-left: none;
+    border-right: none;
   }
 
   /* Color picker / details panel below the grid in the same scroll */
@@ -286,10 +291,13 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 12px;
-    border-radius: 16px;
+    padding: 10px 8px;
+    border-radius: 0;
     background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    border-left: none;
+    border-right: none;
     overflow: visible;
   }
 
@@ -311,8 +319,8 @@
 @media (max-width: 1023px) {
   .generator-options-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    padding: 12px;
+    gap: 8px;
+    padding: 8px;
     flex: none;
     min-height: 0;
   }

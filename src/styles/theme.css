@@ -644,11 +644,18 @@ body {
   justify-content: space-between;
   padding: 3px;
   margin-bottom: 8px;
-  border-radius: 16px;
+  border-radius: 12px;
   background: var(--color-black-30);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--color-border);
+}
+
+/* Mobile: tighter margins within edge-to-edge grid container */
+@media (max-width: 1023px) {
+  .trait-sort-bar {
+    margin: 4px 4px 6px;
+  }
 }
 
 .trait-sort-buttons {

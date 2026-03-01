@@ -19,6 +19,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
+import { rateLimitedFetch } from '@/utils/rateLimiter';
 
 // MintGarden NFT type from the collection listing
 interface MintGardenNFT {
@@ -83,15 +84,15 @@ function truncateAddress(address: string): string {
   return `${address.slice(0, 5)}...${address.slice(-4)}`;
 }
 
-// Fetch full NFT details from MintGarden
+// Fetch full NFT details from MintGarden (rate-limited to prevent 429s)
 async function fetchNFTDetail(encodedId: string): Promise<MintGardenNFTDetail | null> {
   try {
     const isDev = import.meta.env.DEV;
     const basePath = isDev ? '/mintgarden-api' : '/api/mintgarden';
-    const response = await fetch(`${basePath}/nfts/${encodedId}`, {
+    const response = await rateLimitedFetch(`${basePath}/nfts/${encodedId}`, {
       headers: { 'Accept': 'application/json' },
+      cacheTtl: 5 * 60 * 1000, // Cache for 5 minutes
     });
-    if (!response.ok) return null;
     return response.json();
   } catch (err) {
     console.error('[YourWojakExplorer] Error fetching NFT detail:', err);

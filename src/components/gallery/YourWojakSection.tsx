@@ -12,6 +12,7 @@ import { ChevronDown, Palette, AlertCircle, RefreshCw, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { YourWojakExplorer } from './YourWojakExplorer';
 import { getCombatTypeFromAttributes } from '@/lib/combat/getCombatTypeFromAttributes';
+import { rateLimitedFetch } from '@/utils/rateLimiter';
 
 // Your Wojak collection ID on MintGarden
 const YOUR_WOJAK_COLLECTION_ID = 'col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up49lgpnge62ensr2tyfx';
@@ -112,15 +113,15 @@ interface NFTAttribute {
 // Cache for NFT attributes (keyed by encoded_id)
 type AttributesCache = Record<string, NFTAttribute[]>;
 
-// Fetch individual NFT details to get attributes
+// Fetch individual NFT details to get attributes (rate-limited to prevent 429s)
 async function fetchNFTAttributes(encodedId: string): Promise<NFTAttribute[] | null> {
   try {
     const isDev = import.meta.env.DEV;
     const basePath = isDev ? '/mintgarden-api' : '/api/mintgarden';
-    const response = await fetch(`${basePath}/nfts/${encodedId}`, {
+    const response = await rateLimitedFetch(`${basePath}/nfts/${encodedId}`, {
       headers: { 'Accept': 'application/json' },
+      cacheTtl: 5 * 60 * 1000, // Cache for 5 minutes
     });
-    if (!response.ok) return null;
     const data = await response.json();
     return data.data?.metadata_json?.attributes || [];
   } catch (err) {
