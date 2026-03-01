@@ -576,10 +576,10 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
     'Clothes_Tee_detail_Chia-logo.png': `${basePath}/chia-TN.png`,
     'Clothes_Tee_detail_McD-logo.png': `${basePath}/McDonalds-Logo.png`,
     'Clothes_Tee_detail_Ferrari-logo.png': `${basePath}/preview-ferrari-logo.png`,
-    'Clothes_Tee_detail_classic-face.png': `${basePath}/preview-classic-face.png`,
-    'Clothes_Tee_detail_rekt-face.png': `${basePath}/preview-rekt-face.png`,
-    'Clothes_Tee_detail_rugged-face.png': `${basePath}/preview-rugged-face.png`,
-    'Clothes_Tee_detail_bleeding-bags-face.png': `${basePath}/preview-bleeding-bags-face.png`,
+    'Clothes_Tee_detail_classic-face-v2.png': `${basePath}/preview-classic-face-v2.png`,
+    'Clothes_Tee_detail_rekt-face-v2.png': `${basePath}/preview-rekt-face-v2.png`,
+    'Clothes_Tee_detail_rugged-face-v2.png': `${basePath}/preview-rugged-face-v2.png`,
+    'Clothes_Tee_detail_bleeding-bags-face-v2.png': `${basePath}/preview-bleeding-bags-face-v2.png`,
   };
 
   return (
