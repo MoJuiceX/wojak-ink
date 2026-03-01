@@ -297,8 +297,6 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                 const balance = Math.round((credits?.balance ?? 0) / 100);
                 const creditCost = Math.ceil(100 * price.totalXch / price.basePrice);
                 const isFreeConfirm = pendingMintType === 'free';
-                const clothingAttr = metadataAttributes.find(a => a.trait_type === 'Clothes');
-                const clothingName = clothingAttr?.value || '';
                 return (
                   <div className="w-full flex flex-col gap-2.5">
                     {/* NFT Preview Panel — image, headline, traits + price */}
@@ -324,7 +322,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                             type="text"
                             value={customName}
                             onChange={(e) => handleNameChange(e.target.value)}
-                            placeholder={getPlaceholderHint(clothingName)}
+                            placeholder={getPlaceholderHint(metadataAttributes)}
                             maxLength={MAX_NAME_LENGTH}
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted">
@@ -334,7 +332,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                         <button
                           className="btn btn-ghost text-xs"
                           onClick={() => {
-                            const name = generateRandomName(clothingName);
+                            const name = generateRandomName(metadataAttributes);
                             setCustomName(name);
                             setNameError('');
                           }}
