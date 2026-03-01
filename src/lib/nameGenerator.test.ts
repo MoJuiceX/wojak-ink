@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateRandomName, validateName, formatFullName, MAX_NAME_LENGTH } from './nameGenerator';
+import { generateRandomName, validateName, formatFullName, getPlaceholderHint, MAX_NAME_LENGTH } from './nameGenerator';
 
 describe('MAX_NAME_LENGTH', () => {
   it('is 15', () => {
@@ -110,5 +110,72 @@ describe('formatFullName', () => {
 
   it('handles large edition numbers', () => {
     expect(formatFullName(9999, 'Chia Chad')).toBe('Your Wojak #9999: Chia Chad');
+  });
+});
+
+describe('generateRandomName with traits', () => {
+  it('accepts TraitInput[] and returns a name', () => {
+    const traits = [
+      { trait_type: 'Clothes', value: 'SWAT Gear' },
+      { trait_type: 'Head', value: 'Beer Hat' },
+    ];
+    const name = generateRandomName(traits);
+    expect(typeof name).toBe('string');
+    expect(name.length).toBeGreaterThan(0);
+    expect(name.length).toBeLessThanOrEqual(MAX_NAME_LENGTH);
+  });
+
+  it('still works with no arguments (backward compat)', () => {
+    const name = generateRandomName();
+    expect(typeof name).toBe('string');
+    expect(name.length).toBeGreaterThan(0);
+  });
+
+  it('still works with a string argument (backward compat)', () => {
+    const name = generateRandomName('Suit');
+    expect(typeof name).toBe('string');
+    expect(name.length).toBeGreaterThan(0);
+    expect(name.length).toBeLessThanOrEqual(MAX_NAME_LENGTH);
+  });
+
+  it('generates varied names across 30 calls', () => {
+    const traits = [
+      { trait_type: 'Clothes', value: 'Suit' },
+    ];
+    const names = new Set(Array.from({ length: 30 }, () => generateRandomName(traits)));
+    expect(names.size).toBeGreaterThan(3);
+  });
+
+  it('never exceeds MAX_NAME_LENGTH with traits', () => {
+    const traits = [
+      { trait_type: 'Clothes', value: 'Wizard Drip' },
+      { trait_type: 'Head', value: 'Wizard Hat' },
+      { trait_type: 'Face Wear', value: 'Wizard Glasses' },
+      { trait_type: 'Background', value: 'Wizard Tower' },
+    ];
+    for (let i = 0; i < 50; i++) {
+      const name = generateRandomName(traits);
+      expect(name.length).toBeLessThanOrEqual(MAX_NAME_LENGTH);
+    }
+  });
+});
+
+describe('getPlaceholderHint with traits', () => {
+  it('returns a mood-appropriate hint when given traits', () => {
+    const traits = [
+      { trait_type: 'Clothes', value: 'SWAT Gear' },
+    ];
+    const hint = getPlaceholderHint(traits);
+    expect(hint.length).toBeGreaterThan(0);
+  });
+
+  it('still works with no arguments', () => {
+    const hint = getPlaceholderHint();
+    expect(hint.length).toBeGreaterThan(0);
+  });
+
+  it('still works with a string argument (backward compat)', () => {
+    const hint = getPlaceholderHint('Suit');
+    expect(hint.length).toBeGreaterThan(0);
   });
 });
