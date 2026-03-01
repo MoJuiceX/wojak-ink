@@ -609,7 +609,7 @@
       "then": [
         { "action": "disableOption", "target": "Mask", "options": [
           "Coffee", "Diamond", "GFY Left", "GFY Right", "Goose",
-          "Handgun", "Seedling", "Orange", "TangTalk", "Hand Mask"
+          "Handgun", "Seedling", "Orange", "TangTalk", "Brick", "Hand Mask"
         ], "reason": "Deselect Straitjacket" }
       ]
     },

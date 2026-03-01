@@ -334,6 +334,7 @@ export function formatDisplayLabel(rawLabel: string | undefined): string {
     'hand coffee': 'Coffee',
     'hand gun left': 'Handgun',
     'hand left seedling': 'Seedling',
+    'hand left brick': 'Brick',
     'hand gfy right': 'GFY Right',
     'hand gfy left': 'GFY Left',
   };

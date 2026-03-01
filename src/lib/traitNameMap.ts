@@ -293,6 +293,7 @@ export const TRAIT_NAME_MAP: Record<string, string> = {
   'hand gfy right': 'GFY Right',
   'hand gfy left': 'GFY Left',
   'hand left seedling': 'Seedling',
+  'hand left brick': 'Brick',
   'wings': 'Wings',
 
   // === Clothes EXTRA overlays (Chia Farmer composites on tee/tank-top) ===
