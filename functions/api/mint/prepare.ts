@@ -123,12 +123,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // Validate path format: prevent directory traversal and restrict to known patterns
     if (path) {
       const parts = path.split('/');
-      if (parts.length > 6 || parts.some(p => p === '..' || p === '.')) {
+      // Allow up to 10 segments for URL-based paths (https://domain/folder/file)
+      if (parts.length > 10 || parts.some(p => p === '..' || p === '.')) {
         return errorResponse(`Invalid layer path for ${layer}`, 400);
       }
-      // Paths must only contain alphanumeric, hyphens, underscores, spaces, dots, $, commas
-      // and start with optional / (e.g. "/g2/skull-mask-love" or "HEAD_Crown")
-      if (!/^[a-zA-Z0-9_\-.\s/$,]+$/.test(path)) {
+      // Paths must only contain alphanumeric, hyphens, underscores, spaces, dots, $, commas, +, :
+      // : needed for https:// URL-based layer paths (e.g. https://layers.wojak.ink/...)
+      if (!/^[a-zA-Z0-9_\-.\s/$,+:]+$/.test(path)) {
         return errorResponse(`Invalid characters in layer path for ${layer}`, 400);
       }
     }
