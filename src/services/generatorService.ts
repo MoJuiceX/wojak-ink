@@ -8,6 +8,7 @@
 import type { Trait } from '@/types/generator';
 import { UI_LAYER_NAMES, type UILayerName } from '@/lib/memeLayers';
 import { formatDisplayLabel, cleanDisplayName } from '@/lib/traitOptions';
+import { lookupTraitName } from '@/lib/traitNameMap';
 import { G1_TO_G2_MAP, normalizeTraitName } from '@/lib/traitMapping';
 import { G2_CATEGORY_TO_UI, G1_FOLDER_TO_UI } from '@/config/generatorLayerMapping';
 import { MOUTH_BASE_PATTERNS, MOUTH_ITEM_PATTERNS, MASK_PATTERNS, FACIAL_HAIR_PATTERNS } from '@/lib/generatorTraitIds';
@@ -54,7 +55,31 @@ async function loadManifest(): Promise<ManifestData> {
 
 function parseDisplayName(filepath: string): string {
   const cleaned = cleanDisplayName(filepath);
+  // Check canonical TRAIT_NAME_MAP first — matches metadata names exactly.
+  // Skip "Fake It Mask" mappings (metadata-only consolidation; grid keeps individual mask names)
+  const canonical = lookupTraitName(cleaned);
+  if (canonical && canonical !== 'Fake It Mask') return canonical;
+  // Fallback to legacy formatting for unknown traits
   return formatDisplayLabel(cleaned);
+}
+
+/** Layer-specific display name overrides applied after TRAIT_NAME_MAP lookup */
+const DISPLAY_LAYER_OVERRIDES: Partial<Record<UILayerName, Record<string, string>>> = {
+  Clothes: { 'Super Saiyan': 'Super Saiyan Uniform' },
+};
+
+/**
+ * Canonicalize a trait display name to match canonical metadata naming.
+ * Uses TRAIT_NAME_MAP as source of truth, with layer-specific overrides.
+ * Applied to G2 traits whose names come directly from the CDN manifest.
+ */
+function canonicalizeTraitName(rawName: string, uiLayer: UILayerName): string {
+  const normalized = rawName.replace(/[-_]/g, ' ').trim();
+  const mapped = lookupTraitName(normalized);
+  if (mapped && mapped !== 'Fake It Mask') {
+    return DISPLAY_LAYER_OVERRIDES[uiLayer]?.[mapped] || mapped;
+  }
+  return rawName;
 }
 
 function classifyMouthItem(filepath: string): UILayerName | null {
@@ -670,6 +695,12 @@ function buildUnifiedTraitsForLayer(
     if (!matchedG2Ids.has(g2.id)) {
       result.push(g2TraitToUnified(g2, uiLayer));
     }
+  }
+
+  // Canonicalize all trait display names to match metadata
+  // Fixes G2 lowercase/typo names and applies layer-specific overrides
+  for (const trait of result) {
+    trait.name = canonicalizeTraitName(trait.name, uiLayer);
   }
 
   return result;
