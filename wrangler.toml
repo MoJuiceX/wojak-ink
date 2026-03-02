@@ -35,7 +35,7 @@ PHASE2_ROYALTY_ADDRESS = "DYNAMIC_PER_MINTER"  # split: 10% minter + 2% treasury
 TREASURY_ADDRESS = "xch13afmxv0xpyz03t3jfdmcrtv5ecwe5n52977vxd3z2x995f9quunsre5vkd"
 # CREATOR_PAYOUT_ADDRESS: set in Cloudflare Dashboard (Variables) only — do not add here or deploy fails (binding already in use). For local dev use .dev.vars.
 PHASE2_ROYALTY_PCT = "12"
-PINATA_GATEWAY = "tan-careful-chicken-980.mypinata.cloud"
+PINATA_GATEWAY = "bronze-used-crow-589.mypinata.cloud"
 
 # Secrets (set via `wrangler pages secret put --project-name=wojak-ink` or Cloudflare Dashboard):
 # - CLERK_DOMAIN: Your Clerk domain (e.g., your-app.clerk.accounts.dev)

@@ -6,7 +6,7 @@
  */
 
 import { createPortal } from 'react-dom';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, Loader2, CheckCircle, AlertCircle, Copy, ExternalLink, Wallet, Share2, Sparkles } from 'lucide-react';
 import { useMint } from '@/contexts/MintContext';
@@ -19,6 +19,12 @@ interface MintFlowModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+const INTRO_STEP_DURATION_MS = 1200;
+const INTRO_STEPS: Array<{ number: number; label: string }> = [
+  { number: 1, label: 'Preparing your mint...' },
+  { number: 2, label: 'Reserving your Wojak number...' },
+];
 
 // ── Helpers ──
 
@@ -97,7 +103,18 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   const [copied, setCopied] = useState(false);
   const [nameError, setNameError] = useState('');
   const [revealImageUrl, setRevealImageUrl] = useState<string>();
+  const [displayStepNumber, setDisplayStepNumber] = useState<number | null>(null);
+  const [displayStepLabel, setDisplayStepLabel] = useState('');
   const revealObjectUrlRef = useRef<string | null>(null);
+  const introTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const introJobIdRef = useRef<number | null>(null);
+
+  const clearIntroTimers = useCallback(() => {
+    for (const timerId of introTimersRef.current) {
+      clearTimeout(timerId);
+    }
+    introTimersRef.current = [];
+  }, []);
 
   // Persist preview image across the whole mint flow (pendingMintParams is cleared on submit).
   useEffect(() => {
@@ -156,6 +173,10 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   }, [currentJob?.expiresAt]);
 
   const handleClose = () => {
+    clearIntroTimers();
+    introJobIdRef.current = null;
+    setDisplayStepNumber(null);
+    setDisplayStepLabel('');
     if (revealObjectUrlRef.current) {
       URL.revokeObjectURL(revealObjectUrlRef.current);
       revealObjectUrlRef.current = null;
@@ -198,9 +219,57 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
   const isFreeMint = currentJob?.mintType === 'free';
   const showOfferActions = isAwaitingPayment && currentJob;
 
+  // Smooth intro steps (1 -> 2), then catch up to real server step.
+  useEffect(() => {
+    if (!isSubmitted || !currentJob?.jobId) return;
+    if (introJobIdRef.current === currentJob.jobId) return;
+
+    introJobIdRef.current = currentJob.jobId;
+    clearIntroTimers();
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDisplayStepNumber(INTRO_STEPS[0].number);
+    setDisplayStepLabel(INTRO_STEPS[0].label);
+
+    const step2Timer = setTimeout(() => {
+      setDisplayStepNumber(INTRO_STEPS[1].number);
+      setDisplayStepLabel(INTRO_STEPS[1].label);
+    }, INTRO_STEP_DURATION_MS);
+
+    const catchUpTimer = setTimeout(() => {
+      // Hand control back to real backend-driven progress.
+      setDisplayStepNumber(null);
+      setDisplayStepLabel('');
+    }, INTRO_STEP_DURATION_MS * INTRO_STEPS.length);
+
+    introTimersRef.current = [step2Timer, catchUpTimer];
+
+    return () => {
+      clearIntroTimers();
+    };
+  }, [isSubmitted, currentJob?.jobId, clearIntroTimers]);
+
+  // Reset intro state when leaving active processing steps.
+  useEffect(() => {
+    if (isSubmitted || isAwaitingPayment) return;
+    clearIntroTimers();
+    introJobIdRef.current = null;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDisplayStepNumber(null);
+    setDisplayStepLabel('');
+  }, [isSubmitted, isAwaitingPayment, clearIntroTimers]);
+
+  const effectiveStepNumber = isSubmitted && displayStepNumber != null
+    ? displayStepNumber
+    : (currentJob?.stepNumber ?? 0);
+  const effectiveStepLabel = isSubmitted && displayStepLabel
+    ? displayStepLabel
+    : (currentJob?.stepLabel ?? '');
+  const effectiveTotalSteps = currentJob?.totalSteps ?? 0;
+
   // Progress bar
-  const progressPct = currentJob
-    ? Math.round((currentJob.stepNumber / currentJob.totalSteps) * 100)
+  const progressPct = effectiveTotalSteps > 0
+    ? Math.round((effectiveStepNumber / effectiveTotalSteps) * 100)
     : 0;
 
   // Get title and icon
@@ -284,7 +353,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
                     />
                   </div>
                   <p className="text-muted text-[10px] mt-1 tabular-nums">
-                    Step {currentJob.stepNumber} of {currentJob.totalSteps}
+                    Step {effectiveStepNumber} of {effectiveTotalSteps}
                   </p>
                 </div>
               )}
@@ -365,7 +434,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
               {/* ── Submitted: real server-driven progress ── */}
               {isSubmitted && currentJob && (
                 <div className="flex flex-col items-center gap-2">
-                  <p className="text-secondary text-sm">{currentJob.stepLabel}</p>
+                  <p className="text-secondary text-sm">{effectiveStepLabel}</p>
                   <p className="text-muted text-[10px]">Please don&apos;t close this window</p>
                 </div>
               )}
