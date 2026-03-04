@@ -211,6 +211,25 @@ async function fetchWithTimeout(url: string, timeoutMs = FETCH_TIMEOUT): Promise
   }
 }
 
+/**
+ * Promise timeout helper. Prevents a single slow dependency from blocking
+ * the whole treasury refresh cycle.
+ */
+async function withPromiseTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    timeoutHandle = setTimeout(() => {
+      reject(apiError(`[Treasury] ${label} timeout after ${timeoutMs}ms`, 408));
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timeoutHandle) clearTimeout(timeoutHandle);
+  }
+}
+
 async function fetchXchPrice(): Promise<number> {
   // First check localStorage for recent price
   const cached = loadCache();
@@ -427,11 +446,10 @@ function deriveCollectionName(nftNames: string[]): string {
 }
 
 /**
- * Fetch NFTs from SpaceScan API (returns ALL NFTs, unlike MintGarden which caps at ~50).
+ * Fetch NFTs from SpaceScan API.
  * Groups by collection_id and derives collection names from NFT names.
  */
-async function fetchNFTCollections(): Promise<NFTCollection[]> {
-  // Throws on failure — caller (Promise.allSettled) handles fallback
+async function fetchNFTCollectionsFromSpaceScan(): Promise<NFTCollection[]> {
   const data = await spacescanQueue.add(async () => {
     const response = await fetchWithTimeout(
       `${SPACESCAN_API}/address/nft-balance/${WALLET_ADDRESS}`
@@ -447,17 +465,12 @@ async function fetchNFTCollections(): Promise<NFTCollection[]> {
     throw apiError('SpaceScan returned 0 NFTs', 502);
   }
 
-  // Group NFTs by collection with deduplication
   const collectionMap = new Map<string, NFTCollection>();
   const seenNftIds = new Set<string>();
 
   for (const nft of nfts) {
     const nftId = (nft.nft_id as string) || (nft.encoded_id as string) || '';
-
-    // Skip if we've already seen this NFT (deduplication)
-    if (!nftId || seenNftIds.has(nftId)) {
-      continue;
-    }
+    if (!nftId || seenNftIds.has(nftId)) continue;
     seenNftIds.add(nftId);
 
     const collectionId = (nft.collection_id as string) || 'uncategorized';
@@ -469,7 +482,7 @@ async function fetchNFTCollections(): Promise<NFTCollection[]> {
       name: nftName,
       imageUrl: previewUrl,
       collectionId,
-      collectionName: '', // Set after grouping
+      collectionName: '',
     };
 
     if (collectionMap.has(collectionId)) {
@@ -479,7 +492,7 @@ async function fetchNFTCollections(): Promise<NFTCollection[]> {
     } else {
       collectionMap.set(collectionId, {
         collectionId,
-        collectionName: '', // Set after grouping
+        collectionName: '',
         previewImage: previewUrl,
         count: 1,
         nfts: [nftItem],
@@ -487,35 +500,161 @@ async function fetchNFTCollections(): Promise<NFTCollection[]> {
     }
   }
 
-  // Derive collection names from NFT names and update all entries
   for (const collection of collectionMap.values()) {
-    const names = collection.nfts.map(n => n.name);
+    const names = collection.nfts.map((n) => n.name);
     const derivedName = deriveCollectionName(names);
     collection.collectionName = derivedName;
     for (const nft of collection.nfts) {
       nft.collectionName = derivedName;
     }
 
-    // Ensure preview image uses first NFT with a valid URL
     if (!collection.previewImage) {
-      const nftWithImage = collection.nfts.find(n => n.imageUrl);
+      const nftWithImage = collection.nfts.find((n) => n.imageUrl);
       if (nftWithImage) {
         collection.previewImage = nftWithImage.imageUrl;
       }
     }
   }
 
-  // Convert to array and sort by count descending
-  const sorted = Array.from(collectionMap.values())
+  return Array.from(collectionMap.values()).sort((a, b) => b.count - a.count);
+}
+
+/**
+ * Fetch NFTs by collection from MintGarden API.
+ * This endpoint returns rich per-collection grouping and includes all NFTs for the wallet.
+ */
+async function fetchNFTCollectionsFromMintGarden(): Promise<NFTCollection[]> {
+  const response = await fetchWithTimeout(
+    `${MINTGARDEN_API}/address/${WALLET_ADDRESS}/nfts_by_collection`
+  );
+
+  if (!response.ok) {
+    throw apiError(`MintGarden NFT API error: ${response.status}`, response.status);
+  }
+
+  const data = await response.json();
+  if (!Array.isArray(data) || data.length === 0) {
+    throw apiError('MintGarden returned 0 NFT collections', 502);
+  }
+
+  const collections: NFTCollection[] = data
+    .map((collection: Record<string, unknown>) => {
+      const collectionId = (collection.id as string) || (collection.collection_id as string) || 'uncategorized';
+      const collectionName = (collection.name as string) || (collection.collection_name as string) || 'Unknown Collection';
+      const nftsRaw = Array.isArray(collection.nfts) ? collection.nfts as Record<string, unknown>[] : [];
+
+      const nfts: NFTItem[] = nftsRaw
+        .map((nft: Record<string, unknown>) => {
+          const nftId = (nft.encoded_id as string) || (nft.nft_id as string) || (nft.id as string) || '';
+          if (!nftId) return null;
+          return {
+            nftId,
+            name: (nft.name as string) || 'Unknown NFT',
+            imageUrl: (nft.thumbnail_uri as string) || (nft.preview_url as string) || '',
+            collectionId,
+            collectionName,
+          } as NFTItem;
+        })
+        .filter((item): item is NFTItem => !!item);
+
+      if (nfts.length === 0) return null;
+
+      return {
+        collectionId,
+        collectionName,
+        previewImage: (collection.thumbnail_uri as string) || nfts[0].imageUrl || '',
+        count: nfts.length,
+        nfts,
+      } as NFTCollection;
+    })
+    .filter((collection): collection is NFTCollection => !!collection)
     .sort((a, b) => b.count - a.count);
 
-  // Fire-and-forget: fill missing thumbnails from MintGarden in the background.
-  // Don't await — this would eat into the 45s overall timeout budget.
-  // The backfill mutates the NFT objects in place; if the data gets saved to
-  // localStorage later, the MintGarden URLs persist for future loads.
-  backfillMissingThumbnails(sorted).catch(() => {});
+  if (collections.length === 0) {
+    throw apiError('MintGarden returned no usable NFT collections', 502);
+  }
 
-  return sorted;
+  return collections;
+}
+
+function mergeNFTCollections(primary: NFTCollection[], secondary: NFTCollection[]): NFTCollection[] {
+  const collectionMap = new Map<string, NFTCollection>();
+
+  const upsertCollection = (source: NFTCollection) => {
+    const existing = collectionMap.get(source.collectionId);
+    if (!existing) {
+      collectionMap.set(source.collectionId, {
+        collectionId: source.collectionId,
+        collectionName: source.collectionName,
+        previewImage: source.previewImage,
+        count: source.count,
+        nfts: [...source.nfts],
+      });
+      return;
+    }
+
+    if (!existing.collectionName && source.collectionName) {
+      existing.collectionName = source.collectionName;
+    }
+    if (!existing.previewImage && source.previewImage) {
+      existing.previewImage = source.previewImage;
+    }
+
+    const seen = new Set(existing.nfts.map((nft) => nft.nftId));
+    for (const nft of source.nfts) {
+      if (!seen.has(nft.nftId)) {
+        existing.nfts.push(nft);
+        seen.add(nft.nftId);
+      }
+    }
+
+    existing.count = existing.nfts.length;
+  };
+
+  for (const collection of primary) upsertCollection(collection);
+  for (const collection of secondary) upsertCollection(collection);
+
+  return Array.from(collectionMap.values()).sort((a, b) => b.count - a.count);
+}
+
+/**
+ * Fetch NFT collections with multi-source strategy.
+ *
+ * Order:
+ * 1) MintGarden (more stable for wallet-level grouping)
+ * 2) SpaceScan (merged in when available)
+ *
+ * This prevents SpaceScan token endpoint rate limits from freezing NFT refreshes.
+ */
+async function fetchNFTCollections(): Promise<NFTCollection[]> {
+  const [mintGardenResult, spaceScanResult] = await Promise.allSettled([
+    withPromiseTimeout(fetchNFTCollectionsFromMintGarden(), 12_000, 'MintGarden NFT source'),
+    withPromiseTimeout(fetchNFTCollectionsFromSpaceScan(), 12_000, 'SpaceScan NFT source'),
+  ]);
+
+  const mintGardenCollections = mintGardenResult.status === 'fulfilled' ? mintGardenResult.value : [];
+  const spaceScanCollections = spaceScanResult.status === 'fulfilled' ? spaceScanResult.value : [];
+
+  if (mintGardenResult.status === 'rejected') {
+    console.warn('[Treasury] MintGarden NFT source failed:', (mintGardenResult.reason as Error)?.message || mintGardenResult.reason);
+  }
+  if (spaceScanResult.status === 'rejected') {
+    console.warn('[Treasury] SpaceScan NFT source failed:', (spaceScanResult.reason as Error)?.message || spaceScanResult.reason);
+  }
+
+  let collections: NFTCollection[] = [];
+  if (mintGardenCollections.length > 0 && spaceScanCollections.length > 0) {
+    collections = mergeNFTCollections(mintGardenCollections, spaceScanCollections);
+  } else if (mintGardenCollections.length > 0) {
+    collections = mintGardenCollections;
+  } else if (spaceScanCollections.length > 0) {
+    collections = spaceScanCollections;
+  } else {
+    throw apiError('Both MintGarden and SpaceScan NFT sources failed', 502);
+  }
+
+  backfillMissingThumbnails(collections).catch(() => {});
+  return collections;
 }
 
 function getDefaultWalletData(): WalletData {
@@ -577,9 +716,9 @@ class TreasuryService implements ITreasuryService {
     // Inner functions THROW on failure — allSettled reports them as 'rejected'.
     const [xchPriceResult, xchBalanceResult, tokensResult, nftsResult] = await Promise.allSettled([
       fetchXchPrice(),
-      fetchXchBalance(),
-      fetchTokenBalances(),
-      fetchNFTCollections(),
+      withPromiseTimeout(fetchXchBalance(), 12_000, 'XCH balance fetch'),
+      withPromiseTimeout(fetchTokenBalances(), 12_000, 'token balance fetch'),
+      withPromiseTimeout(fetchNFTCollections(), 18_000, 'NFT collection fetch'),
     ]);
 
     // Track which calls actually returned fresh data

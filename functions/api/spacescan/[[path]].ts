@@ -9,12 +9,14 @@
  *   - Error responses (429, 5xx) are NEVER cached.
  */
 
-type Env = Record<string, unknown>;
+type Env = {
+  SPACESCAN_API_KEY?: string;
+};
 
 const EDGE_CACHE_TTL = 300; // 5 minutes (seconds)
 
 export const onRequest: PagesFunction<Env> = async (context) => {
-  const { params, request } = context;
+  const { params, request, env } = context;
 
   // Only proxy GET requests
   if (request.method !== 'GET') {
@@ -27,6 +29,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   // Get the path from the catch-all parameter
   const pathSegments = params.path as string[];
   const path = pathSegments ? pathSegments.join('/') : '';
+  const queryString = new URL(request.url).search;
 
   // ── Edge Cache: check first ──────────────────────────────────────
   // Use the incoming request URL as the cache key (includes path + query).
@@ -46,21 +49,27 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   // ── Origin fetch ─────────────────────────────────────────────────
-  const spacescanUrl = `https://api.spacescan.io/${path}`;
+  const spacescanUrl = `https://api.spacescan.io/${path}${queryString}`;
 
   try {
+    const spacescanApiKey = typeof env.SPACESCAN_API_KEY === 'string' ? env.SPACESCAN_API_KEY.trim() : '';
+    const originHeaders: Record<string, string> = {
+      'Accept': 'application/json',
+      'User-Agent': 'wojak.ink/1.0',
+    };
+    if (spacescanApiKey) {
+      originHeaders['x-api-key'] = spacescanApiKey;
+    }
+
     const response = await fetch(spacescanUrl, {
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'wojak.ink/1.0',
-      },
+      headers: originHeaders,
     });
 
     const data = await response.text();
     const ok = response.status >= 200 && response.status < 400;
 
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      'Content-Type': response.headers.get('content-type') || 'application/json',
       ...corsHeaders(),
       'Cache-Control': ok
         ? `public, max-age=${EDGE_CACHE_TTL}` // Browser + CDN cache
