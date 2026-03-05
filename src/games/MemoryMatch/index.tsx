@@ -15,6 +15,7 @@ import {
   GRID_MAP,
   getRoundConfig,
 } from './config';
+import { getNftImageUrl } from '@/services/constants';
 import './MemoryMatch.game.css';
 
 interface NFTMetadata {
@@ -93,7 +94,10 @@ const MemoryMatchGame: React.FC = () => {
   useEffect(() => {
     fetch('/assets/nft-data/metadata.json')
       .then(res => res.json())
-      .then(data => setMetadata(data))
+      .then((data: NFTMetadata[]) => setMetadata(data.map((nft) => ({
+        ...nft,
+        image: getNftImageUrl(nft.edition),
+      }))))
       .catch(err => console.error('Failed to load metadata:', err));
   }, []);
 

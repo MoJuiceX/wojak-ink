@@ -5,6 +5,7 @@
  */
 
 import { getWojakNftImageUrl } from '@/utils/ipfs';
+import { FARMERS_PLOT_IMAGE_BY_EDITION } from '@/data/farmersPlotImageManifest';
 
 // ============ Collection Info ============
 
@@ -44,12 +45,28 @@ export const MINTGARDEN_COLLECTION_URL = 'https://mintgarden.io/collections/woja
 
 // ============ NFT Image URLs ============
 
+function normalizeEditionNumber(nftId: string | number): number | null {
+  const parsed = Number.parseInt(String(nftId), 10);
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > COLLECTION_SIZE) {
+    return null;
+  }
+
+  return parsed;
+}
+
 export function getNftImageUrl(nftId: string | number): string {
+  const edition = normalizeEditionNumber(nftId);
+  if (edition) {
+    const manifestUrl = FARMERS_PLOT_IMAGE_BY_EDITION[edition];
+    if (manifestUrl) {
+      return manifestUrl;
+    }
+  }
+
   return getWojakNftImageUrl(nftId, NFT_IPFS_CID);
 }
 
 export function getNftThumbnailUrl(nftId: string | number): string {
-  // Same as full image for now - could add thumbnail CDN later
   return getNftImageUrl(nftId);
 }
 

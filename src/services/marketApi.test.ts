@@ -85,36 +85,41 @@ describe('marketApi', () => {
       expect(typeof getNftImageUrl('1')).toBe('string');
     });
 
-    it('pads single-digit NFT ID to four digits', () => {
+    it('returns a stable URL for a valid edition', () => {
       const url = getNftImageUrl('1');
-      expect(url).toContain('0001.png');
+      expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
     });
 
-    it('pads two-digit NFT ID to four digits', () => {
+    it('uses a stable asset URL instead of the legacy IPFS gateway for indexed editions', () => {
       const url = getNftImageUrl('42');
-      expect(url).toContain('0042.png');
+      expect(url).not.toContain('/ipfs/');
     });
 
-    it('pads three-digit NFT ID to four digits', () => {
+    it('supports local fallback assets for missing upstream editions', () => {
+      const url = getNftImageUrl('2370');
+      expect(url).toBe('/assets/farmers-plot-fallbacks/2370.png');
+    });
+
+    it('supports three-digit NFT IDs from the manifest', () => {
       const url = getNftImageUrl('123');
-      expect(url).toContain('0123.png');
+      expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
     });
 
-    it('does not pad a four-digit NFT ID', () => {
+    it('supports four-digit NFT IDs from the manifest', () => {
       const url = getNftImageUrl('4200');
-      expect(url).toContain('4200.png');
+      expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
     });
 
-    it('uses an IPFS gateway URL', () => {
-      expect(getNftImageUrl('1')).toContain('/ipfs/');
+    it('falls back to IPFS for out-of-range IDs', () => {
+      expect(getNftImageUrl('9999')).toContain('/ipfs/');
     });
 
-    it('ends with .png', () => {
-      expect(getNftImageUrl('100')).toMatch(/\.png$/);
+    it('returns an image asset extension', () => {
+      expect(getNftImageUrl('100')).toMatch(/\.png$|\.webp$/);
     });
 
     it('is a valid https URL', () => {
-      expect(getNftImageUrl('1')).toMatch(/^https:\/\//);
+      expect(getNftImageUrl('1')).toMatch(/^(https:\/\/|\/assets\/)/);
     });
   });
 

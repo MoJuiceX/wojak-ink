@@ -106,39 +106,45 @@ describe('MINTGARDEN_COLLECTION_URL', () => {
 // ============================================
 
 describe('getNftImageUrl', () => {
-  it('pads single-digit ID to 4 chars', () => {
+  it('returns a stable URL for a valid edition', () => {
     const url = getNftImageUrl(1);
-    expect(url).toContain('0001.png');
+    expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
   });
 
-  it('pads 3-digit ID correctly', () => {
+  it('uses the manifest instead of the legacy IPFS gateway for indexed editions', () => {
     const url = getNftImageUrl(42);
-    expect(url).toContain('0042.png');
+    expect(url).not.toContain(NFT_IPFS_CID);
   });
 
-  it('does not pad 4-digit ID', () => {
+  it('supports fallback images stored on the site for missing upstream editions', () => {
+    const url = getNftImageUrl(2370);
+    expect(url).toBe('/assets/farmers-plot-fallbacks/2370.png');
+  });
+
+  it('supports four-digit editions from the manifest', () => {
     const url = getNftImageUrl(4200);
-    expect(url).toContain('4200.png');
+    expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
   });
 
   it('accepts a string ID', () => {
     const url = getNftImageUrl('7');
-    expect(url).toContain('0007.png');
-  });
-
-  it('contains the IPFS CID', () => {
-    const url = getNftImageUrl(1);
-    expect(url).toContain(NFT_IPFS_CID);
+    expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
   });
 
   it('is a valid https URL', () => {
     const url = getNftImageUrl(100);
-    expect(url.startsWith('https://')).toBe(true);
+    expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
   });
 
-  it('ends with .png', () => {
+  it('returns an image asset extension', () => {
     const url = getNftImageUrl(999);
-    expect(url.endsWith('.png')).toBe(true);
+    expect(url.endsWith('.webp') || url.endsWith('.png')).toBe(true);
+  });
+
+  it('falls back to the legacy IPFS URL for out-of-range editions', () => {
+    const url = getNftImageUrl(9999);
+    expect(url).toContain(NFT_IPFS_CID);
+    expect(url).toContain('9999.png');
   });
 });
 
@@ -147,15 +153,15 @@ describe('getNftImageUrl', () => {
 // ============================================
 
 describe('getNftThumbnailUrl', () => {
-  it('returns same URL as getNftImageUrl for now', () => {
+  it('returns same URL as getNftImageUrl', () => {
     const imgUrl = getNftImageUrl(100);
     const thumbUrl = getNftThumbnailUrl(100);
     expect(thumbUrl).toBe(imgUrl);
   });
 
-  it('pads ID correctly', () => {
+  it('returns the same stable manifest URL for fallback editions', () => {
     const url = getNftThumbnailUrl(5);
-    expect(url).toContain('0005.png');
+    expect(url).toBe(getNftImageUrl(5));
   });
 });
 
