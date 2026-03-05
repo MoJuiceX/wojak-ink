@@ -13,6 +13,7 @@ import { G1_TO_G2_MAP, normalizeTraitName } from '@/lib/traitMapping';
 import { G2_CATEGORY_TO_UI, G1_FOLDER_TO_UI } from '@/config/generatorLayerMapping';
 import { MOUTH_BASE_PATTERNS, MOUTH_ITEM_PATTERNS, MASK_PATTERNS, FACIAL_HAIR_PATTERNS } from '@/lib/generatorTraitIds';
 import { LAYER_BASE, G2_LAYER_BASE } from '@/config/layerAssetBase';
+import { augmentG2ManifestWithToplessTattoos } from '@/config/toplessTattooDetails';
 
 // ============ Types ============
 
@@ -509,7 +510,8 @@ async function loadG2Manifest(): Promise<G2Manifest | null> {
   try {
     const response = await fetch(`${G2_BASE_PATH}/manifest.json`);
     if (!response.ok) throw new Error('Failed to load G2 manifest');
-    g2ManifestCache = await response.json();
+    const rawManifest = await response.json() as G2Manifest;
+    g2ManifestCache = augmentG2ManifestWithToplessTattoos(rawManifest);
     if (g2ManifestCache) {
       g2TraitIndex = new Map(g2ManifestCache.traits.map(t => [t.id, t]));
     }

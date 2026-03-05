@@ -112,6 +112,9 @@ export function assembleG2Selection(
   if (trait.id === KNOWN_TRAIT_IDS.Clothes_Tee) {
     options.detail = undefined;
   }
+  if (trait.id === KNOWN_TRAIT_IDS.Clothes_Topless) {
+    options.detail = undefined;
+  }
   if (trait.id === KNOWN_TRAIT_IDS.Clothes_Suit) {
     options.detail = trait.detailOptions?.[0]?.file;
   }

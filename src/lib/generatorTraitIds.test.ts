@@ -18,6 +18,10 @@ describe('KNOWN_TRAIT_IDS — regression values', () => {
     expect(KNOWN_TRAIT_IDS.Clothes_ChiaFarmer).toBe('Clothes_Chia-farmer');
   });
 
+  it('Clothes_Topless has correct trait ID', () => {
+    expect(KNOWN_TRAIT_IDS.Clothes_Topless).toBe('Clothes_Topless');
+  });
+
   it('Mask_Hannibal has correct trait ID', () => {
     expect(KNOWN_TRAIT_IDS.Mask_Hannibal).toBe('Mask_Hannibal-Mask');
   });
