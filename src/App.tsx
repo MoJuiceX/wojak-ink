@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useEffect } from 'react';
+import { lazy, Suspense, useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { QueryProvider } from '@/providers/QueryProvider';
@@ -33,6 +33,7 @@ import StartupSequence from '@/components/StartupSequence';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { GameLoading } from '@/components/games/GameLoading';
 import { GameErrorBoundary } from '@/components/games/GameError';
+import { getBootDestination, shouldSkipBootSequence } from '@/lib/bootNavigation';
 // Lazy load all pages for code splitting
 const Gallery = lazy(() => import('./pages/Gallery'));
 const Treasury = lazy(() => import('./pages/Treasury'));
@@ -124,9 +125,23 @@ function AppContent() {
     location.pathname === route || location.pathname.startsWith(route)
   );
 
+  const initialBootDestinationRef = useRef(
+    getBootDestination(location.pathname, location.search, location.hash)
+  );
+  const initialStartupCompleteRef = useRef(
+    shouldSkipBootSequence({
+      isDev: import.meta.env.DEV,
+      skipBootInDev: SKIP_BOOT_IN_DEV,
+      isLocalhost: isLocalhost(),
+      hasSeenBoot: hasSeenBoot(),
+      isPublicRoute,
+      hasSkipBootSetting: hasSkipBootSetting(),
+    })
+  );
+
   // Skip boot if: dev mode, localhost, user already saw it, public route, or user disabled it in settings
   const [isStartupComplete, setIsStartupComplete] = useState(
-    (import.meta.env.DEV && SKIP_BOOT_IN_DEV) || (SKIP_BOOT_IN_DEV && isLocalhost()) || hasSeenBoot() || isPublicRoute || hasSkipBootSetting()
+    initialStartupCompleteRef.current
   );
 
   // Preload wallet dependencies during idle time to reduce perceived latency
@@ -146,8 +161,8 @@ function AppContent() {
   const handleStartupComplete = () => {
     // Mark boot as complete for this session
     markBootComplete();
-    // Navigate to Gallery page after boot sequence
-    navigate('/gallery', { replace: true });
+    // Return the user to the route they actually opened.
+    navigate(initialBootDestinationRef.current, { replace: true });
     // Small delay ensures navigation completes before content becomes visible
     setTimeout(() => {
       setIsStartupComplete(true);
