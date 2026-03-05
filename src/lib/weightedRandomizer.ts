@@ -197,7 +197,7 @@ const frequencies: Record<string, Record<string, number>> = {
     'Dark Alley': 1,
     'Deep Ocean': 1,
     'Dragons Lair': 1,
-    'Everythings-Fine': 1,
+    'Everything is Fine': 1,
     'Frozen Tundra': 1,
     Graveyard: 1,
     Heaven: 1,

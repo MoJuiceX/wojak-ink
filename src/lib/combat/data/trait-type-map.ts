@@ -70,6 +70,7 @@ export const TRAIT_COMBAT_MAP: Record<string, TraitCombatEntry> = {
   // ── Background — Phase 7 (NEW) (12) ───────────────────────────────
   'Background_Casino': e('Background_Casino', 'Background', 'Casino', false, 'SHADOW', 4, 'NEUTRAL', 2, 'speed', 3),
   'Background_Circus': e('Background_Circus', 'Background', 'Circus', false, 'GHOST', 5, 'SHADOW', 2, 'speed', 3),
+  'Background_Everythings-Fine': e('Background_Everythings-Fine', 'Background', 'Everything is Fine', false, 'FIRE', 5, 'WATER', 2, 'defense', 3),
   'Background_Bunker': e('Background_Bunker', 'Background', 'Bunker', false, 'STONE', 8, 'EARTH', 2, 'defense', 3),
   'Background_Home-Office': e('Background_Home-Office', 'Background', 'Home Office', false, 'ELECTRIC', 5, 'NEUTRAL', 2, 'sp_atk', 3),
   'Background_Padded-Cell': e('Background_Padded-Cell', 'Background', 'Padded Cell', false, 'PSYCHE', 5, 'GHOST', 2, 'sp_def', 3),

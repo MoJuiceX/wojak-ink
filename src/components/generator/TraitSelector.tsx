@@ -23,6 +23,7 @@ import { DEFAULT_BASE_PATH, DEFAULT_MOUTHBASE_PATH } from '@/lib/layerRegistry';
 import { LAYER_BASE } from '@/config/layerAssetBase';
 import { TYPE_EMOJI, TYPE_NAME } from '@/lib/combat/combatDisplayNames';
 import { calculateCombatIdentity } from '@/lib/combat/identity-calculator';
+import { deriveCombatTraitIdFromPath } from '@/lib/combat/selectionTraitId';
 
 export type TraitSortMode = 'hot' | 'not' | 'az' | 'za';
 
@@ -828,17 +829,13 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
 
     if (selectedLayers) {
       for (const [layer, path] of Object.entries(selectedLayers)) {
-        if (!path || typeof path !== 'string' || path === '__solid__') continue;
-        const parts = path.split('/');
-        if (parts.length >= 2) {
-          const filename = parts[parts.length - 1].replace(/\.[^.]+$/, '');
-          const layerFolder = parts[parts.length - 2];
-          const traitId = `${layerFolder}_${filename}`;
-          if (!traits.some(t => t.layer === layer)) {
-            traits.push({ traitId, layer });
-            const layerColor = (selectedColors as Record<string, string | undefined>)?.[layer];
-            if (layerColor) colors[traitId] = layerColor;
-          }
+        if (!path || typeof path !== 'string') continue;
+        const traitId = deriveCombatTraitIdFromPath(layer, path);
+        if (!traitId) continue;
+        if (!traits.some(t => t.layer === layer)) {
+          traits.push({ traitId, layer });
+          const layerColor = (selectedColors as Record<string, string | undefined>)?.[layer];
+          if (layerColor) colors[traitId] = layerColor;
         }
       }
     }

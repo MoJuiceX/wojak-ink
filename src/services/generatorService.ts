@@ -30,6 +30,9 @@ export interface LayerImage {
 let manifestCache: ManifestData | null = null;
 const layerImagesCache: Map<UILayerName, LayerImage[]> = new Map();
 
+/** Background entries we require even if an older manifest is served. */
+const REQUIRED_BACKGROUND_ENTRIES = ['Scene/BACKGROUND_Everythings-Fine.png'] as const;
+
 // ============ Mouth Item Classification ============
 // Classification patterns imported from generatorTraitIds.ts:
 // MOUTH_BASE_PATTERNS, MOUTH_ITEM_PATTERNS, MASK_PATTERNS, FACIAL_HAIR_PATTERNS
@@ -139,7 +142,14 @@ function buildLayerImages(manifest: ManifestData): void {
   // Process BACKGROUND (Scene + Solid color + Price overlays + $CASHTAG)
   const bgLayer = G1_FOLDER_TO_UI['BACKGROUND'];
   if (bgLayer && manifest['BACKGROUND']) {
-    const images: (LayerImage & { manifestIndex: number })[] = manifest['BACKGROUND'].map((filepath, index) => {
+    const backgroundEntries = [...manifest['BACKGROUND']];
+    for (const requiredEntry of REQUIRED_BACKGROUND_ENTRIES) {
+      if (!backgroundEntries.includes(requiredEntry)) {
+        backgroundEntries.push(requiredEntry);
+      }
+    }
+
+    const images: (LayerImage & { manifestIndex: number })[] = backgroundEntries.map((filepath, index) => {
       const isSolid = filepath === '__solid__';
       const isPriceUp = filepath === '__price_up__';
       const isPriceDown = filepath === '__price_down__';

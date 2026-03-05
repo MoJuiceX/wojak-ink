@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { calculateCombatIdentity } from '@/lib/combat/identity-calculator';
 import { TYPE_EMOJI, TYPE_NAME } from '@/lib/combat/combatDisplayNames';
+import { deriveCombatTraitIdFromPath } from '@/lib/combat/selectionTraitId';
 
 export function CombatPreview() {
   const { selectedLayers, selectedColors, g2Selections } = useGenerator();
@@ -49,25 +50,17 @@ export function CombatPreview() {
     if (selectedLayers) {
       for (const [layer, path] of Object.entries(selectedLayers)) {
         if (!path || typeof path !== 'string') continue;
-        if (path === '__solid__') continue;
+        const traitId = deriveCombatTraitIdFromPath(layer, path);
+        if (!traitId) continue;
 
-        // G1 paths look like "/layers/Head/Hat/hat.png" — extract trait ID
-        const parts = (path as string).split('/');
-        if (parts.length >= 2) {
-          // Get last two meaningful parts (layer folder + filename)
-          const filename = parts[parts.length - 1].replace(/\.[^.]+$/, '');
-          const layerFolder = parts[parts.length - 2];
-          const traitId = `${layerFolder}_${filename}`;
+        // Avoid duplicating G2 traits already added
+        if (!traits.some(t => t.layer === layer)) {
+          traits.push({ traitId, layer });
 
-          // Avoid duplicating G2 traits already added
-          if (!traits.some(t => t.layer === layer)) {
-            traits.push({ traitId, layer });
-
-            // Add color if this layer has a selected color
-            const layerColor = (selectedColors as Record<string, string | undefined>)?.[layer];
-            if (layerColor) {
-              colors[traitId] = layerColor;
-            }
+          // Add color if this layer has a selected color
+          const layerColor = (selectedColors as Record<string, string | undefined>)?.[layer];
+          if (layerColor) {
+            colors[traitId] = layerColor;
           }
         }
       }
