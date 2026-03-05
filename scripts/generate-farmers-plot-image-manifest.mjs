@@ -9,7 +9,7 @@ const API_BASE = `https://api.mintgarden.io/collections/${COLLECTION_ID}/nfts?si
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const outputPath = path.resolve(__dirname, '../src/data/farmersPlotImageManifest.ts');
+const outputPath = path.resolve(__dirname, '../functions/_data/farmersPlotImageManifest.ts');
 const publicDir = path.resolve(__dirname, '../public/assets/farmers-plot-fallbacks');
 const localSourceDir = process.env.FARMERS_PLOT_SOURCE_DIR
   ? path.resolve(process.env.FARMERS_PLOT_SOURCE_DIR)

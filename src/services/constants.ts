@@ -5,7 +5,6 @@
  */
 
 import { getWojakNftImageUrl } from '@/utils/ipfs';
-import { FARMERS_PLOT_IMAGE_BY_EDITION } from '@/data/farmersPlotImageManifest';
 
 // ============ Collection Info ============
 
@@ -57,10 +56,7 @@ function normalizeEditionNumber(nftId: string | number): number | null {
 export function getNftImageUrl(nftId: string | number): string {
   const edition = normalizeEditionNumber(nftId);
   if (edition) {
-    const manifestUrl = FARMERS_PLOT_IMAGE_BY_EDITION[edition];
-    if (manifestUrl) {
-      return manifestUrl;
-    }
+    return `/api/farmers-plot/image/${edition}`;
   }
 
   return getWojakNftImageUrl(nftId, NFT_IPFS_CID);

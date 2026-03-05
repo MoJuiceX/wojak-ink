@@ -85,41 +85,41 @@ describe('marketApi', () => {
       expect(typeof getNftImageUrl('1')).toBe('string');
     });
 
-    it('returns a stable URL for a valid edition', () => {
+    it('returns a same-origin resolver URL for a valid edition', () => {
       const url = getNftImageUrl('1');
-      expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
+      expect(url).toBe('/api/farmers-plot/image/1');
     });
 
-    it('uses a stable asset URL instead of the legacy IPFS gateway for indexed editions', () => {
+    it('uses the same-origin resolver instead of the legacy IPFS gateway for indexed editions', () => {
       const url = getNftImageUrl('42');
-      expect(url).not.toContain('/ipfs/');
+      expect(url).toBe('/api/farmers-plot/image/42');
     });
 
-    it('supports local fallback assets for missing upstream editions', () => {
+    it('routes missing upstream editions through the same resolver', () => {
       const url = getNftImageUrl('2370');
-      expect(url).toBe('/assets/farmers-plot-fallbacks/2370.png');
+      expect(url).toBe('/api/farmers-plot/image/2370');
     });
 
-    it('supports three-digit NFT IDs from the manifest', () => {
+    it('supports three-digit NFT IDs through the resolver', () => {
       const url = getNftImageUrl('123');
-      expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
+      expect(url).toBe('/api/farmers-plot/image/123');
     });
 
-    it('supports four-digit NFT IDs from the manifest', () => {
+    it('supports four-digit NFT IDs through the resolver', () => {
       const url = getNftImageUrl('4200');
-      expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
+      expect(url).toBe('/api/farmers-plot/image/4200');
     });
 
     it('falls back to IPFS for out-of-range IDs', () => {
       expect(getNftImageUrl('9999')).toContain('/ipfs/');
     });
 
-    it('returns an image asset extension', () => {
-      expect(getNftImageUrl('100')).toMatch(/\.png$|\.webp$/);
+    it('returns the resolver path for in-range editions', () => {
+      expect(getNftImageUrl('100')).toBe('/api/farmers-plot/image/100');
     });
 
-    it('is a valid https URL', () => {
-      expect(getNftImageUrl('1')).toMatch(/^(https:\/\/|\/assets\/)/);
+    it('returns a valid same-origin resolver path', () => {
+      expect(getNftImageUrl('1')).toMatch(/^\/api\/farmers-plot\/image\/1$/);
     });
   });
 

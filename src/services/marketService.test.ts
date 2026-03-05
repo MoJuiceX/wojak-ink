@@ -149,9 +149,9 @@ describe('marketService.getNftImageUrl', () => {
     expect(url.length).toBeGreaterThan(0);
   });
 
-  it('returns a stable asset URL for indexed editions', () => {
+  it('returns a same-origin resolver URL for indexed editions', () => {
     const url = marketService.getNftImageUrl('42');
-    expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
+    expect(url).toBe('/api/farmers-plot/image/42');
   });
 
   it('returns different URLs for different nftIds', () => {
@@ -168,7 +168,7 @@ describe('marketService.getNftImageUrl', () => {
   it('returns a URL for a large nftId like "4200"', () => {
     const url = marketService.getNftImageUrl('4200');
     expect(url).toBeTruthy();
-    expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
+    expect(url).toBe('/api/farmers-plot/image/4200');
   });
 });
 

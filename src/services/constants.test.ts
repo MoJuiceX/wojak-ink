@@ -106,39 +106,39 @@ describe('MINTGARDEN_COLLECTION_URL', () => {
 // ============================================
 
 describe('getNftImageUrl', () => {
-  it('returns a stable URL for a valid edition', () => {
+  it('returns a same-origin resolver URL for a valid edition', () => {
     const url = getNftImageUrl(1);
-    expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
+    expect(url).toBe('/api/farmers-plot/image/1');
   });
 
-  it('uses the manifest instead of the legacy IPFS gateway for indexed editions', () => {
+  it('uses the resolver instead of the legacy IPFS gateway for indexed editions', () => {
     const url = getNftImageUrl(42);
-    expect(url).not.toContain(NFT_IPFS_CID);
+    expect(url).toBe('/api/farmers-plot/image/42');
   });
 
-  it('supports fallback images stored on the site for missing upstream editions', () => {
+  it('routes missing upstream editions through the same resolver', () => {
     const url = getNftImageUrl(2370);
-    expect(url).toBe('/assets/farmers-plot-fallbacks/2370.png');
+    expect(url).toBe('/api/farmers-plot/image/2370');
   });
 
-  it('supports four-digit editions from the manifest', () => {
+  it('supports four-digit editions through the resolver', () => {
     const url = getNftImageUrl(4200);
-    expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
+    expect(url).toBe('/api/farmers-plot/image/4200');
   });
 
   it('accepts a string ID', () => {
     const url = getNftImageUrl('7');
-    expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
+    expect(url).toBe('/api/farmers-plot/image/7');
   });
 
-  it('is a valid https URL', () => {
+  it('returns a same-origin path for in-range editions', () => {
     const url = getNftImageUrl(100);
-    expect(url.startsWith('https://') || url.startsWith('/assets/')).toBe(true);
+    expect(url.startsWith('/api/farmers-plot/image/')).toBe(true);
   });
 
-  it('returns an image asset extension', () => {
+  it('returns the resolver path for in-range editions', () => {
     const url = getNftImageUrl(999);
-    expect(url.endsWith('.webp') || url.endsWith('.png')).toBe(true);
+    expect(url).toBe('/api/farmers-plot/image/999');
   });
 
   it('falls back to the legacy IPFS URL for out-of-range editions', () => {
