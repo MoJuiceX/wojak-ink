@@ -1,6 +1,8 @@
 import { FARMERS_PLOT_IMAGE_BY_EDITION } from '../../../_data/farmersPlotImageManifest';
 
-type Env = Record<string, unknown>;
+interface Env {
+  FARMERS_PLOT_MEDIA_BASE_URL?: string;
+}
 
 const CACHE_CONTROL = 'public, max-age=31536000, immutable';
 
@@ -15,6 +17,18 @@ function parseEdition(rawEdition: string | string[] | undefined): number | null 
   return parsed;
 }
 
+function normalizePublicBaseUrl(rawValue: string | undefined): string | null {
+  const trimmed = rawValue?.trim();
+  if (!trimmed) return null;
+
+  return trimmed.replace(/\/+$/, '');
+}
+
+function getR2Location(baseUrl: string | null, edition: number): string | null {
+  if (!baseUrl) return null;
+  return `${baseUrl}/${String(edition).padStart(4, '0')}.png`;
+}
+
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const edition = parseEdition(context.params.edition);
 
@@ -24,6 +38,20 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-store',
+      },
+    });
+  }
+
+  const r2Location = getR2Location(
+    normalizePublicBaseUrl(context.env?.FARMERS_PLOT_MEDIA_BASE_URL),
+    edition
+  );
+  if (r2Location) {
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: r2Location,
+        'Cache-Control': CACHE_CONTROL,
       },
     });
   }

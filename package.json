@@ -12,6 +12,8 @@
     "nightshift:resume": "node scripts/nightshift.mjs --resume --real --max-hours=8 --max-tasks=20 --soft-failures=5 --hard-failures=10",
     "verify-manifest": "node scripts/verify-manifest-assets.mjs",
     "bundle:report": "node scripts/bundle-budget-report.mjs",
+    "farmers-plot:r2:dry-run": "node scripts/mirror-farmers-plot-media-to-r2.mjs",
+    "farmers-plot:r2:mirror": "node scripts/mirror-farmers-plot-media-to-r2.mjs --real",
     "infra:validate": "./scripts/validate-github-workflows.sh && ./scripts/validate-terraform.sh && ./scripts/validate-k8s-manifests.rb",
     "infra:validate:workflows": "./scripts/validate-github-workflows.sh",
     "infra:validate:terraform": "./scripts/validate-terraform.sh",

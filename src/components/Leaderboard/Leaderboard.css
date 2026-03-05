@@ -2,8 +2,10 @@
 
 /* Wrapper for sidebar layout on desktop */
 .leaderboard-wrapper {
+  width: 100%;
   max-width: 600px;
   margin: 0 auto;
+  box-sizing: border-box;
   /* Ensure touch scrolling works in Chrome mobile emulation */
   touch-action: pan-y;
 }

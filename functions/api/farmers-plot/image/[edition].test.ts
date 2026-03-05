@@ -31,4 +31,15 @@ describe('functions/api/farmers-plot/image/[edition]', () => {
     expect(response.status).toBe(302);
     expect(response.headers.get('Location')).toBe('https://wojak.ink/assets/farmers-plot-fallbacks/2370.png');
   });
+
+  it('prefers the configured R2 public base URL when provided', async () => {
+    const response = await onRequestGet({
+      params: { edition: '42' },
+      env: { FARMERS_PLOT_MEDIA_BASE_URL: 'https://media.wojak.ink/farmers-plot/' },
+      request: new Request('https://wojak.ink/api/farmers-plot/image/42'),
+    } as Parameters<typeof onRequestGet>[0]);
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get('Location')).toBe('https://media.wojak.ink/farmers-plot/0042.png');
+  });
 });

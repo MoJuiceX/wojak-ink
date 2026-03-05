@@ -136,13 +136,13 @@ export function buildIpfsUrlCandidates(rawValue: string | null | undefined): str
       continue;
     }
 
+    for (const gatewayUrl of buildGatewayUrls(ipfs.cid, ipfs.path)) {
+      push(gatewayUrl);
+    }
+
     const keepOriginal = /^https?:\/\//i.test(candidate) && !isUnstableGateway(candidate);
     if (keepOriginal) {
       push(candidate);
-    }
-
-    for (const gatewayUrl of buildGatewayUrls(ipfs.cid, ipfs.path)) {
-      push(gatewayUrl);
     }
   }
 

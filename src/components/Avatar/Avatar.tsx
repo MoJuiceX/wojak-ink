@@ -11,6 +11,7 @@
 import React, { useMemo, useState } from 'react';
 import { AVATAR_SIZES, type AvatarSize } from '../../constants/avatars';
 import type { UserAvatar as UserAvatarType } from '@/types/avatar';
+import { buildIpfsUrlCandidates } from '@/utils/ipfs';
 import './Avatar.css';
 
 interface AvatarProps {
@@ -31,118 +32,8 @@ interface AvatarProps {
   className?: string;
 }
 
-const PUBLIC_IPFS_GATEWAYS = [
-  'https://ipfs.io/ipfs/',
-  'https://gateway.pinata.cloud/ipfs/',
-] as const;
-
-const CUSTOM_PINATA_GATEWAY = (import.meta.env.VITE_PINATA_GATEWAY as string | undefined)?.trim();
-
-function toCandidateList(rawValue: string): string[] {
-  const raw = rawValue.trim();
-  if (!raw) return [];
-
-  if (!raw.startsWith('[')) {
-    return [raw];
-  }
-
-  try {
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      return parsed.filter((v): v is string => typeof v === 'string' && v.trim().length > 0);
-    }
-  } catch {
-    // Fallback to raw string below.
-  }
-
-  return [raw];
-}
-
-function extractCidAndPath(input: string): { cid: string; path: string } | null {
-  const value = input.trim();
-  if (!value) return null;
-
-  const ipfsMatch = value.match(/^ipfs:\/\/([^/?#]+)(\/[^?#]*)?/i);
-  if (ipfsMatch) {
-    return {
-      cid: ipfsMatch[1],
-      path: ipfsMatch[2] || '',
-    };
-  }
-
-  try {
-    const url = new URL(value);
-    const pathStyle = url.pathname.match(/^\/ipfs\/([^/?#]+)(\/[^?#]*)?/i);
-    if (pathStyle) {
-      return {
-        cid: pathStyle[1],
-        path: pathStyle[2] || '',
-      };
-    }
-
-    const hostParts = url.hostname.split('.');
-    if (hostParts.length > 0) {
-      const first = hostParts[0];
-      const looksLikeCid = /^baf[a-z0-9]+$/i.test(first) || /^Qm[a-zA-Z0-9]+$/.test(first);
-      if (looksLikeCid) {
-        return {
-          cid: first,
-          path: url.pathname || '',
-        };
-      }
-    }
-  } catch {
-    // Non-URL string.
-  }
-
-  return null;
-}
-
-function buildGatewayUrls(cid: string, path: string): string[] {
-  const normalizedPath = path || '';
-  const urls: string[] = [];
-
-  if (CUSTOM_PINATA_GATEWAY) {
-    urls.push(`https://${CUSTOM_PINATA_GATEWAY}/ipfs/${cid}${normalizedPath}`);
-  }
-
-  for (const gateway of PUBLIC_IPFS_GATEWAYS) {
-    urls.push(`${gateway}${cid}${normalizedPath}`);
-  }
-
-  return urls;
-}
-
 function buildNftImageSources(rawValue: string): string[] {
-  const seen = new Set<string>();
-  const sources: string[] = [];
-
-  const pushSource = (url: string) => {
-    const cleaned = url.trim();
-    if (!cleaned || seen.has(cleaned)) return;
-    seen.add(cleaned);
-    sources.push(cleaned);
-  };
-
-  for (const candidate of toCandidateList(rawValue)) {
-    const ipfs = extractCidAndPath(candidate);
-    if (!ipfs) {
-      pushSource(candidate);
-      continue;
-    }
-
-    const isUnstableGateway = candidate.includes('.ipfs.w3s.link') || candidate.includes('.web.link');
-
-    if (!isUnstableGateway) {
-      pushSource(candidate);
-    }
-
-    for (const gatewayUrl of buildGatewayUrls(ipfs.cid, ipfs.path)) {
-      pushSource(gatewayUrl);
-    }
-  }
-
-  return sources;
+  return buildIpfsUrlCandidates(rawValue);
 }
 
 interface NftImageProps {
