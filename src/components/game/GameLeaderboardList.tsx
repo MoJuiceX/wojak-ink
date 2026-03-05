@@ -1,6 +1,7 @@
 // Game Leaderboard List — rank #4+ rows with pagination.
 import { Link } from 'react-router-dom';
 import { getTier } from '@/lib/tiers';
+import { getPreferredIpfsUrl } from '@/utils/ipfs';
 
 interface PlayerEntry {
   rank: number;
@@ -43,7 +44,9 @@ function truncateWallet(addr: string): string {
 
 function PlayerRow({ entry, isCurrent }: { entry: PlayerEntry; isCurrent: boolean }) {
   const tier = getTier(entry.powerLevel);
-  const imageUrl = entry.topNft?.imageUri || undefined;
+  const imageUrl = entry.topNft?.imageUri
+    ? (getPreferredIpfsUrl(entry.topNft.imageUri) || entry.topNft.imageUri)
+    : undefined;
 
   return (
     <div
@@ -102,6 +105,9 @@ function PlayerRow({ entry, isCurrent }: { entry: PlayerEntry; isCurrent: boolea
 
 function WojakRow({ entry, isOwned }: { entry: WojakEntry; isOwned: boolean }) {
   const likeRatio = entry.totalVotes > 0 ? Math.round((entry.likes / entry.totalVotes) * 100) : 0;
+  const imageUrl = entry.imageUri
+    ? (getPreferredIpfsUrl(entry.imageUri) || entry.imageUri)
+    : undefined;
 
   return (
     <Link
@@ -120,9 +126,9 @@ function WojakRow({ entry, isOwned }: { entry: WojakEntry; isOwned: boolean }) {
       <span className="text-muted" style={{ fontSize: 14, fontWeight: 500, width: 32, textAlign: 'right', flexShrink: 0 }}>
         {entry.rank}
       </span>
-      {entry.imageUri ? (
+      {imageUrl ? (
         <img
-          src={entry.imageUri}
+          src={imageUrl}
           alt={entry.name}
           style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', objectFit: 'cover', flexShrink: 0 }}
         />

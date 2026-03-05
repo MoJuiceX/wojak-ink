@@ -1,4 +1,5 @@
 import { fetchWithRetry, mintgardenQueue, dexieQueue } from '../utils/rateLimiter'
+import { getNftImageUrl } from './constants'
 
 const MINTGARDEN_API_BASE = 'https://api.mintgarden.io'
 const DEXIE_API_BASE = 'https://api.dexie.space/v1'
@@ -36,9 +37,6 @@ export async function fetchNFTDetails(launcherBech32) {
 export function getNFTThumbnailUrl(launcherBech32) {
   return `${MINTGARDEN_API_BASE}/nfts/${launcherBech32}/thumbnail`
 }
-
-// IPFS base URL for Wojak NFT images
-const IPFS_BASE = 'https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link'
 
 /**
  * Extract token ID from MintGarden API response
@@ -149,7 +147,7 @@ export function extractTokenIdFromName(nftName) {
 
 /**
  * Create IPFS thumbnail URL directly from token ID (numeric)
- * Format: https://...ipfs.w3s.link/{tokenId4}.png (token ID padded to 4 digits)
+ * Format: https://<gateway>/ipfs/<cid>/{tokenId4}.png (token ID padded to 4 digits)
  * @param {string|number} tokenId - Numeric token ID (e.g., "123" or 123)
  * @returns {string|null} - IPFS thumbnail URL or null if token ID invalid
  */
@@ -163,13 +161,12 @@ export function createIPFSThumbnailUrl(tokenId) {
   }
   
   // Pad token ID to 4 digits (e.g., 1 -> 0001, 2345 -> 2345) to match IPFS file naming
-  const tokenId4 = tokenIdStr.padStart(4, '0')
-  return `${IPFS_BASE}/${tokenId4}.png`
+  return getNftImageUrl(tokenIdStr)
 }
 
 /**
  * Get IPFS thumbnail URL for Wojak NFT using token ID from MintGarden
- * Format: https://...ipfs.w3s.link/{tokenId4}.png (token ID padded to 4 digits)
+ * Format: https://<gateway>/ipfs/<cid>/{tokenId4}.png (token ID padded to 4 digits)
  * @param {Object} mintGardenData - MintGarden API response
  * @returns {string|null} - IPFS thumbnail URL or null if token ID not found
  */
@@ -321,4 +318,3 @@ export function extractNFTIdsFromDexieOffer(offerData) {
     return 0
   })
 }
-

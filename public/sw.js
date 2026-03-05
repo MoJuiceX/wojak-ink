@@ -142,7 +142,12 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   // Handle IPFS NFT images (cross-origin) with dedicated cache
-  if (url.hostname.endsWith('.ipfs.w3s.link')) {
+  if (
+    url.hostname.endsWith('.ipfs.w3s.link') ||
+    url.hostname.endsWith('.mypinata.cloud') ||
+    url.hostname === 'gateway.pinata.cloud' ||
+    url.hostname === 'ipfs.io'
+  ) {
     event.respondWith(handleIPFSImage(request));
     return;
   }

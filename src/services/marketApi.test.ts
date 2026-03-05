@@ -105,8 +105,8 @@ describe('marketApi', () => {
       expect(url).toContain('4200.png');
     });
 
-    it('includes .ipfs.w3s.link in the URL (IPFS gateway)', () => {
-      expect(getNftImageUrl('1')).toContain('.ipfs.w3s.link');
+    it('uses an IPFS gateway URL', () => {
+      expect(getNftImageUrl('1')).toContain('/ipfs/');
     });
 
     it('ends with .png', () => {

@@ -1,6 +1,7 @@
 // Game Podium — top 3 display with classic podium arrangement.
 import { Link } from 'react-router-dom';
 import { getTier } from '@/lib/tiers';
+import { getPreferredIpfsUrl } from '@/utils/ipfs';
 
 interface PodiumEntry {
   rank: number;
@@ -43,7 +44,9 @@ function PodiumCard({ entry, mode, isFirst }: { entry: PodiumEntry; mode: 'playe
   const scoreSize = isFirst ? 18 : 15;
   const glow = RANK_GLOWS[entry.rank] || 'none';
 
-  const imageUrl = entry.imageUri || undefined;
+  const imageUrl = entry.imageUri
+    ? (getPreferredIpfsUrl(entry.imageUri) || entry.imageUri)
+    : undefined;
 
   return (
     <div

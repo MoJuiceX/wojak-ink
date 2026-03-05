@@ -4,6 +4,8 @@
  * Centralized configuration for all external APIs and collection data.
  */
 
+import { getWojakNftImageUrl } from '@/utils/ipfs';
+
 // ============ Collection Info ============
 
 export const COLLECTION_ID = 'col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah';
@@ -43,8 +45,7 @@ export const MINTGARDEN_COLLECTION_URL = 'https://mintgarden.io/collections/woja
 // ============ NFT Image URLs ============
 
 export function getNftImageUrl(nftId: string | number): string {
-  const paddedId = String(nftId).padStart(4, '0');
-  return `https://${NFT_IPFS_CID}.ipfs.w3s.link/${paddedId}.png`;
+  return getWojakNftImageUrl(nftId, NFT_IPFS_CID);
 }
 
 export function getNftThumbnailUrl(nftId: string | number): string {

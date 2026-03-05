@@ -12,6 +12,8 @@
 
 import { Zap } from 'lucide-react';
 import { getTypeColor } from '@/lib/combat/data/type-colors';
+import { getNftImageUrl } from '@/services/constants';
+import { getPreferredIpfsUrl } from '@/utils/ipfs';
 
 interface WojakFighter {
   nft_id: string;
@@ -31,26 +33,9 @@ interface WojakFighterCardProps {
   onClick?: () => void;
 }
 
-// Convert IPFS URI to gateway URL
-function resolveImageUrl(imageUri: string | null | undefined, nftId: string): string {
-  if (imageUri) {
-    // Handle IPFS URIs
-    if (imageUri.startsWith('ipfs://')) {
-      const cid = imageUri.replace('ipfs://', '');
-      return `https://nftstorage.link/ipfs/${cid}`;
-    }
-    // Already a URL
-    if (imageUri.startsWith('http')) {
-      return imageUri;
-    }
-  }
-  // Fallback to MintGarden
-  return `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nftId}.png`;
-}
-
 export function WojakFighterCard({ wojak, onClick }: WojakFighterCardProps) {
   const typeColor = wojak.type ? getTypeColor(wojak.type) : '#a0a0b0';
-  const imageUrl = resolveImageUrl(wojak.imageUri, wojak.nft_id);
+  const imageUrl = getPreferredIpfsUrl(wojak.imageUri) || getNftImageUrl(wojak.edition);
   const hasCombatData = !!wojak.type;
 
   return (

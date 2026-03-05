@@ -24,6 +24,7 @@ import type { GameEvent } from '@/config/arcade-light-mappings';
 import ArcadeGameOverScreen from '@/components/media/games/ArcadeGameOverScreen';
 import { generateGameScorecard } from '@/systems/sharing/GameScorecard';
 import { captureGameArea } from '@/systems/sharing/captureDOM';
+import { getNftImageUrl as getCollectionNftImageUrl } from '@/services/constants';
 import BADGE_NFTS from '../NFT2048/badgeNfts.json';
 import './Merge2048Game.css';
 
@@ -35,9 +36,6 @@ const ROWS = 4;
 const COLS = 4;
 const WIN_VALUE = 2048;
 const SLIDE_DURATION = 150; // ms — matches CSS transition
-
-const IPFS_BASE =
-  'https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link';
 
 const TILE_BADGES: Record<number, string> = {
   2: 'Phunky',
@@ -182,10 +180,6 @@ interface Tile {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function getNftImageUrl(nftId: number): string {
-  return `${IPFS_BASE}/${String(nftId).padStart(4, '0')}.png`;
-}
-
 /**
  * Pick one random NFT per tile value.
  * If a previous map is provided, only re-randomize badges the player
@@ -214,7 +208,7 @@ function pickNftMap(
 function preloadNftImages(nftMapObj: Record<number, number>) {
   for (const nftId of Object.values(nftMapObj)) {
     const img = new Image();
-    img.src = getNftImageUrl(nftId);
+    img.src = getCollectionNftImageUrl(nftId);
   }
 }
 
@@ -1106,7 +1100,7 @@ const Merge2048Game: React.FC = () => {
             }}
           >
             <img
-              src={getNftImageUrl(tile.nftId)}
+              src={getCollectionNftImageUrl(tile.nftId)}
               alt={`${tile.badge} #${tile.nftId}`}
               className="nft-tile-image"
               draggable={false}
@@ -1120,7 +1114,7 @@ const Merge2048Game: React.FC = () => {
         <div className="nft-merge-overlay nft-merge-win">
           <div className="nft-merge-overlay-content">
             <img
-              src={getNftImageUrl(nftMap.current[2048] || 3703)}
+              src={getCollectionNftImageUrl(nftMap.current[2048] || 3703)}
               alt="Namekian"
               className="nft-merge-win-nft"
             />
@@ -1200,7 +1194,7 @@ const Merge2048Game: React.FC = () => {
                   }`}
                 >
                   <img
-                    src={getNftImageUrl(nftMap.current[item.val] || 1)}
+                    src={getCollectionNftImageUrl(nftMap.current[item.val] || 1)}
                     alt={TILE_BADGES[item.val]}
                     className="snake-badge-img"
                     draggable={false}
@@ -1312,7 +1306,7 @@ const Merge2048Game: React.FC = () => {
           {BADGE_ORDER.map((val, idx) => (
             <span key={val} className="legend-mobile-item">
               <img
-                src={getNftImageUrl(nftMap.current[val] || 1)}
+                src={getCollectionNftImageUrl(nftMap.current[val] || 1)}
                 alt={TILE_BADGES[val]}
                 className="legend-mobile-img"
                 draggable={false}

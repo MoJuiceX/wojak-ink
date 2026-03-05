@@ -11,6 +11,7 @@ import {
 import { LoadingSpinner, LoadingDots } from './ui/LoadingSpinner';
 import { fetchTradeValues, fetchCollectionStats, formatXCH, formatRelativeTime, type TraitStats, type CollectionStats } from '../services/tradeValuesService';
 import { getXchPrice, getCachedXchPrice } from '../services/treasuryApi';
+import { getNftImageUrl } from '../services/constants';
 import './AskBigPulp.css';
 
 interface NamedCombo {
@@ -103,11 +104,6 @@ interface TopSale {
 interface AskBigPulpProps {
   onNftClick: (nftId: string) => void;
 }
-
-const getNftImageUrl = (id: string | number) => {
-  const paddedId = String(id).padStart(4, '0');
-  return `https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/${paddedId}.png`;
-};
 
 // Format USD value
 const formatUsd = (xch: number, xchPrice: number): string => {

@@ -6,6 +6,8 @@
  * before the user sees them, so we can preload them in advance.
  */
 
+import { getNftImageUrl } from './constants';
+
 interface NFTMetadata {
   name: string;
   description: string;
@@ -121,7 +123,11 @@ export async function initGalleryPreloader(): Promise<void> {
   try {
     // Load NFT metadata
     const response = await fetch('/assets/nft-data/metadata.json');
-    allNfts = await response.json();
+    const rawMetadata = await response.json() as NFTMetadata[];
+    allNfts = rawMetadata.map((nft) => ({
+      ...nft,
+      image: getNftImageUrl(nft.edition),
+    }));
 
     // Group by base
     BASE_NAMES.forEach(base => {

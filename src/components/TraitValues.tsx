@@ -15,6 +15,7 @@ import {
   type Sale,
 } from '../services/tradeValuesService';
 import { getCachedXchPrice } from '../services/treasuryApi';
+import { getNftImageUrl } from '../services/constants';
 import { LoadingSpinner, LoadingDots } from './ui/LoadingSpinner';
 import { Dropdown } from './ui/Dropdown';
 import './TraitValues.css';
@@ -22,12 +23,6 @@ import './TraitValues.css';
 type SortField = 'trait_name' | 'trait_category' | 'total_sales' | 'average_xch' | 'min_xch' | 'max_xch' | 'last_trade';
 type SortDirection = 'asc' | 'desc';
 type SalesSortMode = 'price_asc' | 'price_desc' | 'rarity_asc' | 'rarity_desc' | 'time_asc' | 'time_desc';
-
-const IPFS_CID = 'bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq';
-const getIpfsUrl = (edition: number) => {
-  const paddedId = String(edition).padStart(4, '0');
-  return `https://${IPFS_CID}.ipfs.w3s.link/${paddedId}.png`;
-};
 
 const capitalizeCategory = (str: string): string => {
   return str
@@ -404,7 +399,7 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
                                         </div>
                                         <div className="sale-image-wrapper">
                                           <img
-                                            src={getIpfsUrl(sale.edition)}
+                                            src={getNftImageUrl(sale.edition)}
                                             alt={`#${sale.edition}`}
                                             className="sale-preview-image"
                                             loading="lazy"

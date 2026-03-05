@@ -6,6 +6,7 @@
  */
 
 import { mintgardenQueue } from '../utils/rateLimiter';
+import { getNftImageUrl as getCanonicalNftImageUrl } from './constants';
 
 // Collection ID for Wojak Farmers Plot
 export const COLLECTION_ID = 'col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah';
@@ -608,8 +609,7 @@ export function calculateFloorPrice(listings: NFTListing[]): number {
  * Generate NFT image URL
  */
 export function getNftImageUrl(nftId: string): string {
-  const paddedId = String(nftId).padStart(4, '0');
-  return `https://bafybeigjkkonjzwwpopo4wn4gwrrvb7z3nwr2edj2554vx3avc5ietfjwq.ipfs.w3s.link/${paddedId}.png`;
+  return getCanonicalNftImageUrl(nftId);
 }
 
 /**
