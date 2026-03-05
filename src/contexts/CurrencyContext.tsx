@@ -10,7 +10,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/clerkSafe';
 import { STARTING_BALANCE, SHOP_PRICES } from '../config/economy';
 
 /** Auth shape used by currency logic (Clerk or fallback when Clerk not configured) */

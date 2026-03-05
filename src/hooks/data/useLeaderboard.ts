@@ -9,7 +9,7 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/clerkSafe';
 import { leaderboardKeys } from '@/config/query/queryKeys';
 import { DATA_CACHE_MAP } from '@/config/query/cacheConfig';
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch';

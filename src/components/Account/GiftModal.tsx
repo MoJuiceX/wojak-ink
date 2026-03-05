@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Gift, Loader2, Send, AlertCircle } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/clerkSafe';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useFriends } from '@/contexts/FriendsContext';
 import './GiftModal.css';

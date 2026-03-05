@@ -7,9 +7,7 @@
  */
 
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
-import { useAuth, useUser } from '@clerk/clerk-react';
-
-const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+import { useAuth, useUser } from '@/lib/clerkSafe';
 
 export interface ClerkAuthValue {
   userId: string | null;
@@ -61,14 +59,7 @@ function ClerkAuthProviderWithClerk({ children }: { children: ReactNode }) {
 }
 
 export function ClerkAuthProvider({ children }: { children: ReactNode }) {
-  if (CLERK_ENABLED) {
-    return <ClerkAuthProviderWithClerk>{children}</ClerkAuthProviderWithClerk>;
-  }
-  return (
-    <ClerkAuthContext.Provider value={fallbackAuth}>
-      {children}
-    </ClerkAuthContext.Provider>
-  );
+  return <ClerkAuthProviderWithClerk>{children}</ClerkAuthProviderWithClerk>;
 }
 
 // Hook is the primary export; fast-refresh warning acceptable for context consumers

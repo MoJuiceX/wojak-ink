@@ -9,7 +9,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart3, Gamepad2, Trophy, TrendingUp } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/clerkSafe';
 import { GAME_NAMES, type GameId } from '@/types/leaderboard';
 
 // Check if Clerk is configured

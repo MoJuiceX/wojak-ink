@@ -12,7 +12,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SignInButton } from '@clerk/clerk-react';
+import { SignInButton } from '@/lib/clerkSafe';
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useChatSocket } from '@/hooks/useChatSocket';

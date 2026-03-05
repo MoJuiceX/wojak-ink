@@ -6,7 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { useClerk, SignedIn, SignedOut, SignInButton } from '@clerk/clerk-react';
+import { useClerk, SignedIn, SignedOut, SignInButton } from '@/lib/clerkSafe';
 import {
   User,
   AtSign,

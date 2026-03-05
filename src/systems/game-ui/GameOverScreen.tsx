@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SignInButton } from '@clerk/clerk-react';
+import { SignInButton } from '@/lib/clerkSafe';
 import { useEffects, getGameOverPreset } from '../effects';
 import { CurrencyEarnedDisplay } from './CurrencyEarnedDisplay';
 import { useUserProfile } from '@/contexts/UserProfileContext';

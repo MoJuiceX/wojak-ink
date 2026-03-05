@@ -7,7 +7,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/clerkSafe';
 import { useAuthenticatedFetch } from './useAuthenticatedFetch';
 
 // Check if Clerk is configured

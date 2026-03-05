@@ -11,7 +11,7 @@ import {
   Loader2, X, Type, Image, User, MessageSquare,
   LayoutGrid, Square, Sparkles, Eye, Lock, Check, ChevronRight
 } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/clerkSafe';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import '@/styles/drawer-customization.css';
 

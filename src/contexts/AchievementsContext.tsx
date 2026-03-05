@@ -8,7 +8,7 @@
  */
 
 import { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/clerkSafe';
 import { useUserProfile } from './UserProfileContext';
 import { useCurrency } from './CurrencyContext';
 import { useFriends } from './FriendsContext';

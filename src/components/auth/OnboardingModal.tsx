@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
+import { useUser } from '@/lib/clerkSafe';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wallet, Loader2, X } from 'lucide-react';
 import { useUserProfile } from '@/contexts/UserProfileContext';

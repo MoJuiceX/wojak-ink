@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { SignInButton } from '@clerk/clerk-react';
+import { SignInButton } from '@/lib/clerkSafe';
 import { Lock } from 'lucide-react';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch';

@@ -3,6 +3,10 @@ import { createRoot } from 'react-dom/client'
 import { ClerkProvider } from '@clerk/clerk-react'
 import { register as registerServiceWorker } from './serviceWorkerRegistration'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import {
+  CLERK_PUBLISHABLE_KEY,
+  HAS_VALID_CLERK_PUBLISHABLE_KEY,
+} from '@/lib/clerkConfig'
 
 import './index.css'
 import App from './App.tsx'
@@ -14,7 +18,6 @@ if (window.location.pathname === '/admin') {
 
 // Clerk publishable key from environment. Must be a real key from dashboard.clerk.com.
 // When missing or placeholder, we do NOT wrap with ClerkProvider.
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined
 // Optional: override where Clerk loads its script from. On localhost, clerk.wojak.ink does not resolve;
 // set this to your Frontend API URL from Clerk Dashboard → Domains (the *.clerk.accounts.dev URL).
 const CLERK_JS_URL_RAW = import.meta.env.VITE_CLERK_JS_URL as string | undefined
@@ -61,12 +64,7 @@ if (CLERK_FRONTEND_API) {
   }
 }
 
-const CLERK_PLACEHOLDER = 'pk_test_placeholder_no_real_key'
-const hasClerkKey =
-  typeof CLERK_PUBLISHABLE_KEY === 'string' &&
-  CLERK_PUBLISHABLE_KEY.length > 0 &&
-  CLERK_PUBLISHABLE_KEY !== CLERK_PLACEHOLDER &&
-  (CLERK_PUBLISHABLE_KEY.startsWith('pk_test_') || CLERK_PUBLISHABLE_KEY.startsWith('pk_live_'))
+const hasClerkKey = HAS_VALID_CLERK_PUBLISHABLE_KEY
 
 if (!hasClerkKey) {
   console.warn(

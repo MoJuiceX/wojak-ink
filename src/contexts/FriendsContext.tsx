@@ -7,7 +7,7 @@
  */
 
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/clerkSafe';
 import { useUserProfile } from './UserProfileContext';
 
 const FRIENDS_STORAGE_KEY = 'wojak_friends';

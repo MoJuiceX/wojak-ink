@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SignedOut, SignInButton, useClerk, useAuth } from '@clerk/clerk-react';
+import { SignedOut, SignInButton, useClerk, useAuth } from '@/lib/clerkSafe';
 import { LogOut, Settings, RefreshCw, KeyRound, User, Check, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';

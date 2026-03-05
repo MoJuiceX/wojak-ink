@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Loader2, Sparkles, Crown, Flame, Zap, Star, Package, Target, Palette, Gift, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/clerkSafe';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import { CurrencyDisplay } from '../Currency/CurrencyDisplay';
 import { EmojiRing } from './EmojiRing';

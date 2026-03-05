@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { Award } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/clerkSafe';
 
 interface Achievement {
   id: string;

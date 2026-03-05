@@ -5,7 +5,7 @@
  * Uses Clerk for authentication (Google sign-in).
  */
 
-import { SignedIn, SignedOut, SignInButton, useAuth, useUser } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, useAuth, useUser } from '@/lib/clerkSafe';
 import { User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';

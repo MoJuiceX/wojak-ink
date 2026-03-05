@@ -12,7 +12,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Trophy, User, ThumbsUp, ThumbsDown, HelpCircle, Crown, Medal, ExternalLink, Grid3X3 } from 'lucide-react';
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/clerkSafe';
 import { Link } from 'react-router-dom';
 import { RankingRulesModal } from './RankingRulesModal';
 import { DIDCollectionModal } from './DIDCollectionModal';
