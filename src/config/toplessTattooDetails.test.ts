@@ -16,26 +16,26 @@ describe('toplessTattooDetails', () => {
     expect(trait.outlineFile).toBe('../CLOTHES/CLOTHES_Topless_.png');
     expect(trait.detailOptions).toHaveLength(35);
     expect(trait.detailOptions?.[0]).toEqual({
-      file: '../tattoos/tattoos_1_Taco.png',
+      file: '/assets/wojak-layers/tattoos/tattoos_1_Taco.png?v=20260305a',
       name: 'Taco',
     });
     expect(trait.detailOptions?.at(-1)).toEqual({
-      file: '../tattoos/tattoos_4_sparrow.png',
+      file: '/assets/wojak-layers/tattoos/tattoos_4_sparrow.png?v=20260305a',
       name: 'Sparrow',
     });
   });
 
   it('formats special tattoo labels cleanly', () => {
     expect(TOPLESS_TATTOO_DETAIL_OPTIONS).toContainEqual({
-      file: '../tattoos/tattoos_2_ak47.png',
+      file: '/assets/wojak-layers/tattoos/tattoos_2_ak47.png?v=20260305a',
       name: 'AK47',
     });
     expect(TOPLESS_TATTOO_DETAIL_OPTIONS).toContainEqual({
-      file: '../tattoos/tattoos_4_$NECK.png',
+      file: '/assets/wojak-layers/tattoos/tattoos_4_%24NECK.png?v=20260305a',
       name: '$NECK',
     });
     expect(TOPLESS_TATTOO_DETAIL_OPTIONS).toContainEqual({
-      file: '../tattoos/tattoos_3_skull 2.png',
+      file: '/assets/wojak-layers/tattoos/tattoos_3_skull%202.png?v=20260305a',
       name: 'Skull 2',
     });
   });

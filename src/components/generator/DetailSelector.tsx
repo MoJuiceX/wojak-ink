@@ -8,6 +8,7 @@
 import { memo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Ban } from 'lucide-react';
+import { resolveGeneratorAssetUrl } from '@/utils/generatorAssetUrl';
 
 interface DetailOption {
   file: string;
@@ -104,7 +105,7 @@ export const DetailSelector = memo(function DetailSelector({
               type="button"
             >
               <img
-                src={previewOverrides?.[opt.file] ?? `${basePath}/${opt.file}`}
+                src={previewOverrides?.[opt.file] ?? resolveGeneratorAssetUrl(opt.file, basePath)}
                 alt={opt.name}
                 className="w-full h-full object-contain"
                 crossOrigin="anonymous"

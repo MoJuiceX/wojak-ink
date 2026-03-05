@@ -12,7 +12,7 @@ describe('assembleG2Selection', () => {
       colorable: false,
       outlineFile: '../CLOTHES/CLOTHES_Topless_.png',
       detailOptions: [
-        { file: '../tattoos/tattoos_1_anchor.png', name: 'Anchor' },
+        { file: '/assets/wojak-layers/tattoos/tattoos_1_anchor.png?v=20260305a', name: 'Anchor' },
       ],
     });
 

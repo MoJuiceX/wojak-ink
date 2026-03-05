@@ -16,6 +16,7 @@ import { buildRenderLayers } from '@/services/canvasRendererLayerBuilder';
 import { LAYER_Z_INDEX, MOUTH_OVER_BEER_HAT } from '@/services/canvasRendererConstants';
 import type { RenderLayer, G2LayerData, G2DrawItem, RenderResult, LayerRenderOverride } from '@/services/canvasRendererTypes';
 import { LAYER_BASE, COIN_LOGOS_BASE as COIN_LOGOS_BASE_CFG } from '@/config/layerAssetBase';
+import { resolveGeneratorAssetUrl } from '@/utils/generatorAssetUrl';
 
 /** Default color for solid color backgrounds - sky blue */
 const SOLID_BG_DEFAULT_COLOR = '#38BDF8';
@@ -1856,18 +1857,18 @@ function buildG2LayerData(
     const cig1File = trait.detailOptions.find(d => d.file.endsWith('cig-pack.png'))?.file;
     const cig2File = trait.detailOptions.find(d => d.file.includes('cig-pack-2'))?.file;
     const parts: string[] = [];
-    if (g2.options.constructionHelmetChiaLogo && chiaFile) parts.push(`${basePath}/${chiaFile}`);
+    if (g2.options.constructionHelmetChiaLogo && chiaFile) parts.push(resolveGeneratorAssetUrl(chiaFile, basePath));
     const cigPack = g2.options.constructionHelmetCigPack as string | undefined;
-    if (cigPack === cig1File) parts.push(`${basePath}/${cig1File}`);
-    else if (cigPack === cig2File) parts.push(`${basePath}/${cig2File}`);
+    if (cigPack === cig1File && cig1File) parts.push(resolveGeneratorAssetUrl(cig1File, basePath));
+    else if (cigPack === cig2File && cig2File) parts.push(resolveGeneratorAssetUrl(cig2File, basePath));
     if (parts.length) details = parts;
   }
   if (!details) {
     const selectedDetail = g2.options.detail as string | undefined;
     if (selectedDetail) {
-      detail = `${basePath}/${selectedDetail}`;
+      detail = resolveGeneratorAssetUrl(selectedDetail, basePath);
     } else if (trait.detailFile) {
-      detail = `${basePath}/${trait.detailFile}`;
+      detail = resolveGeneratorAssetUrl(trait.detailFile, basePath);
     }
   }
 
@@ -1875,7 +1876,7 @@ function buildG2LayerData(
   const selectedFrame = g2.options.frame as string | undefined;
   let frame: string | undefined;
   if (selectedFrame) {
-    frame = `${basePath}/${selectedFrame}`;
+    frame = resolveGeneratorAssetUrl(selectedFrame, basePath);
   }
 
   const result: G2LayerData = { fills, outlines, detail, details, frame };

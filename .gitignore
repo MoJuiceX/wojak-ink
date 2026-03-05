@@ -34,6 +34,8 @@ public/assets/wojak-layers/
 !public/assets/wojak-layers/BACKGROUND/
 !public/assets/wojak-layers/BACKGROUND/Scene/
 !public/assets/wojak-layers/BACKGROUND/Scene/BACKGROUND_Orange Grove.png
+!public/assets/wojak-layers/tattoos/
+!public/assets/wojak-layers/tattoos/*.png
 
 # Temp clone for skill install
 .mattpocock-skills-tmp

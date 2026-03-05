@@ -1,4 +1,5 @@
 const TOPLESS_BASE_FILE = '../CLOTHES/CLOTHES_Topless_.png';
+const TATTOO_ASSET_VERSION = '20260305a';
 
 export const TOPLESS_TATTOO_TRAIT_ID = 'Clothes_Topless';
 
@@ -94,7 +95,7 @@ function formatTattooLabel(filename: string): string {
 }
 
 export const TOPLESS_TATTOO_DETAIL_OPTIONS: G2DetailOptionLike[] = TOPLESS_TATTOO_FILES.map((file) => ({
-  file: `../tattoos/${file}`,
+  file: `/assets/wojak-layers/tattoos/${encodeURIComponent(file)}?v=${TATTOO_ASSET_VERSION}`,
   name: formatTattooLabel(file),
 }));
 
