@@ -9,7 +9,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { useClerk, useAuth } from '@clerk/clerk-react';
+import { useClerk, useAuth } from '@/lib/clerkSafe';
 import { Gamepad2, Trophy } from 'lucide-react';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useLayout } from '@/hooks/useLayout';
@@ -440,7 +440,14 @@ export default function GamesHub() {
 
   // Tab bar for Play/Scores toggle — uses fight-club-tabs styling for consistency
   const tabBar = useMemo(() => (
-    <div className="fight-club-tabs" style={{ marginBottom: '16px', width: 'fit-content' }}>
+    <div
+      className="fight-club-tabs games-hub-tabs"
+      style={{
+        marginBottom: '16px',
+        width: isDesktop ? 'fit-content' : '100%',
+        maxWidth: isDesktop ? undefined : '360px',
+      }}
+    >
       <button
         type="button"
         className={`fight-club-tab flex items-center gap-1.5 ${activeTab === 'play' ? 'active' : ''}`}
@@ -458,7 +465,7 @@ export default function GamesHub() {
         Scores
       </button>
     </div>
-  ), [activeTab, handleShowPlayTab, handleShowScoresTab]);
+  ), [activeTab, handleShowPlayTab, handleShowScoresTab, isDesktop]);
 
   // Desktop: 3-column layout that fits viewport
   if (isDesktop) {
@@ -474,7 +481,10 @@ export default function GamesHub() {
             // Use minHeight instead of height to prevent clipping when DevTools shrinks viewport
             minHeight: 'calc(100vh - 64px)',
             // Allow content to scroll if it doesn't fit (e.g., with DevTools open)
-            overflow: 'auto',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            // Keep gutter reserved so layout doesn't jump when scrollbars appear/disappear
+            scrollbarGutter: 'stable both-edges',
             display: 'flex',
             flexDirection: 'column',
           }}

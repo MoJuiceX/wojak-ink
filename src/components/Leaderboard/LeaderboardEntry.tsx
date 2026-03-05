@@ -107,13 +107,14 @@ export const LeaderboardEntry: React.FC<LeaderboardEntryProps> = ({
 
   // Get rank-specific class for top 3 styling in list view
   const rankClass = entry.rank <= 3 ? `rank-${entry.rank}` : '';
+  const entryDelay = prefersReducedMotion ? 0 : Math.min(index, 4) * 0.015;
 
   return (
     <motion.div
       className={`leaderboard-row ${rankClass} ${entry.isCurrentUser ? 'is-current-user' : ''} ${isHighlighted ? 'highlighted' : ''} ${isFriend ? 'is-friend' : ''}`}
-      initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.05, duration: 0.3 }}
+      initial={prefersReducedMotion ? {} : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: entryDelay, duration: 0.18 }}
       onClick={handleClick}
       role="button"
       tabIndex={0}

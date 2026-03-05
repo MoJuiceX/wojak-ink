@@ -40,6 +40,9 @@ public/assets/wojak-layers/
 
 # Local Claude context (personal preferences)
 .claude/CLAUDE.local.md
+.claude/launch.json
+.claude/plans/
+.claude/.DS_Store
 .wrangler
 
 # Playwright

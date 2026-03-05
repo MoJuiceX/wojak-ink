@@ -1078,6 +1078,18 @@ body {
     font-size: 12px;
     border-radius: calc(var(--radius-md) - 2px);
   }
+
+  /* Games hub uses the same tab classes, but with only two tabs we should avoid fade clipping */
+  .games-hub-tabs {
+    overflow: hidden;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .games-hub-tabs .fight-club-tab {
+    flex: 1 1 0;
+    min-width: 0;
+  }
 }
 
 
@@ -9245,4 +9257,3 @@ body {
   flex-direction: column;
   gap: 2px;
 }
-

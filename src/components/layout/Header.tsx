@@ -375,6 +375,13 @@ export function Header({ transparent = false }: HeaderProps) {
                     border: `1px solid ${isWalletConnected ? 'rgba(74, 222, 128, 0.3)' : 'var(--color-white-8)'}`,
                     cursor: 'pointer',
                     height: 'var(--header-badge-height)',
+                    minHeight: 'var(--header-badge-height)',
+                    maxHeight: 'var(--header-badge-height)',
+                    paddingTop: 0,
+                    paddingBottom: 0,
+                    lineHeight: 1,
+                    appearance: 'none',
+                    WebkitAppearance: 'none',
                   }}
                 >
                   <Wallet size={14} style={{ color: isWalletConnected ? '#4ade80' : 'var(--color-text-muted)' }} />

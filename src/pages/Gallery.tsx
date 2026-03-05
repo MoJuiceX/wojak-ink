@@ -50,19 +50,13 @@ function GalleryContent() {
     isLoading,
   } = useGallery();
 
-  // Swipe banner state
-  const [bannerDismissed, setBannerDismissed] = useState(
-    () => localStorage.getItem('wojak_swipe_banner_dismissed') === 'true'
-  );
-
   // Fight Club banner appears after 3 seconds
   const [showFightClubBanner, setShowFightClubBanner] = useState(false);
 
   useEffect(() => {
-    if (bannerDismissed) return;
     const timer = setTimeout(() => setShowFightClubBanner(true), 3000);
     return () => clearTimeout(timer);
-  }, [bannerDismissed]);
+  }, []);
 
   // Pagination state
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
@@ -330,15 +324,6 @@ function GalleryContent() {
     [visibleCount, filteredNfts.length]
   );
 
-  // Full rows: pad so last row has same column count as others
-  const gridColumns = isDesktop ? 8 : 6;
-  const padCount = useMemo(() => {
-    const n = visibleNfts.length;
-    if (n === 0) return 0;
-    const remainder = n % gridColumns;
-    return remainder === 0 ? 0 : gridColumns - remainder;
-  }, [visibleNfts.length, gridColumns]);
-
   const loadMoreRef = useRef<HTMLButtonElement>(null);
   const handleLoadMore = useCallback(() => {
     setVisibleCount((prev) => prev + ITEMS_PER_PAGE);
@@ -360,11 +345,6 @@ function GalleryContent() {
     },
     [openExplorer]
   );
-
-  const handleDismissFightClubBanner = useCallback(() => {
-    localStorage.setItem('wojak_swipe_banner_dismissed', 'true');
-    setBannerDismissed(true);
-  }, []);
 
   // Handle character hover - preload first 50 NFTs for that character
   const handleCharacterHover = useCallback(
@@ -403,7 +383,7 @@ function GalleryContent() {
         />
         {/* Fight Club Banner - floating card on top right */}
         <AnimatePresence>
-          {showFightClubBanner && !bannerDismissed && (
+          {showFightClubBanner && (
             <motion.div
               initial={{ y: -50, opacity: 0, scale: 0.9 }}
               animate={{
@@ -420,24 +400,16 @@ function GalleryContent() {
               }}
               className="fight-club-float"
             >
-              <div className="fight-club-float-inner fight-club-hover-anim">
-                <button
-                  type="button"
-                  aria-label="Dismiss banner"
-                  onClick={handleDismissFightClubBanner}
-                  className="fight-club-close"
-                >
-                  &times;
-                </button>
+              <Link to="/fight-club" className="fight-club-float-inner fight-club-hover-anim fight-club-float-link">
                 <Swords size={18} className="text-primary fight-club-icon" />
-                <Link to="/fight-club" className="fight-club-float-link">
+                <div className="fight-club-copy">
                   <div className="flex items-center gap-2">
                     <span className="fight-club-title">Fight Club is live!</span>
                     <span className="fight-club-badge">NEW</span>
                   </div>
-                  <span className="fight-club-subtitle">Vote, battle, and climb the rankings</span>
-                </Link>
-              </div>
+                  <span className="fight-club-subtitle">Vote and climb the ranking</span>
+                </div>
+              </Link>
             </motion.div>
           )}
         </AnimatePresence>
@@ -480,7 +452,7 @@ function GalleryContent() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                style={isDesktop ? { padding: '24px 24px 0' } : undefined}
+                style={isDesktop ? { padding: '12px 12px 0' } : undefined}
               >
                 {isLoading ? (
                   // Loading skeleton with premium animations
@@ -506,10 +478,9 @@ function GalleryContent() {
                       ref={gridRef}
                       className={`grid gap-1.5 ${
                         isDesktop
-                          ? 'grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12'
+                          ? 'grid-cols-8'
                           : 'grid-cols-4 sm:grid-cols-5 lg:grid-cols-6'
                       }`}
-                      style={isDesktop ? { maxWidth: 1600, margin: '0 auto' } : undefined}
                       variants={prefersReducedMotion ? undefined : nftGridStaggerVariants}
                       initial="hidden"
                       animate="visible"
@@ -523,17 +494,10 @@ function GalleryContent() {
                           eagerLoad={index < 50}
                         />
                       ))}
-                      {Array.from({ length: padCount }, (_, i) => (
-                        <div
-                          key={`pad-${i}`}
-                          className="gallery-grid-placeholder"
-                          aria-hidden="true"
-                        />
-                      ))}
                     </motion.div>
                     {/* Load more button */}
                     {hasMore && (
-                      <div className="flex justify-center py-2">
+                      <div className="flex justify-center pt-1 pb-0">
                         <button
                           ref={loadMoreRef}
                           type="button"

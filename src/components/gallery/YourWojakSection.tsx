@@ -12,7 +12,7 @@ import { ChevronDown, Palette, AlertCircle, RefreshCw, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { YourWojakExplorer } from './YourWojakExplorer';
 import { getCombatTypeFromAttributes } from '@/lib/combat/getCombatTypeFromAttributes';
-import { rateLimitedFetch } from '@/utils/rateLimiter';
+import { lookupTraitName } from '@/lib/traitNameMap';
 
 // Your Wojak collection ID on MintGarden
 const YOUR_WOJAK_COLLECTION_ID = 'col1rhrjj6f28tge783rp0lrj8ct7vnq79xsnklx3up49lgpnge62ensr2tyfx';
@@ -90,6 +90,18 @@ const TRAIT_CATEGORIES = [
   { id: 'clothing', label: 'Clothing' },
 ];
 
+const CATEGORY_TO_METADATA_TRAITS: Record<string, string[]> = {
+  background: ['background'],
+  face: ['face', 'base'],
+  facewear: ['facewear', 'face wear', 'eyes'],
+  headwear: ['headwear', 'head'],
+  mouth: ['mouth'],
+  clothing: ['clothing', 'clothes'],
+};
+
+const PAGE_SIZE = 100;
+const MAX_PAGES = 100;
+
 interface MintGardenNFT {
   id: string;
   encoded_id: string;
@@ -102,6 +114,9 @@ interface MintGardenNFT {
   collection_name: string;
   owner_address_encoded_id?: string;
   minted_at: string;
+  metadata?: {
+    attributes?: NFTAttribute[];
+  } | null;
 }
 
 // NFT attributes from MintGarden detail API
@@ -113,21 +128,9 @@ interface NFTAttribute {
 // Cache for NFT attributes (keyed by encoded_id)
 type AttributesCache = Record<string, NFTAttribute[]>;
 
-// Fetch individual NFT details to get attributes (rate-limited to prevent 429s)
-async function fetchNFTAttributes(encodedId: string): Promise<NFTAttribute[] | null> {
-  try {
-    const isDev = import.meta.env.DEV;
-    const basePath = isDev ? '/mintgarden-api' : '/api/mintgarden';
-    const response = await rateLimitedFetch(`${basePath}/nfts/${encodedId}`, {
-      headers: { 'Accept': 'application/json' },
-      cacheTtl: 5 * 60 * 1000, // Cache for 5 minutes
-    });
-    const data = await response.json();
-    return data.data?.metadata_json?.attributes || [];
-  } catch (err) {
-    console.error('[YourWojak] Error fetching NFT attributes:', err);
-    return null;
-  }
+interface MintGardenCollectionResponse {
+  items?: MintGardenNFT[];
+  next?: string | null;
 }
 
 // Fetch NFTs from MintGarden via proxy (avoids CORS issues)
@@ -135,22 +138,48 @@ async function fetchYourWojakNFTs(): Promise<MintGardenNFT[]> {
   // Use vite proxy for development, API proxy for production
   const isDev = import.meta.env.DEV;
   const basePath = isDev ? '/mintgarden-api' : '/api/mintgarden';
-  const url = `${basePath}/collections/${YOUR_WOJAK_COLLECTION_ID}/nfts?size=100`;
+  const endpoint = `${basePath}/collections/${YOUR_WOJAK_COLLECTION_ID}/nfts`;
 
-  const response = await fetch(url, {
-    headers: {
-      'Accept': 'application/json',
-    },
-  });
+  const allItems: MintGardenNFT[] = [];
+  const seen = new Set<string>();
+  let cursor: string | null = null;
 
-  if (!response.ok) {
-    const text = await response.text();
-    console.error('[YourWojak] API error:', response.status, text);
-    throw new Error(`MintGarden API error: ${response.status}`);
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    const params = new URLSearchParams({
+      size: String(PAGE_SIZE),
+      include_metadata: 'true',
+    });
+    if (cursor) {
+      params.set('page', cursor);
+    }
+    const response = await fetch(`${endpoint}?${params.toString()}`, {
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error('[YourWojak] API error:', response.status, text);
+      throw new Error(`MintGarden API error: ${response.status}`);
+    }
+
+    const data = await response.json() as MintGardenCollectionResponse;
+    const items = data.items || [];
+
+    items.forEach(item => {
+      if (seen.has(item.encoded_id)) return;
+      seen.add(item.encoded_id);
+      allItems.push(item);
+    });
+
+    if (!data.next || items.length === 0 || data.next === cursor) {
+      break;
+    }
+    cursor = data.next;
   }
 
-  const data = await response.json();
-  return data.items || [];
+  return allItems;
 }
 
 export function YourWojakSection() {
@@ -165,14 +194,11 @@ export function YourWojakSection() {
   const categoryBtnRef = useRef<HTMLButtonElement>(null);
   const attributeBtnRef = useRef<HTMLButtonElement>(null);
   const [dropdownPos, setDropdownPos] = useState<{ top: number; right: number } | null>(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   // Lightbox state
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const isLightboxOpen = selectedIndex !== null;
-
-  // Cache for NFT attributes
-  const [attributesCache, setAttributesCache] = useState<AttributesCache>({});
-  const [isLoadingAttributes, setIsLoadingAttributes] = useState(false);
 
   // Fetch NFTs from MintGarden
   const { data: mintgardenNfts = [], isLoading, error, refetch } = useQuery<MintGardenNFT[]>({
@@ -183,46 +209,40 @@ export function YourWojakSection() {
     retryDelay: 1000,
   });
 
-  // Fetch attributes for all NFTs when loaded
-  useEffect(() => {
-    if (mintgardenNfts.length === 0) return;
-
-    // Check which NFTs don't have cached attributes
-    const uncachedNfts = mintgardenNfts.filter(nft => !attributesCache[nft.encoded_id]);
-    if (uncachedNfts.length === 0) return;
-
-    queueMicrotask(() => setIsLoadingAttributes(true));
-
-    // Fetch attributes for all uncached NFTs in parallel
-    Promise.all(
-      uncachedNfts.map(async nft => {
-        const attrs = await fetchNFTAttributes(nft.encoded_id);
-        return { encodedId: nft.encoded_id, attrs };
-      })
-    ).then(results => {
-      const newCache: AttributesCache = { ...attributesCache };
-      results.forEach(({ encodedId, attrs }) => {
-        if (attrs) {
-          newCache[encodedId] = attrs;
-        }
-      });
-      setAttributesCache(newCache);
-      setIsLoadingAttributes(false);
+  // Derive attributes directly from collection metadata
+  const resolvedAttributesCache = useMemo<AttributesCache>(() => {
+    const cache: AttributesCache = {};
+    mintgardenNfts.forEach(nft => {
+      const attrs = nft.metadata?.attributes;
+      if (Array.isArray(attrs) && attrs.length > 0) {
+        cache[nft.encoded_id] = attrs;
+      }
     });
-  }, [mintgardenNfts]); // eslint-disable-line react-hooks/exhaustive-deps
+    return cache;
+  }, [mintgardenNfts]);
+
+  // Canonical gallery set: only NFTs with explicit Combat Type metadata.
+  const canonicalNfts = useMemo(() => {
+    return mintgardenNfts.filter(nft => {
+      const attrs = resolvedAttributesCache[nft.encoded_id];
+      if (!attrs || attrs.length === 0) return false;
+      return attrs.some(attr => attr.trait_type.toLowerCase().trim() === 'combat type');
+    });
+  }, [mintgardenNfts, resolvedAttributesCache]);
 
   // Filter NFTs based on selected filters (Category + Attribute, then Type)
   const filteredNfts = useMemo(() => {
-    let result = mintgardenNfts;
+    let result = canonicalNfts;
 
     // 1) Trait filter: category + attribute
     if (selectedCategory && selectedTraitValue) {
+      const traitTypes = CATEGORY_TO_METADATA_TRAITS[selectedCategory] || [selectedCategory];
       result = result.filter(nft => {
-        const attrs = attributesCache[nft.encoded_id];
+        const attrs = resolvedAttributesCache[nft.encoded_id];
         if (!attrs) return false;
         return attrs.some(attr =>
-          attr.trait_type.toLowerCase() === selectedCategory.toLowerCase() &&
-          attr.value === selectedTraitValue
+          traitTypes.includes(attr.trait_type.toLowerCase().trim()) &&
+          (lookupTraitName(attr.value) ?? attr.value).trim().toLowerCase() === selectedTraitValue.trim().toLowerCase()
         );
       });
     }
@@ -230,14 +250,22 @@ export function YourWojakSection() {
     // 2) Type filter: combat type from traits (Fire, Water, etc.)
     if (typeFilter) {
       result = result.filter(nft => {
-        const attrs = attributesCache[nft.encoded_id] ?? [];
+        const attrs = resolvedAttributesCache[nft.encoded_id];
+        if (!attrs || attrs.length === 0) return false;
         const combatType = getCombatTypeFromAttributes(attrs);
         return combatType === typeFilter;
       });
     }
 
     return result;
-  }, [mintgardenNfts, selectedCategory, selectedTraitValue, typeFilter, attributesCache]);
+  }, [canonicalNfts, selectedCategory, selectedTraitValue, typeFilter, resolvedAttributesCache]);
+
+  const visibleNfts = useMemo(
+    () => filteredNfts.slice(0, visibleCount),
+    [filteredNfts, visibleCount]
+  );
+
+  const hasMoreVisible = visibleCount < filteredNfts.length;
 
   // Get the label for selected category
   const selectedCategoryLabel = selectedCategory
@@ -246,6 +274,12 @@ export function YourWojakSection() {
 
   // Get trait options for selected category
   const traitOptions = selectedCategory ? TRAIT_OPTIONS[selectedCategory] || [] : [];
+
+  const resetViewAfterFilterChange = useCallback(() => {
+    setVisibleCount(PAGE_SIZE);
+    setSelectedIndex(null);
+    document.body.style.overflow = '';
+  }, []);
 
   const handleCategorySelect = (categoryId: string) => {
     if (categoryId === selectedCategory) {
@@ -256,6 +290,7 @@ export function YourWojakSection() {
       setSelectedCategory(categoryId);
       setSelectedTraitValue(null); // Reset value when category changes
     }
+    resetViewAfterFilterChange();
     setOpenDropdown(null);
   };
 
@@ -265,13 +300,19 @@ export function YourWojakSection() {
     } else {
       setSelectedTraitValue(value);
     }
+    resetViewAfterFilterChange();
     setOpenDropdown(null);
   };
 
   const clearFilter = () => {
     setSelectedCategory(null);
     setSelectedTraitValue(null);
+    resetViewAfterFilterChange();
   };
+
+  const handleLoadMore = useCallback(() => {
+    setVisibleCount(prev => Math.min(prev + PAGE_SIZE, filteredNfts.length));
+  }, [filteredNfts.length]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -331,7 +372,10 @@ export function YourWojakSection() {
           <button
             type="button"
             className={`your-wojak-type-btn ${!typeFilter ? 'active' : ''}`}
-            onClick={() => setTypeFilter(null)}
+            onClick={() => {
+              setTypeFilter(null);
+              resetViewAfterFilterChange();
+            }}
           >
             <span className="text-lg">🌐</span>
             <span className="text-xs">All</span>
@@ -341,7 +385,10 @@ export function YourWojakSection() {
               key={t.id}
               type="button"
               className={`your-wojak-type-btn ${typeFilter === t.id ? 'active' : ''}`}
-              onClick={() => setTypeFilter(typeFilter === t.id ? null : t.id)}
+              onClick={() => {
+                setTypeFilter(typeFilter === t.id ? null : t.id);
+                resetViewAfterFilterChange();
+              }}
             >
               <span className="text-lg">{t.emoji}</span>
               <span className="text-xs">{t.label}</span>
@@ -369,6 +416,7 @@ export function YourWojakSection() {
                   e.stopPropagation();
                   setSelectedCategory(null);
                   setSelectedTraitValue(null);
+                  resetViewAfterFilterChange();
                   setOpenDropdown(null);
                 }}
                 className="hover:text-error"
@@ -398,6 +446,7 @@ export function YourWojakSection() {
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedTraitValue(null);
+                  resetViewAfterFilterChange();
                   setOpenDropdown(null);
                 }}
                 className="hover:text-error"
@@ -427,6 +476,7 @@ export function YourWojakSection() {
             onClick={() => {
               setSelectedCategory(null);
               setSelectedTraitValue(null);
+              resetViewAfterFilterChange();
               setOpenDropdown(null);
             }}
           >
@@ -462,6 +512,7 @@ export function YourWojakSection() {
             className="your-wojak-dropdown-item"
             onClick={() => {
               setSelectedTraitValue(null);
+              resetViewAfterFilterChange();
               setOpenDropdown(null);
             }}
           >
@@ -482,15 +533,14 @@ export function YourWojakSection() {
       )}
 
       {/* Filter Status - shows count when filtering */}
-      {(selectedCategory && selectedTraitValue) || typeFilter ? (
+      {(selectedCategory && selectedTraitValue) || typeFilter || hasMoreVisible ? (
         <div className="text-xs text-secondary flex items-center gap-2">
-          {isLoadingAttributes && (selectedCategory && selectedTraitValue) ? (
-            <span>Loading attributes...</span>
-          ) : (
-            <span>
-              {filteredNfts.length} of {mintgardenNfts.length} NFTs match
-            </span>
-          )}
+          <span>
+            Showing {visibleNfts.length} of {filteredNfts.length}
+            {(selectedCategory && selectedTraitValue) || typeFilter
+              ? ` • ${filteredNfts.length} of ${canonicalNfts.length} NFTs match`
+              : ''}
+          </span>
         </div>
       ) : null}
 
@@ -531,11 +581,9 @@ export function YourWojakSection() {
             <>
               <p className="font-medium mb-1">No matches found</p>
               <p className="text-sm text-secondary mb-4">
-                {isLoadingAttributes && (selectedCategory && selectedTraitValue)
-                  ? 'Loading NFT attributes...'
-                  : typeFilter
-                    ? `No NFTs with type ${COMBAT_TYPES.find(t => t.id === typeFilter)?.label ?? typeFilter}`
-                    : `No NFTs with ${selectedCategoryLabel}: ${selectedTraitValue}`}
+                {typeFilter
+                  ? `No NFTs with type ${COMBAT_TYPES.find(t => t.id === typeFilter)?.label ?? typeFilter}`
+                  : `No NFTs with ${selectedCategoryLabel}: ${selectedTraitValue}`}
               </p>
               <button
                 onClick={() => {
@@ -560,30 +608,45 @@ export function YourWojakSection() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-1.5">
-          {filteredNfts.map((nft, index) => (
-            <button
-              key={nft.encoded_id}
-              type="button"
-              className="your-wojak-nft-card"
-              onClick={() => openLightbox(index)}
-              title={`View ${nft.name}`}
-            >
-              <img
-                src={nft.thumbnail_uri || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nft.encoded_id}.png`}
-                alt={nft.name}
-                loading="lazy"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nft.encoded_id}.png`;
-                }}
-              />
-              <div className="your-wojak-nft-overlay">
-                <span className="text-xs font-medium">
-                  #{nft.edition_number}
-                </span>
-              </div>
-            </button>
-          ))}
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-1.5">
+            {visibleNfts.map((nft, index) => (
+              <button
+                key={nft.encoded_id}
+                type="button"
+                className="your-wojak-nft-card"
+                onClick={() => openLightbox(index)}
+                title={`View ${nft.name}`}
+              >
+                <img
+                  src={nft.thumbnail_uri || `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nft.encoded_id}.png`}
+                  alt={nft.name}
+                  loading="lazy"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://assets.mainnet.mintgarden.io/thumbnails/medium/${nft.encoded_id}.png`;
+                  }}
+                />
+                <div className="your-wojak-nft-overlay">
+                  <span className="text-xs font-medium">
+                    #{nft.edition_number}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {hasMoreVisible ? (
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={handleLoadMore}
+                className="btn btn-secondary flex items-center gap-2"
+              >
+                Load 100 More
+                <ChevronDown size={16} />
+              </button>
+            </div>
+          ) : null}
         </div>
       )}
 
@@ -591,7 +654,7 @@ export function YourWojakSection() {
       <YourWojakExplorer
         isOpen={isLightboxOpen}
         onClose={closeLightbox}
-        nfts={filteredNfts}
+        nfts={visibleNfts}
         currentIndex={selectedIndex ?? 0}
         onIndexChange={handleIndexChange}
       />

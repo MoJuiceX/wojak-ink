@@ -93,12 +93,14 @@ const GAME_EMOJIS: Record<GameId, string> = {
   'knife-game': '🔪',
   'color-reaction': '🎨',
   'merge-2048': '🔢',
+  'orange-wordle': '🔤',
   'block-puzzle': '🧩',
   'flappy-orange': '🍊',
   'citrus-drop': '🍋',
   'orange-snake': '🐍',
   'brick-breaker': '🎯',
   'wojak-whack': '🔨',
+  'brick-by-brick': '🧱',
   'combat': '⚔️',
 };
 
@@ -144,27 +146,49 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
   // Server-side leaderboard state
   const [entries, setEntries] = useState<LeaderboardEntryData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userPosition, setUserPosition] = useState<UserPosition | null>(null);
   const [, setResetTime] = useState<string | undefined>(undefined);
+  const requestIdRef = useRef(0);
+  const requestAbortRef = useRef<AbortController | null>(null);
+  const hasLoadedOnceRef = useRef(false);
 
   // Fetch leaderboard from server API
   const fetchLeaderboard = useCallback(async (gameId: GameId, tf: TimeframeType) => {
+    requestAbortRef.current?.abort();
+    const requestId = ++requestIdRef.current;
+
     // Combat leaderboard is rendered by CombatLeaderboard component — skip fetch
     if (gameId === 'combat') {
+      setError(null);
       setIsLoading(false);
+      setIsRefreshing(false);
       return;
     }
 
-    setIsLoading(true);
+    const showBlockingLoader = !hasLoadedOnceRef.current;
+    if (showBlockingLoader) {
+      setIsLoading(true);
+    } else {
+      setIsRefreshing(true);
+    }
     setError(null);
+    const controller = new AbortController();
+    requestAbortRef.current = controller;
 
     try {
-      const response = await fetch(`/api/leaderboard/${gameId}?limit=100&timeframe=${tf}`);
+      const response = await fetch(`/api/leaderboard/${gameId}?limit=100&timeframe=${tf}`, {
+        signal: controller.signal,
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch leaderboard');
       }
       const data = await response.json();
+
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
 
       const entriesWithUser = (data.entries || []).map((entry: LeaderboardEntryData) => ({
         ...entry,
@@ -175,10 +199,20 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
       setUserPosition(data.userPosition || null);
       setResetTime(data.resetTime);
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return;
+      }
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
       console.error('[Leaderboard] Fetch error:', err);
       setError(err instanceof Error ? err.message : 'Failed to load leaderboard');
     } finally {
-      setIsLoading(false);
+      if (requestId === requestIdRef.current) {
+        hasLoadedOnceRef.current = true;
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }
     }
   }, [user?.id]);
 
@@ -201,6 +235,10 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
     fetchLeaderboard(selectedGame, timeframe);
   }, [selectedGame, timeframe, fetchLeaderboard]);
 
+  useEffect(() => () => {
+    requestAbortRef.current?.abort();
+  }, []);
+
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -215,8 +253,10 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const isNftHolder = !!user;
+  const isNftHolder = !!user && !!user.walletAddress && user.avatar.type === 'nft';
   const activeFilterIndex = TIME_FILTERS.findIndex(f => f.value === timeframe);
+  const hasBlockingError = !!error && entries.length === 0;
+  const hasRefreshError = !!error && entries.length > 0;
 
   const handleGameSelect = (gameId: GameId) => {
     setSelectedGame(gameId);
@@ -252,7 +292,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
               <button
                 key={id}
                 className={`game-sidebar-item disabled ${selectedGame === id ? 'selected' : ''}`}
-                onClick={() => handleGameSelect(id)}
+                disabled
+                aria-disabled="true"
+                title={`${GAME_NAMES[id]} is coming soon`}
               >
                 <span className="game-sidebar-emoji">{GAME_EMOJIS[id]}</span>
                 <span className="game-sidebar-name">{GAME_NAMES[id]}</span>
@@ -321,7 +363,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: (filteredActiveGames.length + index) * 0.03 }}
-                      onClick={() => handleGameSelect(id)}
+                      disabled
+                      aria-disabled="true"
+                      title={`${GAME_NAMES[id]} is coming soon`}
                     >
                       <span className="game-emoji">{GAME_EMOJIS[id]}</span>
                       <span className="game-option-name">{GAME_NAMES[id]}</span>
@@ -418,6 +462,28 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
           </div>
         </motion.div>
 
+        <div className="leaderboard-status-slot" aria-live="polite" aria-atomic="true">
+          {!isLoading && isRefreshing && (
+            <motion.div
+              className="leaderboard-refresh-indicator"
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <span>Updating leaderboard...</span>
+            </motion.div>
+          )}
+
+          {!isLoading && !isRefreshing && hasRefreshError && (
+            <motion.div
+              className="leaderboard-refresh-error"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              Couldn&apos;t refresh. Showing latest available rankings.
+            </motion.div>
+          )}
+        </div>
+
         {/* ===== MOBILE: Podium + List Layout ===== */}
         {isMobile && (
           <>
@@ -445,7 +511,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             )}
 
             {/* Mobile Podium - Top 3 (champion + runners-up) */}
-            {!isLoading && !error && filteredEntries.length > 0 && (
+            {!isLoading && !hasBlockingError && filteredEntries.length > 0 && (
               <MobilePodium
                 entries={filteredEntries.slice(0, 3)}
                 timeframe={timeframe}
@@ -453,7 +519,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             )}
 
             {/* List starting from #4 - Mobile */}
-            {!isLoading && !error && filteredEntries.length > 3 && (
+            {!isLoading && !hasBlockingError && filteredEntries.length > 3 && (
               <motion.div
                 className="leaderboard-list mobile-list"
                 initial={{ opacity: 0 }}
@@ -472,7 +538,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             )}
 
             {/* Empty State - Mobile */}
-            {!isLoading && !error && filteredEntries.length === 0 && (
+            {!isLoading && !hasBlockingError && filteredEntries.length === 0 && (
               <motion.div
                 className="mobile-empty"
                 initial={{ opacity: 0 }}
@@ -509,7 +575,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             )}
 
             {/* Error State - Mobile */}
-            {!isLoading && error && (
+            {!isLoading && hasBlockingError && (
               <motion.div
                 className="mobile-error"
                 initial={{ opacity: 0 }}
@@ -527,7 +593,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
         {/* ===== DESKTOP: Original Podium Hero Section ===== */}
         {!isMobile && (
           <div className="leaderboard-podium-hero">
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait" initial={false}>
               {isLoading && (
                 <motion.div
                   key="loading"
@@ -552,7 +618,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 </motion.div>
               )}
 
-              {!isLoading && !error && filteredEntries.length >= 3 && (
+              {!isLoading && !hasBlockingError && filteredEntries.length >= 3 && (
                 <motion.div
                   key="podium"
                   className="podium"
@@ -562,9 +628,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 >
                   <motion.div
                     className="podium-entry second"
-                    initial={{ y: 40, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.2 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.08 }}
                   >
                     <LeaderboardEntry
                       entry={filteredEntries[1]}
@@ -576,9 +642,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                   </motion.div>
                   <motion.div
                     className="podium-entry first"
-                    initial={{ y: 40, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.1 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.04 }}
                   >
                     <LeaderboardEntry
                       entry={filteredEntries[0]}
@@ -590,9 +656,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                   </motion.div>
                   <motion.div
                     className="podium-entry third"
-                    initial={{ y: 40, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.3 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.12 }}
                   >
                     <LeaderboardEntry
                       entry={filteredEntries[2]}
@@ -605,7 +671,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 </motion.div>
               )}
 
-              {!isLoading && !error && filteredEntries.length > 0 && filteredEntries.length < 3 && (
+              {!isLoading && !hasBlockingError && filteredEntries.length > 0 && filteredEntries.length < 3 && (
                 <motion.div
                   key="partial-podium"
                   className="podium partial"
@@ -617,9 +683,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                     <motion.div
                       key={entry.userId}
                       className={`podium-entry ${index === 0 ? 'first' : index === 1 ? 'second' : 'third'}`}
-                      initial={{ y: 40, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.1 * (index + 1) }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.05 * (index + 1) }}
                     >
                       <LeaderboardEntry
                         entry={entry}
@@ -633,59 +699,42 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 </motion.div>
               )}
 
-              {!isLoading && !error && filteredEntries.length === 0 && (
+              {!isLoading && !hasBlockingError && filteredEntries.length === 0 && (
                 <motion.div
                   key="empty"
-                  className="podium-empty"
+                  className="podium podium-empty-shell"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  <motion.div
-                    className="trophy-container"
-                    animate={prefersReducedMotion ? {} : {
-                      y: [0, -15, 0],
-                      rotateY: [0, 10, 0, -10, 0],
-                    }}
-                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                  >
-                    <span className="trophy-icon">{filter === 'friends' ? '👥' : '🏆'}</span>
-                    {!prefersReducedMotion && (
-                      <>
-                        <motion.span className="sparkle sparkle-1" animate={{ opacity: [0, 1, 0], scale: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }}>✨</motion.span>
-                        <motion.span className="sparkle sparkle-2" animate={{ opacity: [0, 1, 0], scale: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity, delay: 0.7 }}>✨</motion.span>
-                        <motion.span className="sparkle sparkle-3" animate={{ opacity: [0, 1, 0], scale: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity, delay: 1.4 }}>✨</motion.span>
-                      </>
-                    )}
-                  </motion.div>
-                  <h2 className="empty-title">
-                    {filter === 'friends' ? 'No Friends Playing Yet' : 'The Arena Awaits'}
-                  </h2>
-                  <p className="empty-subtitle">
-                    {filter === 'friends'
-                      ? friends.length === 0
-                        ? 'Add friends to see their scores here!'
-                        : 'None of your friends have played this game yet.'
-                      : timeframe === 'weekly'
-                      ? 'No scores this week. Claim your glory!'
-                      : 'Be the first to set a record!'}
-                  </p>
-                  <motion.button
-                    type="button"
-                    className="play-now-btn"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      window.location.href = filter === 'friends' && friends.length === 0 ? '/friends' : '/games';
-                    }}
-                  >
-                    <Gamepad2 size={18} />
-                    {filter === 'friends' && friends.length === 0 ? 'Find Friends' : 'Start Playing'}
-                  </motion.button>
+                  <div className="podium-entry second">
+                    <div className="podium-card podium-card-placeholder position-2">
+                      <div className="podium-rank">🥈</div>
+                      <div className="podium-avatar-placeholder" />
+                      <div className="podium-line-placeholder" />
+                      <div className="podium-line-placeholder short" />
+                    </div>
+                  </div>
+                  <div className="podium-entry first">
+                    <div className="podium-card podium-card-placeholder position-1">
+                      <div className="podium-rank">🥇</div>
+                      <div className="podium-avatar-placeholder" />
+                      <div className="podium-line-placeholder" />
+                      <div className="podium-line-placeholder short" />
+                    </div>
+                  </div>
+                  <div className="podium-entry third">
+                    <div className="podium-card podium-card-placeholder position-3">
+                      <div className="podium-rank">🥉</div>
+                      <div className="podium-avatar-placeholder" />
+                      <div className="podium-line-placeholder" />
+                      <div className="podium-line-placeholder short" />
+                    </div>
+                  </div>
                 </motion.div>
               )}
 
-              {!isLoading && error && (
+              {!isLoading && hasBlockingError && (
                 <motion.div
                   key="error"
                   className="podium-error"
@@ -707,12 +756,12 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
         {user && !isNftHolder && <NFTGatePrompt />}
 
         {/* ===== DESKTOP: List (#4 onwards) ===== */}
-        {!isMobile && !isLoading && !error && filteredEntries.length > 3 && (
+        {!isMobile && !isLoading && !hasBlockingError && filteredEntries.length > 3 && (
           <motion.div
             className="leaderboard-list"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
+            transition={{ duration: 0.15 }}
           >
             {filteredEntries.slice(3).map((entry, index) => (
               <LeaderboardEntry
@@ -725,8 +774,59 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
           </motion.div>
         )}
 
+        {/* Keep desktop panel footprint visually stable when a timeframe has < 4 entries */}
+        {!isMobile && !isLoading && !hasBlockingError && filteredEntries.length === 0 && (
+          <div className="leaderboard-list leaderboard-list-empty-shell">
+            <div className="leaderboard-empty-inline">
+              <span className="leaderboard-empty-inline-icon">{filter === 'friends' ? '👥' : '🏆'}</span>
+              <h2 className="empty-title">
+                {filter === 'friends' ? 'No Friends Playing Yet' : 'The Arena Awaits'}
+              </h2>
+              <p className="empty-subtitle">
+                {filter === 'friends'
+                  ? friends.length === 0
+                    ? 'Add friends to see their scores here!'
+                    : 'None of your friends have played this game yet.'
+                  : timeframe === 'weekly'
+                  ? 'No scores this week. Claim your glory!'
+                  : 'Be the first to set a record!'}
+              </p>
+              <motion.button
+                type="button"
+                className="play-now-btn"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => {
+                  window.location.href = filter === 'friends' && friends.length === 0 ? '/friends' : '/games';
+                }}
+              >
+                <Gamepad2 size={18} />
+                {filter === 'friends' && friends.length === 0 ? 'Find Friends' : 'Start Playing'}
+              </motion.button>
+            </div>
+
+            {Array.from({ length: 2 }).map((_, index) => (
+              <div
+                key={`leaderboard-empty-shell-row-${index}`}
+                className="leaderboard-row leaderboard-row-shell"
+              />
+            ))}
+          </div>
+        )}
+
+        {!isMobile && !isLoading && !hasBlockingError && filteredEntries.length > 0 && filteredEntries.length <= 3 && (
+          <div className="leaderboard-list leaderboard-list-empty-shell leaderboard-list-empty-shell-passive" aria-hidden="true">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={`leaderboard-short-shell-row-${index}`}
+                className="leaderboard-row leaderboard-row-shell"
+              />
+            ))}
+          </div>
+        )}
+
         {/* Position Indicator - Desktop */}
-        {!isLoading && !error && userPosition && !isMobile && (
+        {!isLoading && !hasBlockingError && userPosition && !isMobile && (
           <YourPositionBar
             userPosition={userPosition}
             isInVisibleList={isUserInVisibleList}
@@ -734,7 +834,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
         )}
 
         {/* Position Indicator - Mobile */}
-        {!isLoading && !error && userPosition && isMobile && (
+        {!isLoading && !hasBlockingError && userPosition && isMobile && (
           <YourPositionPeek userPosition={userPosition} />
         )}
 

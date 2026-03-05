@@ -8,6 +8,7 @@
  */
 
 import { authenticateRequest } from '../../lib/auth';
+import { GAME_NAMES as LEADERBOARD_GAME_NAMES } from '../../../src/types/leaderboard';
 
 interface Env {
   DB: D1Database;
@@ -63,24 +64,8 @@ interface UserStatsResponse {
   comparison?: ComparisonResult;
 }
 
-// Game name mapping
-const GAME_NAMES: Record<string, string> = {
-  'orange-stack': 'Orange Stack',
-  'memory-match': 'Memory Match',
-  'orange-pong': 'Orange Pong',
-  'wojak-runner': 'Wojak Runner',
-  'orange-juggle': 'Orange Juggle',
-  'knife-game': 'Knife Game',
-  'color-reaction': 'Color Reaction',
-  'merge-2048': 'Wojak Merge',
-  'orange-wordle': 'Orange Wordle',
-  'block-puzzle': 'Block Puzzle',
-  'flappy-orange': 'Flappy Orange',
-  'citrus-drop': 'Citrus Drop',
-  'orange-snake': 'Orange Snake',
-  'brick-breaker': 'Brick Breaker',
-  'wojak-whack': 'Wojak Whack',
-};
+const getGameName = (gameId: string): string =>
+  LEADERBOARD_GAME_NAMES[gameId as keyof typeof LEADERBOARD_GAME_NAMES] || gameId;
 
 // CORS headers
 const corsHeaders = {
@@ -159,7 +144,7 @@ async function getUserStats(db: D1Database, userId: string): Promise<UserStats> 
     const bestRankData = bestRanksMap.get(row.game_id);
     return {
       gameId: row.game_id,
-      gameName: GAME_NAMES[row.game_id] || row.game_id,
+      gameName: getGameName(row.game_id),
       gamesPlayed: row.games_played,
       bestRank: bestRankData?.best_rank || null,
       bestScore: row.best_score,
@@ -173,7 +158,7 @@ async function getUserStats(db: D1Database, userId: string): Promise<UserStats> 
       bestRankEver = {
         rank: data.best_rank,
         gameId: gameId,
-        gameName: GAME_NAMES[gameId] || gameId,
+        gameName: getGameName(gameId),
         achievedAt: data.achieved_at,
       };
     }

@@ -11,6 +11,7 @@
 .leaderboard-wrapper.with-sidebar {
   display: flex;
   gap: 20px;
+  align-items: flex-start;
   max-width: 900px;
 }
 
@@ -23,6 +24,7 @@
 .leaderboard-wrapper.with-stats:not(.with-sidebar) {
   display: flex;
   gap: 20px;
+  align-items: flex-start;
   max-width: 900px;
 }
 
@@ -36,6 +38,8 @@
   min-width: 0;
   /* Ensure touch scrolling works in Chrome mobile emulation */
   touch-action: pan-y;
+  /* Reserve scrollbar space so content doesn't shift when list height changes */
+  scrollbar-gutter: stable both-edges;
 }
 
 /* ===== DESKTOP GAME SIDEBAR ===== */
@@ -47,8 +51,9 @@
   border: 1px solid var(--color-border);
   padding: 16px;
   height: fit-content;
+  align-self: flex-start;
   position: sticky;
-  top: 100px;
+  top: 0;
 }
 
 .game-sidebar-header {
@@ -101,7 +106,8 @@
 
 .game-sidebar-item.disabled {
   opacity: 0.4;
-  cursor: pointer;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .game-sidebar-item.disabled:hover {
@@ -295,16 +301,21 @@
 
 /* ===== PODIUM HERO SECTION ===== */
 .leaderboard-podium-hero {
-  min-height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 0 40px;
-  margin-top: -10px;
+  min-height: 340px;
+  display: grid;
+  align-items: stretch;
+  justify-items: stretch;
+  padding: 8px 0 28px;
+  margin-top: 0;
   margin-bottom: 24px;
   border-bottom: 1px solid var(--color-border);
   position: relative;
   overflow: visible;
+}
+
+.leaderboard-podium-hero > * {
+  width: 100%;
+  min-width: 0;
 }
 
 .podium-loading,
@@ -312,7 +323,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 16px;
+  min-height: 270px;
   color: var(--color-text-muted);
 }
 
@@ -335,8 +348,49 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
   padding: 20px;
+  min-height: 270px;
+}
+
+.podium-empty-shell {
+  position: relative;
+}
+
+.podium-empty-shell .podium-entry {
+  opacity: 0.42;
+  filter: saturate(0.7);
+}
+
+.podium-card-placeholder {
+  min-height: 250px;
+  min-width: 140px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+    rgba(12, 12, 22, 0.9);
+}
+
+.podium-avatar-placeholder {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  margin: 6px 0 14px;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04));
+}
+
+.podium-line-placeholder {
+  width: 92px;
+  height: 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.podium-line-placeholder.short {
+  width: 70px;
 }
 
 /* Mobile filter bar responsive */
@@ -576,6 +630,8 @@
 
 .game-option.disabled {
   opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .game-option.disabled:hover {
@@ -585,6 +641,43 @@
 .game-option.disabled.selected {
   background: rgba(255, 255, 255, 0.1);
   border-left: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Subtle in-place refresh status to avoid content flicker */
+.leaderboard-status-slot {
+  min-height: 18px;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+}
+
+.leaderboard-refresh-indicator {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.leaderboard-refresh-indicator::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: #F97316;
+  animation: leaderboardPulse 1s ease-in-out infinite;
+}
+
+.leaderboard-refresh-error {
+  margin: 0;
+  color: #ffb4b4;
+  font-size: 12px;
+}
+
+@keyframes leaderboardPulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1); }
 }
 
 .game-option.disabled .game-emoji {
@@ -806,6 +899,7 @@
   justify-content: center;
   align-items: flex-end;
   gap: 24px;
+  min-height: 270px;
   padding: 30px 0 20px;
   position: relative;
 }
@@ -997,6 +1091,7 @@
   font-size: 1.5rem;
   margin-top: 8px;
   letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
   background: linear-gradient(135deg, #FF9F43, #F97316);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1023,6 +1118,43 @@
   gap: 8px;
   /* Ensure touch scrolling works */
   touch-action: pan-y;
+}
+
+.leaderboard-list-empty-shell {
+  pointer-events: auto;
+}
+
+.leaderboard-list-empty-shell-passive {
+  pointer-events: none;
+}
+
+.leaderboard-empty-inline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 176px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  background:
+    radial-gradient(circle at 50% 35%, rgba(249, 115, 22, 0.09), transparent 62%),
+    rgba(255, 255, 255, 0.02);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.leaderboard-empty-inline-icon {
+  font-size: 34px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.leaderboard-row-shell {
+  min-height: 62px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.05));
 }
 
 .leaderboard-list.top-entries {
@@ -1144,6 +1276,7 @@
   color: #F97316;
   font-size: 1rem;
   min-width: 60px;
+  font-variant-numeric: tabular-nums;
   text-align: right;
   text-shadow: 0 0 10px rgba(249, 115, 22, 0.4);
 }
@@ -1439,6 +1572,36 @@
   /* === Remove podium glow effects (not used on mobile but just in case) === */
   .podium-card::before {
     display: none;
+  }
+}
+
+/* Desktop-only: keep the leaderboard panel footprint stable across game/timeframe switches */
+@media (min-width: 769px) {
+  .leaderboard-container {
+    display: flex;
+    flex-direction: column;
+    height: clamp(860px, calc(100vh - 190px), 980px);
+    min-height: clamp(860px, calc(100vh - 190px), 980px);
+  }
+
+  .leaderboard-podium-hero {
+    flex: 0 0 460px;
+    height: 460px;
+    min-height: 460px;
+  }
+
+  .leaderboard-list {
+    min-height: 280px;
+    max-height: 280px;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-gutter: stable;
+  }
+
+  .leaderboard-list.leaderboard-list-empty-shell {
+    min-height: 280px;
+    max-height: 280px;
+    overflow: hidden;
   }
 }
 

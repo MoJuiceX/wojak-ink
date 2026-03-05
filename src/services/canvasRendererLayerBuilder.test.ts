@@ -160,5 +160,24 @@ describe('canvasRendererLayerBuilder', () => {
       expect(over?.path).toBe(eyesPath);
       expect(over?.zIndex).toBe(LAYER_Z_INDEX.Eyes);
     });
+
+    it('SWAT Helmet + VR Headset: right 35% renders above helmet', () => {
+      const eyesPath = '/g2/Face-wear/Face-wear_VR-headset.png';
+      const selectedLayers: SelectedLayers = {
+        Base: DEFAULT_BASE_PATH,
+        Clothes: DEFAULT_CLOTHES_PATH,
+        MouthBase: DEFAULT_MOUTHBASE_PATH,
+        Head: '/g2/Head/Head_SWAT-helmet.png',
+        Eyes: eyesPath,
+      };
+
+      const layers = buildRenderLayers(selectedLayers);
+      const overHead = layers.find((l) => l.layerName === 'EyesOverHead');
+
+      expect(overHead).toBeDefined();
+      expect(overHead?.path).toBe(eyesPath);
+      expect(overHead?.zIndex).toBe(LAYER_Z_INDEX.EyesOverHead);
+      expect(overHead?.clipLeftPercent).toBeCloseTo(0.65);
+    });
   });
 });

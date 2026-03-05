@@ -224,6 +224,10 @@ function isFirefighterHelmet(selectedLayers: SelectedLayers): boolean {
   return pathContains(selectedLayers.Head, 'firefigther') || pathContains(selectedLayers.Head, 'firefighter');
 }
 
+function isSwatHelmet(selectedLayers: SelectedLayers): boolean {
+  return pathContains(selectedLayers.Head, 'swat');
+}
+
 function isTinfoilHead(selectedLayers: SelectedLayers): boolean {
   return pathContains(selectedLayers.Head, 'tin-foil');
 }
@@ -280,6 +284,7 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
   const hasLayersAboveHead = needsLayersAboveHead(selectedLayers);
   const hasFullFaceMask = isFullFaceMask(selectedLayers.Mask);
   const hasSuitEyesUnder = !hasAstronaut && isSuitNeedingEyesUnder(selectedLayers);
+  const hasSwat = isSwatHelmet(selectedLayers);
 
   for (const layerName of RENDER_ORDER) {
     const rawPath = selectedLayers[layerName];
@@ -1264,7 +1269,7 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
   }
 
   // EyesOverHead
-  if (needsEyesOverlay && eyesPath && !hasTyson && !hasNinja) {
+  if ((needsEyesOverlay || (hasSwat && isVRHeadset(eyesPath))) && eyesPath && !hasTyson && !hasNinja) {
     // Pirate Hat + Night Vision: right half + clip top 32.7% via polygon
     if (isPirateHead(selectedLayers) && isNightVision(eyesPath)) {
       layers.push({
@@ -1326,6 +1331,14 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         path: eyesPath,
         zIndex: LAYER_Z_INDEX.EyesOverHead,
         layerName: 'EyesOverHead',
+      });
+    // SWAT Helmet + VR Headset: right 35% on top of helmet
+    } else if (hasSwat && isVRHeadset(eyesPath)) {
+      layers.push({
+        path: eyesPath,
+        zIndex: LAYER_Z_INDEX.EyesOverHead,
+        layerName: 'EyesOverHead',
+        clipLeftPercent: 0.65,
       });
     // Super Saiyan + Night Vision / Eye Patch: skip EyesOverHead so Saiyan hair renders on top
     } else if (isSuperSaiyan(selectedLayers) && (isNightVision(eyesPath) || isEyePatch(eyesPath))) {

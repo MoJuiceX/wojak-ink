@@ -13,28 +13,14 @@
  * - Featured items, activities, game scores for Overview tab
  */
 
+import { GAME_NAMES as LEADERBOARD_GAME_NAMES } from '../../../src/types/leaderboard';
+
 interface Env {
   DB: D1Database;
 }
 
-// Game ID to name mapping
-const GAME_NAMES: Record<string, string> = {
-  'flappy-orange': 'Flappy Orange',
-  'orange-stack': 'Orange Stack',
-  'memory-match': 'Memory Match',
-  'orange-pong': 'Orange Pong',
-  'wojak-runner': 'Wojak Runner',
-  'orange-juggle': 'Orange Juggle',
-  'knife-game': 'Knife Game',
-  'block-puzzle': 'Block Puzzle',
-  'citrus-drop': 'Citrus Drop',
-  'orange-snake': 'Orange Snake',
-  'brick-breaker': 'Brick Breaker',
-  'wojak-whack': 'Wojak Whack',
-  'color-reaction': 'Color Reaction',
-  'merge-2048': 'Wojak Merge',
-  'orange-wordle': 'Orange Wordle',
-};
+const getGameName = (gameId: string): string =>
+  LEADERBOARD_GAME_NAMES[gameId as keyof typeof LEADERBOARD_GAME_NAMES] || gameId;
 
 // CORS headers
 const corsHeaders = {
@@ -331,7 +317,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
         gameScores.push({
           gameId: s.game_id,
-          gameName: GAME_NAMES[s.game_id] || s.game_id,
+          gameName: getGameName(s.game_id),
           score: s.high_score,
           rank,
         });
@@ -493,7 +479,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         gems,
         gamesPlayed,
         totalScore,
-        bestGame: highestRankGame ? GAME_NAMES[highestRankGame] : undefined,
+        bestGame: highestRankGame ? getGameName(highestRankGame) : undefined,
         highestRank: bestRank || undefined,
         firstPlaceCount,
         friendsCount,

@@ -8,6 +8,7 @@
  */
 
 import { authenticateRequest } from '../../lib/auth';
+import { LEADERBOARD_API_GAME_IDS } from '../../../src/types/leaderboard';
 
 interface Env {
   CLERK_DOMAIN: string;
@@ -22,25 +23,7 @@ interface SubmitScoreRequest {
   idempotencyKey?: string; // Client-generated UUID to prevent duplicates
 }
 
-// Valid game IDs
-const VALID_GAME_IDS = [
-  'orange-stack',
-  'memory-match',
-  'orange-pong',
-  'wojak-runner',
-  'orange-juggle',
-  'knife-game',
-  'color-reaction',
-  'merge-2048',
-  'orange-wordle',
-  'block-puzzle',
-  'flappy-orange',
-  'citrus-drop',
-  'orange-snake',
-  'brick-breaker',
-  'wojak-whack',
-  'brick-by-brick',
-];
+const VALID_GAME_IDS = new Set<string>(LEADERBOARD_API_GAME_IDS);
 
 // CORS headers
 const corsHeaders = {
@@ -212,7 +195,7 @@ function validateRequest(data: SubmitScoreRequest): { valid: boolean; error?: st
     return { valid: false, error: 'gameId is required' };
   }
 
-  if (!VALID_GAME_IDS.includes(data.gameId)) {
+  if (!VALID_GAME_IDS.has(data.gameId)) {
     return { valid: false, error: 'Invalid gameId' };
   }
 

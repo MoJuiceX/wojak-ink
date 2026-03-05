@@ -149,6 +149,48 @@ interface ClipRegion {
   clipPolygon?: [number, number][];
 }
 
+function collectG2AssetSources(g2: G2LayerData): string[] {
+  const sources: string[] = [];
+
+  for (const item of g2.orderedDrawItems ?? []) {
+    if (item.type === 'fill') sources.push(item.file);
+    else sources.push(item.path);
+  }
+
+  for (const fill of g2.fills) sources.push(fill.file);
+  for (const outline of g2.outlines) sources.push(outline);
+  for (const detail of g2.details ?? []) sources.push(detail);
+
+  if (g2.detail) sources.push(g2.detail);
+  if (g2.frame) sources.push(g2.frame);
+  if (g2.logoFrame) sources.push(g2.logoFrame);
+  if (g2.frame1) sources.push(g2.frame1);
+  if (g2.frame2) sources.push(g2.frame2);
+  if (g2.detailOverlay) sources.push(g2.detailOverlay);
+
+  // drawLogoAtPatch tries webp first, then png fallback.
+  if (g2.logoOption) {
+    sources.push(`${COIN_LOGOS_BASE}/${g2.logoOption}.webp`);
+    sources.push(`${COIN_LOGOS_BASE}/${g2.logoOption}.png`);
+  }
+
+  // flagOption uses generated SVG data URLs (no network), no preload needed.
+  return sources;
+}
+
+async function preloadG2Assets(layers: RenderLayer[]): Promise<void> {
+  const sourceSet = new Set<string>();
+  for (const layer of layers) {
+    if (!layer.g2) continue;
+    for (const source of collectG2AssetSources(layer.g2)) {
+      sourceSet.add(source);
+    }
+  }
+
+  if (sourceSet.size === 0) return;
+  await preloadImages([...sourceSet]);
+}
+
 function hasActiveClip(c: ClipRegion): boolean {
   return !!(
     (c.clipPolygon && c.clipPolygon.length >= 3) ||
@@ -2457,6 +2499,9 @@ export async function renderToCanvas(
     resolvedLayers = expanded;
   }
 
+  // Warm G2 assets in parallel so drawG2Layer hits cache instead of serial network loads.
+  await preloadG2Assets(resolvedLayers);
+
   type LoadedLayer =
     | (RenderLayer & { image: HTMLImageElement; isSolidBackground?: false })
     | (RenderLayer & { fillImage: HTMLImageElement; outlineImage: HTMLImageElement; image?: null; isSolidBackground?: false })
@@ -2815,6 +2860,9 @@ export async function exportImage(
     }
     resolvedLayers = expanded;
   }
+
+  // Warm G2 assets in parallel so drawG2Layer hits cache instead of serial network loads.
+  await preloadG2Assets(resolvedLayers);
 
   const loadPromises = resolvedLayers.map(async (layer) => {
     if (layer.g2) {

@@ -17,27 +17,6 @@ const corsHeaders = {
   'Content-Type': 'application/json',
 };
 
-// Valid game IDs - kept for reference/future validation
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const VALID_GAME_IDS = [
-  'orange-stack',
-  'memory-match',
-  'orange-pong',
-  'wojak-runner',
-  'orange-juggle',
-  'knife-game',
-  'color-reaction',
-  'merge-2048',
-  'orange-wordle',
-  'block-puzzle',
-  'flappy-orange',
-  'citrus-drop',
-  'orange-snake',
-  'brick-breaker',
-  'wojak-whack',
-  'brick-by-brick',
-];
-
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const { env } = context;
 

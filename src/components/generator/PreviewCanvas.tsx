@@ -127,8 +127,8 @@ export function PreviewCanvas({
         </div>
       )}
 
-      {/* Loading state */}
-      {isRendering && (
+      {/* Loading state: keep current preview visible, only block when no image exists yet */}
+      {isRendering && !previewImage && (
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
           style={{ background: 'var(--color-surface)' }}
@@ -141,6 +141,13 @@ export function PreviewCanvas({
             size={32}
           />
         </motion.div>
+      )}
+      {isRendering && previewImage && (
+        <div className="absolute top-3 right-3 z-10 pointer-events-none rounded-full px-2 py-1"
+          style={{ background: 'var(--color-surface-elevated, rgba(0, 0, 0, 0.45))' }}
+        >
+          <Loader2 className="animate-spin text-accent" size={14} />
+        </div>
       )}
 
     </div>

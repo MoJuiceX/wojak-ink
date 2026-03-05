@@ -167,6 +167,23 @@ interface GeneratorProviderProps {
 
 export function GeneratorProvider({ children }: GeneratorProviderProps) {
   const [state, dispatch] = useReducer(generatorReducer, null, createInitialState);
+  const weightedTraitsRegisteredRef = useRef<Set<string>>(new Set());
+
+  /**
+   * Register G2-only traits in weighted randomizer once per (layer, trait).
+   * Avoids repeated O(n*m) matching work on every randomize click.
+   */
+  const registerDynamicWeightedTraits = useCallback((layerName: UILayerName, traits: UnifiedTrait[]) => {
+    for (const trait of traits) {
+      if (trait.source !== 'g2' || trait.g1Path) continue;
+      const key = `${layerName}:${normalizeName(trait.name)}`;
+      if (weightedTraitsRegisteredRef.current.has(key)) continue;
+      if (!findInFrequencies(layerName, trait.name)) {
+        addWeightedTrait(layerName, trait.name, 1);
+      }
+      weightedTraitsRegisteredRef.current.add(key);
+    }
+  }, []);
 
   // Initialize generator service, build pathToTraitIdMap, then set default unified selections
   useEffect(() => {
@@ -353,6 +370,17 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
 
   const randomize = useCallback(async () => {
     const randomSelections: SelectedLayers = {};
+    const layersToPrefetch: UILayerName[] = ['Base', 'Clothes', 'MouthBase', 'Background', 'FacialHair', 'MouthItem', 'Eyes', 'Head', 'Mask'];
+    const traitsByLayer = new Map<UILayerName, UnifiedTrait[]>();
+
+    // Load all randomizer layers in parallel once per click to avoid serial await latency.
+    const traitsEntries = await Promise.all(
+      layersToPrefetch.map(async (layerName) => [layerName, await getUnifiedTraits(layerName)] as const)
+    );
+    for (const [layerName, traits] of traitsEntries) {
+      traitsByLayer.set(layerName, traits);
+      registerDynamicWeightedTraits(layerName, traits);
+    }
 
     /**
      * Find a unified trait by weighted trait name
@@ -385,10 +413,10 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
      * Returns both the path (for SelectedLayers) and the UnifiedTrait (for G2 hydration).
      * Falls back to uniform random if no weights defined or no match found.
      */
-    const selectWeightedUnified = async (
+    const selectWeightedUnified = (
       layerName: UILayerName
-    ): Promise<{ path: string; trait: UnifiedTrait } | null> => {
-      let traits = await getUnifiedTraits(layerName);
+    ): { path: string; trait: UnifiedTrait } | null => {
+      let traits = traitsByLayer.get(layerName) ?? [];
       if (traits.length === 0) return null;
 
       // For Background: filter out special virtual backgrounds (Solid color, Price overlays)
@@ -410,13 +438,6 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
           return true;
         });
         if (traits.length === 0) return null;
-      }
-
-      // Register G2-only traits in weighted randomizer so they get a fair (rare) chance
-      for (const t of traits) {
-        if ((t.source === 'g2') && !t.g1Path && !findInFrequencies(layerName, t.name)) {
-          addWeightedTrait(layerName, t.name, 1);
-        }
       }
 
       // Try weighted selection if frequencies exist for this layer
@@ -459,21 +480,21 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
 
     // Always select required layers with weighted randomization
     for (const layerName of requiredLayers) {
-      const result = await selectWeightedUnified(layerName);
+      const result = selectWeightedUnified(layerName);
       if (result) recordSelection(layerName, result);
     }
 
     // Randomly select optional layers (60% chance each) with weighted randomization
     for (const layerName of optionalLayers) {
       if (Math.random() < 0.6) {
-        const result = await selectWeightedUnified(layerName);
+        const result = selectWeightedUnified(layerName);
         if (result) recordSelection(layerName, result);
       }
     }
 
     // Mask has a much lower chance (15%) - most Wojaks should be unmasked
     if (Math.random() < 0.15) {
-      const result = await selectWeightedUnified('Mask');
+      const result = selectWeightedUnified('Mask');
       if (result) recordSelection('Mask', result);
     }
 
@@ -504,7 +525,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     const bgPath = randomSelections.Background;
     const bgIsEmpty = !bgPath || bgPath === '' || bgPath.toLowerCase() === 'none';
     if (bgIsEmpty) {
-      const allBgTraits = await getUnifiedTraits('Background');
+      const allBgTraits = traitsByLayer.get('Background') ?? [];
       const validBgTraits = allBgTraits.filter(t => {
         // Exclude virtual backgrounds
         if (t.g1Path?.includes('__solid__') || t.g1Path?.includes('__price_')) {
@@ -544,7 +565,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     const pathMap = getPathToTraitIdMap();
     const unified = fromExternal(randomSelections, g2Map, pathMap);
     dispatch({ type: 'RANDOMIZE', selections: unified });
-  }, []);
+  }, [registerDynamicWeightedTraits]);
 
   const randomizeLayer = useCallback(async (layer: UILayerName) => {
     const findUnifiedTraitByName = (
@@ -566,12 +587,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     const traits = await getUnifiedTraits(layer);
     if (traits.length === 0) return;
 
-    // Register G2-only traits in weighted randomizer so they get a fair (rare) chance
-    for (const t of traits) {
-      if ((t.source === 'g2') && !t.g1Path && !findInFrequencies(layer, t.name)) {
-        addWeightedTrait(layer, t.name, 1);
-      }
-    }
+    registerDynamicWeightedTraits(layer, traits);
 
     // Select trait using weighted frequencies
     let selectedTrait: UnifiedTrait | null = null;
@@ -619,7 +635,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     const pathMap = getPathToTraitIdMap();
     const unified = fromExternal(finalSelectedLayers, newG2, pathMap);
     dispatch({ type: 'RANDOMIZE', selections: unified });
-  }, [derived.selectedLayers, derived.g2Selections]);
+  }, [derived.selectedLayers, derived.g2Selections, registerDynamicWeightedTraits]);
 
   const clearAll = useCallback(() => {
     dispatch({ type: 'CLEAR_ALL' });

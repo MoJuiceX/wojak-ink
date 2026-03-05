@@ -78,22 +78,32 @@ export interface SubmitScoreResult {
   orangesEarned: number;
 }
 
-export type GameId =
-  | 'orange-stack'
-  | 'memory-match'
-  | 'orange-pong'
-  | 'wojak-runner'
-  | 'orange-juggle'
-  | 'knife-game'
-  | 'color-reaction'
-  | 'merge-2048'
-  | 'block-puzzle'
-  | 'flappy-orange'
-  | 'citrus-drop'
-  | 'orange-snake'
-  | 'brick-breaker'
-  | 'wojak-whack'
-  | 'combat';
+export const GAME_IDS = [
+  'orange-stack',
+  'memory-match',
+  'orange-pong',
+  'wojak-runner',
+  'orange-juggle',
+  'knife-game',
+  'color-reaction',
+  'merge-2048',
+  'orange-wordle',
+  'block-puzzle',
+  'flappy-orange',
+  'citrus-drop',
+  'orange-snake',
+  'brick-breaker',
+  'wojak-whack',
+  'brick-by-brick',
+  'combat',
+] as const;
+
+export type GameId = (typeof GAME_IDS)[number];
+export type ApiGameId = Exclude<GameId, 'combat'>;
+
+export const LEADERBOARD_API_GAME_IDS: ApiGameId[] = GAME_IDS.filter(
+  (id): id is ApiGameId => id !== 'combat'
+);
 
 export const GAME_NAMES: Record<GameId, string> = {
   'orange-stack': 'Brick by Brick',
@@ -104,12 +114,14 @@ export const GAME_NAMES: Record<GameId, string> = {
   'knife-game': 'The Knife Game',
   'color-reaction': 'Color Reaction',
   'merge-2048': 'Wojak Merge',
+  'orange-wordle': 'Orange Wordle',
   'block-puzzle': 'Block Puzzle',
   'flappy-orange': 'Flappy Orange',
   'citrus-drop': 'Citrus Drop',
   'orange-snake': 'Orange Snake',
   'brick-breaker': 'Brick Breaker',
   'wojak-whack': 'Wojak Whack',
+  'brick-by-brick': 'Brick by Brick',
   'combat': 'Combat Arena',
 };
 
@@ -135,5 +147,3 @@ export const DISABLED_GAME_IDS: GameId[] = [
   'brick-breaker',
   'wojak-whack',
 ];
-
-export const GAME_IDS = Object.keys(GAME_NAMES) as GameId[];

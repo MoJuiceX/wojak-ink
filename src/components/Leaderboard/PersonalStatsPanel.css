@@ -18,8 +18,9 @@
   .personal-stats-panel.desktop-sidebar {
     width: 260px;
     flex-shrink: 0;
+    align-self: flex-start;
     position: sticky;
-    top: 100px;
+    top: 0;
     max-height: calc(100vh - 120px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;

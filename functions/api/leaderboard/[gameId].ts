@@ -11,6 +11,7 @@
  */
 
 import { authenticateRequest } from '../../lib/auth';
+import { LEADERBOARD_API_GAME_IDS } from '../../../src/types/leaderboard';
 
 interface Env {
   DB: D1Database;
@@ -77,25 +78,8 @@ interface LeaderboardResponse {
   resetTime?: string;
 }
 
-// Valid game IDs
-const VALID_GAME_IDS = [
-  'orange-stack',
-  'memory-match',
-  'orange-pong',
-  'wojak-runner',
-  'orange-juggle',
-  'knife-game',
-  'color-reaction',
-  'merge-2048',
-  'orange-wordle',
-  'block-puzzle',
-  'flappy-orange',
-  'citrus-drop',
-  'orange-snake',
-  'brick-breaker',
-  'wojak-whack',
-  'brick-by-brick',
-];
+// Canonical leaderboard game IDs (shared with frontend type source)
+const VALID_GAME_IDS = new Set<string>(LEADERBOARD_API_GAME_IDS);
 
 // Valid timeframes
 const VALID_TIMEFRAMES: Timeframe[] = ['weekly', 'all-time'];
@@ -398,7 +382,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   // Get gameId from params
   const gameId = params.gameId as string;
 
-  if (!gameId || !VALID_GAME_IDS.includes(gameId)) {
+  if (!gameId || !VALID_GAME_IDS.has(gameId)) {
     return new Response(
       JSON.stringify({ error: 'Invalid gameId' }),
       { status: 400, headers: corsHeaders }
@@ -432,9 +416,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       userId = auth?.userId ?? null;
     }
 
-    // Get leaderboard entries
-    const totalCount = await getLeaderboardCount(env.DB, gameId, timeframe);
-    const entries = await getLeaderboard(env.DB, gameId, timeframe, limit, offset);
+    // Fetch count + entries in parallel to reduce switch latency.
+    const [totalCount, entries] = await Promise.all([
+      getLeaderboardCount(env.DB, gameId, timeframe),
+      getLeaderboard(env.DB, gameId, timeframe, limit, offset),
+    ]);
 
     // Get user position if authenticated
     let userPosition: UserPosition | undefined;
