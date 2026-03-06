@@ -2327,7 +2327,7 @@ export async function renderToCanvas(
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
-  const layers = buildRenderLayers(selectedLayers);
+  const layers = buildRenderLayers(selectedLayers, options.g2Selections);
 
   // Resolve G2 data; expand composite Clothes so layer0/layer1 draw under MouthBase and MouthItem (z 2.1/2.2)
   let resolvedLayers: RenderLayer[] = layers;

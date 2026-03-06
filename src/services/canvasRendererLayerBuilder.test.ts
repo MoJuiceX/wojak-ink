@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import type { SelectedLayers } from '@/lib/wojakRules';
+import type { SelectedLayers, G2Selections } from '@/types/generator';
 import { buildRenderLayers } from '@/services/canvasRendererLayerBuilder';
 import { LAYER_Z_INDEX } from '@/services/canvasRendererConstants';
 import { DEFAULT_BASE_PATH, DEFAULT_MOUTHBASE_PATH, DEFAULT_CLOTHES_PATH } from '@/lib/layerRegistry';
@@ -74,17 +74,46 @@ describe('canvasRendererLayerBuilder', () => {
       expect(layers.some((l) => l.layerName === 'MaskUnderAstronaut')).toBe(true);
     });
 
-    it('Rekt + BubbleGum adds BubbleGumRekt virtual layer', () => {
+    it('Face Rekt + BubbleGum adds BubbleGumRekt virtual layer', () => {
       const selectedLayers: SelectedLayers = {
-        Base: '/assets/wojak-layers/BASE/BASE_Base-Wojak_rekt.png',
+        Base: DEFAULT_BASE_PATH,
         Clothes: DEFAULT_CLOTHES_PATH,
         MouthBase: '/assets/wojak-layers/MOUTH/MOUTH_Bubble-Gum.png',
       };
-      const layers = buildRenderLayers(selectedLayers);
+      const g2Selections: G2Selections = {
+        Base: {
+          traitId: 'Base_Rekt',
+          g2Category: 'Base',
+          colors: {},
+          options: {},
+        },
+      };
+      const layers = buildRenderLayers(selectedLayers, g2Selections);
       const names = layers.map((l) => l.layerName);
       expect(names).toContain('BubbleGumRekt');
       const bubbleRekt = layers.find((l) => l.layerName === 'BubbleGumRekt');
       expect(bubbleRekt?.zIndex).toBe(LAYER_Z_INDEX.RektMouthOverlay);
+      expect(bubbleRekt?.path).toBe('/assets/wojak-layers/MOUTH/MOUTH_Bubble-Gum_rekt.png');
+    });
+
+    it('Face Rekt + Pipe adds local PipeWhenRekt overlay', () => {
+      const selectedLayers: SelectedLayers = {
+        Base: DEFAULT_BASE_PATH,
+        Clothes: DEFAULT_CLOTHES_PATH,
+        MouthBase: '/assets/wojak-layers/MOUTH/MOUTH_Pipe.png',
+      };
+      const g2Selections: G2Selections = {
+        Base: {
+          traitId: 'Base_Rekt',
+          g2Category: 'Base',
+          colors: {},
+          options: {},
+        },
+      };
+      const layers = buildRenderLayers(selectedLayers, g2Selections);
+      const pipeRekt = layers.find((l) => l.layerName === 'PipeWhenRekt');
+      expect(pipeRekt?.zIndex).toBe(LAYER_Z_INDEX.RektMouthOverlay);
+      expect(pipeRekt?.path).toBe('/assets/wojak-layers/MOUTH/MOUTH_Pipe-when-rekt.png');
     });
 
     it('Chia Farmer adds ClothesAddon virtual layer', () => {

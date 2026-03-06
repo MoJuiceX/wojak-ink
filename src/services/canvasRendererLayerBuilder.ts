@@ -6,6 +6,7 @@
  */
 
 import type { SelectedLayers } from '@/lib/wojakRules';
+import type { G2Selections } from '@/types/generator';
 import { RENDER_ORDER } from '@/lib/layerRegistry';
 import {
   LAYER_Z_INDEX,
@@ -26,9 +27,13 @@ import type { RenderLayer } from '@/services/canvasRendererTypes';
 import { isExtraAccessoryPath, isWingsExtraPath } from '@/lib/generatorExtras';
 import { pathContains } from '@/lib/pathHelpers';
 import { isSelectionPathEmpty } from '@/types/generator';
-import { LAYER_BASE } from '@/config/layerAssetBase';
 
 // ============ Helpers ============
+
+const LOCAL_REKT_MOUTH_OVERLAYS = {
+  bubbleGum: '/assets/wojak-layers/MOUTH/MOUTH_Bubble-Gum_rekt.png',
+  pipe: '/assets/wojak-layers/MOUTH/MOUTH_Pipe-when-rekt.png',
+} as const;
 
 function getEffectiveMaskPath(selectedLayers: SelectedLayers): string | undefined {
   const maskPath = selectedLayers.Mask;
@@ -64,7 +69,12 @@ function getCenturionPath(originalPath: string, needsMaskVariant: boolean): stri
   return originalPath;
 }
 
-function isRektBase(selectedLayers: SelectedLayers): boolean {
+function isRektFace(selectedLayers: SelectedLayers, g2Selections?: G2Selections | null): boolean {
+  const baseTraitId = g2Selections?.Base?.traitId;
+  if (baseTraitId) {
+    return pathContains(baseTraitId, 'rekt') && !pathContains(baseTraitId, 'rugged');
+  }
+
   const basePath = selectedLayers.Base;
   if (!basePath) return false;
   return pathContains(basePath, 'rekt') && !pathContains(basePath, 'rugged');
@@ -266,12 +276,12 @@ function isSuitIncompatibleWithBandana(selectedLayers: SelectedLayers): boolean 
  * Build render layers from selections with all special handling (virtual layers, skip logic, z-index).
  * Returns a flat list sorted by zIndex. G2 expansion and .g2 attachment are done by the main renderer.
  */
-export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[] {
+export function buildRenderLayers(selectedLayers: SelectedLayers, g2Selections?: G2Selections | null): RenderLayer[] {
   const layers: RenderLayer[] = [];
 
   const hasCenturion = isCenturionSelected(selectedLayers);
   const centurionMaskVariant = needsCenturionMaskVariant(selectedLayers);
-  const hasRekt = isRektBase(selectedLayers);
+  const hasRekt = isRektFace(selectedLayers, g2Selections);
   const hasBubble = hasBubbleGum(selectedLayers);
   const hasRonin = hasRoninHelmet(selectedLayers);
   const hasBandanaRaw = hasBandanaMask(selectedLayers);
@@ -1091,17 +1101,17 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
     }
   }
 
-  // Rekt base + specific mouths: extra detail overlay on top of base
+  // Rekt face + specific mouths: extra detail overlay on top of the face
   if (hasBubble && hasRekt) {
     layers.push({
-      path: `${LAYER_BASE}/MOUTH/MOUTH_Bubble-Gum_rekt.png`,
+      path: LOCAL_REKT_MOUTH_OVERLAYS.bubbleGum,
       zIndex: LAYER_Z_INDEX.RektMouthOverlay,
       layerName: 'BubbleGumRekt',
     });
   }
   if (hasRekt && pathContains(selectedLayers.MouthBase, 'Pipe')) {
     layers.push({
-      path: `${LAYER_BASE}/MOUTH/MOUTH_Pipe-when-rekt.png`,
+      path: LOCAL_REKT_MOUTH_OVERLAYS.pipe,
       zIndex: LAYER_Z_INDEX.RektMouthOverlay,
       layerName: 'PipeWhenRekt',
     });
