@@ -206,13 +206,27 @@ Undoes:
 Risk:
 - lint output regains noise from the generated manifest file
 
+## `e1bee59` — Playwright runner env cleanup
+
+```bash
+git revert e1bee59
+npm test
+```
+
+Undoes:
+- the Playwright env wrapper script
+- the clean npm-script path for local-safe Playwright runs
+
+Risk:
+- Playwright local-safe runs regain the noisy color-policy warnings
+
 ## Full nightly rollback
 
 To remove the entire overnight branch delta relative to `main`:
 
 ```bash
 git log --oneline main..HEAD
-git revert 1ba7cc0 717ccb8 86068cb d099d2b 9727080 5a7e4e8 aad9a75 5b1d1f3 2196cf4 5c586aa 76574fb 02df9da 0e7bf0c
+git revert e1bee59 1ba7cc0 717ccb8 86068cb d099d2b 9727080 5a7e4e8 aad9a75 5b1d1f3 2196cf4 5c586aa 76574fb 02df9da 0e7bf0c
 ```
 
 Validate afterward:

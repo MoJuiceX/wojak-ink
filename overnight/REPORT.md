@@ -28,6 +28,7 @@
 12. Reduced repo-generated unit-test stderr noise without suppressing unexpected failures.
 13. Remuxed the heaviest local music video to a `faststart` MP4 for better browser playback compatibility.
 14. Removed the final repo-owned lint noise by excluding the generated Farmers Plot manifest from ESLint.
+15. Cleaned the local-safe Playwright runner env so the e2e baseline no longer emits color-policy warnings.
 
 ## Phase Results
 
@@ -360,6 +361,26 @@ Artifacts:
 Validation:
 - `npm run lint` => passed with no additional output beyond the command banner
 
+### Phase 13 — Playwright runner env cleanup
+
+Commit:
+- `e1bee59` — `test: clean playwright runner env`
+
+What changed:
+- added `scripts/run-playwright-clean.mjs`
+- routed all Playwright npm scripts through the wrapper
+- stripped `FORCE_COLOR` and `NO_COLOR` at the final spawn boundary so Playwright workers no longer emit color-policy warnings during local-safe runs
+
+Measured result:
+- Playwright env warning lines (`NO_COLOR` / `FORCE_COLOR` / `Warning:`) dropped from `12` to `0` in the local-safe smoke log
+
+Artifacts:
+- `overnight/artifacts/playwright-after-test-noise-cleanup.log`
+- `overnight/artifacts/playwright-color-clean.log`
+
+Validation:
+- `npm test` => passed (`6` tests) with no env warning lines in the output log
+
 ## Final Validation State
 
 Artifacts:
@@ -369,6 +390,7 @@ Artifacts:
 - `overnight/artifacts/lint-after-noise-cleanup.log`
 - `overnight/artifacts/typecheck-after-test-noise-cleanup.log`
 - `overnight/artifacts/playwright-after-test-noise-cleanup.log`
+- `overnight/artifacts/playwright-color-clean.log`
 - `overnight/artifacts/lint-final-clean.log`
 - `overnight/artifacts/bundle-report-latest.*`
 - `overnight/artifacts/lighthouse/*`
@@ -380,7 +402,7 @@ Final checks:
 - `npm run test:unit` => passed (`152` files, `4260` tests)
 - `npm run build` => passed (`built in 5.44s`)
 - `npm run lint` => passed with no lint output beyond the command banner
-- `PW_LOCAL_SAFE=1 npm test` => passed (`6` tests)
+- `npm test` => passed (`6` tests) with no Playwright env warnings
 
 ## Remaining Risks / Deferred Work
 
@@ -389,7 +411,7 @@ Not touched overnight because the risk/effort was not justified:
 - wallet manual chunk warning between `wallet-protocol -> wallet-core -> wallet-protocol` — worth a separate focused pass, but not a safe overnight quick fix
 - upstream Rollup PURE annotation warning from `node_modules/ox/_esm/core/Base64.js` — library-level noise, not repo logic
 - Babel deopt note on `functions/_data/farmersPlotImageManifest.ts` — expected from the generated file size; fixing it would require structural data changes, not a superficial tweak
-- environment-specific Node warnings during local test runs (`--localstorage-file`, `NO_COLOR` vs `FORCE_COLOR`) — these originate from the host toolchain/runtime, not the repo
+- environment-specific Node warnings during unit-test runs (`--localstorage-file`) — these still originate from the host toolchain/runtime, not the repo
 
 ## Morning Recommendations
 

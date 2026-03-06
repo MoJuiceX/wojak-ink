@@ -293,6 +293,23 @@ npm run lint > overnight/artifacts/lint-final-clean.log 2>&1
 cat overnight/artifacts/lint-final-clean.log
 ```
 
+## Commit `e1bee59` — `test: clean playwright runner env`
+
+### What changed
+- added `scripts/run-playwright-clean.mjs`
+- routed all Playwright npm scripts through the wrapper
+- stripped `FORCE_COLOR` and `NO_COLOR` from the final Playwright child-process env so the local-safe suite runs without color-policy warnings
+
+### Files touched
+- `scripts/run-playwright-clean.mjs`
+- `package.json`
+
+### Validate
+```bash
+npm test > overnight/artifacts/playwright-color-clean.log 2>&1
+rg -n 'NO_COLOR|FORCE_COLOR|Warning:' overnight/artifacts/playwright-color-clean.log
+```
+
 ## Final validation set
 
 ```bash
@@ -308,4 +325,5 @@ npm run test:unit > overnight/artifacts/unit-noise-after-fixes.log 2>&1
 rg -n '^stderr \|' overnight/artifacts/unit-noise-after-fixes.log
 npm run build > overnight/artifacts/build-after-wiznerd-remux.log 2>&1
 npm run lint > overnight/artifacts/lint-final-clean.log 2>&1
+npm test > overnight/artifacts/playwright-color-clean.log 2>&1
 ```

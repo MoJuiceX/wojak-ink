@@ -152,3 +152,4 @@ After the initial overnight baseline, the gallery page was still the weakest hig
 | Lighthouse artifacts | none | JSON + HTML + markdown summary |
 | Repo-generated unit-suite `stderr |` entries | `28` | `0` |
 | Environment `--localstorage-file` Node warnings | `4` | `4` |
+| Playwright color-policy warning lines | `12` | `0` |

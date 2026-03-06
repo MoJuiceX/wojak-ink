@@ -226,3 +226,27 @@ print(f'delta_kb={(mp4-mov)/1024:.2f}')
 print(f'delta_pct={(mp4-mov)/mov*100:.3f}')
 PY
 cat /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/lint-final-clean.log
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && node -e "const p=require('./package.json'); console.log(p.scripts.test); console.log(p.scripts['test:e2e:local']); console.log(process.env.NO_COLOR || 'NO_COLOR=<unset>'); console.log(process.env.FORCE_COLOR || 'FORCE_COLOR=<unset>');"
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && env -u FORCE_COLOR NO_COLOR=1 npx playwright test --list
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && FORCE_COLOR=0 NO_COLOR=1 npx playwright test --list
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && npm test > overnight/artifacts/playwright-color-clean.log 2>&1 && { rg -n 'NO_COLOR|FORCE_COLOR|Warning:' overnight/artifacts/playwright-color-clean.log || true; tail -n 40 overnight/artifacts/playwright-color-clean.log; }
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && node - <<'NODE'
+const { spawn } = require('child_process');
+const env = { ...process.env };
+delete env.FORCE_COLOR;
+env.NO_COLOR = '1';
+const cp = spawn('./node_modules/.bin/playwright', ['test', '--list'], { stdio: 'inherit', env, shell: false });
+cp.on('exit', (code) => process.exit(code ?? 0));
+NODE
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && npm test > overnight/artifacts/playwright-color-clean.log 2>&1 && { rg -n 'NO_COLOR|FORCE_COLOR|Warning:' overnight/artifacts/playwright-color-clean.log || true; tail -n 30 overnight/artifacts/playwright-color-clean.log; }
+python3 - <<'PY'
+from pathlib import Path
+prev = Path('/Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/playwright-after-test-noise-cleanup.log')
+new = Path('/Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/playwright-color-clean.log')
+for name, path in [('before', prev), ('after', new)]:
+    text = path.read_text()
+    count = sum(1 for line in text.splitlines() if 'NO_COLOR' in line or 'FORCE_COLOR' in line or 'Warning:' in line)
+    print(name, count)
+PY
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && git log --oneline --max-count=10
+tail -n 40 /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/playwright-color-clean.log
