@@ -5,10 +5,14 @@
  * Cloudflare R2:      'https://layers.wojak.ink' (production after migration)
  *
  * Set VITE_LAYER_BASE_URL in .env.local to override.
- * When using R2, the CORS policy on the bucket + Vary: Origin Transform Rule
- * must be configured — see docs/plans/ Spec 1 for details.
+ * When using an absolute external base in local dev, route it through the Vite
+ * proxy to avoid browser-side CORS failures on the layer manifests.
  */
-export const LAYER_BASE = import.meta.env.VITE_LAYER_BASE_URL || '/assets/wojak-layers';
+const rawLayerBase = (import.meta.env.VITE_LAYER_BASE_URL || '/assets/wojak-layers').replace(/\/$/, '');
+const isAbsoluteLayerBase = /^https?:\/\//i.test(rawLayerBase);
+
+export const LAYER_BASE =
+  import.meta.env.DEV && isAbsoluteLayerBase ? '/__layer_proxy' : rawLayerBase;
 
 /** G2 (YourWojak colorable layers) base path */
 export const G2_LAYER_BASE = `${LAYER_BASE}/YourWojak-layers`;

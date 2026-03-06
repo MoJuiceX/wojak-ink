@@ -64,6 +64,12 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const useHttps = process.env.HTTPS === 'true'
   const isPlaywrightLocalSafe = process.env.PW_LOCAL_SAFE === '1'
+  const rawLayerBase = env.VITE_LAYER_BASE_URL?.replace(/\/$/, '') || ''
+  const hasExternalLayerBase = /^https?:\/\//i.test(rawLayerBase)
+  const externalLayerUrl = hasExternalLayerBase ? new URL(rawLayerBase) : null
+  const externalLayerBasePath = externalLayerUrl
+    ? externalLayerUrl.pathname.replace(/\/$/, '')
+    : ''
 
   return {
     plugins: [
@@ -244,6 +250,17 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/dexie-api/, ''),
         },
+        ...(externalLayerUrl ? {
+          '/__layer_proxy': {
+            target: externalLayerUrl.origin,
+            changeOrigin: true,
+            secure: true,
+            rewrite: (requestPath) => {
+              const rewrittenPath = requestPath.replace(/^\/__layer_proxy/, '')
+              return `${externalLayerBasePath}${rewrittenPath || '/'}`
+            },
+          },
+        } : {}),
       },
     },
   }
