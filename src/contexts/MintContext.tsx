@@ -28,6 +28,12 @@ import { useSageWallet } from '@/sage-wallet';
 import { fetchCollectionStats } from '@/services/tradeValuesService';
 import { useMetadataAttributes, type MetadataAttribute } from '@/components/generator/MetadataPreview';
 import { isValidChiaAddress } from '@/lib/validation';
+import {
+  POLL_MAX_DURATION,
+  POST_ACCEPT_WINDOW_MS,
+  getConfirmCooldownMs,
+  getMintPollInterval,
+} from '@/contexts/mintPolling';
 
 // ============ Types ============
 
@@ -135,17 +141,6 @@ interface MintContextValue {
 const DEFAULT_MAX_SUPPLY = 4200;
 const BASE_PRICE_XCH = 0.2;
 const PRICING_REFRESH_MS = 60_000;
-const POLL_INTERVAL_ACTIVE = 3000;
-const POLL_MAX_DURATION = 10 * 60 * 1000; // 10 minutes
-
-// Progressive backoff intervals for awaiting_payment polling (hits MintGarden API each cycle)
-const POLL_BACKOFF_SCHEDULE = [
-  { afterMs: 0, intervalMs: 5000 },       // First 30s: every 5s
-  { afterMs: 30_000, intervalMs: 10_000 }, // 30s-2min: every 10s
-  { afterMs: 120_000, intervalMs: 15_000 },// 2-5min: every 15s
-  { afterMs: 300_000, intervalMs: 20_000 },// 5min+: every 20s
-];
-
 const MintContext = createContext<MintContextValue | null>(null);
 
 // ============ Helpers ============
@@ -319,13 +314,14 @@ export function MintProvider({ children }: { children: ReactNode }) {
       clearTimeout(pollingTimeoutRef.current);
       pollingTimeoutRef.current = null;
     }
+    postAcceptFastUntilRef.current = 0;
   }, []);
 
   const pollingStartTimeRef = useRef<number>(0);
   const lastConfirmCallRef = useRef<number>(0);
   const currentStepRef = useRef<string>('');
+  const postAcceptFastUntilRef = useRef<number>(0);
   const isSubmittingRef = useRef<boolean>(false);
-  const CONFIRM_DEDUP_MS = 10_000; // Don't call confirm-payment more than once per 10s
 
   const startPolling = useCallback((jobId: number, walletAddr: string, initialStep?: string) => {
     stopPolling();
@@ -333,54 +329,72 @@ export function MintProvider({ children }: { children: ReactNode }) {
     lastConfirmCallRef.current = 0;
     currentStepRef.current = initialStep || '';
 
-    const poll = async () => {
-      try {
-        const res = await fetch(`/api/mint/job?id=${jobId}&wallet=${encodeURIComponent(walletAddr)}`);
-        if (!res.ok) return;
-        const data = await res.json() as MintJob;
+    const applyJobUpdate = (data: MintJob) => {
+      setCurrentJob(data);
+      currentStepRef.current = data.step;
 
-        setCurrentJob(data);
-        currentStepRef.current = data.step;
+      if (data.step === 'awaiting_payment') {
+        setMintStep('awaiting_payment');
+      }
 
-        if (data.step === 'awaiting_payment') {
-          setMintStep('awaiting_payment');
+      if (data.step === 'completed') {
+        setMintStep('success');
+        postAcceptFastUntilRef.current = 0;
+        stopPolling();
+        refetchCredits();
+      }
 
-          // Auto-detect payment: call confirm-payment (no launcherId) to let
-          // the server check if the NFT has appeared on-chain yet.
-          // Deduped: skip if called less than 10s ago to avoid burning rate limit.
-          const now = Date.now();
-          if (now - lastConfirmCallRef.current >= CONFIRM_DEDUP_MS) {
-            lastConfirmCallRef.current = now;
-            try {
-              const confirmRes = await fetch('/api/mint/confirm-payment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ jobId, walletAddress: walletAddr }),
-              });
-              const confirmData = await confirmRes.json().catch(() => ({}));
-              if (confirmData.success) {
-                // Server finalized — next poll will pick up completed state
-                return;
-              }
-              // pending = not yet on-chain, keep polling
-            } catch {
-              // Ignore — next poll will try again
-            }
-          }
-        }
-
-        if (data.step === 'completed') {
-          setMintStep('success');
-          stopPolling();
+      if (data.step === 'failed' || data.step === 'refunded') {
+        setMintStep('error');
+        setErrorMessage(data.error || 'Mint failed');
+        postAcceptFastUntilRef.current = 0;
+        stopPolling();
+        if (data.creditsRefunded) {
           refetchCredits();
         }
+      }
+    };
 
-        if (data.step === 'failed' || data.step === 'refunded') {
-          setMintStep('error');
-          setErrorMessage(data.error || 'Mint failed');
-          stopPolling();
-          if (data.creditsRefunded) {
-            refetchCredits();
+    const fetchJobStatus = async (): Promise<MintJob | null> => {
+      const res = await fetch(`/api/mint/job?id=${jobId}&wallet=${encodeURIComponent(walletAddr)}`);
+      if (!res.ok) return null;
+      return await res.json() as MintJob;
+    };
+
+    const attemptConfirmPayment = async (force = false): Promise<boolean> => {
+      const now = Date.now();
+      const confirmCooldownMs = force ? 0 : getConfirmCooldownMs(now, postAcceptFastUntilRef.current);
+      if (!force && now - lastConfirmCallRef.current < confirmCooldownMs) {
+        return false;
+      }
+
+      lastConfirmCallRef.current = now;
+      try {
+        const confirmRes = await fetch('/api/mint/confirm-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jobId, walletAddress: walletAddr }),
+        });
+        const confirmData = await confirmRes.json().catch(() => ({} as { success?: boolean }));
+        return !!confirmData.success;
+      } catch {
+        return false;
+      }
+    };
+
+    const poll = async (forceConfirm = false) => {
+      try {
+        const data = await fetchJobStatus();
+        if (!data) return;
+        applyJobUpdate(data);
+
+        if (data.step === 'awaiting_payment') {
+          const confirmSucceeded = await attemptConfirmPayment(forceConfirm);
+          if (confirmSucceeded) {
+            const refreshed = await fetchJobStatus();
+            if (refreshed) {
+              applyJobUpdate(refreshed);
+            }
           }
         }
       } catch (err) {
@@ -391,16 +405,12 @@ export function MintProvider({ children }: { children: ReactNode }) {
     // Get the right interval based on current step and elapsed time.
     // Reads currentStepRef so the interval adapts when the step changes
     // (e.g. from processing to awaiting_payment).
-    const getInterval = (): number => {
-      if (currentStepRef.current !== 'awaiting_payment') return POLL_INTERVAL_ACTIVE;
-      const elapsed = Date.now() - pollingStartTimeRef.current;
-      // Find the highest matching backoff tier
-      let interval = POLL_BACKOFF_SCHEDULE[0].intervalMs;
-      for (const tier of POLL_BACKOFF_SCHEDULE) {
-        if (elapsed >= tier.afterMs) interval = tier.intervalMs;
-      }
-      return interval;
-    };
+    const getInterval = (): number => getMintPollInterval({
+      step: currentStepRef.current,
+      elapsedMs: Date.now() - pollingStartTimeRef.current,
+      now: Date.now(),
+      postAcceptFastUntilMs: postAcceptFastUntilRef.current,
+    });
 
     // Initial poll
     poll();
@@ -481,36 +491,34 @@ export function MintProvider({ children }: { children: ReactNode }) {
     };
   }, [mintStep, currentJob?.step, stopPolling]);
 
-  // Immediate re-poll when tab becomes visible (handles backgrounded tabs)
+  // Immediate re-poll when tab becomes visible or the window regains focus
   useEffect(() => {
     if (!currentJob || !address) return;
     const terminalSteps = ['completed', 'failed', 'refunded'];
     if (terminalSteps.includes(currentJob.step)) return;
 
+    const restartPollingNow = () => {
+      if (!pollingRef.current) return;
+      startPolling(currentJob.jobId, address, currentJob.step);
+    };
+
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible' && pollingRef.current) {
-        // Trigger an immediate poll instead of waiting for the next interval
-        fetch(`/api/mint/job?id=${currentJob.jobId}&wallet=${encodeURIComponent(address)}`)
-          .then((res) => (res.ok ? res.json() : null))
-          .then((data) => {
-            if (!data) return;
-            setCurrentJob(data as MintJob);
-            if (data.step === 'awaiting_payment') setMintStep('awaiting_payment');
-            if (data.step === 'completed') { setMintStep('success'); stopPolling(); refetchCredits(); }
-            if (data.step === 'failed' || data.step === 'refunded') {
-              setMintStep('error');
-              setErrorMessage(data.error || 'Mint failed');
-              stopPolling();
-              if (data.creditsRefunded) refetchCredits();
-            }
-          })
-          .catch(() => { });
+      if (document.visibilityState === 'visible') {
+        restartPollingNow();
       }
     };
 
+    const handleFocus = () => {
+      restartPollingNow();
+    };
+
     document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [currentJob, address, stopPolling, refetchCredits]);
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [currentJob, address, startPolling]);
 
   // ── Page Reload Recovery ──
 
@@ -677,33 +685,34 @@ export function MintProvider({ children }: { children: ReactNode }) {
 
       const data = await res.json().catch(() => ({}));
       if (data.success) {
-        // Polling will pick up the completed state
+        startPolling(currentJob.jobId, address, 'finalizing');
       } else if (data.pending) {
-        // Not yet confirmed on-chain — keep waiting
+        startPolling(currentJob.jobId, address, currentJob.step);
       } else {
         setErrorMessage(data.error || 'Payment confirmation failed');
       }
     } catch (err) {
       console.error('[MintContext] confirmPayment error:', err);
     }
-  }, [currentJob, address]);
+  }, [currentJob, address, startPolling]);
 
   // Accept offer in Sage wallet via WalletConnect.
-  // After takeOffer succeeds, polling + cleanup auto-finalize handle confirmation.
-  // No manual confirm-payment call needed — the polling loop (lines 337-350)
-  // already calls confirm-payment on each cycle during awaiting_payment.
+  // After wallet acceptance, switch into a short fast-follow polling window so
+  // the UI flips to the minted state as soon as the backend finalizes.
   const acceptOfferInWallet = useCallback(async () => {
     if (!currentJob?.offerFile || !address) return;
 
     try {
       // Send takeOffer to Sage wallet via WalletConnect
       await takeOffer(currentJob.offerFile, 0);
-      // Offer accepted — polling will auto-detect the payment and finalize
+      postAcceptFastUntilRef.current = Date.now() + POST_ACCEPT_WINDOW_MS;
+      lastConfirmCallRef.current = 0;
+      startPolling(currentJob.jobId, address, currentJob.step);
     } catch (err) {
       console.error('[MintContext] acceptOfferInWallet error:', err);
       // User may have rejected in wallet — stay on awaiting_payment
     }
-  }, [currentJob, address, takeOffer]);
+  }, [currentJob, address, takeOffer, startPolling]);
 
   // confirmMintManual removed — auto-finalize via polling + cleanup is the
   // official paid mint confirmation path. confirm-payment.ts is kept as an
