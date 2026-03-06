@@ -58,7 +58,7 @@ export const MOCK_VIDEOS: VideoItem[] = [
     id: 'wiznerd-music',
     title: 'Wiznerd Music',
     description: 'The wizard nerd strikes again',
-    videoUrl: '/assets/videos/wiznerd-music.mov',
+    videoUrl: '/assets/videos/wiznerd-music.mp4',
     thumbnailUrl: '/assets/videos/TN_wiznerd-music.webp',
     duration: 240,
     durationFormatted: '4:00',

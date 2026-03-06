@@ -40,7 +40,7 @@ const MUSIC_VIDEOS: VideoItem[] = [
     id: '4',
     title: 'WizNerd Music',
     platform: 'local',
-    videoFile: '/assets/videos/wiznerd-music.mov',
+    videoFile: '/assets/videos/wiznerd-music.mp4',
     thumbnail: '/assets/videos/TN_wiznerd-music.webp',
     author: '@WizNerd'
   },
