@@ -34,25 +34,7 @@ import {
   getErrorMessage,
   getWelcomeMessage,
 } from '@/config/bigpulpResponses';
-
-// Type for the NFT data from big_pulp_v3_output.json
-interface BigPulpNFTData {
-  edition: number;
-  name: string;
-  open_rarity_rank: number;
-  hp_count: number;
-  image_ipfs: string;
-  launcher_id: string;
-  mintgarden_url: string;
-  traits: Record<string, string>;
-  hp_traits: string[];
-  named_combos: string[];
-  cultures: string[];
-  is_five_hp: boolean;
-  description: string;
-  is_homie_edition?: boolean;
-  homie_name?: string;
-}
+import { getBigPulpV9Entry, type BigPulpNFTData } from '@/services/bigPulpV9Service';
 import {
   useBigPulpMarketStats,
   useBigPulpHeatMap,
@@ -435,25 +417,10 @@ export function BigPulpProvider({
   void mockData; // Reserved for development mode
   const [state, dispatch] = useReducer(bigPulpReducer, initialState);
 
-  // NFT data from big_pulp_v9_output.json
-  const [nftDataMap, setNftDataMap] = useState<Record<string, BigPulpNFTData> | null>(null);
-
   // Badge state
   const [badges, setBadges] = useState<BadgeOption[]>([]);
   const [selectedBadge, setSelectedBadge] = useState<string | null>(null);
   const [badgeMapping, setBadgeMapping] = useState<BadgeMapping | null>(null);
-
-  // Load big_pulp_v9_output.json on mount
-  useEffect(() => {
-    fetch('/assets/BigPulp/bigPv9/big_pulp_v9_output.json')
-      .then(res => res.json())
-      .then((data: Record<string, BigPulpNFTData>) => {
-        setNftDataMap(data);
-      })
-      .catch(err => {
-        console.error('Failed to load big_pulp_v9_output.json:', err);
-      });
-  }, []);
 
   // Load badge data on mount
   useEffect(() => {
@@ -590,21 +557,6 @@ export function BigPulpProvider({
     homieName: nftData?.homie_name || null,
   }), []);
 
-  // Update traits when nftDataMap loads (if we already have an analysis)
-  useEffect(() => {
-    if (nftDataMap && state.currentAnalysis && !state.currentNftTraits) {
-      // Extract NFT ID from the analysis
-      const nftIdStr = state.currentAnalysis.nft.id.replace('WFP-', '').replace(/^0+/, '') || '0';
-      const nftData = nftDataMap[nftIdStr];
-      if (nftData) {
-        dispatch({
-          type: 'UPDATE_NFT_TRAITS',
-          payload: getV9Payload(nftData),
-        });
-      }
-    }
-  }, [nftDataMap, state.currentAnalysis, state.currentNftTraits, getV9Payload]);
-
   // Search actions
   const setSearchQuery = useCallback((query: string) => {
     dispatch({ type: 'SET_SEARCH_QUERY', payload: query });
@@ -621,10 +573,14 @@ export function BigPulpProvider({
       }
 
       try {
-        const analysis = await searchMutation.mutateAsync(numId);
+        const [analysis, nftData] = await Promise.all([
+          searchMutation.mutateAsync(numId),
+          getBigPulpV9Entry(numId).catch((error) => {
+            console.error('Failed to load big_pulp_v9_output.json:', error);
+            return undefined;
+          }),
+        ]);
         if (analysis) {
-          // Get data from big_pulp_v9_output.json
-          const nftData = nftDataMap?.[String(numId)];
           dispatch({
             type: 'SEARCH_SUCCESS',
             payload: { analysis, ...getV9Payload(nftData) }
@@ -636,7 +592,7 @@ export function BigPulpProvider({
         dispatch({ type: 'SEARCH_ERROR', payload: 'NFT not found' });
       }
     },
-    [searchMutation, nftDataMap, getV9Payload]
+    [searchMutation, getV9Payload]
   );
 
   const surpriseMe = useCallback(async () => {
@@ -647,8 +603,10 @@ export function BigPulpProvider({
       const nftIdStr = analysis.nft.id.replace('WFP-', '');
       dispatch({ type: 'SET_SEARCH_QUERY', payload: nftIdStr });
 
-      // Get data from big_pulp_v9_output.json
-      const nftData = nftDataMap?.[nftIdStr];
+      const nftData = await getBigPulpV9Entry(nftIdStr).catch((error) => {
+        console.error('Failed to load big_pulp_v9_output.json:', error);
+        return undefined;
+      });
       dispatch({
         type: 'SEARCH_SUCCESS',
         payload: { analysis, ...getV9Payload(nftData) }
@@ -656,7 +614,7 @@ export function BigPulpProvider({
     } catch {
       dispatch({ type: 'SEARCH_ERROR', payload: 'Failed to get random NFT' });
     }
-  }, [randomMutation, nftDataMap, getV9Payload]);
+  }, [randomMutation, getV9Payload]);
 
   const clearSearch = useCallback(() => {
     dispatch({ type: 'CLEAR_SEARCH' });
