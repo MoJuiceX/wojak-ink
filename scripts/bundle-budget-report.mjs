@@ -10,17 +10,21 @@ const repoRoot = path.resolve(__dirname, '..');
 function parseArgs(argv) {
   const out = {
     distDir: path.join(repoRoot, 'dist', 'assets'),
+    publicDir: path.join(repoRoot, 'public'),
     jsonOut: path.join(repoRoot, 'reports', 'bundle-budget-latest.json'),
     mdOut: path.join(repoRoot, 'reports', 'bundle-budget-latest.md'),
     enforceHard: false,
     maxJsAssetKb: 406,
+    publicAssetThresholdKb: 250,
   };
   for (const arg of argv) {
     if (arg === '--enforce-hard') out.enforceHard = true;
     else if (arg.startsWith('--dist-dir=')) out.distDir = path.resolve(repoRoot, arg.slice('--dist-dir='.length));
+    else if (arg.startsWith('--public-dir=')) out.publicDir = path.resolve(repoRoot, arg.slice('--public-dir='.length));
     else if (arg.startsWith('--json-out=')) out.jsonOut = path.resolve(repoRoot, arg.slice('--json-out='.length));
     else if (arg.startsWith('--md-out=')) out.mdOut = path.resolve(repoRoot, arg.slice('--md-out='.length));
     else if (arg.startsWith('--max-js-asset-kb=')) out.maxJsAssetKb = Number(arg.slice('--max-js-asset-kb='.length));
+    else if (arg.startsWith('--public-asset-threshold-kb=')) out.publicAssetThresholdKb = Number(arg.slice('--public-asset-threshold-kb='.length));
   }
   return out;
 }
@@ -82,6 +86,10 @@ async function main() {
 
   const jsFiles = files.filter((f) => f.type === 'js').sort((a, b) => b.bytes - a.bytes);
   const cssFiles = files.filter((f) => f.type === 'css').sort((a, b) => b.bytes - a.bytes);
+  const publicFiles = await collectPublicFiles(args.publicDir);
+  const heavyPublicAssets = publicFiles
+    .filter((f) => f.sizeKb >= args.publicAssetThresholdKb)
+    .sort((a, b) => b.bytes - a.bytes);
   const standaloneJsFiles = jsFiles
     .filter((f) => f.group.startsWith('standalone-'))
     .sort((a, b) => b.bytes - a.bytes);
@@ -122,15 +130,23 @@ async function main() {
     distDir: path.relative(repoRoot, args.distDir),
     limits: {
       maxJsAssetKb: args.maxJsAssetKb,
+      publicAssetThresholdKb: args.publicAssetThresholdKb,
     },
     totals: {
       jsFiles: jsFiles.length,
       cssFiles: cssFiles.length,
+      publicFiles: publicFiles.length,
       jsKb: kb(jsFiles.reduce((sum, f) => sum + f.bytes, 0)),
       cssKb: kb(cssFiles.reduce((sum, f) => sum + f.bytes, 0)),
     },
     topJs: jsFiles.slice(0, 15).map(({ file, bytes, sizeKb, group }) => ({ file, bytes, sizeKb, group })),
     topCss: cssFiles.slice(0, 10).map(({ file, bytes, sizeKb }) => ({ file, bytes, sizeKb })),
+    topPublicAssets: heavyPublicAssets.slice(0, 20).map(({ file, bytes, sizeKb, ext }) => ({
+      file,
+      bytes,
+      sizeKb,
+      ext,
+    })),
     standaloneJs: standaloneJsFiles.map(({ file, bytes, sizeKb, group }) => ({ file, bytes, sizeKb, group })),
     budgets: budgetChecks,
     perAssetHardBreaches: perAssetHardBreaches.map(({ file, bytes, sizeKb, group }) => ({
@@ -176,6 +192,7 @@ async function main() {
   md.push(`- Per-asset JS hard breaches (>${args.maxJsAssetKb}kB): ${report.summary.perAssetHardBreaches}`);
   md.push(`- Orphaned JS files (not in budget groups): ${report.summary.orphanedJs}`);
   md.push(`- Orphaned JS hard breaches (>${args.maxJsAssetKb}kB): ${report.summary.orphanedHardBreaches}`);
+  md.push(`- Public assets over ${args.publicAssetThresholdKb}kB: ${report.topPublicAssets.length}`);
   md.push('');
   md.push('## Per-Asset JS Hard Limit');
   md.push(`All shipped JavaScript assets in \`${report.distDir}\` must be <= ${args.maxJsAssetKb} kB.`);
@@ -236,6 +253,16 @@ async function main() {
     md.push(`| ${row.file} | ${row.sizeKb.toFixed(2)} |`);
   }
   md.push('');
+  md.push(`## Top Public Assets (>${args.publicAssetThresholdKb}kB)`);
+  md.push('| File | Ext | Size (kB) |');
+  md.push('|---|---|---:|');
+  for (const row of report.topPublicAssets) {
+    md.push(`| ${row.file} | ${row.ext} | ${row.sizeKb.toFixed(2)} |`);
+  }
+  if (!report.topPublicAssets.length) {
+    md.push('| (none) | - | - |');
+  }
+  md.push('');
 
   await fs.writeFile(args.mdOut, `${md.join('\n')}\n`, 'utf8');
 
@@ -271,6 +298,32 @@ async function collectFiles(rootDir) {
       });
     }
   }
+  await walk(rootDir);
+  return out;
+}
+
+async function collectPublicFiles(rootDir) {
+  const out = [];
+  async function walk(dir) {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const abs = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await walk(abs);
+        continue;
+      }
+      if (!entry.isFile()) continue;
+      const stat = await fs.stat(abs);
+      const file = path.relative(repoRoot, abs).replace(/\\/g, '/');
+      out.push({
+        file,
+        bytes: stat.size,
+        sizeKb: kb(stat.size),
+        ext: path.extname(abs).slice(1) || 'unknown',
+      });
+    }
+  }
+
   await walk(rootDir);
   return out;
 }
