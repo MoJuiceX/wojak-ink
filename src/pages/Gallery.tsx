@@ -34,6 +34,12 @@ import type { CharacterType } from '@/types/nft';
 import { PageSEO } from '@/components/seo';
 
 const ITEMS_PER_PAGE = 100;
+const INITIAL_CHARACTER_PRELOAD_COUNT = 12;
+const SECONDARY_CHARACTER_PRELOAD_COUNT = 24;
+const TERTIARY_CHARACTER_PRELOAD_COUNT = 48;
+const INITIAL_GRID_PRELOAD_COUNT = 24;
+const SORT_PRELOAD_COUNT = 24;
+const HOVER_PRELOAD_COUNT = 24;
 
 function GalleryContent() {
   const { setHeaderBreadcrumb } = useLayout();
@@ -87,8 +93,10 @@ function GalleryContent() {
 
     async function preloadAllCharacters() {
       try {
-        // Phase 1: Load first 50 images per character with HIGH priority (immediate)
-        const urlsByCharacter = await galleryService.getFirstNImageUrlsPerCharacter(50);
+        // Phase 1: Load a small first slice per character after initial layout settles
+        const urlsByCharacter = await galleryService.getFirstNImageUrlsPerCharacter(
+          INITIAL_CHARACTER_PRELOAD_COUNT
+        );
 
         if (cancelled) return;
 
@@ -99,15 +107,16 @@ function GalleryContent() {
         }
         imagePreloader.preloadBatch(firstBatch, 'high');
 
-        // Phase 2: After a short delay, load more images (51-150) per character
+        // Phase 2: After a short delay, load a second slice per character
         setTimeout(async () => {
           if (cancelled) return;
           try {
-            const moreUrls = await galleryService.getFirstNImageUrlsPerCharacter(150);
+            const moreUrls = await galleryService.getFirstNImageUrlsPerCharacter(
+              SECONDARY_CHARACTER_PRELOAD_COUNT
+            );
             const secondBatch: string[] = [];
             for (const urls of moreUrls.values()) {
-              // Skip the first 50 we already loaded
-              secondBatch.push(...urls.slice(50));
+              secondBatch.push(...urls.slice(INITIAL_CHARACTER_PRELOAD_COUNT));
             }
             if (secondBatch.length > 0) {
               imagePreloader.preloadBatch(secondBatch, 'medium');
@@ -117,15 +126,16 @@ function GalleryContent() {
           }
         }, 1000);
 
-        // Phase 3: After user has been on page for 3 seconds, load even more
+        // Phase 3: After user has been on page for a while, load a deeper slice
         setTimeout(async () => {
           if (cancelled) return;
           try {
-            const allUrls = await galleryService.getFirstNImageUrlsPerCharacter(300);
+            const allUrls = await galleryService.getFirstNImageUrlsPerCharacter(
+              TERTIARY_CHARACTER_PRELOAD_COUNT
+            );
             const thirdBatch: string[] = [];
             for (const urls of allUrls.values()) {
-              // Skip the first 150 we already loaded
-              thirdBatch.push(...urls.slice(150));
+              thirdBatch.push(...urls.slice(SECONDARY_CHARACTER_PRELOAD_COUNT));
             }
             if (thirdBatch.length > 0) {
               imagePreloader.preloadBatch(thirdBatch, 'low');
@@ -140,20 +150,24 @@ function GalleryContent() {
       }
     }
 
-    preloadAllCharacters();
+    const kickoff = window.setTimeout(() => {
+      void preloadAllCharacters();
+    }, 500);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(kickoff);
     };
   }, []); // Only run once on mount
 
-  // CRITICAL: Preload first 50 images immediately with highest priority
+  // CRITICAL: Preload the first visible rows immediately with highest priority
   // This ensures the user sees images as soon as possible
   useEffect(() => {
     if (filteredNfts.length === 0 || isLoading) return;
 
-    // Get the first 50 images that will be displayed immediately
-    const firstBatchUrls = filteredNfts.slice(0, 50).map((nft) => nft.thumbnailUrl);
+    const firstBatchUrls = filteredNfts
+      .slice(0, INITIAL_GRID_PRELOAD_COUNT)
+      .map((nft) => nft.thumbnailUrl);
 
     // Preload these with CRITICAL priority - they must load first
     imagePreloader.preloadBatch(firstBatchUrls, 'critical');
@@ -209,45 +223,40 @@ function GalleryContent() {
 
     // Register action images with the coordinator
     // This tells the coordinator what images each button would show
-    preloadCoordinator.updateActionImages('gallery', 'filter-all-sort-id-asc', getTopUrls(byIdAsc, ITEMS_PER_PAGE));
-    preloadCoordinator.updateActionImages('gallery', 'filter-all-sort-id-desc', getTopUrls(byIdDesc, ITEMS_PER_PAGE));
-    preloadCoordinator.updateActionImages('gallery', 'filter-all-sort-rarity-asc', getTopUrls(byRarityAsc, ITEMS_PER_PAGE));
-    preloadCoordinator.updateActionImages('gallery', 'filter-all-sort-rarity-desc', getTopUrls(byRarityDesc, ITEMS_PER_PAGE));
-    preloadCoordinator.updateActionImages('gallery', 'filter-all-sort-price-asc', getTopUrls(byPriceAsc, ITEMS_PER_PAGE));
-    preloadCoordinator.updateActionImages('gallery', 'filter-all-sort-price-desc', getTopUrls(byPriceDesc, ITEMS_PER_PAGE));
-    preloadCoordinator.updateActionImages('gallery', 'filter-listed-sort-id-asc', getTopUrls(listedByIdAsc, ITEMS_PER_PAGE));
-    preloadCoordinator.updateActionImages('gallery', 'filter-listed-sort-id-desc', getTopUrls(listedByIdDesc, ITEMS_PER_PAGE));
-    preloadCoordinator.updateActionImages('gallery', 'filter-listed-sort-rarity-asc', getTopUrls(listedByRarityAsc, ITEMS_PER_PAGE));
-    preloadCoordinator.updateActionImages('gallery', 'filter-listed-sort-rarity-desc', getTopUrls(listedByRarityDesc, ITEMS_PER_PAGE));
-    preloadCoordinator.updateActionImages('gallery', 'filter-listed-sort-price-asc', getTopUrls(listedByPriceAsc, ITEMS_PER_PAGE));
-    preloadCoordinator.updateActionImages('gallery', 'filter-listed-sort-price-desc', getTopUrls(listedByPriceDesc, ITEMS_PER_PAGE));
+    preloadCoordinator.updateActionImages('gallery', 'filter-all-sort-id-asc', getTopUrls(byIdAsc, SORT_PRELOAD_COUNT));
+    preloadCoordinator.updateActionImages('gallery', 'filter-all-sort-id-desc', getTopUrls(byIdDesc, SORT_PRELOAD_COUNT));
+    preloadCoordinator.updateActionImages('gallery', 'filter-all-sort-rarity-asc', getTopUrls(byRarityAsc, SORT_PRELOAD_COUNT));
+    preloadCoordinator.updateActionImages('gallery', 'filter-all-sort-rarity-desc', getTopUrls(byRarityDesc, SORT_PRELOAD_COUNT));
+    preloadCoordinator.updateActionImages('gallery', 'filter-all-sort-price-asc', getTopUrls(byPriceAsc, SORT_PRELOAD_COUNT));
+    preloadCoordinator.updateActionImages('gallery', 'filter-all-sort-price-desc', getTopUrls(byPriceDesc, SORT_PRELOAD_COUNT));
+    preloadCoordinator.updateActionImages('gallery', 'filter-listed-sort-id-asc', getTopUrls(listedByIdAsc, SORT_PRELOAD_COUNT));
+    preloadCoordinator.updateActionImages('gallery', 'filter-listed-sort-id-desc', getTopUrls(listedByIdDesc, SORT_PRELOAD_COUNT));
+    preloadCoordinator.updateActionImages('gallery', 'filter-listed-sort-rarity-asc', getTopUrls(listedByRarityAsc, SORT_PRELOAD_COUNT));
+    preloadCoordinator.updateActionImages('gallery', 'filter-listed-sort-rarity-desc', getTopUrls(listedByRarityDesc, SORT_PRELOAD_COUNT));
+    preloadCoordinator.updateActionImages('gallery', 'filter-listed-sort-price-asc', getTopUrls(listedByPriceAsc, SORT_PRELOAD_COUNT));
+    preloadCoordinator.updateActionImages('gallery', 'filter-listed-sort-price-desc', getTopUrls(listedByPriceDesc, SORT_PRELOAD_COUNT));
 
     // Collect all URLs from first 100 of each sort (use Set to dedupe)
     const highPriorityUrls = new Set<string>();
 
-    // Add first 100 from each sort order (All filter)
-    getTopUrls(byIdAsc, ITEMS_PER_PAGE).forEach((url) => highPriorityUrls.add(url));
-    getTopUrls(byIdDesc, ITEMS_PER_PAGE).forEach((url) => highPriorityUrls.add(url));
-    getTopUrls(byRarityAsc, ITEMS_PER_PAGE).forEach((url) => highPriorityUrls.add(url));
-    getTopUrls(byRarityDesc, ITEMS_PER_PAGE).forEach((url) => highPriorityUrls.add(url));
-    getTopUrls(byPriceAsc, ITEMS_PER_PAGE).forEach((url) => highPriorityUrls.add(url));
-    getTopUrls(byPriceDesc, ITEMS_PER_PAGE).forEach((url) => highPriorityUrls.add(url));
+    // Add the first slice from each sort order (All filter)
+    getTopUrls(byIdAsc, SORT_PRELOAD_COUNT).forEach((url) => highPriorityUrls.add(url));
+    getTopUrls(byIdDesc, SORT_PRELOAD_COUNT).forEach((url) => highPriorityUrls.add(url));
+    getTopUrls(byRarityAsc, SORT_PRELOAD_COUNT).forEach((url) => highPriorityUrls.add(url));
+    getTopUrls(byRarityDesc, SORT_PRELOAD_COUNT).forEach((url) => highPriorityUrls.add(url));
+    getTopUrls(byPriceAsc, SORT_PRELOAD_COUNT).forEach((url) => highPriorityUrls.add(url));
+    getTopUrls(byPriceDesc, SORT_PRELOAD_COUNT).forEach((url) => highPriorityUrls.add(url));
 
-    // Add first 100 from each sort order (Listed filter)
-    getTopUrls(listedByIdAsc, ITEMS_PER_PAGE).forEach((url) => highPriorityUrls.add(url));
-    getTopUrls(listedByIdDesc, ITEMS_PER_PAGE).forEach((url) => highPriorityUrls.add(url));
-    getTopUrls(listedByRarityAsc, ITEMS_PER_PAGE).forEach((url) => highPriorityUrls.add(url));
-    getTopUrls(listedByRarityDesc, ITEMS_PER_PAGE).forEach((url) => highPriorityUrls.add(url));
-    getTopUrls(listedByPriceAsc, ITEMS_PER_PAGE).forEach((url) => highPriorityUrls.add(url));
-    getTopUrls(listedByPriceDesc, ITEMS_PER_PAGE).forEach((url) => highPriorityUrls.add(url));
+    // Add the first slice from each sort order (Listed filter)
+    getTopUrls(listedByIdAsc, SORT_PRELOAD_COUNT).forEach((url) => highPriorityUrls.add(url));
+    getTopUrls(listedByIdDesc, SORT_PRELOAD_COUNT).forEach((url) => highPriorityUrls.add(url));
+    getTopUrls(listedByRarityAsc, SORT_PRELOAD_COUNT).forEach((url) => highPriorityUrls.add(url));
+    getTopUrls(listedByRarityDesc, SORT_PRELOAD_COUNT).forEach((url) => highPriorityUrls.add(url));
+    getTopUrls(listedByPriceAsc, SORT_PRELOAD_COUNT).forEach((url) => highPriorityUrls.add(url));
+    getTopUrls(listedByPriceDesc, SORT_PRELOAD_COUNT).forEach((url) => highPriorityUrls.add(url));
 
     // Preload all high priority URLs (for filter/sort switching)
     imagePreloader.preloadBatch(Array.from(highPriorityUrls), 'high');
-
-    // Preload remaining NFTs with low priority in background
-    const allUrls = new Set(allCharacterNfts.map((nft) => nft.thumbnailUrl));
-    const remainingUrls = Array.from(allUrls).filter((url) => !highPriorityUrls.has(url));
-    imagePreloader.preloadBatch(remainingUrls, 'low');
 
   }, [allCharacterNfts, isLoading, selectedCharacter]);
 
@@ -351,7 +360,7 @@ function GalleryContent() {
     async (character: CharacterType) => {
       try {
         const nfts = await galleryService.fetchNFTsByCharacter(character);
-        const urls = nfts.slice(0, 50).map((nft) => nft.imageUrl);
+        const urls = nfts.slice(0, HOVER_PRELOAD_COUNT).map((nft) => nft.imageUrl);
         imagePreloader.preloadBatch(urls, 'high');
       } catch {
         // Silently fail - preloading is a nice-to-have
