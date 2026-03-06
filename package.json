@@ -11,6 +11,7 @@
     "nightshift:run": "node scripts/nightshift.mjs --real --max-hours=8 --max-tasks=20 --soft-failures=5 --hard-failures=10",
     "nightshift:resume": "node scripts/nightshift.mjs --resume --real --max-hours=8 --max-tasks=20 --soft-failures=5 --hard-failures=10",
     "verify-manifest": "node scripts/verify-manifest-assets.mjs",
+    "manifest:orphans": "node scripts/report-manifest-orphans.mjs",
     "generate:metadata-lite": "node scripts/generate-metadata-lite.mjs",
     "bundle:report": "node scripts/bundle-budget-report.mjs",
     "perf:lighthouse": "node scripts/run-lighthouse-baseline.mjs",
