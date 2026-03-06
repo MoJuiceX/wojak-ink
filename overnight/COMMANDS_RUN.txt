@@ -195,3 +195,34 @@ tail -n 40 /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/l
 tail -n 30 /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/build-after-test-noise-cleanup.log
 cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && npx tsc --noEmit > overnight/artifacts/typecheck-after-test-noise-cleanup.log 2>&1 && tail -n 20 overnight/artifacts/typecheck-after-test-noise-cleanup.log
 cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && PW_LOCAL_SAFE=1 npm test > overnight/artifacts/playwright-after-test-noise-cleanup.log 2>&1 && tail -n 60 overnight/artifacts/playwright-after-test-noise-cleanup.log
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && rg -n "big_pulp_v3_output|big_pulp_v9_output|nft_takes_v2|wiznerd-music|multi-billion-dao|pokemon-tang-gang|big_pulp_v3|BigPulp/big_pulp_v3_output" src public scripts functions
+sed -n '1,260p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/utils/mockMediaData.ts
+sed -n '1,260p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/contexts/VideoPlayerContext.tsx
+command -v ffmpeg && ffmpeg -version | head -n 2
+command -v ffprobe && ffprobe -v error -show_entries format=duration,size,bit_rate -show_streams -of json /Users/abit_hex/wojak-ink-nightshift-2026-03-06/public/assets/videos/wiznerd-music.mov
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06/public/assets/videos && rm -f wiznerd-music.remux-test.mp4 && ffmpeg -y -i wiznerd-music.mov -c copy -movflags +faststart wiznerd-music.remux-test.mp4 >/tmp/wiznerd-remux.log 2>&1 && ls -lh wiznerd-music.mov wiznerd-music.remux-test.mp4 && tail -n 20 /tmp/wiznerd-remux.log
+python3 - <<'PY'
+from pathlib import Path
+mov = Path('/Users/abit_hex/wojak-ink-nightshift-2026-03-06/public/assets/videos/wiznerd-music.mov').stat().st_size
+mp4 = Path('/Users/abit_hex/wojak-ink-nightshift-2026-03-06/public/assets/videos/wiznerd-music.remux-test.mp4').stat().st_size
+print({'mov_bytes': mov, 'mp4_bytes': mp4, 'delta_bytes': mp4-mov, 'delta_pct': round((mp4-mov)/mov*100, 3)})
+PY
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06/public/assets/videos && mv -f wiznerd-music.remux-test.mp4 wiznerd-music.mp4
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && rg -n "wiznerd-music\.(mov|mp4)" src public
+npm --prefix /Users/abit_hex/wojak-ink-nightshift-2026-03-06 run build > /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/build-after-wiznerd-remux.log 2>&1 && tail -n 40 /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/build-after-wiznerd-remux.log
+git -C /Users/abit_hex/wojak-ink-nightshift-2026-03-06 status --short
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && git add src/contexts/VideoPlayerContext.tsx src/utils/mockMediaData.ts public/assets/videos/wiznerd-music.mp4 && git commit -m "perf: remux wiznerd video for web playback"
+sed -n '1,260p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/eslint.config.js
+npm --prefix /Users/abit_hex/wojak-ink-nightshift-2026-03-06 run lint
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && git add eslint.config.js && git commit -m "chore: ignore generated farmers plot manifest in lint"
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && npm run lint > overnight/artifacts/lint-final-clean.log 2>&1 && wc -l overnight/artifacts/lint-final-clean.log && git log --oneline --max-count=8
+python3 - <<'PY'
+from pathlib import Path
+mov = Path('/Users/abit_hex/wojak-ink-nightshift-2026-03-06/public/assets/videos/wiznerd-music.mov').stat().st_size
+mp4 = Path('/Users/abit_hex/wojak-ink-nightshift-2026-03-06/public/assets/videos/wiznerd-music.mp4').stat().st_size
+print(f'mov_kb={mov/1024:.2f}')
+print(f'mp4_kb={mp4/1024:.2f}')
+print(f'delta_kb={(mp4-mov)/1024:.2f}')
+print(f'delta_pct={(mp4-mov)/mov*100:.3f}')
+PY
+cat /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/lint-final-clean.log

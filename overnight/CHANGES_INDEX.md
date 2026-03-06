@@ -260,6 +260,39 @@ npm run build
 rg -n '^stderr \|' overnight/artifacts/unit-noise-after-fixes.log
 ```
 
+## Commit `717ccb8` — `perf: remux wiznerd video for web playback`
+
+### What changed
+- added `public/assets/videos/wiznerd-music.mp4` via a `faststart` MP4 remux of the existing MOV source
+- switched runtime references from `.mov` to `.mp4` in the local video playlists
+- kept the original MOV in place for rollback and source preservation
+
+### Files touched
+- `public/assets/videos/wiznerd-music.mp4`
+- `src/contexts/VideoPlayerContext.tsx`
+- `src/utils/mockMediaData.ts`
+
+### Validate
+```bash
+npm run build
+rg -n "wiznerd-music\\.(mov|mp4)" src public
+```
+
+## Commit `1ba7cc0` — `chore: ignore generated farmers plot manifest in lint`
+
+### What changed
+- excluded the generated `functions/_data/farmersPlotImageManifest.ts` file from ESLint
+- removed the final repo-controlled lint-time deopt noise from the nightly run
+
+### Files touched
+- `eslint.config.js`
+
+### Validate
+```bash
+npm run lint > overnight/artifacts/lint-final-clean.log 2>&1
+cat overnight/artifacts/lint-final-clean.log
+```
+
 ## Final validation set
 
 ```bash
@@ -273,4 +306,6 @@ npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse --route=/ --
 npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse-gallery-tuned --route=/gallery
 npm run test:unit > overnight/artifacts/unit-noise-after-fixes.log 2>&1
 rg -n '^stderr \|' overnight/artifacts/unit-noise-after-fixes.log
+npm run build > overnight/artifacts/build-after-wiznerd-remux.log 2>&1
+npm run lint > overnight/artifacts/lint-final-clean.log 2>&1
 ```

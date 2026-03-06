@@ -179,13 +179,40 @@ Undoes:
 Risk:
 - repo-generated unit-suite stderr noise returns and module-init localStorage access becomes less defensive again
 
+## `717ccb8` — WizNerd video remux
+
+```bash
+git revert 717ccb8
+npm run build
+```
+
+Undoes:
+- the MP4 runtime reference for the WizNerd video
+- the additional `wiznerd-music.mp4` asset
+
+Risk:
+- local music-video playback falls back to the MOV source only
+
+## `1ba7cc0` — Ignore generated Farmers Plot manifest in lint
+
+```bash
+git revert 1ba7cc0
+npm run lint
+```
+
+Undoes:
+- the ESLint ignore for `functions/_data/farmersPlotImageManifest.ts`
+
+Risk:
+- lint output regains noise from the generated manifest file
+
 ## Full nightly rollback
 
 To remove the entire overnight branch delta relative to `main`:
 
 ```bash
 git log --oneline main..HEAD
-git revert 86068cb d099d2b 9727080 5a7e4e8 aad9a75 5b1d1f3 2196cf4 5c586aa 76574fb 02df9da 0e7bf0c
+git revert 1ba7cc0 717ccb8 86068cb d099d2b 9727080 5a7e4e8 aad9a75 5b1d1f3 2196cf4 5c586aa 76574fb 02df9da 0e7bf0c
 ```
 
 Validate afterward:

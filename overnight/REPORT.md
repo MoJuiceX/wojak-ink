@@ -26,6 +26,8 @@
 10. Reduced gallery preload pressure and re-measured `/gallery` with a dedicated Lighthouse run.
 11. Reduced long-form game music preload buffering to avoid eager audio downloads.
 12. Reduced repo-generated unit-test stderr noise without suppressing unexpected failures.
+13. Remuxed the heaviest local music video to a `faststart` MP4 for better browser playback compatibility.
+14. Removed the final repo-owned lint noise by excluding the generated Farmers Plot manifest from ESLint.
 
 ## Phase Results
 
@@ -322,6 +324,42 @@ Validation:
 - `npm run lint` => passed (remaining output is only the Babel deopt note on `functions/_data/farmersPlotImageManifest.ts`)
 - `npm run build` => passed (`built in 5.91s`)
 
+### Phase 11 — WizNerd video remux for web playback
+
+Commit:
+- `717ccb8` — `perf: remux wiznerd video for web playback`
+
+What changed:
+- remuxed `public/assets/videos/wiznerd-music.mov` to `public/assets/videos/wiznerd-music.mp4` using a stream copy plus `-movflags +faststart`
+- updated app references to the MP4 in:
+  - `src/contexts/VideoPlayerContext.tsx`
+  - `src/utils/mockMediaData.ts`
+- kept the original `.mov` file on disk for rollback and source preservation
+
+Measured result:
+- `wiznerd-music.mov`: `12664.79 KB`
+- `wiznerd-music.mp4`: `12687.50 KB`
+- size delta: `+22.71 KB` (`+0.179%`)
+- tradeoff accepted because the change improves web playback compatibility and seek/startup behavior without re-encoding the source
+
+Validation:
+- `npm run build` => passed (`built in 5.44s`)
+
+### Phase 12 — Generated-manifest lint cleanup
+
+Commit:
+- `1ba7cc0` — `chore: ignore generated farmers plot manifest in lint`
+
+What changed:
+- excluded `functions/_data/farmersPlotImageManifest.ts` from ESLint via `globalIgnores`
+- this removes the last repo-controlled lint-time Babel deopt noise from the nightly run
+
+Artifacts:
+- `overnight/artifacts/lint-final-clean.log`
+
+Validation:
+- `npm run lint` => passed with no additional output beyond the command banner
+
 ## Final Validation State
 
 Artifacts:
@@ -331,6 +369,7 @@ Artifacts:
 - `overnight/artifacts/lint-after-noise-cleanup.log`
 - `overnight/artifacts/typecheck-after-test-noise-cleanup.log`
 - `overnight/artifacts/playwright-after-test-noise-cleanup.log`
+- `overnight/artifacts/lint-final-clean.log`
 - `overnight/artifacts/bundle-report-latest.*`
 - `overnight/artifacts/lighthouse/*`
 - `overnight/artifacts/lighthouse-gallery-tuned/*`
@@ -339,8 +378,8 @@ Final checks:
 - `git status --short --branch` => nightly branch plus `overnight/` artifacts/docs only before final packaging commit
 - `npx tsc --noEmit` => passed
 - `npm run test:unit` => passed (`152` files, `4260` tests)
-- `npm run build` => passed (`built in 5.91s`)
-- `npm run lint` => passed with no ESLint warnings
+- `npm run build` => passed (`built in 5.44s`)
+- `npm run lint` => passed with no lint output beyond the command banner
 - `PW_LOCAL_SAFE=1 npm test` => passed (`6` tests)
 
 ## Remaining Risks / Deferred Work

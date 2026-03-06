@@ -90,6 +90,12 @@
 | Long-form game music affected | ad hoc per page | centralized helper used by BrickByBrick, MemoryMatch, FlappyOrange, WojakRunner, BlockPuzzle, ColorReaction, GameModal, AudioContext |
 | Short SFX / Howler pools | unchanged | unchanged by design |
 
+### WizNerd local video container
+
+| Asset | Before | After | Delta |
+|---|---:|---:|---:|
+| `public/assets/videos/wiznerd-music` | `12664.79 KB` MOV | `12687.50 KB` MP4 (`faststart`) | `+22.71 KB` (`+0.179%`) |
+
 ## Lighthouse baseline (new)
 
 The project had no repeatable Lighthouse artifact before this pass. These scores are the new local desktop baseline from `overnight/artifacts/lighthouse/summary.md`.
@@ -139,6 +145,7 @@ After the initial overnight baseline, the gallery page was still the weakest hig
 | Signal | Before | After |
 |---|---:|---:|
 | ESLint warnings | `43` | `0` |
+| Lint-time repo-owned Babel/deopt noise | `1` generated manifest note | `0` |
 | Bundle hard breaches | n/a | `0` |
 | Bundle soft breaches | n/a | `0` |
 | Orphaned JS visibility | none | explicit report (`0` current) |
