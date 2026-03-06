@@ -22,6 +22,11 @@ import { resolveGeneratorAssetUrl } from '@/utils/generatorAssetUrl';
 /** Default color for solid color backgrounds - sky blue */
 const SOLID_BG_DEFAULT_COLOR = '#38BDF8';
 
+const STATIC_REKT_MOUTH_OVERLAY_PATHS = new Set<string>([
+  '/assets/wojak-layers/MOUTH/MOUTH_Bubble-Gum_rekt.png',
+  '/assets/wojak-layers/MOUTH/MOUTH_Pipe-when-rekt.png',
+]);
+
 function isMouthOverBeerHat(path: string | undefined): boolean {
   if (!path) return false;
   const lower = path.toLowerCase();
@@ -2475,7 +2480,8 @@ export async function renderToCanvas(
         continue;
       }
       // Generic G2 resolution — skip Beer Hat Head (already resolved above with pre-split images)
-      if (g2Sel && !(layerNameStr === 'Head' && g2Sel.traitId === 'Head_Beer-Hat')) {
+      const shouldSkipStaticOverlayG2Resolution = STATIC_REKT_MOUTH_OVERLAY_PATHS.has(layer.path);
+      if (g2Sel && !shouldSkipStaticOverlayG2Resolution && !(layerNameStr === 'Head' && g2Sel.traitId === 'Head_Beer-Hat')) {
         try {
           const trait = await getUnifiedTraitById(g2Sel.traitId);
           if (trait && (trait.source === 'g2' || trait.source === 'both')) {
@@ -2837,7 +2843,8 @@ export async function exportImage(
         continue;
       }
       // Generic G2 resolution — skip Beer Hat Head (already resolved above with pre-split images)
-      if (g2Sel && !(layerNameStr === 'Head' && g2Sel.traitId === 'Head_Beer-Hat')) {
+      const shouldSkipStaticOverlayG2Resolution = STATIC_REKT_MOUTH_OVERLAY_PATHS.has(layer.path);
+      if (g2Sel && !shouldSkipStaticOverlayG2Resolution && !(layerNameStr === 'Head' && g2Sel.traitId === 'Head_Beer-Hat')) {
         try {
           const trait = await getUnifiedTraitById(g2Sel.traitId);
           if (trait && (trait.source === 'g2' || trait.source === 'both')) {
