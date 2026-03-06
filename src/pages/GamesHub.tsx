@@ -33,15 +33,12 @@ import { SoundManager } from '@/systems/audio';
 import '@/styles/voting.css';
 import { PageSEO } from '@/components/seo';
 
-const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const LEADERBOARD_EXCLUDE_GAMES = ['combat'];
 
 export default function GamesHub() {
   const { contentPadding, isDesktop } = useLayout();
   const { isSignedIn } = useUserProfile();
-  // Always call the hook unconditionally
-  const clerkResult = useClerk();
-  const clerk = CLERK_ENABLED ? clerkResult : null;
+  const clerk = useClerk();
 
   const handleSignInClick = useCallback(() => {
     if (clerk) {
@@ -70,10 +67,7 @@ export default function GamesHub() {
   const [donutBalance, setDonutBalance] = useState(0);
   const [poopBalance, setPoopBalance] = useState(0);
   const voteBalancesRef = useRef({ donut: 0, poop: 0 });
-  // Always call hooks unconditionally (rules of hooks)
-  const clerkAuth = useAuth();
-  const authResult = CLERK_ENABLED ? clerkAuth : { getToken: async () => null };
-  const { getToken } = authResult;
+  const { getToken } = useAuth();
 
   // Fetch consumable balances from API when signed in
   useEffect(() => {

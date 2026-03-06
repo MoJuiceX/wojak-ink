@@ -12,9 +12,6 @@ import { useUserProfile } from './UserProfileContext';
 
 const FRIENDS_STORAGE_KEY = 'wojak_friends';
 
-// Check if Clerk is configured
-const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
 interface UserSummary {
   id: string;
   displayName: string;
@@ -52,13 +49,7 @@ const FriendsContext = createContext<FriendsContextType | null>(null);
 
 export function FriendsProvider({ children }: { children: React.ReactNode }) {
   const { isSignedIn } = useUserProfile();
-  // Get user ID and getToken from Clerk
-  const clerkAuth = useAuth();
-  const authResult = CLERK_ENABLED
-    ? clerkAuth
-    : { userId: null, getToken: () => Promise.resolve(null) };
-  const userId = authResult.userId;
-  const getToken = authResult.getToken;
+  const { userId, getToken } = useAuth();
 
   const [friends, setFriends] = useState<string[]>([]);
   const [friendProfiles, setFriendProfiles] = useState<UserSummary[]>([]);

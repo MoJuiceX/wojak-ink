@@ -10,8 +10,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '@/lib/clerkSafe';
 
-const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
 // Page types for voting - extend this as you add more pages
 export type VotePageType = 'games' | 'gallery' | 'media' | 'shop';
 
@@ -43,10 +41,7 @@ export function useFlickVoting(pageType: VotePageType) {
   const [activeMode, setActiveMode] = useState<'donut' | 'poop' | null>(null);
   const [votes, setVotes] = useState<VoteStore>({});
   const [isLoading, setIsLoading] = useState(false);
-  // Always call hooks unconditionally (rules of hooks)
-  const clerkAuth = useAuth();
-  const authResult = CLERK_ENABLED ? clerkAuth : { getToken: async () => null };
-  const { getToken } = authResult;
+  const { getToken } = useAuth();
 
   const fetchVoteCounts = useCallback(async () => {
     try {

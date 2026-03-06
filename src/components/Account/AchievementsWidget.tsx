@@ -30,15 +30,11 @@ interface AchievementsWidgetProps {
   onViewAll: () => void;
 }
 
-const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
 export function AchievementsWidget({ onViewAll }: AchievementsWidgetProps) {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [stats, setStats] = useState<AchievementStats>({ completed: 0, total: 0, orangesEarned: 0 });
   const [loading, setLoading] = useState(true);
-  const clerkAuth = useAuth();
-  const authResult = CLERK_ENABLED ? clerkAuth : { getToken: async () => null };
-  const { getToken } = authResult;
+  const { getToken } = useAuth();
 
   useEffect(() => {
     const fetchAchievements = async () => {

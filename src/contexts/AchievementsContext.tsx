@@ -20,9 +20,6 @@ import type {
   AchievementStats,
 } from '@/types/achievement';
 
-// Check if Clerk is configured
-const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
 // LocalStorage keys (kept for stats only, not progress)
 const STATS_STORAGE_KEY = 'wojak_achievement_stats';
 const OWNED_ITEMS_KEY = 'wojak_owned_items';
@@ -50,9 +47,7 @@ const AchievementsContext = createContext<AchievementsContextType | null>(null);
 
 export function AchievementsProvider({ children }: { children: React.ReactNode }) {
   // Always call hooks unconditionally (rules of hooks)
-  const clerkAuth = useAuth();
-  const authResult = CLERK_ENABLED ? clerkAuth : { userId: null, isSignedIn: false, getToken: async () => null };
-  const getToken = authResult.getToken;
+  const { getToken } = useAuth();
   const { profile, isSignedIn } = useUserProfile();
   const { currency, refreshBalance } = useCurrency();
   const { friends } = useFriends();

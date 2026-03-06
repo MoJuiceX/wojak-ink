@@ -14,9 +14,6 @@ import type { ReactNode } from 'react';
 import { useAuth } from '@/lib/clerkSafe';
 import { useCurrency } from './CurrencyContext';
 
-// Check if Clerk is configured
-const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
 // Challenge types
 export type ChallengeType = 'games_played' | 'personal_best' | 'play_time_seconds';
 export type ChallengeDifficulty = 'easy' | 'medium' | 'hard';
@@ -83,11 +80,7 @@ function formatPlayTime(seconds: number): string {
 
 export const DailyChallengesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Always call hooks unconditionally (rules of hooks)
-  const clerkAuth = useAuth();
-  const authResult = CLERK_ENABLED ? clerkAuth : { userId: null, isSignedIn: false, getToken: async () => null };
-  const userId = authResult.userId;
-  const isSignedIn = authResult.isSignedIn;
-  const getToken = authResult.getToken;
+  const { userId, isSignedIn, getToken } = useAuth();
   const { refreshBalance } = useCurrency();
 
   const [state, setState] = useState<DailyChallengesState | null>(null);
