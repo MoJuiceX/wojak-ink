@@ -19,6 +19,7 @@ import { marketService } from './marketService';
 import { getRecentSales, type SaleRecord } from './salesDatabank';
 import { fetchCollectionStats } from './nftDataService';
 import { getCurrentXchPrice } from './historicalPriceService';
+import { loadWfpMetadataLite } from './wfpCollectionData';
 
 // ============ Types for JSON Data ============
 
@@ -115,9 +116,7 @@ async function loadMetadata(): Promise<MetadataEntry[]> {
   if (metadataCache) return metadataCache;
 
   try {
-    const response = await fetch('/assets/nft-data/metadata.json');
-    if (!response.ok) throw new Error('Failed to load metadata');
-    metadataCache = await response.json();
+    metadataCache = await loadWfpMetadataLite();
     return metadataCache!;
   } catch (error) {
     console.error('Failed to load metadata:', error);

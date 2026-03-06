@@ -16,6 +16,7 @@ import {
   getRoundConfig,
 } from './config';
 import { getNftImageUrl } from '@/services/constants';
+import { loadWfpMetadataLite } from '@/services/wfpCollectionData';
 import './MemoryMatch.game.css';
 
 interface NFTMetadata {
@@ -92,9 +93,8 @@ const MemoryMatchGame: React.FC = () => {
 
   // Load metadata on mount
   useEffect(() => {
-    fetch('/assets/nft-data/metadata.json')
-      .then(res => res.json())
-      .then((data: NFTMetadata[]) => setMetadata(data.map((nft) => ({
+    loadWfpMetadataLite()
+      .then((data) => setMetadata(data.map((nft) => ({
         ...nft,
         image: getNftImageUrl(nft.edition),
       }))))

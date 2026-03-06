@@ -7,10 +7,10 @@
  */
 
 import { getNftImageUrl } from './constants';
+import { loadWfpMetadataByBase, loadWfpMetadataLite } from './wfpCollectionData';
 
 interface NFTMetadata {
   name: string;
-  description: string;
   image: string;
   edition: number;
   attributes: { trait_type: string; value: string }[];
@@ -121,24 +121,22 @@ export async function initGalleryPreloader(): Promise<void> {
   if (isInitialized) return;
 
   try {
-    // Load NFT metadata
-    const response = await fetch('/assets/nft-data/metadata.json');
-    const rawMetadata = await response.json() as NFTMetadata[];
+    const rawMetadata = await loadWfpMetadataLite() as NFTMetadata[];
     allNfts = rawMetadata.map((nft) => ({
       ...nft,
       image: getNftImageUrl(nft.edition),
     }));
 
-    // Group by base
-    BASE_NAMES.forEach(base => {
-      nftsByBase.set(base, []);
-    });
-
-    allNfts.forEach(nft => {
-      const baseAttr = nft.attributes.find(a => a.trait_type === 'Base');
-      if (baseAttr && nftsByBase.has(baseAttr.value)) {
-        nftsByBase.get(baseAttr.value)!.push(nft);
-      }
+    const byBase = await loadWfpMetadataByBase();
+    BASE_NAMES.forEach((base) => {
+      const entries = byBase.get(base) || [];
+      nftsByBase.set(
+        base,
+        entries.map((nft) => ({
+          ...nft,
+          image: getNftImageUrl(nft.edition),
+        }))
+      );
     });
 
     // Generate initial random queues for each base

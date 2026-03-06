@@ -15,6 +15,7 @@ import {
   type BadgeMapping,
   type NFTBadgeInfo,
 } from '@/services/badgeService';
+import { loadWfpMetadataLite, loadWfpRarity } from '@/services/wfpCollectionData';
 import { useBigPulp } from '@/contexts/BigPulpContext';
 import { getNftImageUrl } from '@/services/constants';
 import type {
@@ -395,7 +396,6 @@ function TopSalesContent({ sales, isLoading }: { sales: NFTSale[]; isLoading?: b
 // Metadata entry type
 interface MetadataEntry {
   edition: number;
-  open_rarity_rank: number;
   attributes: Array<{ trait_type: string; value: string }>;
 }
 
@@ -432,14 +432,13 @@ function useNftMetadata(): {
   });
 
   useEffect(() => {
-    fetch('/assets/nft-data/metadata.json')
-      .then(res => res.json())
-      .then((metadata: MetadataEntry[]) => {
+    Promise.all([loadWfpMetadataLite(), loadWfpRarity()])
+      .then(([metadata, rarity]) => {
         const ranks: Record<string, number> = {};
         const names: Record<string, string> = {};
         for (const nft of metadata) {
           const id = String(nft.edition);
-          ranks[id] = nft.open_rarity_rank;
+          ranks[id] = rarity[id]?.[0] ?? 9999;
           names[id] = getNftName(nft.edition, metadata);
         }
         setData({ ranks, names, metadata });

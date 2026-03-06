@@ -1,28 +1,23 @@
 /**
  * Gallery Service
  *
- * Loads real NFT data from metadata.json and rarity.json.
+ * Loads gallery NFT data from metadata-lite.json and rarity.json.
  */
 
 import type { NFT, CharacterType, NFTTrait, RarityTier } from '@/types/nft';
 import { getNftImageUrl, COLLECTION_SIZE } from './constants';
+import {
+  loadWfpMetadataByBase,
+  loadWfpMetadataLite,
+  loadWfpRarity,
+  type WfpMetadataLiteEntry,
+  type WfpRarityEntry,
+} from './wfpCollectionData';
 
 // ============ Types ============
 
-interface RawMetadata {
-  name: string;
-  description: string;
-  image: string;
-  edition: number;
-  date: number;
-  attributes: Array<{
-    trait_type: string;
-    value: string;
-  }>;
-}
-
-// Rarity array format: [rank, score, tier_letter, Base, Face, Mouth, Face Wear, Head, Clothes, Background]
-type RarityEntry = [number, number, string, ...string[]];
+type RawMetadata = WfpMetadataLiteEntry;
+type RarityEntry = WfpRarityEntry;
 
 // ============ Data Cache ============
 
@@ -35,25 +30,13 @@ const characterCache: Map<CharacterType, NFT[]> = new Map();
 
 async function loadMetadata(): Promise<RawMetadata[]> {
   if (metadataCache) return metadataCache;
-
-  const response = await fetch('/assets/nft-data/metadata.json');
-  if (!response.ok) {
-    throw new Error('Failed to load NFT metadata');
-  }
-
-  metadataCache = await response.json();
+  metadataCache = await loadWfpMetadataLite();
   return metadataCache!;
 }
 
 async function loadRarity(): Promise<Record<string, RarityEntry>> {
   if (rarityCache) return rarityCache;
-
-  const response = await fetch('/assets/nft-data/rarity.json');
-  if (!response.ok) {
-    throw new Error('Failed to load rarity data');
-  }
-
-  rarityCache = await response.json();
+  rarityCache = await loadWfpRarity();
   return rarityCache!;
 }
 
@@ -131,7 +114,7 @@ function convertToNFT(metadata: RawMetadata, rarityData: Record<string, RarityEn
     traits,
     traitCount: traits.length,
     transactions: [],
-    mintedAt: new Date(metadata.date),
+    mintedAt: new Date(metadata.date ?? 0),
     owner: `xch1${id.toString().padStart(4, '0')}mock${Math.random().toString(36).substring(2, 30)}abcd`,
     collection: 'wojak-farmers-plot',
     isSpecialEdition: rarityRank <= 100,
@@ -233,23 +216,16 @@ class GalleryService implements IGalleryService {
   }
 
   async getFirstNImageUrlsPerCharacter(count: number): Promise<Map<CharacterType, string[]>> {
-    const allNFTs = await this.fetchAllNFTs();
+    const byBase = await loadWfpMetadataByBase();
     const result = new Map<CharacterType, string[]>();
 
-    // Group NFTs by character type
-    const byCharacter = new Map<CharacterType, NFT[]>();
-    for (const nft of allNFTs) {
-      if (!byCharacter.has(nft.characterType)) {
-        byCharacter.set(nft.characterType, []);
-      }
-      byCharacter.get(nft.characterType)!.push(nft);
-    }
-
     // Get first N image URLs for each character
-    for (const [character, nfts] of byCharacter) {
-      // Sort by ID to get consistent order
-      nfts.sort((a, b) => a.id.localeCompare(b.id));
-      const urls = nfts.slice(0, count).map(nft => nft.imageUrl);
+    for (const [base, entries] of byBase) {
+      const character = getCharacterTypeFromBase(base);
+      const urls = [...entries]
+        .sort((a, b) => a.edition - b.edition)
+        .slice(0, count)
+        .map((entry) => getNftImageUrl(entry.edition));
       result.set(character, urls);
     }
 

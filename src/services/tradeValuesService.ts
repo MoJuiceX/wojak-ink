@@ -5,6 +5,7 @@
  */
 
 import traitValuesData from '../data/trait-values.json';
+import { loadWfpMetadataLite } from './wfpCollectionData';
 
 // Cloudflare Worker API endpoint
 const WORKER_API_URL = 'https://wojak-mobile-trade-fetcher.abitsolvesthis.workers.dev';
@@ -182,8 +183,7 @@ async function loadNftMetadata() {
   if (nftMetadataCache) return nftMetadataCache;
 
   try {
-    const response = await fetch('/assets/nft-data/metadata.json');
-    nftMetadataCache = await response.json();
+    nftMetadataCache = await loadWfpMetadataLite();
     return nftMetadataCache;
   } catch (err) {
     console.error('Failed to load NFT metadata:', err);

@@ -14,6 +14,7 @@ import { useGameNavigationGuard } from '@/hooks/useGameNavigationGuard';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { getAllNfts, isReady as isPreloaderReady, initGalleryPreloader } from '@/services/galleryPreloader';
 import { getNftImageUrl } from '@/services/constants';
+import { loadWfpMetadataLite } from '@/services/wfpCollectionData';
 import { GameSEO } from '@/components/seo/GameSEO';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { captureGameArea } from '@/systems/sharing/captureDOM';
@@ -528,9 +529,8 @@ const MemoryMatch: React.FC = () => {
             setMetadata(nfts);
           } else {
             // Fallback to direct fetch if preloader failed
-            const res = await fetch('/assets/nft-data/metadata.json');
-            const data = await res.json();
-            setMetadata((data as NFTMetadata[]).map((nft) => ({
+            const data = await loadWfpMetadataLite();
+            setMetadata(data.map((nft) => ({
               ...nft,
               image: getNftImageUrl(nft.edition),
             })));

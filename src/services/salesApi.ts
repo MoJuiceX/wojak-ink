@@ -10,6 +10,7 @@
 
 import { COLLECTION_ID } from './marketApi';
 import { dexieQueue } from '../utils/rateLimiter';
+import { loadWfpMetadataLite } from './wfpCollectionData';
 
 const DEXIE_API = 'https://api.dexie.space/v1';
 
@@ -249,8 +250,7 @@ interface NFTMetadataItem {
  */
 async function loadNftMetadata(): Promise<Map<string, NFTMetadataItem>> {
   try {
-    const response = await fetch('/assets/nft-data/metadata.json');
-    const data: NFTMetadataItem[] = await response.json();
+    const data = await loadWfpMetadataLite() as NFTMetadataItem[];
 
     const metadataMap = new Map<string, NFTMetadataItem>();
     for (const nft of data) {
