@@ -1,5 +1,6 @@
 // src/games/Wordle/stats.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
+import { muteConsole } from '@/tests/muteConsole';
 import type { WordleStats } from './stats';
 import {
   getDefaultStats,
@@ -25,6 +26,7 @@ Object.defineProperty(globalThis, 'localStorage', {
   value: localStorageMock,
   writable: true,
 });
+muteConsole();
 
 describe('Wordle stats', () => {
   beforeEach(() => {

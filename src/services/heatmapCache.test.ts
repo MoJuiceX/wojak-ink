@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { CacheMetadata } from './heatmapCache';
 import type { HeatMapCell } from '@/types/bigpulp';
+import { muteConsole } from '@/tests/muteConsole';
 
 // ============ localStorage mock ============
 // The vitest happy-dom environment provides a stub localStorage that only
@@ -22,6 +23,7 @@ function makeLocalStorage(): Storage {
 
 const mockStorage = makeLocalStorage();
 vi.stubGlobal('localStorage', mockStorage);
+muteConsole();
 
 // Import module AFTER stubbing so it picks up the mock
 const {

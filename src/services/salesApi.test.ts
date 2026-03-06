@@ -107,7 +107,7 @@ function stubFetchWithOffers(offers: object[]) {
   return vi.spyOn(globalThis, 'fetch').mockImplementation(async (url: RequestInfo | URL) => {
     const urlStr = String(url);
 
-    if (urlStr.includes('metadata.json')) {
+    if (urlStr.includes('metadata-lite.json') || urlStr.includes('metadata.json')) {
       return { ok: true, json: async () => mockMetadata } as Response;
     }
 

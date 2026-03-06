@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { muteConsole } from '@/tests/muteConsole';
 import {
   getQualificationDisplayName,
   getCachedBadgeSystem,
@@ -13,6 +14,7 @@ import {
 beforeEach(() => {
   vi.resetModules();
 });
+muteConsole();
 
 // ---------------------------------------------------------------------------
 // getQualificationDisplayName — pure synchronous function

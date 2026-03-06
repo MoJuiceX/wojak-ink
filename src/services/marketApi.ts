@@ -7,6 +7,7 @@
 
 import { mintgardenQueue } from '../utils/rateLimiter';
 import { getNftImageUrl as getCanonicalNftImageUrl } from './constants';
+import { getBrowserStorage } from '../utils/browserStorage';
 
 // Collection ID for Wojak Farmers Plot
 export const COLLECTION_ID = 'col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah';
@@ -40,7 +41,10 @@ const inFlightHistoryRequests = new Map<number, Promise<NftEvent[]>>();
  */
 function loadHistoryCache(): void {
   try {
-    const cached = localStorage.getItem(HISTORY_CACHE_KEY);
+    const storage = getBrowserStorage();
+    if (!storage) return;
+
+    const cached = storage.getItem(HISTORY_CACHE_KEY);
     if (!cached) return;
 
     const data = JSON.parse(cached) as Record<string, HistoryCacheEntry>;
@@ -63,6 +67,9 @@ function loadHistoryCache(): void {
  */
 function saveHistoryCache(): void {
   try {
+    const storage = getBrowserStorage();
+    if (!storage) return;
+
     const data: Record<string, HistoryCacheEntry> = {};
     const now = Date.now();
 
@@ -73,7 +80,7 @@ function saveHistoryCache(): void {
       }
     }
 
-    localStorage.setItem(HISTORY_CACHE_KEY, JSON.stringify(data));
+    storage.setItem(HISTORY_CACHE_KEY, JSON.stringify(data));
   } catch (error) {
     console.warn('[HistoryCache] Failed to save cache:', error);
   }
@@ -147,7 +154,10 @@ const LISTINGS_CACHE_KEY = 'wojak_listings_cache_v1';
  */
 function loadCachedListings(): NFTListing[] | null {
   try {
-    const cached = localStorage.getItem(LISTINGS_CACHE_KEY);
+    const storage = getBrowserStorage();
+    if (!storage) return null;
+
+    const cached = storage.getItem(LISTINGS_CACHE_KEY);
     if (!cached) return null;
 
     const data = JSON.parse(cached);
@@ -155,7 +165,7 @@ function loadCachedListings(): NFTListing[] | null {
 
     // Cache valid for 1 hour in localStorage
     if (age > 60 * 60 * 1000) {
-      localStorage.removeItem(LISTINGS_CACHE_KEY);
+      storage.removeItem(LISTINGS_CACHE_KEY);
       return null;
     }
 
@@ -172,11 +182,14 @@ function loadCachedListings(): NFTListing[] | null {
  */
 function saveListingsToCache(listings: NFTListing[]): void {
   try {
+    const storage = getBrowserStorage();
+    if (!storage) return;
+
     const data = {
       listings,
       timestamp: Date.now()
     };
-    localStorage.setItem(LISTINGS_CACHE_KEY, JSON.stringify(data));
+    storage.setItem(LISTINGS_CACHE_KEY, JSON.stringify(data));
   } catch (error) {
     console.warn('[MarketAPI] Failed to cache listings:', error);
   }

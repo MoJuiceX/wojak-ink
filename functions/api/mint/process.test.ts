@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { muteConsole } from '@/tests/muteConsole';
 
 // Mock external deps
 vi.mock('./request', () => ({
@@ -80,6 +81,7 @@ const freeJobRow = {
 };
 
 const paidJobRow = { ...freeJobRow, id: 2, mint_type: 'paid' as const, credit_cost: null, xch_price_mojos: 200000000000, credit_spend_id: null };
+muteConsole();
 
 describe('buildCombatAttributes', () => {
   it('returns 7 CHIP-0007 attribute entries', () => {

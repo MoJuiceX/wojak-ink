@@ -49,8 +49,9 @@ function mockFetchResponse(status: number, body: Record<string, unknown>, header
 describe('callMintGardenMint – 429 rate-limit detection', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    // Suppress console.log/error noise during tests
+    // Suppress expected retry/rate-limit logging during tests
     vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 

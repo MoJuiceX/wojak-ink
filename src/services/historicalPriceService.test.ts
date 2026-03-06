@@ -16,6 +16,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
+import { muteConsole } from '@/tests/muteConsole';
 
 // Stub localStorage before importing the service.
 // happy-dom's localStorage stub in this vitest env omits removeItem.
@@ -32,6 +33,7 @@ const localStorageMock = {
 beforeAll(() => {
   vi.stubGlobal('localStorage', localStorageMock);
 });
+muteConsole();
 
 // Mock the rate limiter — no real HTTP requests in tests.
 vi.mock('@/utils/rateLimiter', () => ({

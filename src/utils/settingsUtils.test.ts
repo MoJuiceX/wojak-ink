@@ -1,5 +1,6 @@
 // src/utils/settingsUtils.test.ts
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { muteConsole } from '@/tests/muteConsole';
 import {
   loadSettings,
   saveSettings,
@@ -39,6 +40,7 @@ Object.defineProperty(global, 'document', {
   },
   writable: true,
 });
+muteConsole(['warn']);
 
 describe('settingsUtils', () => {
   beforeEach(() => {

@@ -9,6 +9,7 @@
 import { WALLET_ADDRESS } from './treasuryConstants';
 import { spacescanQueue, coingeckoQueue } from '../utils/rateLimiter';
 import { treasuryService } from './treasuryService';
+import { getBrowserStorage } from '../utils/browserStorage';
 
 // Use proxies to avoid CORS issues
 // Dev: Vite proxy, Prod: Cloudflare Pages Function
@@ -78,20 +79,23 @@ let cachedXchBalance: { xch: number; mojo: number } = { xch: 0.1, mojo: 10000000
 // Load persisted data from localStorage on module init
 function loadPersistedData(): void {
   try {
-    const storedPrice = localStorage.getItem(STORAGE_XCH_PRICE_KEY);
+    const storage = getBrowserStorage();
+    if (!storage) return;
+
+    const storedPrice = storage.getItem(STORAGE_XCH_PRICE_KEY);
     if (storedPrice) {
       const price = parseFloat(storedPrice);
       if (price > 0) cachedXchPrice = price;
     }
 
-    const storedBalance = localStorage.getItem(STORAGE_XCH_BALANCE_KEY);
+    const storedBalance = storage.getItem(STORAGE_XCH_BALANCE_KEY);
     if (storedBalance) {
       const balance = JSON.parse(storedBalance);
       if (balance.xch > 0) cachedXchBalance = balance;
     }
 
-    const storedData = localStorage.getItem(STORAGE_KEY);
-    const storedTimestamp = localStorage.getItem(STORAGE_TIMESTAMP_KEY);
+    const storedData = storage.getItem(STORAGE_KEY);
+    const storedTimestamp = storage.getItem(STORAGE_TIMESTAMP_KEY);
     if (storedData && storedTimestamp) {
       const data = JSON.parse(storedData);
       data.last_updated = new Date(data.last_updated);
@@ -106,10 +110,13 @@ function loadPersistedData(): void {
 // Save data to localStorage
 function persistData(data: WalletData): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    localStorage.setItem(STORAGE_TIMESTAMP_KEY, Date.now().toString());
-    localStorage.setItem(STORAGE_XCH_PRICE_KEY, data.xch_price_usd.toString());
-    localStorage.setItem(STORAGE_XCH_BALANCE_KEY, JSON.stringify({
+    const storage = getBrowserStorage();
+    if (!storage) return;
+
+    storage.setItem(STORAGE_KEY, JSON.stringify(data));
+    storage.setItem(STORAGE_TIMESTAMP_KEY, Date.now().toString());
+    storage.setItem(STORAGE_XCH_PRICE_KEY, data.xch_price_usd.toString());
+    storage.setItem(STORAGE_XCH_BALANCE_KEY, JSON.stringify({
       xch: data.xch_balance,
       mojo: data.xch_balance_mojos
     }));

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { muteConsole } from '@/tests/muteConsole';
 
 // Mock process.ts
 vi.mock('./process', () => ({
@@ -32,6 +33,7 @@ import { unpinFromIPFS } from './uploadToIPFS';
 import { markRefundNeeded, logMintStep } from './auditHelper';
 
 type CleanupEnv = ProcessEnv & { DB: D1Database; MINT_JOBS_KV: KVNamespace; PINATA_JWT?: string; PHASE2_COLLECTION_UUID?: string };
+muteConsole();
 
 const TEST_WALLET = 'xch1' + 'a'.repeat(58);
 
