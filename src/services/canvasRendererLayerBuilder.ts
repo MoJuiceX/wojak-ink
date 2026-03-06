@@ -35,6 +35,12 @@ const LOCAL_REKT_MOUTH_OVERLAYS = {
   pipe: '/assets/wojak-layers/MOUTH/MOUTH_Pipe-when-rekt.png',
 } as const;
 
+function getBubbleGumRenderPath(selectedLayers: SelectedLayers, hasRekt: boolean): string | undefined {
+  const mouthBasePath = selectedLayers.MouthBase;
+  if (!mouthBasePath) return undefined;
+  return hasRekt ? LOCAL_REKT_MOUTH_OVERLAYS.bubbleGum : mouthBasePath;
+}
+
 function getEffectiveMaskPath(selectedLayers: SelectedLayers): string | undefined {
   const maskPath = selectedLayers.Mask;
   if (isExtraAccessoryPath(maskPath)) return undefined;
@@ -1119,7 +1125,7 @@ export function buildRenderLayers(selectedLayers: SelectedLayers, g2Selections?:
 
   // BubbleGumOverHead
   if (hasBubble && selectedLayers.Head) {
-    const mouthBasePath = selectedLayers.MouthBase;
+    const mouthBasePath = getBubbleGumRenderPath(selectedLayers, hasRekt);
     if (mouthBasePath) {
       layers.push({
         path: mouthBasePath,
@@ -1131,7 +1137,7 @@ export function buildRenderLayers(selectedLayers: SelectedLayers, g2Selections?:
 
   // BubbleGumOverEyes
   if (hasBubble && eyesPath) {
-    const mouthBasePath = selectedLayers.MouthBase;
+    const mouthBasePath = getBubbleGumRenderPath(selectedLayers, hasRekt);
     if (mouthBasePath) {
       layers.push({
         path: mouthBasePath,

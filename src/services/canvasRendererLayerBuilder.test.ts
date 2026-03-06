@@ -116,6 +116,48 @@ describe('canvasRendererLayerBuilder', () => {
       expect(pipeRekt?.path).toBe('/assets/wojak-layers/MOUTH/MOUTH_Pipe-when-rekt.png');
     });
 
+    it('Face Rekt + BubbleGum redraws the rekt bubble over head', () => {
+      const selectedLayers: SelectedLayers = {
+        Base: DEFAULT_BASE_PATH,
+        Clothes: DEFAULT_CLOTHES_PATH,
+        MouthBase: '/assets/wojak-layers/MOUTH/MOUTH_Bubble-Gum.png',
+        Head: '/assets/wojak-layers/HEAD/HEAD_Pirate_hat.png',
+      };
+      const g2Selections: G2Selections = {
+        Base: {
+          traitId: 'Base_Rekt',
+          g2Category: 'Base',
+          colors: {},
+          options: {},
+        },
+      };
+      const layers = buildRenderLayers(selectedLayers, g2Selections);
+      const overHead = layers.find((l) => l.layerName === 'BubbleGumOverHead');
+      expect(overHead?.path).toBe('/assets/wojak-layers/MOUTH/MOUTH_Bubble-Gum_rekt.png');
+      expect(overHead?.zIndex).toBe(LAYER_Z_INDEX.BubbleGumOverHead);
+    });
+
+    it('Face Rekt + BubbleGum redraws the rekt bubble over eyes', () => {
+      const selectedLayers: SelectedLayers = {
+        Base: DEFAULT_BASE_PATH,
+        Clothes: DEFAULT_CLOTHES_PATH,
+        MouthBase: '/assets/wojak-layers/MOUTH/MOUTH_Bubble-Gum.png',
+        Eyes: '/assets/wojak-layers/EYE/EYE_Aviators.png',
+      };
+      const g2Selections: G2Selections = {
+        Base: {
+          traitId: 'Base_Rekt',
+          g2Category: 'Base',
+          colors: {},
+          options: {},
+        },
+      };
+      const layers = buildRenderLayers(selectedLayers, g2Selections);
+      const overEyes = layers.find((l) => l.layerName === 'BubbleGumOverEyes');
+      expect(overEyes?.path).toBe('/assets/wojak-layers/MOUTH/MOUTH_Bubble-Gum_rekt.png');
+      expect(overEyes?.zIndex).toBe(LAYER_Z_INDEX.BubbleGumOverEyes);
+    });
+
     it('Chia Farmer adds ClothesAddon virtual layer', () => {
       const selectedLayers: SelectedLayers = {
         Base: DEFAULT_BASE_PATH,
