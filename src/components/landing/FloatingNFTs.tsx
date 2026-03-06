@@ -10,14 +10,14 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 // Hero section uses Alien variants and base characters
 const HERO_IMAGES = [
-  '/assets/gallery-previews/alien-wojak.png',
-  '/assets/gallery-previews/alien-baddie.png',
-  '/assets/gallery-previews/alien-soyjak.png',
-  '/assets/gallery-previews/alien-waifu.png',
-  '/assets/gallery-previews/baddie.png',
-  '/assets/gallery-previews/soyjak.png',
-  '/assets/gallery-previews/waifu.png',
-  '/assets/gallery-previews/wojak.png',
+  '/assets/gallery-previews/alien-wojak.webp',
+  '/assets/gallery-previews/alien-baddie.webp',
+  '/assets/gallery-previews/alien-soyjak.webp',
+  '/assets/gallery-previews/alien-waifu.webp',
+  '/assets/gallery-previews/baddie.webp',
+  '/assets/gallery-previews/soyjak.webp',
+  '/assets/gallery-previews/waifu.webp',
+  '/assets/gallery-previews/wojak.webp',
 ];
 
 // More spread out positions - right side adjusted inward
@@ -94,6 +94,7 @@ const FloatingNFT: React.FC<FloatingNFTProps> = ({
             src={image}
             alt="Floating Wojak NFT artwork"
             loading="eager"
+            decoding="async"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.05 }}

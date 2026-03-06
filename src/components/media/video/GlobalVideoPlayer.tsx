@@ -381,7 +381,7 @@ export function GlobalVideoPlayer() {
         src={currentVideo.videoUrl}
         poster={currentVideo.thumbnailUrl}
         playsInline
-        preload="auto"
+        preload="metadata"
       />
 
       {isMinimized ? (

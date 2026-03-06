@@ -13,11 +13,11 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 // Different images from hero section - use Bepe variants and other unique ones
 const COLLECTION_IMAGES = [
   '/assets/gallery-previews/bepe-baddie.png',
-  '/assets/gallery-previews/monkey-zoo.png',
-  '/assets/gallery-previews/papa-tang.png',
-  '/assets/gallery-previews/bepe-waifu.png',
-  '/assets/gallery-previews/bepe-soyjak.png',
-  '/assets/gallery-previews/bepe-wojak.png',
+  '/assets/gallery-previews/monkey-zoo.webp',
+  '/assets/gallery-previews/papa-tang.webp',
+  '/assets/gallery-previews/bepe-waifu.webp',
+  '/assets/gallery-previews/bepe-soyjak.webp',
+  '/assets/gallery-previews/bepe-wojak.webp',
 ];
 
 // Collection stats
@@ -101,6 +101,8 @@ export const CollectionPreview: React.FC = () => {
                 key={src}
                 src={src}
                 alt="Wojak NFT collection preview"
+                loading="lazy"
+                decoding="async"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

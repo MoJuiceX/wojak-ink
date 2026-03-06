@@ -67,7 +67,7 @@ export function ArcadeFrame({
 
       {/* Frame PNG overlays on top - clicks pass through to game */}
       <img
-        src="/img/arcade-frame_fin.png"
+        src="/img/arcade-frame_fin.webp"
         alt=""
         className="arcade-frame-overlay"
         aria-hidden="true"

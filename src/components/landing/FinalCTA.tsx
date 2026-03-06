@@ -12,18 +12,18 @@ import { useNavigate } from 'react-router-dom';
 
 // FinalCTA uses all available NFTs - it's the last section so variety matters
 const CTA_IMAGES = [
-  '/assets/gallery-previews/wojak.png',
-  '/assets/gallery-previews/waifu.png',
-  '/assets/gallery-previews/soyjak.png',
-  '/assets/gallery-previews/baddie.png',
-  '/assets/gallery-previews/alien-wojak.png',
-  '/assets/gallery-previews/alien-waifu.png',
-  '/assets/gallery-previews/bepe-wojak.png',
-  '/assets/gallery-previews/monkey-zoo.png',
-  '/assets/gallery-previews/papa-tang.png',
+  '/assets/gallery-previews/wojak.webp',
+  '/assets/gallery-previews/waifu.webp',
+  '/assets/gallery-previews/soyjak.webp',
+  '/assets/gallery-previews/baddie.webp',
+  '/assets/gallery-previews/alien-wojak.webp',
+  '/assets/gallery-previews/alien-waifu.webp',
+  '/assets/gallery-previews/bepe-wojak.webp',
+  '/assets/gallery-previews/monkey-zoo.webp',
+  '/assets/gallery-previews/papa-tang.webp',
   '/assets/gallery-previews/bepe-baddie.png',
-  '/assets/gallery-previews/alien-baddie.png',
-  '/assets/gallery-previews/alien-soyjak.png',
+  '/assets/gallery-previews/alien-baddie.webp',
+  '/assets/gallery-previews/alien-soyjak.webp',
 ];
 
 const POSITIONS = {
@@ -111,6 +111,8 @@ export const FinalCTA: React.FC = () => {
                 key={leftImages[index]}
                 src={leftImages[index]}
                 alt="Floating Wojak NFT preview"
+                loading="lazy"
+                decoding="async"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -151,6 +153,8 @@ export const FinalCTA: React.FC = () => {
                 key={rightImages[index]}
                 src={rightImages[index]}
                 alt="Floating Wojak NFT preview"
+                loading="lazy"
+                decoding="async"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

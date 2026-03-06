@@ -162,7 +162,7 @@ export function FloatingVideoPlayer() {
               src={currentVideo.videoUrl}
               poster={currentVideo.thumbnailUrl}
               playsInline
-              preload="auto"
+              preload="metadata"
               onTimeUpdate={(e) => {
                 const video = e.target as HTMLVideoElement;
                 seekVideo(video.currentTime);

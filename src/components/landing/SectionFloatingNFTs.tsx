@@ -9,20 +9,20 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 const NFT_IMAGE_POOL = [
-  '/assets/gallery-previews/alien-wojak.png',
-  '/assets/gallery-previews/alien-baddie.png',
-  '/assets/gallery-previews/alien-soyjak.png',
-  '/assets/gallery-previews/alien-waifu.png',
-  '/assets/gallery-previews/baddie.png',
+  '/assets/gallery-previews/alien-wojak.webp',
+  '/assets/gallery-previews/alien-baddie.webp',
+  '/assets/gallery-previews/alien-soyjak.webp',
+  '/assets/gallery-previews/alien-waifu.webp',
+  '/assets/gallery-previews/baddie.webp',
   '/assets/gallery-previews/bepe-baddie.png',
-  '/assets/gallery-previews/bepe-soyjak.png',
-  '/assets/gallery-previews/bepe-waifu.png',
-  '/assets/gallery-previews/bepe-wojak.png',
-  '/assets/gallery-previews/monkey-zoo.png',
-  '/assets/gallery-previews/papa-tang.png',
-  '/assets/gallery-previews/soyjak.png',
-  '/assets/gallery-previews/waifu.png',
-  '/assets/gallery-previews/wojak.png',
+  '/assets/gallery-previews/bepe-soyjak.webp',
+  '/assets/gallery-previews/bepe-waifu.webp',
+  '/assets/gallery-previews/bepe-wojak.webp',
+  '/assets/gallery-previews/monkey-zoo.webp',
+  '/assets/gallery-previews/papa-tang.webp',
+  '/assets/gallery-previews/soyjak.webp',
+  '/assets/gallery-previews/waifu.webp',
+  '/assets/gallery-previews/wojak.webp',
 ];
 
 interface Position {
@@ -109,6 +109,8 @@ export const SectionFloatingNFTs: React.FC<SectionFloatingNFTsProps> = ({
               key={images[index]}
               src={images[index]}
               alt="Decorative Wojak NFT"
+              loading="lazy"
+              decoding="async"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
