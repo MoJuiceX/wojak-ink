@@ -23,11 +23,18 @@ function isTrumpHair(selectedLayers: SelectedLayers): boolean {
   return pathContains(selectedLayers.Head, 'trump');
 }
 import type { RenderLayer } from '@/services/canvasRendererTypes';
+import { isExtraAccessoryPath, isWingsExtraPath } from '@/lib/generatorExtras';
 import { pathContains } from '@/lib/pathHelpers';
 import { isSelectionPathEmpty } from '@/types/generator';
 import { LAYER_BASE } from '@/config/layerAssetBase';
 
 // ============ Helpers ============
+
+function getEffectiveMaskPath(selectedLayers: SelectedLayers): string | undefined {
+  const maskPath = selectedLayers.Mask;
+  if (isExtraAccessoryPath(maskPath)) return undefined;
+  return maskPath;
+}
 
 function isCenturionSelected(selectedLayers: SelectedLayers): boolean {
   return pathContains(selectedLayers.Head, 'centurion');
@@ -42,7 +49,7 @@ function isMouthOverPirate(path: string): boolean {
 }
 
 function hasMask(selectedLayers: SelectedLayers): boolean {
-  const maskPath = selectedLayers.Mask;
+  const maskPath = getEffectiveMaskPath(selectedLayers);
   return !isSelectionPathEmpty(maskPath);
 }
 
@@ -80,7 +87,7 @@ function hasAnarchySpikes(selectedLayers: SelectedLayers): boolean {
 }
 
 function hasBandanaMask(selectedLayers: SelectedLayers): boolean {
-  return pathContains(selectedLayers.Mask, 'bandana');
+  return pathContains(getEffectiveMaskPath(selectedLayers), 'bandana');
 }
 
 function needsEyesOverHead(selectedLayers: SelectedLayers): boolean {
@@ -100,7 +107,7 @@ function isNinjaTurtle(path: string | undefined): boolean {
 }
 
 function isMaskThatCoversNinja(selectedLayers: SelectedLayers): boolean {
-  const maskPath = selectedLayers.Mask;
+  const maskPath = getEffectiveMaskPath(selectedLayers);
   if (!maskPath) return false;
   return NINJA_COVERING_MASKS.some((mask) => pathContains(maskPath, mask));
 }
@@ -119,11 +126,11 @@ function getChiaFarmerAddonPath(clothesPath: string): string {
 }
 
 function isHannibalMask(selectedLayers: SelectedLayers): boolean {
-  return pathContains(selectedLayers.Mask, 'hannibal');
+  return pathContains(getEffectiveMaskPath(selectedLayers), 'hannibal');
 }
 
 function isCopiumMask(selectedLayers: SelectedLayers): boolean {
-  return pathContains(selectedLayers.Mask, 'copium');
+  return pathContains(getEffectiveMaskPath(selectedLayers), 'copium');
 }
 
 function needsLayersAboveHead(selectedLayers: SelectedLayers): boolean {
@@ -282,7 +289,8 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
   const hasHannibal = isHannibalMask(selectedLayers);
   const hasCopium = isCopiumMask(selectedLayers);
   const hasLayersAboveHead = needsLayersAboveHead(selectedLayers);
-  const hasFullFaceMask = isFullFaceMask(selectedLayers.Mask);
+  const effectiveMaskPath = getEffectiveMaskPath(selectedLayers);
+  const hasFullFaceMask = isFullFaceMask(effectiveMaskPath);
   const hasSuitEyesUnder = !hasAstronaut && isSuitNeedingEyesUnder(selectedLayers);
   const hasSwat = isSwatHelmet(selectedLayers);
 
@@ -324,7 +332,8 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         break;
 
       case 'Mask':
-        if (hasFullFaceMask) skipLayer = true;
+        if (isExtraAccessoryPath(path)) skipLayer = true;
+        else if (hasFullFaceMask) skipLayer = true;
         else if (hasAstronaut) skipLayer = true;
         else if (hasHannibal) skipLayer = true;
         else if (hasCopium && hasLayersAboveHead) skipLayer = true;
@@ -960,7 +969,7 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
         layerName: 'Astronaut',
       });
     }
-    const maskPathRaw = selectedLayers.Mask;
+    const maskPathRaw = effectiveMaskPath;
     if (!isSelectionPathEmpty(maskPathRaw) && !hasFullFaceMask) {
       const maskPath = maskPathRaw as string;
       if (pathContains(maskPath, 'bandana')) {
@@ -1056,7 +1065,7 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
 
   // HannibalMask
   if (hasHannibal && !hasLayersAboveHead) {
-    const maskPath = selectedLayers.Mask;
+    const maskPath = effectiveMaskPath;
     if (maskPath) {
       if (hasSuitEyesUnder) {
         // Hannibal + Bepe/Pepe/Gopher/PoP suit: left 50% under suit, right 50% on top
@@ -1133,7 +1142,7 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
 
   // Masks over Ronin Helmet: right 50% renders on top of the helmet
   if (hasRonin) {
-    const maskPath = selectedLayers.Mask;
+    const maskPath = effectiveMaskPath;
     if (maskPath) {
       if (hasBandana) {
         layers.push({
@@ -1195,7 +1204,7 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
   // Ronin case: CopiumMaskOverRonin is at 13.2; NeckbeardOverRonin at 13.5; Mouth*OverNeckbeard at 13.6/13.7.
   // Re-draw copium (right half) above those so the mask stays on top.
   if (hasRonin && hasCopium && hasNeckbeard(selectedLayers)) {
-    const maskPathForCopium = selectedLayers.Mask;
+    const maskPathForCopium = effectiveMaskPath;
     if (maskPathForCopium) {
       layers.push({
         path: maskPathForCopium,
@@ -1406,7 +1415,7 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
 
   // MaskOverStandardCut
   if (hasLayersAboveHead && (hasHannibal || hasCopium)) {
-    const maskPath = selectedLayers.Mask;
+    const maskPath = effectiveMaskPath;
     if (maskPath) {
       layers.push({
         path: maskPath,
@@ -1418,7 +1427,7 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
 
   // FullFaceMask
   if (hasFullFaceMask) {
-    const maskPath = selectedLayers.Mask;
+    const maskPath = effectiveMaskPath;
     if (maskPath) {
       layers.push({
         path: maskPath,
@@ -1451,16 +1460,24 @@ export function buildRenderLayers(selectedLayers: SelectedLayers): RenderLayer[]
     }
   }
 
-  // Extra1, Extra2, Extra3 (hand items + wings) — multi-select extra accessories
+  // Extra1, Extra2, Extra3 (hand items + wings) — multi-select extra accessories.
+  // Also recover gracefully if a broken state stored an extra path in Mask.
+  const extraPaths = new Set<string>();
   for (const extraKey of ['Extra1', 'Extra2', 'Extra3'] as const) {
     const extraPath = selectedLayers[extraKey];
     if (isSelectionPathEmpty(extraPath)) continue;
-    const path = extraPath as string;
-    const isWings = pathContains(path, 'extra_wings');
+    extraPaths.add(extraPath as string);
+  }
+  if (isExtraAccessoryPath(selectedLayers.Mask) && !isSelectionPathEmpty(selectedLayers.Mask)) {
+    extraPaths.add(selectedLayers.Mask as string);
+  }
+
+  for (const path of extraPaths) {
+    const isWings = isWingsExtraPath(path);
     layers.push({
       path,
       zIndex: isWings ? LAYER_Z_INDEX.ExtraWings : LAYER_Z_INDEX.ExtraHands,
-      layerName: extraKey,
+      layerName: isWings ? 'ExtraWings' : 'ExtraHands',
     });
   }
 

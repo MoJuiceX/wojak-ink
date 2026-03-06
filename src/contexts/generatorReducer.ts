@@ -19,6 +19,7 @@ import {
   BASE_CLOTHES_MAP,
 } from '@/config/layers';
 import { DEFAULT_MOUTHBASE_PATH } from '@/lib/layerRegistry';
+import { isExtraAccessoryPath } from '@/lib/generatorExtras';
 import { getPathToTraitIdMap } from '@/services/generatorService';
 import { fromExternal } from '@/lib/selectionAdapter';
 import { applyRulesUnified, pushHistoryUnified, getClothesForBase } from '@/contexts/generatorStateUtils';
@@ -765,6 +766,24 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
       let suspendedMask = state.suspendedMaskByExtra;
       let suspendedExtras = state.suspendedExtrasByMask;
 
+      if (updated.Mask?.path === newPath && isExtraAccessoryPath(newPath)) {
+        delete updated.Mask;
+        const { newSelections, result } = applyRulesUnified(updated, pathMap);
+        const newState = pushHistoryUnified(state, newSelections);
+        return {
+          ...newState,
+          selections: newSelections,
+          suspendedMaskByExtra: suspendedMask,
+          suspendedExtrasByMask: suspendedExtras,
+          disabledLayers: result.disabledLayers,
+          disabledOptions: result.disabledOptions,
+          disabledReasons: result.reasons,
+          disabledOptionReasons: result.disabledOptionReasons,
+          isPreviewStale: true,
+          generatorError: null,
+        };
+      }
+
       // Straitjacket blocks hand extras (hands are tied) — allow deselect but reject new selection
       if (isStraightJacket(updated.Clothes?.path) && isHandExtra(newPath)) {
         // Allow deselecting an already-selected hand extra
@@ -871,6 +890,9 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
       delete updated.Extra1;
       delete updated.Extra2;
       delete updated.Extra3;
+      if (isExtraAccessoryPath(updated.Mask?.path)) {
+        delete updated.Mask;
+      }
 
       // Restore mask if it was suspended by extras
       let suspendedMask = state.suspendedMaskByExtra;

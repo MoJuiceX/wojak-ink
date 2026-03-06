@@ -29,6 +29,7 @@ import { toExternal, fromExternal, normalizeG2Selection } from '@/lib/selectionA
 import { getAllUserPickableFillSlots } from '@/lib/g2FillTreatments';
 import { GENERATOR_PALETTE_HEX } from '@/components/generator/ColorPicker';
 import { assembleG2Selection } from '@/contexts/generatorG2Helpers';
+import { filterRandomizableTraitsForLayer } from '@/lib/generatorExtras';
 import { renderPreview, renderThumbnail, downloadImage } from '@/services/canvasRenderer';
 import { createInitialState, generatorReducer, type GeneratorState } from '@/contexts/generatorReducer';
 import { KNOWN_TRAIT_IDS } from '@/lib/generatorTraitIds';
@@ -416,7 +417,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     const selectWeightedUnified = (
       layerName: UILayerName
     ): { path: string; trait: UnifiedTrait } | null => {
-      let traits = traitsByLayer.get(layerName) ?? [];
+      let traits = filterRandomizableTraitsForLayer(layerName, traitsByLayer.get(layerName) ?? []);
       if (traits.length === 0) return null;
 
       // For Background: filter out special virtual backgrounds (Solid color, Price overlays)

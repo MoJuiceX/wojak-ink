@@ -179,5 +179,24 @@ describe('canvasRendererLayerBuilder', () => {
       expect(overHead?.zIndex).toBe(LAYER_Z_INDEX.EyesOverHead);
       expect(overHead?.clipLeftPercent).toBeCloseTo(0.65);
     });
+
+    it('renders malformed wings stored in Mask behind the base as an extra layer', () => {
+      const selectedLayers: SelectedLayers = {
+        Base: DEFAULT_BASE_PATH,
+        Clothes: DEFAULT_CLOTHES_PATH,
+        MouthBase: DEFAULT_MOUTHBASE_PATH,
+        Mask: '/assets/wojak-layers/EXTRA/EXTRA_EXTRA_wings.png',
+      };
+
+      const layers = buildRenderLayers(selectedLayers);
+      const maskLayer = layers.find((layer) => layer.layerName === 'Mask');
+      const wingsLayer = layers.find((layer) => layer.layerName === 'ExtraWings');
+      const baseLayer = layers.find((layer) => layer.layerName === 'Base');
+
+      expect(maskLayer).toBeUndefined();
+      expect(wingsLayer?.zIndex).toBe(LAYER_Z_INDEX.ExtraWings);
+      expect(baseLayer?.zIndex).toBe(LAYER_Z_INDEX.Base);
+      expect(wingsLayer?.zIndex).toBeLessThan(baseLayer?.zIndex ?? Infinity);
+    });
   });
 });

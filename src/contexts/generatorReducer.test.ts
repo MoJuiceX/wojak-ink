@@ -88,4 +88,30 @@ describe('generatorReducer', () => {
       expect(next.isInitialized).toBe(true);
     });
   });
+
+  describe('TOGGLE_EXTRA', () => {
+    it('clears malformed wings stored in Mask when toggled', () => {
+      const state = {
+        ...createInitialState(),
+        selections: {
+          Base: { path: DEFAULT_BASE_PATH, traitId: null },
+          Clothes: { path: DEFAULT_CLOTHES_PATH, traitId: null },
+          MouthBase: { path: DEFAULT_MOUTHBASE_PATH, traitId: null },
+          Mask: {
+            path: '/assets/wojak-layers/EXTRA/EXTRA_EXTRA_wings.png',
+            traitId: null,
+          },
+        },
+      };
+
+      const next = generatorReducer(state, {
+        type: 'TOGGLE_EXTRA',
+        path: '/assets/wojak-layers/EXTRA/EXTRA_EXTRA_wings.png',
+      });
+
+      expect(next.selections.Mask).toBeUndefined();
+      expect(next.selections.Extra1).toBeUndefined();
+      expect(next.isPreviewStale).toBe(true);
+    });
+  });
 });
