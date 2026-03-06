@@ -447,16 +447,19 @@ export function BigPulpProvider({
 
   // Use TanStack Query hooks for data fetching
   const { data: marketStatsData, isLoading: isMarketStatsLoading } = useBigPulpMarketStats();
+  const isMarketTabActive = state.activeTab === 'market';
+  const isAskTabActive = state.activeTab === 'ask';
+  const isAttributesTabActive = state.activeTab === 'attributes';
   const {
     data: heatMapData,
     isLoading: isHeatMapLoading,
     isRefetching: isHeatmapRefetching,
     refetch: refetchHeatmap,
-  } = useBigPulpHeatMap();
-  const { data: priceDistributionData, isLoading: isDistributionLoading } = useBigPulpPriceDistribution();
-  const { data: attributesData, isLoading: isAttributesLoading } = useBigPulpAttributes();
-  const { data: topSalesData, isLoading: isTopSalesLoading } = useBigPulpTopSales();
-  const { data: rarestFindsData, isLoading: isRarestLoading } = useBigPulpRarestFinds();
+  } = useBigPulpHeatMap(isMarketTabActive);
+  const { data: priceDistributionData, isLoading: isDistributionLoading } = useBigPulpPriceDistribution(isMarketTabActive);
+  const { data: attributesData, isLoading: isAttributesLoading } = useBigPulpAttributes(isAttributesTabActive);
+  const { data: topSalesData, isLoading: isTopSalesLoading } = useBigPulpTopSales(isAskTabActive);
+  const { data: rarestFindsData, isLoading: isRarestLoading } = useBigPulpRarestFinds(isAskTabActive);
 
   // Get heatmap cache metadata for staleness indicator
   const heatmapCacheMetadata = useHeatmapCacheMetadata();

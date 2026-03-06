@@ -55,7 +55,7 @@ export function useBigPulpMarketStats() {
  * 3. Update cache on success
  * 4. Fall back to cache on API failure
  */
-export function useBigPulpHeatMap() {
+export function useBigPulpHeatMap(enabled = true) {
   // Load initial data from cache for instant display
   const cachedData = useMemo(() => {
     const cached = loadHeatmapFromCache();
@@ -87,6 +87,7 @@ export function useBigPulpHeatMap() {
     // Retry with exponential backoff on failure
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    enabled,
   });
 
   return query;
@@ -107,44 +108,48 @@ export function useHeatmapCacheMetadata(): CacheMetadata | null {
 /**
  * Fetch price distribution
  */
-export function useBigPulpPriceDistribution() {
+export function useBigPulpPriceDistribution(enabled = true) {
   return useQuery({
     queryKey: bigPulpKeys.priceDistribution(),
     queryFn: () => bigpulpService.getPriceDistribution(),
     ...DATA_CACHE_MAP.marketStats,
+    enabled,
   });
 }
 
 /**
  * Fetch attribute stats (merges live sales with static data)
  */
-export function useBigPulpAttributes() {
+export function useBigPulpAttributes(enabled = true) {
   return useQuery({
     queryKey: bigPulpKeys.attributes(),
     queryFn: () => bigpulpService.getAttributeStats(),
     ...DATA_CACHE_MAP.traitSales, // Volatile - refresh often for live sales
+    enabled,
   });
 }
 
 /**
  * Fetch top sales
  */
-export function useBigPulpTopSales() {
+export function useBigPulpTopSales(enabled = true) {
   return useQuery({
     queryKey: bigPulpKeys.topSales(),
     queryFn: () => bigpulpService.getTopSales(),
     ...DATA_CACHE_MAP.listings, // Volatile
+    enabled,
   });
 }
 
 /**
  * Fetch rarest finds
  */
-export function useBigPulpRarestFinds() {
+export function useBigPulpRarestFinds(enabled = true) {
   return useQuery({
     queryKey: bigPulpKeys.rarestFinds(),
     queryFn: () => bigpulpService.getRarestFinds(),
     ...DATA_CACHE_MAP.nftMetadata, // Static
+    enabled,
   });
 }
 

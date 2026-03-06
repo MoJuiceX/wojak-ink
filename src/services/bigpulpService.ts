@@ -24,15 +24,8 @@ import { loadWfpMetadataLite } from './wfpCollectionData';
 // ============ Types for JSON Data ============
 
 interface NFTTakeEntry {
-  token_id: number;
   open_rarity_rank: number;
-  take: string;
-  tone: string;
-  flags?: {
-    is_top_10?: boolean;
-    has_crown?: boolean;
-    [key: string]: unknown;
-  };
+  is_top_10?: boolean;
 }
 
 // Interface kept for future use
@@ -53,13 +46,33 @@ async function loadNftTakes(): Promise<Record<string, NFTTakeEntry>> {
   if (nftTakesCache) return nftTakesCache;
 
   try {
-    const response = await fetch('/assets/BigPulp/nft_takes_v2.json');
-    if (!response.ok) throw new Error('Failed to load NFT takes');
+    const response = await fetch('/assets/BigPulp/nft_takes_lite.json');
+    if (!response.ok) throw new Error('Failed to load NFT takes lite');
     nftTakesCache = await response.json();
     return nftTakesCache!;
   } catch (error) {
-    console.error('Failed to load NFT takes:', error);
-    return {};
+    console.warn('Failed to load NFT takes lite, falling back to full payload:', error);
+    try {
+      const fallbackResponse = await fetch('/assets/BigPulp/nft_takes_v2.json');
+      if (!fallbackResponse.ok) throw new Error('Failed to load full NFT takes');
+      const fallbackData = await fallbackResponse.json() as Record<string, {
+        open_rarity_rank: number;
+        flags?: { is_top_10?: boolean };
+      }>;
+      nftTakesCache = Object.fromEntries(
+        Object.entries(fallbackData).map(([id, entry]) => [
+          id,
+          {
+            open_rarity_rank: entry.open_rarity_rank,
+            is_top_10: Boolean(entry.flags?.is_top_10),
+          } satisfies NFTTakeEntry,
+        ])
+      );
+      return nftTakesCache!;
+    } catch (fallbackError) {
+      console.error('Failed to load NFT takes:', fallbackError);
+      return {};
+    }
   }
 }
 
@@ -750,7 +763,7 @@ class BigPulpService implements IBigPulpService {
         floorPrice: 0.55,
         floorPriceUSD: 0.55 * 5.34, // Approximate XCH price
       },
-      badges: take?.flags?.is_top_10 ? [{
+      badges: take?.is_top_10 ? [{
         id: 'top-10',
         type: 'top-10-percent',
         label: 'Top 10%',
