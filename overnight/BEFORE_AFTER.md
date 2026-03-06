@@ -82,6 +82,14 @@
 | `FloatingVideoPlayer` | `preload="auto"` | `preload="metadata"` |
 | `GlobalVideoPlayer` | `preload="auto"` | `preload="metadata"` |
 
+### Long-form game music buffering
+
+| Area | Before | After |
+|---|---|---|
+| Raw `Audio(...)` game music instances | browser default / eager buffering | shared `createManagedAudio()` helper with `preload="metadata"` |
+| Long-form game music affected | ad hoc per page | centralized helper used by BrickByBrick, MemoryMatch, FlappyOrange, WojakRunner, BlockPuzzle, ColorReaction, GameModal, AudioContext |
+| Short SFX / Howler pools | unchanged | unchanged by design |
+
 ## Lighthouse baseline (new)
 
 The project had no repeatable Lighthouse artifact before this pass. These scores are the new local desktop baseline from `overnight/artifacts/lighthouse/summary.md`.
@@ -135,3 +143,5 @@ After the initial overnight baseline, the gallery page was still the weakest hig
 | Bundle soft breaches | n/a | `0` |
 | Orphaned JS visibility | none | explicit report (`0` current) |
 | Lighthouse artifacts | none | JSON + HTML + markdown summary |
+| Repo-generated unit-suite `stderr |` entries | `28` | `0` |
+| Environment `--localstorage-file` Node warnings | `4` | `4` |

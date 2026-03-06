@@ -146,13 +146,46 @@ Undoes:
 Risk:
 - reverting restores the earlier aggressive gallery network behavior and the weaker `/gallery` Lighthouse profile
 
+## `d099d2b` — Long-form music preload buffering
+
+```bash
+git revert d099d2b
+npm run test:unit
+npm run lint
+npm run build
+```
+
+Undoes:
+- `createManagedAudio()` helper
+- the `preload="metadata"` long-form game music behavior
+
+Risk:
+- long-form game pages go back to more eager audio buffering/download behavior
+
+## `86068cb` — Unit test noise cleanup
+
+```bash
+git revert 86068cb
+npm run test:unit > overnight/artifacts/unit-noise-after-fixes.log 2>&1
+npm run lint
+npm run build
+```
+
+Undoes:
+- safe localStorage guards in `marketApi` and `treasuryApi`
+- targeted console muting in expected-error-path tests
+- the `metadata-lite` test stub fix in `salesApi.test.ts`
+
+Risk:
+- repo-generated unit-suite stderr noise returns and module-init localStorage access becomes less defensive again
+
 ## Full nightly rollback
 
 To remove the entire overnight branch delta relative to `main`:
 
 ```bash
 git log --oneline main..HEAD
-git revert 9727080 5a7e4e8 aad9a75 5b1d1f3 2196cf4 5c586aa 76574fb 02df9da 0e7bf0c
+git revert 86068cb d099d2b 9727080 5a7e4e8 aad9a75 5b1d1f3 2196cf4 5c586aa 76574fb 02df9da 0e7bf0c
 ```
 
 Validate afterward:

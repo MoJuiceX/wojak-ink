@@ -204,6 +204,62 @@ npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.jso
 npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse-gallery-tuned --route=/gallery
 ```
 
+## Commit `d099d2b` — `perf: reduce music preload buffering`
+
+### What changed
+- added `src/utils/audioElement.ts` and `createManagedAudio()` for long-form HTML audio
+- switched long-form game music constructors to `preload="metadata"` via the shared helper
+- left short SFX / Howler pools untouched to avoid latency regressions
+
+### Files touched
+- `src/utils/audioElement.ts`
+- `src/utils/audioElement.test.ts`
+- `src/pages/BrickByBrick.tsx`
+- `src/pages/MemoryMatch.tsx`
+- `src/pages/FlappyOrange.tsx`
+- `src/pages/WojakRunner.tsx`
+- `src/pages/BlockPuzzle.tsx`
+- `src/pages/ColorReaction.tsx`
+- `src/components/media/games/GameModal.tsx`
+- `src/contexts/AudioContext.tsx`
+
+### Validate
+```bash
+npm run test:unit
+npm run lint
+npm run build
+```
+
+## Commit `86068cb` — `chore: reduce unit test noise`
+
+### What changed
+- added `src/utils/browserStorage.ts` and hardened module-init localStorage access in market/treasury services
+- added `src/tests/muteConsole.ts` for targeted expected-error-path muting in tests
+- updated sales/treasury/market and selected failure-path tests so the full unit suite no longer emits repo-generated `stderr |` noise
+
+### Files touched
+- `src/utils/browserStorage.ts`
+- `src/tests/muteConsole.ts`
+- `src/services/marketApi.ts`
+- `src/services/treasuryApi.ts`
+- `src/services/salesApi.test.ts`
+- `src/services/heatmapCache.test.ts`
+- `src/utils/settingsUtils.test.ts`
+- `src/services/historicalPriceService.test.ts`
+- `src/services/badgeService.test.ts`
+- `src/games/Wordle/stats.test.ts`
+- `functions/api/mint/process.test.ts`
+- `functions/api/mint/cleanup.test.ts`
+- `functions/api/mint/request.test.ts`
+
+### Validate
+```bash
+npm run test:unit
+npm run lint
+npm run build
+rg -n '^stderr \|' overnight/artifacts/unit-noise-after-fixes.log
+```
+
 ## Final validation set
 
 ```bash
@@ -215,4 +271,6 @@ PW_LOCAL_SAFE=1 npm test
 npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md
 npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse --route=/ --route=/gallery --route=/generator --route=/bigpulp
 npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse-gallery-tuned --route=/gallery
+npm run test:unit > overnight/artifacts/unit-noise-after-fixes.log 2>&1
+rg -n '^stderr \|' overnight/artifacts/unit-noise-after-fixes.log
 ```

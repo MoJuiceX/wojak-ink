@@ -24,6 +24,8 @@
 8. Continued the pass with BigPulp rarity payload trimming and explicit chunk classification in the bundle report.
 9. Re-ran the full validation set and refreshed the morning review package.
 10. Reduced gallery preload pressure and re-measured `/gallery` with a dedicated Lighthouse run.
+11. Reduced long-form game music preload buffering to avoid eager audio downloads.
+12. Reduced repo-generated unit-test stderr noise without suppressing unexpected failures.
 
 ## Phase Results
 
@@ -260,6 +262,66 @@ Validation:
 - `npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md` => passed
 - `npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse-gallery-tuned --route=/gallery` => passed
 
+### Phase 9 — Long-form music preload buffering
+
+Commit:
+- `d099d2b` — `perf: reduce music preload buffering`
+
+What changed:
+- Added `src/utils/audioElement.ts` with a shared `createManagedAudio()` helper that defaults long-form HTML audio elements to `preload="metadata"`
+- Updated the long-form game music paths that instantiate raw `Audio(...)` objects to use the shared helper:
+  - `src/pages/BrickByBrick.tsx`
+  - `src/pages/MemoryMatch.tsx`
+  - `src/pages/FlappyOrange.tsx`
+  - `src/pages/WojakRunner.tsx`
+  - `src/pages/BlockPuzzle.tsx`
+  - `src/pages/ColorReaction.tsx`
+  - `src/components/media/games/GameModal.tsx`
+  - `src/contexts/AudioContext.tsx`
+- Intentionally did not touch the short SFX / Howler pools to avoid input-latency regressions
+
+Validation:
+- `npm run test:unit` => passed (`152` files, `4260` tests)
+- `npm run lint` => passed
+- `npm run build` => passed
+
+### Phase 10 — Unit-test noise cleanup
+
+Commit:
+- `86068cb` — `chore: reduce unit test noise`
+
+What changed:
+- Added `src/utils/browserStorage.ts` and hardened module-init localStorage access in:
+  - `src/services/marketApi.ts`
+  - `src/services/treasuryApi.ts`
+- Added `src/tests/muteConsole.ts` for test-local console suppression in expected failure-path tests
+- Updated targeted tests to mute only expected console noise:
+  - `src/services/heatmapCache.test.ts`
+  - `src/utils/settingsUtils.test.ts`
+  - `src/services/historicalPriceService.test.ts`
+  - `src/services/badgeService.test.ts`
+  - `src/games/Wordle/stats.test.ts`
+  - `functions/api/mint/process.test.ts`
+  - `functions/api/mint/cleanup.test.ts`
+  - `functions/api/mint/request.test.ts`
+- Updated `src/services/salesApi.test.ts` to serve `metadata-lite.json` in its fetch stub so it no longer forces the fallback warning path
+
+Measured result:
+- repo-generated `stderr |` entries in the full unit-suite log dropped from `28` to `0`
+- environment-specific Node warnings about ``--localstorage-file`` remained at `4` occurrences and are still outside repo control
+
+Artifacts:
+- `overnight/artifacts/unit-noise-current.log`
+- `overnight/artifacts/unit-noise-after-fixes.log`
+- `overnight/artifacts/lint-after-test-noise-cleanup.log`
+- `overnight/artifacts/build-after-test-noise-cleanup.log`
+
+Validation:
+- `npm run test:unit -- src/services/salesApi.test.ts src/services/treasuryApi.test.ts src/services/marketApi.test.ts src/services/heatmapCache.test.ts src/utils/settingsUtils.test.ts src/services/historicalPriceService.test.ts src/services/badgeService.test.ts src/games/Wordle/stats.test.ts functions/api/mint/process.test.ts functions/api/mint/cleanup.test.ts` => passed (`247` tests)
+- `npm run test:unit` => passed (`152` files, `4260` tests)
+- `npm run lint` => passed (remaining output is only the Babel deopt note on `functions/_data/farmersPlotImageManifest.ts`)
+- `npm run build` => passed (`built in 5.91s`)
+
 ## Final Validation State
 
 Artifacts:
@@ -267,6 +329,8 @@ Artifacts:
 - `overnight/artifacts/unit-final.log`
 - `overnight/artifacts/build-final.log`
 - `overnight/artifacts/lint-after-noise-cleanup.log`
+- `overnight/artifacts/typecheck-after-test-noise-cleanup.log`
+- `overnight/artifacts/playwright-after-test-noise-cleanup.log`
 - `overnight/artifacts/bundle-report-latest.*`
 - `overnight/artifacts/lighthouse/*`
 - `overnight/artifacts/lighthouse-gallery-tuned/*`
@@ -274,8 +338,8 @@ Artifacts:
 Final checks:
 - `git status --short --branch` => nightly branch plus `overnight/` artifacts/docs only before final packaging commit
 - `npx tsc --noEmit` => passed
-- `npm run test:unit` => passed (`151` files, `4258` tests)
-- `npm run build` => passed (`built in 5.51s`)
+- `npm run test:unit` => passed (`152` files, `4260` tests)
+- `npm run build` => passed (`built in 5.91s`)
 - `npm run lint` => passed with no ESLint warnings
 - `PW_LOCAL_SAFE=1 npm test` => passed (`6` tests)
 
@@ -286,6 +350,7 @@ Not touched overnight because the risk/effort was not justified:
 - wallet manual chunk warning between `wallet-protocol -> wallet-core -> wallet-protocol` — worth a separate focused pass, but not a safe overnight quick fix
 - upstream Rollup PURE annotation warning from `node_modules/ox/_esm/core/Base64.js` — library-level noise, not repo logic
 - Babel deopt note on `functions/_data/farmersPlotImageManifest.ts` — expected from the generated file size; fixing it would require structural data changes, not a superficial tweak
+- environment-specific Node warnings during local test runs (`--localstorage-file`, `NO_COLOR` vs `FORCE_COLOR`) — these originate from the host toolchain/runtime, not the repo
 
 ## Morning Recommendations
 

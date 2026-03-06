@@ -142,3 +142,56 @@ git add src/pages/Gallery.tsx
 git commit -m "perf: trim gallery preload pressure"
 npm run test:unit
 npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md
+git -C /Users/abit_hex/wojak-ink-nightshift-2026-03-06 status --short --branch
+tail -n 80 /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/COMMANDS_RUN.txt
+sed -n '1,220p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/CHANGES_INDEX.md
+sed -n '1,260p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/REPORT.md
+sed -n '1,260p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/BEFORE_AFTER.md
+sed -n '1,260p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/ROLLBACK.md
+sed -n '1,220p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/vitest.config.ts
+npm --prefix /Users/abit_hex/wojak-ink-nightshift-2026-03-06 run test:unit > /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/unit-noise-current.log 2>&1
+rg -n "console\.(warn|error|log)|stderr|warn\(|error\(|metadata-lite unavailable|localStorage\.getItem is not a function|Failed to|rate-limited|Skipping splitter|falling back|fallback" /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src /Users/abit_hex/wojak-ink-nightshift-2026-03-06/functions /Users/abit_hex/wojak-ink-nightshift-2026-03-06/tests
+sed -n '1,220p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/services/treasuryApi.ts
+rg -n -- '--localstorage-file|localstorage-file' /Users/abit_hex/wojak-ink-nightshift-2026-03-06 /Users/abit_hex/wojak-ink-nightshift-2026-03-06/node_modules
+sed -n '1,240p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/services/treasuryApi.test.ts
+sed -n '1,160p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/services/treasuryService.ts
+head -n 160 /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/unit-noise-current.log
+sed -n '1,220p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/services/marketApi.ts
+sed -n '1,220p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/services/salesApi.ts
+sed -n '1,220p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/utils/settingsUtils.ts
+rg -n "muteConsole|spyOn\(console|console\.warn =|console\.error =|silenceConsole|mockConsole" /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src /Users/abit_hex/wojak-ink-nightshift-2026-03-06/functions /Users/abit_hex/wojak-ink-nightshift-2026-03-06/tests
+sed -n '1,240p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/functions/api/mint/process.test.ts
+sed -n '1,220p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/functions/api/mint/cleanup.test.ts
+sed -n '1,220p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/services/historicalPriceService.test.ts
+rg -n '^stderr \|' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/unit-noise-current.log
+sed -n '1,260p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/services/heatmapCache.test.ts
+sed -n '1,220p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/utils/settingsUtils.test.ts
+sed -n '1,220p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/services/badgeService.test.ts
+sed -n '1,220p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/games/Wordle/stats.test.ts
+env | rg 'localstorage|NODE_OPTIONS|NODE_'
+sed -n '1,140p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/games/Wordle/stats.ts
+node -p "JSON.stringify(process.execArgv)"
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && node -e "console.log(JSON.stringify(process.execArgv)); console.log(JSON.stringify(process.argv));"
+npm --prefix /Users/abit_hex/wojak-ink-nightshift-2026-03-06 run test:unit -- src/services/salesApi.test.ts src/services/treasuryApi.test.ts src/services/marketApi.test.ts src/services/heatmapCache.test.ts src/utils/settingsUtils.test.ts src/services/historicalPriceService.test.ts src/services/badgeService.test.ts src/games/Wordle/stats.test.ts functions/api/mint/process.test.ts functions/api/mint/cleanup.test.ts
+npm --prefix /Users/abit_hex/wojak-ink-nightshift-2026-03-06 run test:unit -- src/games/Wordle/stats.test.ts
+npm --prefix /Users/abit_hex/wojak-ink-nightshift-2026-03-06 run test:unit > /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/unit-noise-after-fixes.log 2>&1 && rg -n '^stderr \|' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/unit-noise-after-fixes.log || true
+npm --prefix /Users/abit_hex/wojak-ink-nightshift-2026-03-06 run lint > /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/lint-after-test-noise-cleanup.log 2>&1 && tail -n 40 /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/lint-after-test-noise-cleanup.log
+npm --prefix /Users/abit_hex/wojak-ink-nightshift-2026-03-06 run build > /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/build-after-test-noise-cleanup.log 2>&1 && tail -n 60 /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/build-after-test-noise-cleanup.log
+git -C /Users/abit_hex/wojak-ink-nightshift-2026-03-06 status --short
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && git add functions/api/mint/cleanup.test.ts functions/api/mint/process.test.ts functions/api/mint/request.test.ts src/games/Wordle/stats.test.ts src/services/badgeService.test.ts src/services/heatmapCache.test.ts src/services/historicalPriceService.test.ts src/services/marketApi.ts src/services/salesApi.test.ts src/services/treasuryApi.ts src/utils/settingsUtils.test.ts src/tests/muteConsole.ts src/utils/browserStorage.ts && git commit -m "chore: reduce unit test noise"
+rg -n -- '--localstorage-file|Warning:' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/unit-noise-after-fixes.log
+git -C /Users/abit_hex/wojak-ink-nightshift-2026-03-06 log --oneline --max-count=6
+tail -n 20 /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/unit-noise-after-fixes.log
+python3 - <<'PY'
+from pathlib import Path
+for name in ['unit-noise-current.log','unit-noise-after-fixes.log']:
+    path = Path('/Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts')/name
+    text = path.read_text()
+    stderr_count = sum(1 for line in text.splitlines() if line.startswith('stderr |'))
+    node_warn_count = sum(1 for line in text.splitlines() if '--localstorage-file' in line)
+    print(name, stderr_count, node_warn_count)
+PY
+tail -n 40 /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/lint-after-test-noise-cleanup.log
+tail -n 30 /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/build-after-test-noise-cleanup.log
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && npx tsc --noEmit > overnight/artifacts/typecheck-after-test-noise-cleanup.log 2>&1 && tail -n 20 overnight/artifacts/typecheck-after-test-noise-cleanup.log
+cd /Users/abit_hex/wojak-ink-nightshift-2026-03-06 && PW_LOCAL_SAFE=1 npm test > overnight/artifacts/playwright-after-test-noise-cleanup.log 2>&1 && tail -n 60 overnight/artifacts/playwright-after-test-noise-cleanup.log
