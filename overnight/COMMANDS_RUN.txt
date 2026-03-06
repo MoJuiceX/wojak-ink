@@ -1,0 +1,86 @@
+npm ci
+node -v
+npm -v
+git status --short --branch
+npm run build
+npm run lint
+npx tsc --noEmit
+npm run bundle:report
+npm test
+npm run test:unit
+cat package.json
+sed -n '1,240p' playwright.config.ts
+sed -n '1,260p' vite.config.ts
+rg -n "vitest|@vitest/expect|tests/workers|testDir|testMatch|testIgnore" tests playwright.config.ts vitest.config.ts package.json
+npm test -- --list
+npm run test:unit -- src/services/generatorService.test.ts
+npm run build
+npm run bundle:report
+git add package.json playwright.config.ts playwright.full.config.ts vite.config.ts scripts/verify-manifest-assets.mjs tests/local/app-shell.spec.ts src/services/generatorService.test.ts
+git commit -m "test: fix playwright baseline + prod guardrails"
+sed -n '1,260p' src/contexts/BigPulpContext.tsx
+sed -n '1,260p' src/services/bigpulpService.ts
+sed -n '1,220p' src/components/bigpulp/AskTab.tsx
+npm run test:unit -- src/services/bigPulpV9Service.test.ts
+npm run build
+git add src/services/bigPulpV9Service.ts src/services/bigPulpV9Service.test.ts src/contexts/BigPulpContext.tsx
+git commit -m "perf: lazy-load BigPulp datasets"
+node scripts/generate-metadata-lite.mjs
+npm run test:unit -- src/services/wfpCollectionData.test.ts src/services/galleryService.test.ts src/services/salesApi.test.ts
+npm run test:unit
+npm run build
+git add package.json public/assets/nft-data/metadata-lite.json scripts/generate-metadata-lite.mjs src/services/wfpCollectionData.ts src/services/wfpCollectionData.test.ts src/services/galleryService.ts src/services/galleryPreloader.ts src/services/salesApi.ts src/services/tradeValuesService.ts src/services/bigpulpService.ts src/games/MemoryMatch/index.tsx src/pages/MemoryMatch.tsx src/components/bigpulp/AskTab.tsx
+git commit -m "perf: reduce gallery metadata load footprint"
+sed -n '1,220p' src/components/ArcadeFrame.tsx
+sed -n '1,260p' src/components/media/video/FloatingVideoPlayer.tsx
+sed -n '1,420p' src/components/media/video/GlobalVideoPlayer.tsx
+node <<'NODE'
+const fs=require('fs'); const path=require('path');
+const root='public';
+const pairs=[];
+function walk(dir){for(const ent of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,ent.name); if(ent.isDirectory()) walk(p); else if(ent.isFile() && p.endsWith('.png')){const w=p.slice(0,-4)+'.webp'; if(fs.existsSync(w)) pairs.push([p,w]);}}}
+walk(root);
+for (const [png,webp] of pairs.sort()) console.log(`${png} -> ${webp}`);
+NODE
+rg -n "arcade-frame_fin\.png|arcade-frame\.png|gallery-banner\.png|og-image\.png|gallery-previews/.*\.png" src public index.html
+sed -n '1,220p' src/components/landing/CollectionPreview.tsx
+sed -n '1,220p' src/components/landing/FloatingNFTs.tsx
+sed -n '1,220p' src/components/landing/SectionFloatingNFTs.tsx
+sed -n '1,240p' src/components/landing/FinalCTA.tsx
+node <<'NODE'
+const fs=require('fs'); const path=require('path');
+const dir='public/assets/gallery-previews';
+for (const f of fs.readdirSync(dir).filter(f=>f.endsWith('.png')).sort()){
+ const png=path.join(dir,f); const webp=png.replace(/\.png$/,'.webp');
+ if(!fs.existsSync(webp)) continue;
+ const sp=fs.statSync(png).size; const sw=fs.statSync(webp).size;
+ const diff=sw-sp;
+ console.log(`${f}\tpng=${(sp/1024).toFixed(1)}KB\twebp=${(sw/1024).toFixed(1)}KB\tdelta=${(diff/1024).toFixed(1)}KB`)
+}
+NODE
+npm run build > overnight/artifacts/phase4-build.log 2>&1
+PW_LOCAL_SAFE=1 npm test > overnight/artifacts/phase4-e2e.log 2>&1
+git add src/components/ArcadeFrame.tsx src/components/landing/CollectionPreview.tsx src/components/landing/FinalCTA.tsx src/components/landing/FloatingNFTs.tsx src/components/landing/SectionFloatingNFTs.tsx src/components/media/video/FloatingVideoPlayer.tsx src/components/media/video/GlobalVideoPlayer.tsx
+git commit -m "perf: use existing webp assets where available"
+cat package.json
+sed -n '1,260p' scripts/bundle-budget-report.mjs
+npm install -D lighthouse chrome-launcher
+node -e "import('chrome-launcher').then(m=>console.log(Object.keys(m))).catch(err=>{console.error(err);process.exit(1)})"
+npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md
+npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse
+git add package.json package-lock.json scripts/run-lighthouse-baseline.mjs scripts/bundle-budget-report.mjs
+git commit -m "chore: add performance baseline reporting"
+sed -n '1,260p' eslint.config.js
+sed -n '1,260p' scripts/verify-manifest-assets.mjs
+npm run lint > overnight/artifacts/lint-current.log 2>&1
+npm run manifest:orphans -- --json-out=overnight/artifacts/manifest-orphans.json --text-out=overnight/artifacts/manifest-orphans.txt > overnight/artifacts/manifest-orphans.log 2>&1
+npm run lint > overnight/artifacts/lint-after-noise-cleanup.log 2>&1
+npm run manifest:orphans -- --json-out=overnight/artifacts/manifest-orphans.json --text-out=overnight/artifacts/manifest-orphans.txt > overnight/artifacts/manifest-orphans.log 2>&1
+git add eslint.config.js package.json scripts/report-manifest-orphans.mjs
+git commit -m "chore: reduce socket-server lint warning noise"
+cat overnight/artifacts/lighthouse/summary.md
+cat overnight/artifacts/bundle-report-latest.md
+npx tsc --noEmit > overnight/artifacts/typecheck-final.log 2>&1
+npm run test:unit > overnight/artifacts/unit-final.log 2>&1
+npm run build > overnight/artifacts/build-final.log 2>&1
+git log --oneline --decorate --max-count=10

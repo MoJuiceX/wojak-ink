@@ -1,0 +1,20 @@
+public/img/arcade-frame_fin.png
+  png: 1236.0 KB
+  webp: 374.7 KB
+  saved: 861.4 KB (69.7%)
+
+public/assets/gallery-previews/alien-wojak.png
+  png: 95.4 KB
+  webp: 54.4 KB
+  saved: 41.0 KB (42.9%)
+
+public/assets/gallery-previews/bepe-baddie.png
+  png: 79.0 KB
+  webp: 93.1 KB
+  saved: -14.1 KB (-17.8%)
+
+public/assets/gallery-previews/wojak.png
+  png: 183.4 KB
+  webp: 64.7 KB
+  saved: 118.7 KB (64.7%)
+

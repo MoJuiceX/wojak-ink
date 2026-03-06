@@ -1,0 +1,154 @@
+# Changes Index
+
+## Commit `0e7bf0c` — `test: fix playwright baseline + prod guardrails`
+
+### What changed
+- isolated the default Playwright run to `tests/local/**/*.spec.ts`
+- added `playwright.full.config.ts` for broader/manual suites
+- defaulted Playwright to `http://127.0.0.1:5174`
+- added a production guard requiring `PW_ALLOW_PROD=1`
+- disabled the Vite production `/api` proxy during local-safe Playwright runs
+- added local-safe smoke tests for `/gallery` and `/generator`
+- taught the manifest verifier to honor `VITE_LAYER_BASE_URL`
+- relaxed the generator asset-path test to allow local or remote layer hosts
+
+### Files touched
+- `package.json`
+- `playwright.config.ts`
+- `playwright.full.config.ts`
+- `vite.config.ts`
+- `scripts/verify-manifest-assets.mjs`
+- `tests/local/app-shell.spec.ts`
+- `src/services/generatorService.test.ts`
+
+### Validate
+```bash
+npm test
+npm run test:unit
+npm run build
+npm run bundle:report
+```
+
+## Commit `02df9da` — `perf: lazy-load BigPulp datasets`
+
+### What changed
+- removed eager mount-time fetch of the BigPulp V9 dataset
+- added shared lazy V9 loader + cache
+- load V9 only during `searchNFT` / `surpriseMe`
+- parallelized V9 load with existing search analysis
+
+### Files touched
+- `src/services/bigPulpV9Service.ts`
+- `src/services/bigPulpV9Service.test.ts`
+- `src/contexts/BigPulpContext.tsx`
+
+### Validate
+```bash
+npm run test:unit -- src/services/bigPulpV9Service.test.ts
+npm run build
+```
+
+## Commit `76574fb` — `perf: reduce gallery metadata load footprint`
+
+### What changed
+- added generated `metadata-lite.json`
+- added shared collection-data loader/cache service
+- migrated the highest-volume metadata consumers to the lite/indexed path
+- switched BigPulp AskTab rank lookups to `rarity.json`
+- updated build to regenerate metadata-lite automatically
+
+### Files touched
+- `package.json`
+- `public/assets/nft-data/metadata-lite.json`
+- `scripts/generate-metadata-lite.mjs`
+- `src/services/wfpCollectionData.ts`
+- `src/services/wfpCollectionData.test.ts`
+- `src/services/galleryService.ts`
+- `src/services/galleryPreloader.ts`
+- `src/services/salesApi.ts`
+- `src/services/tradeValuesService.ts`
+- `src/services/bigpulpService.ts`
+- `src/games/MemoryMatch/index.tsx`
+- `src/pages/MemoryMatch.tsx`
+- `src/components/bigpulp/AskTab.tsx`
+
+### Validate
+```bash
+npm run generate:metadata-lite
+npm run test:unit -- src/services/wfpCollectionData.test.ts src/services/galleryService.test.ts src/services/salesApi.test.ts
+npm run test:unit
+npm run build
+```
+
+## Commit `5c586aa` — `perf: use existing webp assets where available`
+
+### What changed
+- swapped `ArcadeFrame` to the existing WebP frame asset
+- switched decorative landing/gallery preview pools to smaller existing WebP files
+- kept `bepe-baddie.png` because its WebP variant was larger
+- added `loading="lazy"` / `decoding="async"` to safe below-the-fold preview images
+- reduced persistent video preload from `auto` to `metadata`
+
+### Files touched
+- `src/components/ArcadeFrame.tsx`
+- `src/components/landing/CollectionPreview.tsx`
+- `src/components/landing/FinalCTA.tsx`
+- `src/components/landing/FloatingNFTs.tsx`
+- `src/components/landing/SectionFloatingNFTs.tsx`
+- `src/components/media/video/FloatingVideoPlayer.tsx`
+- `src/components/media/video/GlobalVideoPlayer.tsx`
+
+### Validate
+```bash
+npm run build
+PW_LOCAL_SAFE=1 npm test
+```
+
+## Commit `2196cf4` — `chore: add performance baseline reporting`
+
+### What changed
+- added `npm run perf:lighthouse`
+- added `scripts/run-lighthouse-baseline.mjs`
+- extended bundle reporting with top public assets over threshold
+- added local-only performance tooling dependencies (`lighthouse`, `chrome-launcher`)
+
+### Files touched
+- `package.json`
+- `package-lock.json`
+- `scripts/run-lighthouse-baseline.mjs`
+- `scripts/bundle-budget-report.mjs`
+
+### Validate
+```bash
+npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md
+npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse
+```
+
+## Commit `5b1d1f3` — `chore: reduce socket-server lint warning noise`
+
+### What changed
+- extended the `no-console` exemption to `socket-server/**/*`
+- added dry-run manifest orphan reporting / optional cleanup tooling
+- added `npm run manifest:orphans`
+- matched the orphan tool behavior to the remote-layer `VITE_LAYER_BASE_URL` skip logic
+
+### Files touched
+- `eslint.config.js`
+- `package.json`
+- `scripts/report-manifest-orphans.mjs`
+
+### Validate
+```bash
+npm run lint
+npm run manifest:orphans -- --json-out=overnight/artifacts/manifest-orphans.json --text-out=overnight/artifacts/manifest-orphans.txt
+```
+
+## Final validation set
+
+```bash
+npx tsc --noEmit
+npm run test:unit
+npm run build
+npm run lint
+PW_LOCAL_SAFE=1 npm test
+```

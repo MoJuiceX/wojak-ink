@@ -1,0 +1,6 @@
+build=
+lint=
+tsc=
+bundle=
+e2e=
+unit=

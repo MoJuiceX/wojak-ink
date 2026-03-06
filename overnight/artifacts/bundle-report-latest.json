@@ -1,0 +1,1028 @@
+{
+  "generatedAt": "2026-03-06T03:04:47.666Z",
+  "distDir": "dist/assets",
+  "limits": {
+    "maxJsAssetKb": 406,
+    "publicAssetThresholdKb": 250
+  },
+  "totals": {
+    "jsFiles": 93,
+    "cssFiles": 37,
+    "publicFiles": 726,
+    "jsKb": 4056.04,
+    "cssKb": 920.87
+  },
+  "topJs": [
+    {
+      "file": "vendor-wallet-D1PXsfn8.js",
+      "bytes": 359683,
+      "sizeKb": 351.25,
+      "group": "vendor-wallet"
+    },
+    {
+      "file": "vendor-react-CD3mQ61R.js",
+      "bytes": 309983,
+      "sizeKb": 302.72,
+      "group": "vendor-react"
+    },
+    {
+      "file": "index-Dwu1QzJp.js",
+      "bytes": 276008,
+      "sizeKb": 269.54,
+      "group": "entry-index"
+    },
+    {
+      "file": "wallet-connect-standalone-wallet-protocol-C4VxITVL.js",
+      "bytes": 252349,
+      "sizeKb": 246.43,
+      "group": "standalone-wallet-protocol"
+    },
+    {
+      "file": "wallet-connect-standalone-wallet-core-BAVQEmi7.js",
+      "bytes": 203982,
+      "sizeKb": 199.2,
+      "group": "standalone-wallet-core"
+    },
+    {
+      "file": "html2canvas.esm-DXEQVQnt.js",
+      "bytes": 201041,
+      "sizeKb": 196.33,
+      "group": "js-other"
+    },
+    {
+      "file": "wallet-connect-standalone-wallet-ui-DuUfeWJu.js",
+      "bytes": 200048,
+      "sizeKb": 195.36,
+      "group": "standalone-wallet-ui"
+    },
+    {
+      "file": "vendor-wallet-ui-bYn9U32G.js",
+      "bytes": 179557,
+      "sizeKb": 175.35,
+      "group": "vendor-wallet-ui"
+    },
+    {
+      "file": "feature-generator-core-XCbg_RLj.js",
+      "bytes": 170459,
+      "sizeKb": 166.46,
+      "group": "feature-generator-core"
+    },
+    {
+      "file": "Generator-CKW4gIiy.js",
+      "bytes": 156048,
+      "sizeKb": 152.39,
+      "group": "js-other"
+    },
+    {
+      "file": "wallet-connect-standalone-wallet-crypto-CtgPRmL-.js",
+      "bytes": 132874,
+      "sizeKb": 129.76,
+      "group": "standalone-wallet-crypto"
+    },
+    {
+      "file": "vendor-animation-X2OmVDBg.js",
+      "bytes": 127668,
+      "sizeKb": 124.68,
+      "group": "js-other"
+    },
+    {
+      "file": "BigPulp-FFr-mOou.js",
+      "bytes": 101037,
+      "sizeKb": 98.67,
+      "group": "js-other"
+    },
+    {
+      "file": "CitrusDrop-BGu7ypkE.js",
+      "bytes": 96931,
+      "sizeKb": 94.66,
+      "group": "js-other"
+    },
+    {
+      "file": "vendor-wallet-crypto-CylnypXm.js",
+      "bytes": 91351,
+      "sizeKb": 89.21,
+      "group": "vendor-wallet-crypto"
+    }
+  ],
+  "topCss": [
+    {
+      "file": "index-BC9lw4fP.css",
+      "bytes": 289301,
+      "sizeKb": 282.52
+    },
+    {
+      "file": "GameEffects-CZQMYlwf.css",
+      "bytes": 68984,
+      "sizeKb": 67.37
+    },
+    {
+      "file": "Account-DQ9Q1kLK.css",
+      "bytes": 60913,
+      "sizeKb": 59.49
+    },
+    {
+      "file": "BlockPuzzle-VtexbuqL.css",
+      "bytes": 47347,
+      "sizeKb": 46.24
+    },
+    {
+      "file": "BrickByBrick-Bc6tBAUl.css",
+      "bytes": 46698,
+      "sizeKb": 45.6
+    },
+    {
+      "file": "GamesHub-BuGOunO7.css",
+      "bytes": 43244,
+      "sizeKb": 42.23
+    },
+    {
+      "file": "MemoryMatch-C8C2MkPq.css",
+      "bytes": 40386,
+      "sizeKb": 39.44
+    },
+    {
+      "file": "GatedChat-CiWw2_hi.css",
+      "bytes": 39380,
+      "sizeKb": 38.46
+    },
+    {
+      "file": "ColorReaction-Bt8DDKs2.css",
+      "bytes": 35172,
+      "sizeKb": 34.35
+    },
+    {
+      "file": "OrangeJuggle-9vKC8W6R.css",
+      "bytes": 31040,
+      "sizeKb": 30.31
+    }
+  ],
+  "topPublicAssets": [
+    {
+      "file": "public/assets/videos/wiznerd-music.mov",
+      "bytes": 12968742,
+      "sizeKb": 12664.79,
+      "ext": "mov"
+    },
+    {
+      "file": "public/assets/BigPulp/bigPv9/big_pulp_v9_output.json",
+      "bytes": 4553505,
+      "sizeKb": 4446.78,
+      "ext": "json"
+    },
+    {
+      "file": "public/assets/videos/multi-billion-dao.mp4",
+      "bytes": 3873478,
+      "sizeKb": 3782.69,
+      "ext": "mp4"
+    },
+    {
+      "file": "public/assets/BigPulp/big_pulp_v3_output.json",
+      "bytes": 3807911,
+      "sizeKb": 3718.66,
+      "ext": "json"
+    },
+    {
+      "file": "public/assets/nft-data/metadata.json",
+      "bytes": 3781522,
+      "sizeKb": 3692.89,
+      "ext": "json"
+    },
+    {
+      "file": "public/audio/music/memory-match/megaman-fireman-final.mp3",
+      "bytes": 3603953,
+      "sizeKb": 3519.49,
+      "ext": "mp3"
+    },
+    {
+      "file": "public/assets/Games/sfx/retro_music/Donkey Kong Country Returns Music - Jungle Hijinx - HARMFUL.mp3",
+      "bytes": 3096412,
+      "sizeKb": 3023.84,
+      "ext": "mp3"
+    },
+    {
+      "file": "public/audio/music/wojak-runner/sonic-green-hill-final.mp3",
+      "bytes": 2832118,
+      "sizeKb": 2765.74,
+      "ext": "mp3"
+    },
+    {
+      "file": "public/assets/BigPulp/nft_takes_v2.json",
+      "bytes": 2814217,
+      "sizeKb": 2748.26,
+      "ext": "json"
+    },
+    {
+      "file": "public/audio/music/FlappyOrange/gourmet-race-whisper.mp3",
+      "bytes": 2450127,
+      "sizeKb": 2392.7,
+      "ext": "mp3"
+    },
+    {
+      "file": "public/audio/music/2048-merge/sf2-blanka-final.mp3",
+      "bytes": 2421734,
+      "sizeKb": 2364.97,
+      "ext": "mp3"
+    },
+    {
+      "file": "public/audio/music/2048-merge/sf2-chunli-final.mp3",
+      "bytes": 2418855,
+      "sizeKb": 2362.16,
+      "ext": "mp3"
+    },
+    {
+      "file": "public/audio/music/memory-match/sf2-zangief-final.mp3",
+      "bytes": 2418855,
+      "sizeKb": 2362.16,
+      "ext": "mp3"
+    },
+    {
+      "file": "public/audio/music/wojak-runner/street-fighter-vega-final.mp3",
+      "bytes": 2418852,
+      "sizeKb": 2362.16,
+      "ext": "mp3"
+    },
+    {
+      "file": "public/audio/music/block-puzzle/smb-underwater-final.mp3",
+      "bytes": 2408760,
+      "sizeKb": 2352.3,
+      "ext": "mp3"
+    },
+    {
+      "file": "public/assets/videos/pokemon-tang-gang.mp4",
+      "bytes": 2194858,
+      "sizeKb": 2143.42,
+      "ext": "mp4"
+    },
+    {
+      "file": "public/assets/Games/sfx/Street Figther 2 music/Street Fighter II Arcade Music - True Ending Theme - CPS1 - Lamar Johnson.mp3",
+      "bytes": 2174250,
+      "sizeKb": 2123.29,
+      "ext": "mp3"
+    },
+    {
+      "file": "public/audio/music/2048-merge/sf2-ending-final.mp3",
+      "bytes": 2174250,
+      "sizeKb": 2123.29,
+      "ext": "mp3"
+    },
+    {
+      "file": "public/assets/Games/sfx/retro_music/Tetris (Tengen) (NES) Music - Troika - GBelair.mp3",
+      "bytes": 2162703,
+      "sizeKb": 2112.01,
+      "ext": "mp3"
+    },
+    {
+      "file": "public/audio/music/FlappyOrange/tetris-troika-whisper.mp3",
+      "bytes": 2162703,
+      "sizeKb": 2112.01,
+      "ext": "mp3"
+    }
+  ],
+  "standaloneJs": [
+    {
+      "file": "wallet-connect-standalone-wallet-protocol-C4VxITVL.js",
+      "bytes": 252349,
+      "sizeKb": 246.43,
+      "group": "standalone-wallet-protocol"
+    },
+    {
+      "file": "wallet-connect-standalone-wallet-core-BAVQEmi7.js",
+      "bytes": 203982,
+      "sizeKb": 199.2,
+      "group": "standalone-wallet-core"
+    },
+    {
+      "file": "wallet-connect-standalone-wallet-ui-DuUfeWJu.js",
+      "bytes": 200048,
+      "sizeKb": 195.36,
+      "group": "standalone-wallet-ui"
+    },
+    {
+      "file": "wallet-connect-standalone-wallet-crypto-CtgPRmL-.js",
+      "bytes": 132874,
+      "sizeKb": 129.76,
+      "group": "standalone-wallet-crypto"
+    },
+    {
+      "file": "wallet-connect-standalone.js",
+      "bytes": 2162,
+      "sizeKb": 2.11,
+      "group": "standalone-entry"
+    },
+    {
+      "file": "wallet-connect-standalone-runtime-ByX85dGu.js",
+      "bytes": 991,
+      "sizeKb": 0.97,
+      "group": "standalone-runtime"
+    }
+  ],
+  "budgets": [
+    {
+      "group": "vendor-wallet",
+      "sizeKb": 351.25,
+      "softKb": 380,
+      "hardKb": 430,
+      "level": "pass",
+      "file": "vendor-wallet-D1PXsfn8.js"
+    },
+    {
+      "group": "vendor-react",
+      "sizeKb": 302.72,
+      "softKb": 330,
+      "hardKb": 380,
+      "level": "pass",
+      "file": "vendor-react-CD3mQ61R.js"
+    },
+    {
+      "group": "entry-index",
+      "sizeKb": 269.54,
+      "softKb": 300,
+      "hardKb": 360,
+      "level": "pass",
+      "file": "index-Dwu1QzJp.js"
+    },
+    {
+      "group": "vendor-wallet-ui",
+      "sizeKb": 175.35,
+      "softKb": 220,
+      "hardKb": 280,
+      "level": "pass",
+      "file": "vendor-wallet-ui-bYn9U32G.js"
+    },
+    {
+      "group": "feature-generator-core",
+      "sizeKb": 166.46,
+      "softKb": 180,
+      "hardKb": 240,
+      "level": "pass",
+      "file": "feature-generator-core-XCbg_RLj.js"
+    },
+    {
+      "group": "vendor-wallet-crypto",
+      "sizeKb": 89.21,
+      "softKb": 120,
+      "hardKb": 160,
+      "level": "pass",
+      "file": "vendor-wallet-crypto-CylnypXm.js"
+    }
+  ],
+  "perAssetHardBreaches": [],
+  "orphanedJs": [
+    {
+      "file": "html2canvas.esm-DXEQVQnt.js",
+      "bytes": 201041,
+      "sizeKb": 196.33,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "Generator-CKW4gIiy.js",
+      "bytes": 156048,
+      "sizeKb": 152.39,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "vendor-animation-X2OmVDBg.js",
+      "bytes": 127668,
+      "sizeKb": 124.68,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "BigPulp-FFr-mOou.js",
+      "bytes": 101037,
+      "sizeKb": 98.67,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "CitrusDrop-BGu7ypkE.js",
+      "bytes": 96931,
+      "sizeKb": 94.66,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "Account-DEIZjRjl.js",
+      "bytes": 87716,
+      "sizeKb": 85.66,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "Gallery-C7r8p8G-.js",
+      "bytes": 78163,
+      "sizeKb": 76.33,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "GamesHub-Ck5fz-0D.js",
+      "bytes": 63602,
+      "sizeKb": 62.11,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "FlappyOrange-CwVhnfJF.js",
+      "bytes": 59444,
+      "sizeKb": 58.05,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "ArcadeGameOverScreen-DpfVzrIo.js",
+      "bytes": 57623,
+      "sizeKb": 56.27,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "FightClub-Cp7w_OVW.js",
+      "bytes": 52341,
+      "sizeKb": 51.11,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "vendor-socket-CG1tBJBN.js",
+      "bytes": 41796,
+      "sizeKb": 40.82,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "BattleView-JScw3e2V.js",
+      "bytes": 39752,
+      "sizeKb": 38.82,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "moves-DYH82CMw.js",
+      "bytes": 36197,
+      "sizeKb": 35.35,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "howler-CQ9lpn6e.js",
+      "bytes": 36145,
+      "sizeKb": 35.3,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "vendor-data-Q8bilxQB.js",
+      "bytes": 35321,
+      "sizeKb": 34.49,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "BlockPuzzle-BE9OTxgd.js",
+      "bytes": 35294,
+      "sizeKb": 34.47,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "ColorReaction-BQwtXo9r.js",
+      "bytes": 34461,
+      "sizeKb": 33.65,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "GameEffects-B3zIvckP.js",
+      "bytes": 34410,
+      "sizeKb": 33.6,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "Profile-WdX6ez0l.js",
+      "bytes": 31296,
+      "sizeKb": 30.56,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "nameGenerator-B-4_4dIC.js",
+      "bytes": 29404,
+      "sizeKb": 28.71,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "WordleGame-Cfo6PcWo.js",
+      "bytes": 28572,
+      "sizeKb": 27.9,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "Merge2048Game-mlPuo3NP.js",
+      "bytes": 27376,
+      "sizeKb": 26.73,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "MemoryMatch-BhfOPdTe.js",
+      "bytes": 27189,
+      "sizeKb": 26.55,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "Treasury-B9JkFbQJ.js",
+      "bytes": 27057,
+      "sizeKb": 26.42,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "vendor-icons-mzr3BScy.js",
+      "bytes": 25964,
+      "sizeKb": 25.36,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "BrickBreaker-CeXQ1TtW.js",
+      "bytes": 24679,
+      "sizeKb": 24.1,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "BrickByBrick-B2QREV84.js",
+      "bytes": 22069,
+      "sizeKb": 21.55,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "DesktopExplorerPanel-u9D4N0A_.js",
+      "bytes": 21335,
+      "sizeKb": 20.83,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "ChatRoom-DrLR4DiP.js",
+      "bytes": 20556,
+      "sizeKb": 20.07,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "Drawer-D7gzG7Ey.js",
+      "bytes": 20025,
+      "sizeKb": 19.56,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "DemoBattle-Cfqk7lRo.js",
+      "bytes": 19758,
+      "sizeKb": 19.29,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "RuleBuilder-CANnguiZ.js",
+      "bytes": 18710,
+      "sizeKb": 18.27,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "Settings-2YYph4Qe.js",
+      "bytes": 18237,
+      "sizeKb": 17.81,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "BattleCanvas-B9sgm1xe.js",
+      "bytes": 18088,
+      "sizeKb": 17.66,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "trait-type-map-blfGuUXy.js",
+      "bytes": 17986,
+      "sizeKb": 17.56,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "OrangeJuggle-CY_pxtUM.js",
+      "bytes": 17806,
+      "sizeKb": 17.39,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "GameVoting-DRYmLlC_.js",
+      "bytes": 16312,
+      "sizeKb": 15.93,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "Guild-BtwZKkAq.js",
+      "bytes": 14436,
+      "sizeKb": 14.1,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "WojakRunner-DMUx3wzJ.js",
+      "bytes": 13321,
+      "sizeKb": 13.01,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "Admin-B_nNOUCM.js",
+      "bytes": 11736,
+      "sizeKb": 11.46,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "OrangeSnake-Dq7rpphs.js",
+      "bytes": 11619,
+      "sizeKb": 11.35,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "confetti.module-C2jkTI5u.js",
+      "bytes": 10696,
+      "sizeKb": 10.45,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "ArcadeLightsContext--SJ-5vT2.js",
+      "bytes": 10657,
+      "sizeKb": 10.41,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "OrangePong-DqaCGxS3.js",
+      "bytes": 10104,
+      "sizeKb": 9.87,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "WojakWhack-BgE4HPM0.js",
+      "bytes": 8247,
+      "sizeKb": 8.05,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "badgeService-CfL4YSxB.js",
+      "bytes": 6489,
+      "sizeKb": 6.34,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "Media-BmEfpp_y.js",
+      "bytes": 6402,
+      "sizeKb": 6.25,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "GameScorecard-De5mgl0s.js",
+      "bytes": 5568,
+      "sizeKb": 5.44,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "GameContext-Bt9OTwES.js",
+      "bytes": 4592,
+      "sizeKb": 4.48,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "KnifeGame-CvmUHDyq.js",
+      "bytes": 4154,
+      "sizeKb": 4.06,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "ChatHub-DsOXC61N.js",
+      "bytes": 4028,
+      "sizeKb": 3.93,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "BigPulp-DEuvG6P_.js",
+      "bytes": 3808,
+      "sizeKb": 3.72,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "useGameHaptics-SZ31IXv7.js",
+      "bytes": 3468,
+      "sizeKb": 3.39,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "useMediaData-DS1Kmrk9.js",
+      "bytes": 3255,
+      "sizeKb": 3.18,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "useGameEffects-CUDe3zQO.js",
+      "bytes": 2762,
+      "sizeKb": 2.7,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "vendor-runtime-DruY0qtP.js",
+      "bytes": 2566,
+      "sizeKb": 2.51,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "VideoCard-B8Qkelx1.js",
+      "bytes": 2539,
+      "sizeKb": 2.48,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "CombatBattle-FFNsFNxm.js",
+      "bytes": 2226,
+      "sizeKb": 2.17,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "GameEffects-D4XwpDf1.js",
+      "bytes": 2183,
+      "sizeKb": 2.13,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "wallet-connect-standalone 2.js",
+      "bytes": 2162,
+      "sizeKb": 2.11,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "GameSEO-CHg6aQoy.js",
+      "bytes": 1998,
+      "sizeKb": 1.95,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "useLeaderboard-dTSsJF0t.js",
+      "bytes": 1939,
+      "sizeKb": 1.89,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "Shop-guFD3ud6.js",
+      "bytes": 1856,
+      "sizeKb": 1.81,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "ConfirmModal-CvI_il8i.js",
+      "bytes": 1660,
+      "sizeKb": 1.62,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "PageSEO-BaAM6X3Q.js",
+      "bytes": 1325,
+      "sizeKb": 1.29,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "Avatar-B1T91_qr.js",
+      "bytes": 1279,
+      "sizeKb": 1.25,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "skeletons-DlE-Qa-7.js",
+      "bytes": 1209,
+      "sizeKb": 1.18,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "useGameNavigationGuard-DgOtSq__.js",
+      "bytes": 1042,
+      "sizeKb": 1.02,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "useGameTouch-FZjuNEbW.js",
+      "bytes": 1009,
+      "sizeKb": 0.99,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "vendor-auth-o35ioL2O.js",
+      "bytes": 1007,
+      "sizeKb": 0.98,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "HolderChat-xDLlWGAX.js",
+      "bytes": 856,
+      "sizeKb": 0.84,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "GatedChat-BQDleK6-.js",
+      "bytes": 840,
+      "sizeKb": 0.82,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "useMobileGameFullscreen-DgnZLfxN.js",
+      "bytes": 669,
+      "sizeKb": 0.65,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "captureDOM-7cvxBlQp.js",
+      "bytes": 665,
+      "sizeKb": 0.65,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "wallet-preload-C_wKALDH.js",
+      "bytes": 622,
+      "sizeKb": 0.61,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "useAuthenticatedFetch-BOW2MyJo.js",
+      "bytes": 420,
+      "sizeKb": 0.41,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "GatedChat-BjNYkeJJ.js",
+      "bytes": 405,
+      "sizeKb": 0.4,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "PageTransition-Cg__yo2-.js",
+      "bytes": 400,
+      "sizeKb": 0.39,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "types-CApfC9Nb.js",
+      "bytes": 233,
+      "sizeKb": 0.23,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    },
+    {
+      "file": "brandConstants-ByHzxFXn.js",
+      "bytes": 81,
+      "sizeKb": 0.08,
+      "group": "js-other",
+      "hardKb": 406,
+      "exceeded": false
+    }
+  ],
+  "summary": {
+    "hardBreaches": 0,
+    "softBreaches": 0,
+    "perAssetHardBreaches": 0,
+    "orphanedJs": 81,
+    "orphanedHardBreaches": 0,
+    "status": "pass"
+  }
+}
