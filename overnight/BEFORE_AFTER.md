@@ -32,7 +32,7 @@
 | Metric | Final |
 |---|---:|
 | Build status | Passed |
-| Build time | `5.63s` |
+| Build time | `5.51s` |
 | Lint status | Passed with `0` ESLint warnings |
 | Typecheck status | Passed |
 | Bundle report status | Passed |
@@ -92,6 +92,16 @@ The project had no repeatable Lighthouse artifact before this pass. These scores
 | `/gallery` | `68` | `91` | `100` | `100` | `2855` | `15991` | `157` | `0.000` |
 | `/generator` | `81` | `91` | `100` | `100` | `2854` | `3998` | `128` | `0.001` |
 | `/bigpulp` | `76` | `91` | `100` | `100` | `2854` | `4847` | `150` | `0.003` |
+
+### Gallery route follow-up tuning
+
+After the initial overnight baseline, the gallery page was still the weakest high-traffic route. A second pass trimmed the image preload strategy and produced this measured delta:
+
+| Route | Before | After | Delta |
+|---|---:|---:|---:|
+| `/gallery` Perf | `68` | `82` | `+14` |
+| `/gallery` LCP | `15991 ms` | `3913 ms` | `-12078 ms` |
+| `/gallery` TBT | `157 ms` | `109 ms` | `-48 ms` |
 
 ## Current top chunks and assets
 

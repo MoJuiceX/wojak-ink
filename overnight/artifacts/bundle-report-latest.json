@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-06T03:43:02.465Z",
+  "generatedAt": "2026-03-06T04:10:23.179Z",
   "distDir": "dist/assets",
   "limits": {
     "maxJsAssetKb": 406,
@@ -9,7 +9,7 @@
     "jsFiles": 93,
     "cssFiles": 37,
     "publicFiles": 727,
-    "jsKb": 4056.56,
+    "jsKb": 4056.55,
     "cssKb": 921.58
   },
   "topJs": [
@@ -26,7 +26,7 @@
       "group": "vendor-react"
     },
     {
-      "file": "index-Db5-P562.js",
+      "file": "index-Bv-FqMfI.js",
       "bytes": 276008,
       "sizeKb": 269.54,
       "group": "entry-index"
@@ -68,7 +68,7 @@
       "group": "feature-generator-core"
     },
     {
-      "file": "Generator-Dg2rpcho.js",
+      "file": "Generator-9SbMpJcU.js",
       "bytes": 156048,
       "sizeKb": 152.39,
       "group": "route-chunk"
@@ -86,13 +86,13 @@
       "group": "vendor-animation"
     },
     {
-      "file": "BigPulp-Bt2jehzI.js",
+      "file": "BigPulp-BKtUMjCP.js",
       "bytes": 101566,
       "sizeKb": 99.19,
       "group": "route-chunk"
     },
     {
-      "file": "CitrusDrop-Ba34Bu9r.js",
+      "file": "CitrusDrop-CCM5-WSb.js",
       "bytes": 96931,
       "sizeKb": 94.66,
       "group": "route-chunk"
@@ -339,7 +339,7 @@
       "softKb": 300,
       "hardKb": 360,
       "level": "pass",
-      "file": "index-Db5-P562.js"
+      "file": "index-Bv-FqMfI.js"
     },
     {
       "group": "vendor-html2canvas",
@@ -371,7 +371,7 @@
       "softKb": 180,
       "hardKb": 240,
       "level": "pass",
-      "file": "Generator-Dg2rpcho.js"
+      "file": "Generator-9SbMpJcU.js"
     },
     {
       "group": "vendor-wallet-crypto",

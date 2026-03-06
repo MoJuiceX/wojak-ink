@@ -181,6 +181,29 @@ npm run build
 npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md
 ```
 
+## Commit `9727080` — `perf: trim gallery preload pressure`
+
+### What changed
+- reduced the cross-character background preload slices from `50/150/300` to `12/24/48`
+- delayed the cross-character preload kickoff so initial gallery render settles first
+- reduced immediate grid-critical preload from `50` images to `24`
+- reduced sort/filter preload slices from `100` per combination to `24`
+- removed the full remaining-collection low-priority preload sweep
+- reduced character-hover preload from `50` to `24`
+
+### Files touched
+- `src/pages/Gallery.tsx`
+
+### Validate
+```bash
+npm run test:unit -- src/services/wfpCollectionData.test.ts src/services/galleryService.test.ts src/config/routes.test.ts
+PW_LOCAL_SAFE=1 npm test
+npm run build
+npm run test:unit
+npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md
+npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse-gallery-tuned --route=/gallery
+```
+
 ## Final validation set
 
 ```bash
@@ -191,4 +214,5 @@ npm run lint
 PW_LOCAL_SAFE=1 npm test
 npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md
 npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse --route=/ --route=/gallery --route=/generator --route=/bigpulp
+npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse-gallery-tuned --route=/gallery
 ```

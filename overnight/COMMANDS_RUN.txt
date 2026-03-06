@@ -116,3 +116,29 @@ EOF2
 cat > /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/ROLLBACK.md <<'EOF2'
 [rewrote rollback guide]
 EOF2
+rg -n "preload=|new Howl|Howler|src=\"/assets/videos|/audio/music|/assets/videos|autoplay|preload:\s*true|html5:\s*true" /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src /Users/abit_hex/wojak-ink-nightshift-2026-03-06/public --glob '!**/dist/**'
+sed -n '1,260p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/components/media/video/GlobalVideoPlayer.tsx
+sed -n '1,220p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/components/media/video/FloatingVideoPlayer.tsx
+rg -n "Howl\(|preload:\s*true|html5:\s*true|autoplay:\s*true|loop:\s*true" /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/games /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/hooks /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/services
+sed -n '1,220p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/hooks/useHowlerSounds.ts
+sed -n '1,220p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/hooks/useTimeUrgency.ts
+rg -n "useHowlerSounds\(|useTimeUrgency\(" /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src
+sed -n '1,360p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/components/media/games/GameModal.tsx
+sed -n '1,320p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/services/galleryPreloader.ts
+rg -n "galleryPreloader|preload.*gallery|preloadCharacterData|preload\(" /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/pages/Gallery.tsx /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/services /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/components
+sed -n '1,360p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/pages/Gallery.tsx
+rg -n "initGalleryPreloader|startPreloading\(|getNextRandom\(|getWithDifferentTrait\(" /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src
+sed -n '1,260p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/services/galleryPreloader.test.ts
+rg -n "big_pulp_v3_output|nft_takes_v2|nft_takes_lite|attribute_stats|price distribution|heatmap|top sales|rarest finds" /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src /Users/abit_hex/wojak-ink-nightshift-2026-03-06/public/assets/BigPulp
+sed -n '1,320p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/services/bigpulpService.ts
+sed -n '1,320p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/src/hooks/data/useBigPulpData.ts
+npm run test:unit -- src/services/wfpCollectionData.test.ts src/services/galleryService.test.ts src/config/routes.test.ts
+PW_LOCAL_SAFE=1 npm test
+npm run build
+npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse-gallery-tuned --route=/gallery
+git diff -- src/pages/Gallery.tsx
+git status --short
+git add src/pages/Gallery.tsx
+git commit -m "perf: trim gallery preload pressure"
+npm run test:unit
+npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md

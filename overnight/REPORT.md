@@ -23,6 +23,7 @@
 7. Reduced lint warning noise for `socket-server` and added manifest-orphan cleanup tooling.
 8. Continued the pass with BigPulp rarity payload trimming and explicit chunk classification in the bundle report.
 9. Re-ran the full validation set and refreshed the morning review package.
+10. Reduced gallery preload pressure and re-measured `/gallery` with a dedicated Lighthouse run.
 
 ## Phase Results
 
@@ -228,6 +229,37 @@ Validation:
 - `npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md` => passed with zero orphaned JS files
 - `npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse --route=/ --route=/gallery --route=/generator --route=/bigpulp` => passed
 
+### Phase 8 — Gallery preload pressure reduction
+
+Commit:
+- `9727080` — `perf: trim gallery preload pressure`
+
+What changed:
+- Reduced cross-character background preload slices from `50/150/300` to `12/24/48`
+- Delayed the cross-character preload kickoff by `500ms` so initial gallery render settles first
+- Reduced immediate grid-critical preload from `50` images to `24`
+- Reduced sort/filter action-image preload slices from `100` per combination to `24`
+- Removed the background “preload all remaining NFTs” sweep
+- Reduced character-hover preload from `50` to `24`
+
+Artifacts:
+- `overnight/artifacts/lighthouse-gallery-tuned/summary.md`
+- `overnight/artifacts/lighthouse-gallery-tuned/gallery.html`
+- `overnight/artifacts/lighthouse-gallery-tuned/gallery.json`
+
+Measured result:
+- `/gallery` Lighthouse performance improved from `68` to `82`
+- LCP improved from `15991 ms` to `3913 ms`
+- TBT improved from `157 ms` to `109 ms`
+
+Validation:
+- `npm run test:unit -- src/services/wfpCollectionData.test.ts src/services/galleryService.test.ts src/config/routes.test.ts` => passed (`70` tests)
+- `PW_LOCAL_SAFE=1 npm test` => passed (`6` tests)
+- `npm run build` => passed (`built in 5.51s`)
+- `npm run test:unit` => passed (`151` files, `4258` tests)
+- `npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md` => passed
+- `npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse-gallery-tuned --route=/gallery` => passed
+
 ## Final Validation State
 
 Artifacts:
@@ -237,12 +269,13 @@ Artifacts:
 - `overnight/artifacts/lint-after-noise-cleanup.log`
 - `overnight/artifacts/bundle-report-latest.*`
 - `overnight/artifacts/lighthouse/*`
+- `overnight/artifacts/lighthouse-gallery-tuned/*`
 
 Final checks:
 - `git status --short --branch` => nightly branch plus `overnight/` artifacts/docs only before final packaging commit
 - `npx tsc --noEmit` => passed
 - `npm run test:unit` => passed (`151` files, `4258` tests)
-- `npm run build` => passed (`built in 5.63s`)
+- `npm run build` => passed (`built in 5.51s`)
 - `npm run lint` => passed with no ESLint warnings
 - `PW_LOCAL_SAFE=1 npm test` => passed (`6` tests)
 
@@ -275,4 +308,5 @@ Highest-value follow-up items from the new baseline:
 - [x] Socket-server lint noise removed
 - [x] BigPulp lite takes payload added and wired
 - [x] Bundle report orphan classifications reduced to zero
+- [x] Gallery preload pressure reduced and re-measured
 - [x] Morning review package refreshed to final state

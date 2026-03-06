@@ -128,13 +128,31 @@ Undoes:
 Risk:
 - no runtime impact; only reduces report clarity and returns orphaned JS noise
 
+## `9727080` — Gallery preload pressure reduction
+
+```bash
+git revert 9727080
+npm run test:unit -- src/services/wfpCollectionData.test.ts src/services/galleryService.test.ts src/config/routes.test.ts
+PW_LOCAL_SAFE=1 npm test
+npm run build
+```
+
+Undoes:
+- reduced cross-character preload slices
+- delayed gallery background preload kickoff
+- smaller initial grid/action-image hover preload windows
+- removal of the full remaining-collection background preload sweep
+
+Risk:
+- reverting restores the earlier aggressive gallery network behavior and the weaker `/gallery` Lighthouse profile
+
 ## Full nightly rollback
 
 To remove the entire overnight branch delta relative to `main`:
 
 ```bash
 git log --oneline main..HEAD
-git revert 5a7e4e8 aad9a75 5b1d1f3 2196cf4 5c586aa 76574fb 02df9da 0e7bf0c
+git revert 9727080 5a7e4e8 aad9a75 5b1d1f3 2196cf4 5c586aa 76574fb 02df9da 0e7bf0c
 ```
 
 Validate afterward:

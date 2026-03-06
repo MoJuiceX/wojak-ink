@@ -1,6 +1,6 @@
 # Bundle Budget Report
 
-- Generated: 2026-03-06T03:43:02.465Z
+- Generated: 2026-03-06T04:10:23.179Z
 - Dist assets: `dist/assets`
 - Status: **pass**
 - Hard breaches: 0
@@ -17,35 +17,35 @@ All shipped JavaScript assets in `dist/assets` must be <= 406 kB.
 |---|---|---:|---:|---|
 | vendor-wallet-D1PXsfn8.js | vendor-wallet | 351.25 | 406 | pass |
 | vendor-react-CD3mQ61R.js | vendor-react | 302.72 | 406 | pass |
-| index-Db5-P562.js | entry-index | 269.54 | 406 | pass |
+| index-Bv-FqMfI.js | entry-index | 269.54 | 406 | pass |
 | wallet-connect-standalone-wallet-protocol-C4VxITVL.js | standalone-wallet-protocol | 246.43 | 406 | pass |
 | wallet-connect-standalone-wallet-core-BAVQEmi7.js | standalone-wallet-core | 199.20 | 406 | pass |
 | html2canvas.esm-DXEQVQnt.js | vendor-html2canvas | 196.33 | 406 | pass |
 | wallet-connect-standalone-wallet-ui-DuUfeWJu.js | standalone-wallet-ui | 195.36 | 406 | pass |
 | vendor-wallet-ui-bYn9U32G.js | vendor-wallet-ui | 175.35 | 406 | pass |
 | feature-generator-core-XCbg_RLj.js | feature-generator-core | 166.46 | 406 | pass |
-| Generator-Dg2rpcho.js | route-chunk | 152.39 | 406 | pass |
+| Generator-9SbMpJcU.js | route-chunk | 152.39 | 406 | pass |
 | wallet-connect-standalone-wallet-crypto-CtgPRmL-.js | standalone-wallet-crypto | 129.76 | 406 | pass |
 | vendor-animation-X2OmVDBg.js | vendor-animation | 124.68 | 406 | pass |
-| BigPulp-Bt2jehzI.js | route-chunk | 99.19 | 406 | pass |
-| CitrusDrop-Ba34Bu9r.js | route-chunk | 94.66 | 406 | pass |
+| BigPulp-BKtUMjCP.js | route-chunk | 99.19 | 406 | pass |
+| CitrusDrop-CCM5-WSb.js | route-chunk | 94.66 | 406 | pass |
 | vendor-wallet-crypto-CylnypXm.js | vendor-wallet-crypto | 89.21 | 406 | pass |
-| Account-D9rZ4nfB.js | route-chunk | 85.66 | 406 | pass |
-| Gallery-2MdSDAqm.js | route-chunk | 76.33 | 406 | pass |
-| GamesHub-CN_n2mwd.js | route-chunk | 62.11 | 406 | pass |
-| FlappyOrange-BEB8qOrS.js | route-chunk | 58.05 | 406 | pass |
-| ArcadeGameOverScreen-ClBitCB3.js | route-chunk | 56.27 | 406 | pass |
+| Account-BXInir7F.js | route-chunk | 85.66 | 406 | pass |
+| Gallery-Dj1mBoXQ.js | route-chunk | 76.32 | 406 | pass |
+| GamesHub-BVbBlVPb.js | route-chunk | 62.11 | 406 | pass |
+| FlappyOrange-DFWxMZRl.js | route-chunk | 58.05 | 406 | pass |
+| ArcadeGameOverScreen-BA_PSPQT.js | route-chunk | 56.27 | 406 | pass |
 
 ## Budget Checks
 | Group | File | Size (kB) | Soft | Hard | Status |
 |---|---|---:|---:|---:|---|
 | vendor-wallet | vendor-wallet-D1PXsfn8.js | 351.25 | 380 | 430 | pass |
 | vendor-react | vendor-react-CD3mQ61R.js | 302.72 | 330 | 380 | pass |
-| entry-index | index-Db5-P562.js | 269.54 | 300 | 360 | pass |
+| entry-index | index-Bv-FqMfI.js | 269.54 | 300 | 360 | pass |
 | vendor-html2canvas | html2canvas.esm-DXEQVQnt.js | 196.33 | 210 | 260 | pass |
 | vendor-wallet-ui | vendor-wallet-ui-bYn9U32G.js | 175.35 | 220 | 280 | pass |
 | feature-generator-core | feature-generator-core-XCbg_RLj.js | 166.46 | 180 | 240 | pass |
-| route-chunk | Generator-Dg2rpcho.js | 152.39 | 180 | 240 | pass |
+| route-chunk | Generator-9SbMpJcU.js | 152.39 | 180 | 240 | pass |
 | vendor-wallet-crypto | vendor-wallet-crypto-CylnypXm.js | 89.21 | 120 | 160 | pass |
 
 ## Standalone Wallet Assets
@@ -69,14 +69,14 @@ All shipped JavaScript assets in `dist/assets` must be <= 406 kB.
 |---|---|---:|
 | vendor-wallet-D1PXsfn8.js | vendor-wallet | 351.25 |
 | vendor-react-CD3mQ61R.js | vendor-react | 302.72 |
-| index-Db5-P562.js | entry-index | 269.54 |
+| index-Bv-FqMfI.js | entry-index | 269.54 |
 | wallet-connect-standalone-wallet-protocol-C4VxITVL.js | standalone-wallet-protocol | 246.43 |
 | wallet-connect-standalone-wallet-core-BAVQEmi7.js | standalone-wallet-core | 199.20 |
 | html2canvas.esm-DXEQVQnt.js | vendor-html2canvas | 196.33 |
 | wallet-connect-standalone-wallet-ui-DuUfeWJu.js | standalone-wallet-ui | 195.36 |
 | vendor-wallet-ui-bYn9U32G.js | vendor-wallet-ui | 175.35 |
 | feature-generator-core-XCbg_RLj.js | feature-generator-core | 166.46 |
-| Generator-Dg2rpcho.js | route-chunk | 152.39 |
+| Generator-9SbMpJcU.js | route-chunk | 152.39 |
 
 ## Top CSS Assets
 | File | Size (kB) |
