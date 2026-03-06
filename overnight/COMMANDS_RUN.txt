@@ -84,3 +84,35 @@ npx tsc --noEmit > overnight/artifacts/typecheck-final.log 2>&1
 npm run test:unit > overnight/artifacts/unit-final.log 2>&1
 npm run build > overnight/artifacts/build-final.log 2>&1
 git log --oneline --decorate --max-count=10
+npm run generate:bigpulp-takes-lite
+npm run test:unit -- src/services/wfpCollectionData.test.ts src/services/bigPulpV9Service.test.ts src/config/routes.test.ts
+npm run lint
+npx tsc --noEmit
+npm run test:unit
+PW_LOCAL_SAFE=1 npm test
+npm run build
+npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md
+npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse --route=/ --route=/gallery --route=/generator --route=/bigpulp
+git -C /Users/abit_hex/wojak-ink-nightshift-2026-03-06 status --short
+git -C /Users/abit_hex/wojak-ink-nightshift-2026-03-06 log --oneline -10
+sed -n '1,240p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/REPORT.md
+sed -n '1,260p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/BEFORE_AFTER.md
+sed -n '1,260p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/CHANGES_INDEX.md
+sed -n '1,260p' /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/ROLLBACK.md
+tail -n 80 /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/COMMANDS_RUN.txt
+cat /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/bundle-report-latest.md
+cat /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/lighthouse/summary.md
+tail -n 80 /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/build-final.log
+head -n 40 /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/artifacts/build-final.log
+cat > /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/REPORT.md <<'EOF2'
+[rewrote overnight report]
+EOF2
+cat > /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/BEFORE_AFTER.md <<'EOF2'
+[rewrote before/after metrics]
+EOF2
+cat > /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/CHANGES_INDEX.md <<'EOF2'
+[rewrote changes index]
+EOF2
+cat > /Users/abit_hex/wojak-ink-nightshift-2026-03-06/overnight/ROLLBACK.md <<'EOF2'
+[rewrote rollback guide]
+EOF2

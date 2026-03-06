@@ -15,13 +15,14 @@
 ## Running Log
 
 1. Captured a full baseline into `overnight/artifacts/baseline/`.
-2. Fixed the broken Playwright baseline and added production guardrails.
+2. Fixed the broken Playwright baseline and added local-only/prod-blocking guardrails.
 3. Removed the biggest eager BigPulp client fetch.
 4. Reduced shared metadata pressure by introducing `metadata-lite.json` and migrating the highest-volume consumers.
 5. Swapped low-risk decorative assets to existing WebP files and reduced eager video preload behavior.
 6. Added a local Lighthouse baseline and improved bundle reporting with top public-asset visibility.
 7. Reduced lint warning noise for `socket-server` and added manifest-orphan cleanup tooling.
-8. Ran a final validation set and assembled the morning review package.
+8. Continued the pass with BigPulp rarity payload trimming and explicit chunk classification in the bundle report.
+9. Re-ran the full validation set and refreshed the morning review package.
 
 ## Phase Results
 
@@ -158,15 +159,16 @@ Artifacts:
 - `overnight/artifacts/bundle-report-latest.md`
 
 Lighthouse summary (desktop preset, local preview):
-- `/` => Perf `63`, A11y `91`, Best `100`, SEO `100`
+- `/` => Perf `79`, A11y `91`, Best `100`, SEO `100`
 - `/gallery` => Perf `68`, A11y `91`, Best `100`, SEO `100`
-- `/generator` => Perf `80`, A11y `91`, Best `100`, SEO `100`
+- `/generator` => Perf `81`, A11y `91`, Best `100`, SEO `100`
+- `/bigpulp` => Perf `76`, A11y `91`, Best `100`, SEO `100`
 
 Bundle report summary:
 - Status: `pass`
 - Hard breaches: `0`
 - Soft breaches: `0`
-- Orphaned JS files: `81`
+- Orphaned JS files: `0`
 - Orphaned JS files breaching hard limit: `0`
 - Public assets over `250 KB`: `20`
 
@@ -193,6 +195,38 @@ Validation:
 - `npm run lint` => warning count reduced from `43` to `0` ESLint warnings
 - Remaining lint-time noise is the Babel deopt note on the generated `functions/_data/farmersPlotImageManifest.ts`
 - `npm run manifest:orphans -- --json-out=overnight/artifacts/manifest-orphans.json --text-out=overnight/artifacts/manifest-orphans.txt` => safely skipped in this worktree because assets are served from `https://layers.wojak.ink`
+
+### Phase 7 — BigPulp payload trimming + bundle classification follow-up
+
+Commits:
+- `aad9a75` — `perf: trim BigPulp rarity payloads`
+- `5a7e4e8` — `chore: classify bundle chunks explicitly`
+
+What changed:
+- Added `scripts/generate-bigpulp-takes-lite.mjs`
+- Added generated `public/assets/BigPulp/nft_takes_lite.json`
+- Updated `build` to regenerate the BigPulp lite takes payload automatically
+- Updated `src/services/bigpulpService.ts` to load `nft_takes_lite.json` first and fall back to `nft_takes_v2.json`
+- Changed BigPulp tab queries so large secondary datasets only load when the relevant tab is active:
+  - market tab => heatmap + price distribution
+  - ask tab => top sales + rarest finds
+  - attributes tab => attribute stats
+- Expanded bundle report group classification so route/app/helper chunks are explicitly categorized instead of surfacing as generic orphaned JS entries
+
+Concrete footprint change:
+- `nft_takes_v2.json`: `2748.26 KB`
+- `nft_takes_lite.json`: `206.62 KB`
+- size reduction for the lite takes payload: `2541.64 KB` (`92.5%` smaller on disk)
+
+Validation:
+- `npm run generate:bigpulp-takes-lite` => passed
+- `npm run test:unit -- src/services/wfpCollectionData.test.ts src/services/bigPulpV9Service.test.ts src/config/routes.test.ts` => passed (`41` tests)
+- `npm run lint` => passed
+- `npm run test:unit` => passed (`151` files, `4258` tests)
+- `PW_LOCAL_SAFE=1 npm test` => passed (`6` tests)
+- `npm run build` => passed
+- `npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md` => passed with zero orphaned JS files
+- `npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse --route=/ --route=/gallery --route=/generator --route=/bigpulp` => passed
 
 ## Final Validation State
 
@@ -223,9 +257,9 @@ Not touched overnight because the risk/effort was not justified:
 ## Morning Recommendations
 
 Highest-value follow-up items from the new baseline:
-1. Split or server-side index the remaining BigPulp JSON payloads (`big_pulp_v3_output.json`, `nft_takes_v2.json`)
-2. Replace or stream the heaviest local video/audio assets surfaced by the new bundle/public-asset report
-3. Reduce the `81` orphaned JS chunk classifications by explicitly budgeting important route chunks in `scripts/bundle-budget-report.mjs`
+1. Replace or stream the heaviest local video/audio assets surfaced by the new public-asset report
+2. Split or server-side index the remaining BigPulp JSON payloads (`big_pulp_v3_output.json` and any consumers that still need `nft_takes_v2.json` fallback data)
+3. Revisit the wallet manual chunk cycle with a dedicated, isolated bundle-graph pass
 4. Decide whether `metadata-lite.json` should become the default collection index for any remaining read-only consumers still leaning on full metadata
 
 ## Morning Checklist
@@ -238,7 +272,7 @@ Highest-value follow-up items from the new baseline:
 - [x] Low-risk WebP/preload pass completed
 - [x] Local Lighthouse baseline added and run
 - [x] Bundle report improved with top public-asset visibility
-- [x] Socket-server lint noise reduced
-- [x] Manifest orphan reporting tool added
-- [x] Final validation run completed
-- [x] Rollback guide and change index prepared
+- [x] Socket-server lint noise removed
+- [x] BigPulp lite takes payload added and wired
+- [x] Bundle report orphan classifications reduced to zero
+- [x] Morning review package refreshed to final state

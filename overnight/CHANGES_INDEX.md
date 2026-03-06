@@ -143,6 +143,44 @@ npm run lint
 npm run manifest:orphans -- --json-out=overnight/artifacts/manifest-orphans.json --text-out=overnight/artifacts/manifest-orphans.txt
 ```
 
+## Commit `aad9a75` — `perf: trim BigPulp rarity payloads`
+
+### What changed
+- added a generated BigPulp lite takes dataset (`nft_takes_lite.json`)
+- updated the build to regenerate the lite takes dataset automatically
+- moved BigPulp dataset loading to lite-first with full-payload fallback
+- changed BigPulp tab queries so heavy secondary data is fetched only when the relevant tab is active
+
+### Files touched
+- `package.json`
+- `scripts/generate-bigpulp-takes-lite.mjs`
+- `public/assets/BigPulp/nft_takes_lite.json`
+- `src/services/bigpulpService.ts`
+- `src/hooks/data/useBigPulpData.ts`
+- `src/contexts/BigPulpContext.tsx`
+
+### Validate
+```bash
+npm run generate:bigpulp-takes-lite
+npm run test:unit -- src/services/wfpCollectionData.test.ts src/services/bigPulpV9Service.test.ts src/config/routes.test.ts
+npm run build
+```
+
+## Commit `5a7e4e8` — `chore: classify bundle chunks explicitly`
+
+### What changed
+- expanded bundle report grouping so route/app/helper chunks are explicitly classified
+- reduced bundle report orphaned JS output from `81` to `0`
+- kept the existing hard/soft budget checks intact while improving report readability
+
+### Files touched
+- `scripts/bundle-budget-report.mjs`
+
+### Validate
+```bash
+npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md
+```
+
 ## Final validation set
 
 ```bash
@@ -151,4 +189,6 @@ npm run test:unit
 npm run build
 npm run lint
 PW_LOCAL_SAFE=1 npm test
+npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md
+npm run perf:lighthouse -- --out-dir=overnight/artifacts/lighthouse --route=/ --route=/gallery --route=/generator --route=/bigpulp
 ```

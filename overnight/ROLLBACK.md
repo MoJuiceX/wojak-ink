@@ -97,13 +97,44 @@ Undoes:
 Risk:
 - returns lint output to the earlier 43-warning state
 
+## `aad9a75` — BigPulp lite takes payload + tab-scoped queries
+
+```bash
+git revert aad9a75
+npm run test:unit -- src/services/wfpCollectionData.test.ts src/services/bigPulpV9Service.test.ts src/config/routes.test.ts
+npm run build
+```
+
+Undoes:
+- `nft_takes_lite.json`
+- build-time generation of the BigPulp lite takes payload
+- BigPulp lite-first dataset loading
+- tab-scoped heavy BigPulp query activation
+
+Risk:
+- BigPulp route pressure increases again and the full takes payload becomes the only active source
+
+## `5a7e4e8` — Explicit bundle chunk classification
+
+```bash
+git revert 5a7e4e8
+npm run bundle:report -- --json-out=overnight/artifacts/bundle-report-latest.json --md-out=overnight/artifacts/bundle-report-latest.md
+```
+
+Undoes:
+- explicit grouping for route/app/helper chunks in the bundle report
+- zero-orphan classification improvement
+
+Risk:
+- no runtime impact; only reduces report clarity and returns orphaned JS noise
+
 ## Full nightly rollback
 
 To remove the entire overnight branch delta relative to `main`:
 
 ```bash
 git log --oneline main..HEAD
-git revert 5b1d1f3 2196cf4 5c586aa 76574fb 02df9da 0e7bf0c
+git revert 5a7e4e8 aad9a75 5b1d1f3 2196cf4 5c586aa 76574fb 02df9da 0e7bf0c
 ```
 
 Validate afterward:

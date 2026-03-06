@@ -36,7 +36,7 @@
 | Lint status | Passed with `0` ESLint warnings |
 | Typecheck status | Passed |
 | Bundle report status | Passed |
-| Bundle report summary | `status=pass hard=0 soft=0 orphaned=81 public-assets>250kB=20` |
+| Bundle report summary | `status=pass hard=0 soft=0 orphaned=0 public-assets>250kB=20` |
 | Playwright status | Passed |
 | Playwright suite | `6` local-safe tests |
 | Unit tests status | Passed |
@@ -56,12 +56,15 @@
 | `public/assets/nft-data/metadata-lite.json` | not present | `1572.38 KB` | new lite index |
 | Lite vs full metadata | `3692.89 KB` | `1572.38 KB` | `-2120.51 KB` (`-57.4%`) |
 
-### BigPulp route behavior
+### BigPulp payloads
 
-| Item | Before | After |
-|---|---|---|
-| `big_pulp_v9_output.json` (`4446.78 KB`) | eagerly fetched on BigPulp mount | loaded only during user actions (`searchNFT`, `surpriseMe`) |
-| BigPulp V9 loader | component-local/eager | shared lazy loader with in-memory cache |
+| Asset / behavior | Before | After | Delta |
+|---|---:|---:|---:|
+| `big_pulp_v9_output.json` route load | eager on BigPulp mount | on-demand only during `searchNFT` / `surpriseMe` | lazy-loaded |
+| `public/assets/BigPulp/nft_takes_v2.json` | `2748.26 KB` | retained as fallback | source retained |
+| `public/assets/BigPulp/nft_takes_lite.json` | not present | `206.62 KB` | new lite payload |
+| Lite vs full takes payload | `2748.26 KB` | `206.62 KB` | `-2541.64 KB` (`-92.5%`) |
+| BigPulp secondary queries | loaded regardless of visible tab | tab-scoped to active tab | lower route pressure |
 
 ### Decorative asset swaps
 
@@ -85,9 +88,10 @@ The project had no repeatable Lighthouse artifact before this pass. These scores
 
 | Route | Perf | A11y | Best | SEO | FCP (ms) | LCP (ms) | TBT (ms) | CLS |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| `/` | `63` | `91` | `100` | `100` | `3693` | `16919` | `203` | `0.000` |
-| `/gallery` | `68` | `91` | `100` | `100` | `2855` | `15994` | `164` | `0.000` |
-| `/generator` | `80` | `91` | `100` | `100` | `2854` | `4333` | `104` | `0.001` |
+| `/` | `79` | `91` | `100` | `100` | `2858` | `3462` | `326` | `0.000` |
+| `/gallery` | `68` | `91` | `100` | `100` | `2855` | `15991` | `157` | `0.000` |
+| `/generator` | `81` | `91` | `100` | `100` | `2854` | `3998` | `128` | `0.001` |
+| `/bigpulp` | `76` | `91` | `100` | `100` | `2854` | `4847` | `150` | `0.003` |
 
 ## Current top chunks and assets
 
@@ -95,7 +99,7 @@ The project had no repeatable Lighthouse artifact before this pass. These scores
 
 1. `vendor-wallet-D1PXsfn8.js` — `351.25 KB`
 2. `vendor-react-CD3mQ61R.js` — `302.72 KB`
-3. `index-Dwu1QzJp.js` — `269.54 KB`
+3. `index-Db5-P562.js` — `269.54 KB`
 4. `wallet-connect-standalone-wallet-protocol-C4VxITVL.js` — `246.43 KB`
 5. `wallet-connect-standalone-wallet-core-BAVQEmi7.js` — `199.20 KB`
 
@@ -106,6 +110,11 @@ The project had no repeatable Lighthouse artifact before this pass. These scores
 3. `public/assets/videos/multi-billion-dao.mp4` — `3782.69 KB`
 4. `public/assets/BigPulp/big_pulp_v3_output.json` — `3718.66 KB`
 5. `public/assets/nft-data/metadata.json` — `3692.89 KB`
+6. `public/audio/music/memory-match/megaman-fireman-final.mp3` — `3519.49 KB`
+7. `public/assets/Games/sfx/retro_music/Donkey Kong Country Returns Music - Jungle Hijinx - HARMFUL.mp3` — `3023.84 KB`
+8. `public/audio/music/wojak-runner/sonic-green-hill-final.mp3` — `2765.74 KB`
+9. `public/assets/BigPulp/nft_takes_v2.json` — `2748.26 KB`
+10. `public/audio/music/FlappyOrange/gourmet-race-whisper.mp3` — `2392.70 KB`
 
 ## Noise reduction
 
@@ -114,5 +123,5 @@ The project had no repeatable Lighthouse artifact before this pass. These scores
 | ESLint warnings | `43` | `0` |
 | Bundle hard breaches | n/a | `0` |
 | Bundle soft breaches | n/a | `0` |
-| Orphaned JS visibility | none | explicit report (`81` current) |
+| Orphaned JS visibility | none | explicit report (`0` current) |
 | Lighthouse artifacts | none | JSON + HTML + markdown summary |
