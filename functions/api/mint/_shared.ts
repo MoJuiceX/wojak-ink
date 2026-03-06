@@ -38,6 +38,7 @@ export const SURCHARGE_TARGET_XCH = 0.5;
 export const SURCHARGE_TARGET_USES = 200;
 export const SURCHARGE_EXPONENT = 0.80;
 export const SURCHARGE_SCALE = SURCHARGE_TARGET_XCH / Math.pow(SURCHARGE_TARGET_USES - 1, SURCHARGE_EXPONENT);
+export const SURCHARGE_DISCOUNT_MULTIPLIER = 0.85;
 export const DECAY_HALF_LIFE_DAYS = 28;
 
 /** Only these categories have surcharges */
@@ -66,7 +67,7 @@ export function surchargeXch(
   if (traitDisplayName && SURCHARGE_EXEMPT_TRAITS.has(traitDisplayName)) return 0;
   if (effectiveUsage <= 1) return 0;
 
-  return SURCHARGE_SCALE * Math.pow(effectiveUsage - 1, SURCHARGE_EXPONENT);
+  return SURCHARGE_DISCOUNT_MULTIPLIER * SURCHARGE_SCALE * Math.pow(effectiveUsage - 1, SURCHARGE_EXPONENT);
 }
 
 /**

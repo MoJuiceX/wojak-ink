@@ -144,8 +144,8 @@ export function GeneratorInfo({ isOpen, onClose }: GeneratorInfoProps) {
             </ul>
             <p className="mt-2.5 text-muted" style={{ fontSize: '0.75rem' }}>
               Example:{' '}
-              <span className="text-accent">0.45 XCH</span>{' '}
-              (base 0.20 + 0.25 Crown surcharge)
+              <span className="text-accent">0.41 XCH</span>{' '}
+              (base 0.20 + 0.21 Crown surcharge)
             </p>
           </div>
         </div>
