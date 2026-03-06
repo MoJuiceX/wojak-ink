@@ -17,6 +17,7 @@ import { captureGameArea } from '@/systems/sharing/captureDOM';
 import { generateGameScorecard } from '@/systems/sharing/GameScorecard';
 import { ArcadeGameOverScreen } from '@/components/media/games/ArcadeGameOverScreen';
 import { GameButton } from '@/components/ui/GameButton';
+import { createManagedAudio } from '@/utils/audioElement';
 import {
   FREEZE_DURATIONS,
   SHAKE_CONFIG,
@@ -305,7 +306,7 @@ const BlockPuzzle: React.FC = () => {
     }
     playlistIndexRef.current = index;
     const track = MUSIC_PLAYLIST[index];
-    const music = new Audio(track.src);
+    const music = createManagedAudio(track.src);
     music.volume = 1.0;
     music.addEventListener('ended', () => {
       playlistIndexRef.current = (playlistIndexRef.current + 1) % MUSIC_PLAYLIST.length;

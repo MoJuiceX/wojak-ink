@@ -16,6 +16,7 @@ import { GameSEO } from '@/components/seo/GameSEO';
 import { ArcadeGameOverScreen } from '@/components/media/games/ArcadeGameOverScreen';
 import { useGameEffects } from '@/components/media/games/effects/useGameEffects';
 import { GAME_OVER_SEQUENCE } from '@/lib/juice/brandConstants';
+import { createManagedAudio } from '@/utils/audioElement';
 import './BrickByBrick.css';
 
 interface Block {
@@ -150,7 +151,7 @@ const BrickByBrick: React.FC = () => {
     }
 
     const track = BRICK_BY_BRICK_MUSIC_PLAYLIST[index];
-    const audio = new Audio(track.src);
+    const audio = createManagedAudio(track.src);
     audio.volume = 1.0; // Tracks are already normalized quiet
 
     // When song ends, play next track (use ref to get current state)

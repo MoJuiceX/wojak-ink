@@ -27,6 +27,7 @@ import { ArcadeLightsProvider, useArcadeLights, GAME_LIGHT_INTENSITY } from '@/c
 import { MobileGameControls } from './MobileGameControls';
 import { CRTOverlay } from '@/components/arcade/CRTOverlay';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { createManagedAudio } from '@/utils/audioElement';
 import './GameModal.css';
 
 /**
@@ -229,7 +230,7 @@ export function GameModal({ game, isOpen, onClose }: GameModalProps) {
       audioRef.current = null;
     }
 
-    const audio = new Audio(track);
+    const audio = createManagedAudio(track);
     audio.volume = 1.0;
 
     // When song ends, play next track (use ref to avoid stale closure)

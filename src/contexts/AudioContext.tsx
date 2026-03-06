@@ -3,6 +3,7 @@ import { createContext, useContext, useState, useEffect, useRef, type ReactNode 
 import { useSettings } from './SettingsContext';
 import { SoundManager } from '@/systems/audio/SoundManager';
 import type { SoundName } from '@/systems/audio/sounds';
+import { createManagedAudio } from '@/utils/audioElement';
 
 interface AudioContextType {
   // Background music controls
@@ -65,7 +66,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
 
   // Initialize background music audio element
   useEffect(() => {
-    bgMusicRef.current = new Audio();
+    bgMusicRef.current = createManagedAudio();
     bgMusicRef.current.loop = true;
     bgMusicRef.current.volume = initialMusicVolumeRef.current;
     bgMusicRef.current.src = MUSIC_TRACKS.default; // Set initial track
@@ -125,7 +126,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
     forcePlayActiveRef.current = true;
 
     if (!bgMusicRef.current) {
-      bgMusicRef.current = new Audio();
+      bgMusicRef.current = createManagedAudio();
       bgMusicRef.current.loop = true;
       bgMusicRef.current.volume = musicVolume || 0.5;
     }

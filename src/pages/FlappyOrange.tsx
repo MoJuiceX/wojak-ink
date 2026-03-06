@@ -15,6 +15,7 @@ import { GAME_OVER_SEQUENCE } from '@/lib/juice/brandConstants';
 import { GameSEO } from '@/components/seo/GameSEO';
 import { ArcadeGameOverScreen } from '@/components/media/games/ArcadeGameOverScreen';
 import { getFlappyOrangeScorecardDataUrl, type FlappyScorecardData } from '@/systems/sharing/FlappyOrangeScorecard';
+import { createManagedAudio } from '@/utils/audioElement';
 // UI Components extracted from this file
 import {
   ShareModal,
@@ -433,7 +434,7 @@ const FlappyOrange: React.FC = () => {
     playlistIndexRef.current = index;
     const track = MUSIC_PLAYLIST[index];
 
-    const music = new Audio(track.src);
+    const music = createManagedAudio(track.src);
     music.volume = 1.0;  // All tracks are normalized
 
     // When song ends, play next

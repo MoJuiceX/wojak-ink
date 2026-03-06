@@ -17,6 +17,7 @@ import { useMobileGameFullscreen } from '@/hooks/useMobileGameFullscreen';
 import { getComboTier, type GameEvent } from '@/config/arcade-light-mappings';
 import { useGameSounds } from '@/hooks/useGameSounds';
 import { GAME_OVER_SEQUENCE } from '@/lib/juice/brandConstants';
+import { createManagedAudio } from '@/utils/audioElement';
 import {
   FRUITS,
   COLORS,
@@ -148,7 +149,7 @@ const ColorReaction: React.FC = () => {
     }
     playlistIndexRef.current = index;
     const track = MUSIC_PLAYLIST[index];
-    const music = new Audio(track.src);
+    const music = createManagedAudio(track.src);
     music.volume = 1.0;
     music.addEventListener('ended', () => {
       playlistIndexRef.current = (playlistIndexRef.current + 1) % MUSIC_PLAYLIST.length;
