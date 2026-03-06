@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', '.claude/worktrees', 'public/assets']),
+  globalIgnores(['dist', '.claude/worktrees', 'public/assets', 'functions/_data/farmersPlotImageManifest.ts']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
