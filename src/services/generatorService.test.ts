@@ -24,8 +24,9 @@ describe('getG2BasePath', () => {
     expect(path.length).toBeGreaterThan(0);
   });
 
-  it('starts with /assets', () => {
-    expect(getG2BasePath().startsWith('/assets')).toBe(true);
+  it('uses either local assets or an absolute layer host', () => {
+    const path = getG2BasePath();
+    expect(path.startsWith('/assets') || /^https?:\/\//.test(path)).toBe(true);
   });
 
   it('returns the same value on repeated calls', () => {

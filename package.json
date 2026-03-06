@@ -33,12 +33,15 @@
     "precommit": "npm run lint:scoped -- --max-warnings=0",
     "preview": "vite preview",
     "test": "playwright test",
-    "test:mobile": "playwright test tests/mobile/ --project='Mobile Safari'",
-    "test:mobile:headed": "playwright test tests/mobile/ --project='Mobile Safari' --headed",
+    "test:e2e:local": "playwright test",
+    "test:e2e:full": "playwright test -c playwright.full.config.ts",
+    "test:mobile": "playwright test -c playwright.full.config.ts tests/mobile/ --project='Mobile Safari'",
+    "test:mobile:headed": "playwright test -c playwright.full.config.ts tests/mobile/ --project='Mobile Safari' --headed",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
-    "test:ui": "playwright test --ui",
-    "test:headed": "playwright test --headed"
+    "test:ui": "playwright test -c playwright.full.config.ts --ui",
+    "test:headed": "playwright test -c playwright.full.config.ts --headed",
+    "test:full:headed": "playwright test -c playwright.full.config.ts --headed"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.59.3",

@@ -63,6 +63,7 @@ const walletCorePackages = new Set([
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const useHttps = process.env.HTTPS === 'true'
+  const isPlaywrightLocalSafe = process.env.PW_LOCAL_SAFE === '1'
 
   return {
     plugins: [
@@ -208,12 +209,14 @@ export default defineConfig(({ mode }) => {
       host: true, // Allow network access
       allowedHosts: ['localhost', '.trycloudflare.com', '.loca.lt', '.ngrok.io', '.ngrok-free.app'],
       proxy: {
-        // API routes - proxy to production for dev testing with real database
-        '/api': {
-          target: 'https://wojak.ink',
-          changeOrigin: true,
-          secure: true,
-        },
+        // API routes - safe local Playwright mode disables this production proxy.
+        ...(!isPlaywrightLocalSafe ? {
+          '/api': {
+            target: 'https://wojak.ink',
+            changeOrigin: true,
+            secure: true,
+          },
+        } : {}),
         '/spacescan-api': {
           target: 'https://api.spacescan.io',
           changeOrigin: true,

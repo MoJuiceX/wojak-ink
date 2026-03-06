@@ -13,9 +13,31 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+function readEnvOverride() {
+  const envFiles = ['.env.local', '.env'];
+
+  for (const file of envFiles) {
+    const fullPath = join(__dirname, '..', file);
+    if (!existsSync(fullPath)) continue;
+
+    const raw = readFileSync(fullPath, 'utf8');
+    for (const line of raw.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const match = trimmed.match(/^VITE_LAYER_BASE_URL=(.*)$/);
+      if (!match) continue;
+      return match[1].trim().replace(/^['"]|['"]$/g, '');
+    }
+  }
+
+  return '';
+}
+
+const layerBaseOverride = process.env.VITE_LAYER_BASE_URL || readEnvOverride();
+
 // Skip verification when assets are served from R2 (not local)
-if (process.env.VITE_LAYER_BASE_URL) {
-  console.log(`✅ Skipping local asset verification — assets served from ${process.env.VITE_LAYER_BASE_URL}`);
+if (layerBaseOverride) {
+  console.log(`✅ Skipping local asset verification — assets served from ${layerBaseOverride}`);
   process.exit(0);
 }
 
