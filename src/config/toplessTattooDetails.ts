@@ -1,7 +1,20 @@
+import type { G2Selection } from '@/types/generator';
+import { resolveGeneratorAssetUrl } from '@/utils/generatorAssetUrl';
+
 const TOPLESS_BASE_FILE = '../CLOTHES/CLOTHES_Topless_.png';
 const TATTOO_ASSET_VERSION = '20260305a';
 
 export const TOPLESS_TATTOO_TRAIT_ID = 'Clothes_Topless';
+export const TOPLESS_TATTOO_SLOT_KEYS = ['tattoo1', 'tattoo2', 'tattoo3', 'tattoo4'] as const;
+export type ToplessTattooSlotKey = typeof TOPLESS_TATTOO_SLOT_KEYS[number];
+export const TOPLESS_TATTOO_SLOT_LABELS: Record<ToplessTattooSlotKey, string> = {
+  tattoo1: 'Tattoo 1',
+  tattoo2: 'Tattoo 2',
+  tattoo3: 'Tattoo 3',
+  tattoo4: 'Tattoo 4',
+};
+
+type G2OptionRecord = G2Selection['options'];
 
 export interface G2DetailOptionLike {
   file: string;
@@ -94,10 +107,95 @@ function formatTattooLabel(filename: string): string {
     .join(' ');
 }
 
-export const TOPLESS_TATTOO_DETAIL_OPTIONS: G2DetailOptionLike[] = TOPLESS_TATTOO_FILES.map((file) => ({
-  file: `/assets/wojak-layers/tattoos/${encodeURIComponent(file)}?v=${TATTOO_ASSET_VERSION}`,
-  name: formatTattooLabel(file),
+function normalizeTattooFilename(input: string): string {
+  const withoutQuery = input.split('?')[0] ?? input;
+  const basename = withoutQuery.split('/').pop() ?? withoutQuery;
+  try {
+    return decodeURIComponent(basename);
+  } catch {
+    return basename;
+  }
+}
+
+export function getToplessTattooSlotKey(input: string): ToplessTattooSlotKey | null {
+  const match = normalizeTattooFilename(input).match(/^tattoos_([1-4])_/i);
+  return match ? (`tattoo${match[1]}` as ToplessTattooSlotKey) : null;
+}
+
+const TOPLESS_TATTOO_DETAIL_DEFINITIONS = TOPLESS_TATTOO_FILES.map((sourceFile) => {
+  const slotKey = getToplessTattooSlotKey(sourceFile);
+  if (!slotKey) {
+    throw new Error(`Unrecognized topless tattoo slot for file: ${sourceFile}`);
+  }
+
+  return {
+    slotKey,
+    file: `/assets/wojak-layers/tattoos/${encodeURIComponent(sourceFile)}?v=${TATTOO_ASSET_VERSION}`,
+    name: formatTattooLabel(sourceFile),
+  };
+});
+
+export const TOPLESS_TATTOO_DETAIL_OPTIONS: G2DetailOptionLike[] = TOPLESS_TATTOO_DETAIL_DEFINITIONS.map(({ file, name }) => ({
+  file,
+  name,
 }));
+
+export const TOPLESS_TATTOO_OPTIONS_BY_SLOT: Record<ToplessTattooSlotKey, G2DetailOptionLike[]> = TOPLESS_TATTOO_SLOT_KEYS.reduce(
+  (acc, slotKey) => {
+    acc[slotKey] = TOPLESS_TATTOO_DETAIL_DEFINITIONS
+      .filter((option) => option.slotKey === slotKey)
+      .map(({ file, name }) => ({ file, name }));
+    return acc;
+  },
+  {} as Record<ToplessTattooSlotKey, G2DetailOptionLike[]>,
+);
+
+function getExplicitToplessTattooSelection(options: G2OptionRecord, slotKey: ToplessTattooSlotKey): string | undefined {
+  const raw = options[slotKey];
+  return typeof raw === 'string' && raw.trim() ? raw : undefined;
+}
+
+function getLegacyToplessTattooSelection(options: G2OptionRecord): string | undefined {
+  const raw = options.detail;
+  return typeof raw === 'string' && raw.trim() ? raw : undefined;
+}
+
+export function getToplessTattooSelectedOption(options: G2OptionRecord, slotKey: ToplessTattooSlotKey): string | undefined {
+  const explicit = getExplicitToplessTattooSelection(options, slotKey);
+  if (explicit) return explicit;
+
+  const legacy = getLegacyToplessTattooSelection(options);
+  if (!legacy) return undefined;
+
+  return getToplessTattooSlotKey(legacy) === slotKey ? legacy : undefined;
+}
+
+export function buildToplessTattooOptionPatch(
+  options: G2OptionRecord,
+  slotKey: ToplessTattooSlotKey,
+  nextSelection: string | undefined,
+): Partial<Record<string, string>> {
+  const updates: Partial<Record<string, string>> = {
+    [slotKey]: nextSelection ?? '',
+  };
+
+  const legacy = getLegacyToplessTattooSelection(options);
+  if (!legacy) return updates;
+
+  const legacySlotKey = getToplessTattooSlotKey(legacy);
+  if (legacySlotKey && !getExplicitToplessTattooSelection(options, legacySlotKey)) {
+    updates[legacySlotKey] = legacy;
+  }
+  updates.detail = '';
+  return updates;
+}
+
+export function getResolvedToplessTattooDetails(options: G2OptionRecord, basePath: string): string[] {
+  return TOPLESS_TATTOO_SLOT_KEYS
+    .map((slotKey) => getToplessTattooSelectedOption(options, slotKey))
+    .filter((file): file is string => Boolean(file))
+    .map((file) => resolveGeneratorAssetUrl(file, basePath));
+}
 
 export function createToplessTattooTrait(): G2TraitLike {
   return {

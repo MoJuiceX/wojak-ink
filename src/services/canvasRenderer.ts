@@ -16,6 +16,7 @@ import { buildRenderLayers } from '@/services/canvasRendererLayerBuilder';
 import { LAYER_Z_INDEX, MOUTH_OVER_BEER_HAT } from '@/services/canvasRendererConstants';
 import type { RenderLayer, G2LayerData, G2DrawItem, RenderResult, LayerRenderOverride } from '@/services/canvasRendererTypes';
 import { LAYER_BASE, COIN_LOGOS_BASE as COIN_LOGOS_BASE_CFG } from '@/config/layerAssetBase';
+import { TOPLESS_TATTOO_TRAIT_ID, getResolvedToplessTattooDetails } from '@/config/toplessTattooDetails';
 import { resolveGeneratorAssetUrl } from '@/utils/generatorAssetUrl';
 
 /** Default color for solid color backgrounds - sky blue */
@@ -1851,7 +1852,10 @@ function buildG2LayerData(
   // Detail
   let detail: string | undefined;
   let details: string[] | undefined;
-  if (trait.id === 'Head_Construction-Helmet' && trait.detailOptions?.length) {
+  if (trait.id === TOPLESS_TATTOO_TRAIT_ID) {
+    const selectedToplessTattoos = getResolvedToplessTattooDetails(g2.options, basePath);
+    if (selectedToplessTattoos.length) details = selectedToplessTattoos;
+  } else if (trait.id === 'Head_Construction-Helmet' && trait.detailOptions?.length) {
     // Multi-detail: Chia logo (toggle) + cigarette pack (one of two, mutually exclusive)
     const chiaFile = trait.detailOptions.find(d => d.file.includes('chia-logo'))?.file;
     const cig1File = trait.detailOptions.find(d => d.file.endsWith('cig-pack.png'))?.file;

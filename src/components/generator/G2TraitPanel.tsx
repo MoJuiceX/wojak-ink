@@ -10,6 +10,14 @@ import { Ban } from 'lucide-react';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { getUnifiedTraitById, getG2BasePath, type UnifiedTrait } from '@/services/generatorService';
 import { getFlagSvgDataUrl } from '@/services/canvasRenderer';
+import {
+  TOPLESS_TATTOO_OPTIONS_BY_SLOT,
+  TOPLESS_TATTOO_SLOT_KEYS,
+  TOPLESS_TATTOO_SLOT_LABELS,
+  buildToplessTattooOptionPatch,
+  getToplessTattooSelectedOption,
+  type ToplessTattooSlotKey,
+} from '@/config/toplessTattooDetails';
 import { DetailSelector } from './DetailSelector';
 import type { G2Selection } from '@/types/generator';
 import { COIN_LOGOS_BASE as COIN_LOGOS_BASE_CFG } from '@/config/layerAssetBase';
@@ -139,6 +147,7 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
   const isBepeArmy = trait.id === 'Clothes_Bepe-army';
   const isSuit = trait.id === 'Clothes_Suit';
   const isWizardDrip = trait.id === 'Clothes_Wizard-drip';
+  const isTopless = trait.id === 'Clothes_Topless';
 
   // BEPA Army: name tag inputs — limited by pixel width to fit the tag area
   if (isBepeArmy) {
@@ -563,6 +572,33 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
             </div>
           </div>
         )}
+      </div>
+    );
+  }
+
+  if (isTopless) {
+    const handleToplessTattooSelect = (slotKey: ToplessTattooSlotKey, file: string | undefined) => {
+      setG2Detail(activeLayer, undefined, buildToplessTattooOptionPatch(g2Sel.options, slotKey, file));
+    };
+
+    return (
+      <div
+        className="rounded-xl p-4 flex flex-col gap-4"
+        style={{
+          background: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+        }}
+      >
+        {TOPLESS_TATTOO_SLOT_KEYS.map((slotKey) => (
+          <DetailSelector
+            key={slotKey}
+            options={TOPLESS_TATTOO_OPTIONS_BY_SLOT[slotKey]}
+            basePath={basePath}
+            selectedOption={getToplessTattooSelectedOption(g2Sel.options, slotKey)}
+            onSelect={(file) => handleToplessTattooSelect(slotKey, file)}
+            label={TOPLESS_TATTOO_SLOT_LABELS[slotKey]}
+          />
+        ))}
       </div>
     );
   }

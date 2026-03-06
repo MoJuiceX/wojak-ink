@@ -127,6 +127,7 @@ export interface G2Selection {
    *
    * Known keys:
    * - detail: string — selected detail option filename
+   * - tattoo1 / tattoo2 / tattoo3 / tattoo4: string — selected Topless tattoo for that slot
    * - frame: string — selected frame filename
    * - variant: string — selected variant filename
    * - logo: string — coin logo name (Astronaut, Cap, Comrad Hat, Hard Hat, Wizard Drip)

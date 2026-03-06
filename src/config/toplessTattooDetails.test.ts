@@ -2,9 +2,15 @@ import { describe, expect, it } from 'vitest';
 
 import {
   TOPLESS_TATTOO_DETAIL_OPTIONS,
+  TOPLESS_TATTOO_OPTIONS_BY_SLOT,
+  TOPLESS_TATTOO_SLOT_KEYS,
   TOPLESS_TATTOO_TRAIT_ID,
   augmentG2ManifestWithToplessTattoos,
+  buildToplessTattooOptionPatch,
   createToplessTattooTrait,
+  getResolvedToplessTattooDetails,
+  getToplessTattooSelectedOption,
+  getToplessTattooSlotKey,
 } from './toplessTattooDetails';
 
 describe('toplessTattooDetails', () => {
@@ -38,6 +44,51 @@ describe('toplessTattooDetails', () => {
       file: '/assets/wojak-layers/tattoos/tattoos_3_skull%202.png?v=20260305a',
       name: 'Skull 2',
     });
+  });
+
+  it('groups tattoo options into four independent slot buckets', () => {
+    expect(TOPLESS_TATTOO_SLOT_KEYS).toEqual(['tattoo1', 'tattoo2', 'tattoo3', 'tattoo4']);
+    expect(TOPLESS_TATTOO_OPTIONS_BY_SLOT.tattoo1).toHaveLength(14);
+    expect(TOPLESS_TATTOO_OPTIONS_BY_SLOT.tattoo2).toHaveLength(10);
+    expect(TOPLESS_TATTOO_OPTIONS_BY_SLOT.tattoo3).toHaveLength(8);
+    expect(TOPLESS_TATTOO_OPTIONS_BY_SLOT.tattoo4).toHaveLength(3);
+    expect(getToplessTattooSlotKey('/assets/wojak-layers/tattoos/tattoos_3_skull%202.png?v=20260305a')).toBe('tattoo3');
+  });
+
+  it('keeps one active selection per tattoo slot while migrating legacy single-detail state', () => {
+    const legacyAnchor = '/assets/wojak-layers/tattoos/tattoos_1_anchor.png?v=20260305a';
+    const slotTwoCrown = '/assets/wojak-layers/tattoos/tattoos_2_crown.png?v=20260305a';
+    const patch = buildToplessTattooOptionPatch(
+      { detail: legacyAnchor, tattoo2: slotTwoCrown },
+      'tattoo4',
+      '/assets/wojak-layers/tattoos/tattoos_4_sparrow.png?v=20260305a',
+    );
+
+    expect(patch).toEqual({
+      detail: '',
+      tattoo1: legacyAnchor,
+      tattoo4: '/assets/wojak-layers/tattoos/tattoos_4_sparrow.png?v=20260305a',
+    });
+
+    expect(getToplessTattooSelectedOption({ detail: legacyAnchor }, 'tattoo1')).toBe(legacyAnchor);
+    expect(getToplessTattooSelectedOption({ detail: legacyAnchor }, 'tattoo2')).toBeUndefined();
+  });
+
+  it('resolves selected tattoo slots into ordered detail layers', () => {
+    expect(
+      getResolvedToplessTattooDetails(
+        {
+          tattoo1: '/assets/wojak-layers/tattoos/tattoos_1_anchor.png?v=20260305a',
+          tattoo3: '/assets/wojak-layers/tattoos/tattoos_3_turtle.png?v=20260305a',
+          tattoo4: '/assets/wojak-layers/tattoos/tattoos_4_sparrow.png?v=20260305a',
+        },
+        'https://layers.wojak.ink/YourWojak-layers',
+      ),
+    ).toEqual([
+      '/assets/wojak-layers/tattoos/tattoos_1_anchor.png?v=20260305a',
+      '/assets/wojak-layers/tattoos/tattoos_3_turtle.png?v=20260305a',
+      '/assets/wojak-layers/tattoos/tattoos_4_sparrow.png?v=20260305a',
+    ]);
   });
 
   it('injects Topless into Clothes once and keeps the operation idempotent', () => {
