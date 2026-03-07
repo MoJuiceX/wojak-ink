@@ -345,7 +345,7 @@
 .trait-card-image-bg {
   background:
     radial-gradient(ellipse 80% 80% at 50% 50%, var(--color-white-4) 0%, transparent 60%),
-    linear-gradient(180deg, #1f1f24 0%, #1a1a1f 50%, #16161a 100%) !important;
+    linear-gradient(180deg, #1f1f24 0%, #1a1a1f 50%, #16161a 100%);
 }
 
 /* Light theme */
@@ -353,21 +353,21 @@
   background:
     radial-gradient(ellipse 80% 80% at 60% 40%, var(--color-white-40) 0%, transparent 50%),
     radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, var(--color-black-3) 100%),
-    linear-gradient(45deg, #e9ecef 0%, #f0f2f5 40%, #f5f7f9 70%, #fafbfc 100%) !important;
+    linear-gradient(45deg, #e9ecef 0%, #f0f2f5 40%, #f5f7f9 70%, #fafbfc 100%);
 }
 
 /* Tang Orange theme - subtle warm tint */
 .theme-tang-orange .trait-card-image-bg {
   background:
     radial-gradient(ellipse 80% 80% at 50% 50%, var(--color-primary-6) 0%, transparent 60%),
-    linear-gradient(180deg, #221f1c 0%, #1c1a18 50%, #181614 100%) !important;
+    linear-gradient(180deg, #221f1c 0%, #1c1a18 50%, #181614 100%);
 }
 
 /* Chia Green theme - subtle green tint */
 .theme-chia-green .trait-card-image-bg {
   background:
     radial-gradient(ellipse 80% 80% at 50% 50%, var(--color-success-6) 0%, transparent 60%),
-    linear-gradient(180deg, #1c221f 0%, #181c1a 50%, #141816 100%) !important;
+    linear-gradient(180deg, #1c221f 0%, #181c1a 50%, #141816 100%);
 }
 
 /* === TRAIT CARD SELECTED BORDER & BADGE COLORS (Theme-aware) === */
@@ -407,7 +407,7 @@
 
 /* Selected state — with one-shot pulse on selection */
 .generator-option-item.selected {
-  border-color: #F97316;
+  border-color: var(--generator-selected-color);
   box-shadow:
     0 0 20px var(--color-primary-50),
     inset 0 0 20px var(--color-primary-10);
@@ -439,7 +439,7 @@
   right: 8px;
   width: 24px;
   height: 24px;
-  background: #F97316;
+  background: var(--generator-selected-color);
   border-radius: 50%;
   display: flex;
   align-items: center;
