@@ -20,9 +20,35 @@ import {
 } from '@/config/toplessTattooDetails';
 import { DetailSelector } from './DetailSelector';
 import type { G2Selection } from '@/types/generator';
-import { COIN_LOGOS_BASE as COIN_LOGOS_BASE_CFG } from '@/config/layerAssetBase';
+import { COIN_LOGOS_BASE as COIN_LOGOS_BASE_CFG, LAYER_BASE } from '@/config/layerAssetBase';
+import { DEFAULT_BASE_PATH, DEFAULT_MOUTHBASE_PATH } from '@/lib/layerRegistry';
 
 const COIN_LOGOS_BASE = COIN_LOGOS_BASE_CFG;
+
+/** Composite underlay for tattoo thumbnails: classic face + topless body + numb mouth */
+const TATTOO_UNDERLAY_IMAGES = [
+  DEFAULT_BASE_PATH,
+  `${LAYER_BASE}/CLOTHES/CLOTHES_Topless_.png`,
+  DEFAULT_MOUTHBASE_PATH,
+];
+
+/** Per-slot zoom config: each tattoo slot focuses on a different body region */
+const TATTOO_ZOOM: Record<string, { zoom: number; origin: string }> = {
+  tattoo1: { zoom: 4, origin: 'bottom left' },
+  tattoo2: { zoom: 4, origin: '30% 100%' },
+  tattoo3: { zoom: 4, origin: '73% 100%' },
+  tattoo4: { zoom: 4, origin: '50% 89%' },
+};
+
+/** Per-option zoom origin overrides for specific tattoo thumbnails.
+ *  Keys must match the full opt.file path from TOPLESS_TATTOO_OPTIONS_BY_SLOT. */
+const TATTOO_ZOOM_ORIGIN_OVERRIDES: Record<string, Record<string, string>> = {
+  tattoo4: Object.fromEntries(
+    TOPLESS_TATTOO_OPTIONS_BY_SLOT.tattoo4
+      .filter((o) => o.file.includes('sparrow') || o.file.includes('jock'))
+      .map((o) => [o.file, '48% 89%']),
+  ),
+};
 
 const ASTRONAUT_LOGOS = ['BEPE', 'CASTER', 'CAT', 'CHAD', 'XCH', 'CNI', 'COOKIES', 'Dexi Bucks', 'DIG', 'DWB', 'G4M', 'GYATT', 'HOA', 'HONK', 'JOCK', 'LOVE', 'MAX', 'MIRROR', 'MMM', 'MOG', 'MonkeyZoo', 'MRMT', 'NeckCoin', 'NWO', 'PEPEcoin', 'PIZZA', 'PP', 'Spacebucks', 'SPELLPOWER', 'SPROUT', 'STONKS', 'TANG', 'TVL', 'WITCHER', 'WOJAK'];
 
@@ -597,6 +623,11 @@ export function G2TraitPanel({ overrideG2Selection, onDetailSelect, onConstructi
             selectedOption={getToplessTattooSelectedOption(g2Sel.options, slotKey)}
             onSelect={(file) => handleToplessTattooSelect(slotKey, file)}
             label={TOPLESS_TATTOO_SLOT_LABELS[slotKey]}
+            allowNone={false}
+            underlayImages={TATTOO_UNDERLAY_IMAGES}
+            compositeZoom={TATTOO_ZOOM[slotKey]?.zoom}
+            compositeZoomOrigin={TATTOO_ZOOM[slotKey]?.origin}
+            compositeZoomOriginOverrides={TATTOO_ZOOM_ORIGIN_OVERRIDES[slotKey]}
           />
         ))}
       </div>

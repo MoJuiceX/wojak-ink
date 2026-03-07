@@ -32,6 +32,14 @@ interface DetailSelectorProps {
   zoom?: number;
   /** Map detail filenames to custom preview image URLs for the picker thumbnails */
   previewOverrides?: Record<string, string>;
+  /** Image URLs to render behind each detail option (e.g. base face + topless body + mouth for tattoo composites) */
+  underlayImages?: string[];
+  /** Zoom level for composite preview (applied to all layers together) */
+  compositeZoom?: number;
+  /** CSS transform-origin for composite zoom (e.g. 'bottom left' for third quadrant) */
+  compositeZoomOrigin?: string;
+  /** Per-option transform-origin overrides (keyed by filename) */
+  compositeZoomOriginOverrides?: Record<string, string>;
 }
 
 export const DetailSelector = memo(function DetailSelector({
@@ -43,6 +51,10 @@ export const DetailSelector = memo(function DetailSelector({
   allowNone = true,
   zoom,
   previewOverrides,
+  underlayImages,
+  compositeZoom,
+  compositeZoomOrigin,
+  compositeZoomOriginOverrides,
 }: DetailSelectorProps) {
   const prefersReducedMotion = useReducedMotion();
 
@@ -100,18 +112,43 @@ export const DetailSelector = memo(function DetailSelector({
               }}
               whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
               whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
-              onClick={() => onSelect(opt.file)}
+              onClick={() => onSelect(isSelected ? undefined : opt.file)}
               title={opt.name}
               type="button"
             >
-              <img
-                src={previewOverrides?.[opt.file] ?? resolveGeneratorAssetUrl(opt.file, basePath)}
-                alt={opt.name}
-                className="w-full h-full object-contain"
-                crossOrigin="anonymous"
-                style={zoom ? { transform: `scale(${zoom}) translate(-16%, -14%)`, transformOrigin: 'top left' } : undefined}
-                loading="lazy"
-              />
+              {underlayImages ? (
+                <div
+                  className="absolute inset-0 w-full h-full"
+                  style={compositeZoom ? { transform: `scale(${compositeZoom})`, transformOrigin: compositeZoomOriginOverrides?.[opt.file] ?? compositeZoomOrigin ?? 'center' } : undefined}
+                >
+                  {underlayImages.map((src, i) => (
+                    <img
+                      key={i}
+                      src={src}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover"
+                      crossOrigin="anonymous"
+                      loading="lazy"
+                    />
+                  ))}
+                  <img
+                    src={previewOverrides?.[opt.file] ?? resolveGeneratorAssetUrl(opt.file, basePath)}
+                    alt={opt.name}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    crossOrigin="anonymous"
+                    loading="lazy"
+                  />
+                </div>
+              ) : (
+                <img
+                  src={previewOverrides?.[opt.file] ?? resolveGeneratorAssetUrl(opt.file, basePath)}
+                  alt={opt.name}
+                  className="w-full h-full object-contain"
+                  crossOrigin="anonymous"
+                  style={zoom ? { transform: `scale(${zoom}) translate(-16%, -14%)`, transformOrigin: 'top left' } : undefined}
+                  loading="lazy"
+                />
+              )}
               {isSelected && (
                 <motion.div
                   className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
