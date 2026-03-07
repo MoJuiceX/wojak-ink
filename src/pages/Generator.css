@@ -102,9 +102,6 @@
   .generator-preview-canvas-wrapper {
     aspect-ratio: 1;
     width: 100%;
-    /* Smaller preview on mobile so trait grid + color panel get enough space (9+ items visible) */
-    max-width: min(100%, calc(32vh - 48px));
-    max-height: calc(32vh - 48px);
     margin: 0 auto;
   }
 
