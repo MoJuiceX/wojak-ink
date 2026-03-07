@@ -20,28 +20,28 @@ describe('toplessTattooDetails', () => {
     expect(trait.id).toBe(TOPLESS_TATTOO_TRAIT_ID);
     expect(trait.name).toBe('Topless');
     expect(trait.outlineFile).toBe('../CLOTHES/CLOTHES_Topless_.png');
-    expect(trait.detailOptions).toHaveLength(35);
+    expect(trait.detailOptions).toHaveLength(37);
     expect(trait.detailOptions?.[0]).toEqual({
-      file: '/assets/wojak-layers/tattoos/tattoos_1_Taco.png?v=20260305a',
+      file: '/assets/wojak-layers/tattoos/tattoos_1_Taco.png?v=20260307a',
       name: 'Taco',
     });
     expect(trait.detailOptions?.at(-1)).toEqual({
-      file: '/assets/wojak-layers/tattoos/tattoos_4_sparrow.png?v=20260305a',
-      name: 'Sparrow',
+      file: '/assets/wojak-layers/tattoos/tattoos_4_jock.png?v=20260307a',
+      name: 'Jock',
     });
   });
 
   it('formats special tattoo labels cleanly', () => {
     expect(TOPLESS_TATTOO_DETAIL_OPTIONS).toContainEqual({
-      file: '/assets/wojak-layers/tattoos/tattoos_2_ak47.png?v=20260305a',
+      file: '/assets/wojak-layers/tattoos/tattoos_2_ak47.png?v=20260307a',
       name: 'AK47',
     });
     expect(TOPLESS_TATTOO_DETAIL_OPTIONS).toContainEqual({
-      file: '/assets/wojak-layers/tattoos/tattoos_4_%24NECK.png?v=20260305a',
+      file: '/assets/wojak-layers/tattoos/tattoos_4_%24NECK.png?v=20260307a',
       name: '$NECK',
     });
     expect(TOPLESS_TATTOO_DETAIL_OPTIONS).toContainEqual({
-      file: '/assets/wojak-layers/tattoos/tattoos_3_skull%202.png?v=20260305a',
+      file: '/assets/wojak-layers/tattoos/tattoos_3_skull%202.png?v=20260307a',
       name: 'Skull 2',
     });
   });
@@ -50,24 +50,24 @@ describe('toplessTattooDetails', () => {
     expect(TOPLESS_TATTOO_SLOT_KEYS).toEqual(['tattoo1', 'tattoo2', 'tattoo3', 'tattoo4']);
     expect(TOPLESS_TATTOO_OPTIONS_BY_SLOT.tattoo1).toHaveLength(14);
     expect(TOPLESS_TATTOO_OPTIONS_BY_SLOT.tattoo2).toHaveLength(10);
-    expect(TOPLESS_TATTOO_OPTIONS_BY_SLOT.tattoo3).toHaveLength(8);
-    expect(TOPLESS_TATTOO_OPTIONS_BY_SLOT.tattoo4).toHaveLength(3);
-    expect(getToplessTattooSlotKey('/assets/wojak-layers/tattoos/tattoos_3_skull%202.png?v=20260305a')).toBe('tattoo3');
+    expect(TOPLESS_TATTOO_OPTIONS_BY_SLOT.tattoo3).toHaveLength(9);
+    expect(TOPLESS_TATTOO_OPTIONS_BY_SLOT.tattoo4).toHaveLength(4);
+    expect(getToplessTattooSlotKey('/assets/wojak-layers/tattoos/tattoos_3_skull%202.png?v=20260307a')).toBe('tattoo3');
   });
 
   it('keeps one active selection per tattoo slot while migrating legacy single-detail state', () => {
-    const legacyAnchor = '/assets/wojak-layers/tattoos/tattoos_1_anchor.png?v=20260305a';
-    const slotTwoCrown = '/assets/wojak-layers/tattoos/tattoos_2_crown.png?v=20260305a';
+    const legacyAnchor = '/assets/wojak-layers/tattoos/tattoos_1_anchor.png?v=20260307a';
+    const slotTwoCrown = '/assets/wojak-layers/tattoos/tattoos_2_crown.png?v=20260307a';
     const patch = buildToplessTattooOptionPatch(
       { detail: legacyAnchor, tattoo2: slotTwoCrown },
       'tattoo4',
-      '/assets/wojak-layers/tattoos/tattoos_4_sparrow.png?v=20260305a',
+      '/assets/wojak-layers/tattoos/tattoos_4_sparrow.png?v=20260307a',
     );
 
     expect(patch).toEqual({
       detail: '',
       tattoo1: legacyAnchor,
-      tattoo4: '/assets/wojak-layers/tattoos/tattoos_4_sparrow.png?v=20260305a',
+      tattoo4: '/assets/wojak-layers/tattoos/tattoos_4_sparrow.png?v=20260307a',
     });
 
     expect(getToplessTattooSelectedOption({ detail: legacyAnchor }, 'tattoo1')).toBe(legacyAnchor);
@@ -78,16 +78,16 @@ describe('toplessTattooDetails', () => {
     expect(
       getResolvedToplessTattooDetails(
         {
-          tattoo1: '/assets/wojak-layers/tattoos/tattoos_1_anchor.png?v=20260305a',
-          tattoo3: '/assets/wojak-layers/tattoos/tattoos_3_turtle.png?v=20260305a',
-          tattoo4: '/assets/wojak-layers/tattoos/tattoos_4_sparrow.png?v=20260305a',
+          tattoo1: '/assets/wojak-layers/tattoos/tattoos_1_anchor.png?v=20260307a',
+          tattoo3: '/assets/wojak-layers/tattoos/tattoos_3_turtle.png?v=20260307a',
+          tattoo4: '/assets/wojak-layers/tattoos/tattoos_4_sparrow.png?v=20260307a',
         },
         'https://layers.wojak.ink/YourWojak-layers',
       ),
     ).toEqual([
-      '/assets/wojak-layers/tattoos/tattoos_1_anchor.png?v=20260305a',
-      '/assets/wojak-layers/tattoos/tattoos_3_turtle.png?v=20260305a',
-      '/assets/wojak-layers/tattoos/tattoos_4_sparrow.png?v=20260305a',
+      '/assets/wojak-layers/tattoos/tattoos_1_anchor.png?v=20260307a',
+      '/assets/wojak-layers/tattoos/tattoos_3_turtle.png?v=20260307a',
+      '/assets/wojak-layers/tattoos/tattoos_4_sparrow.png?v=20260307a',
     ]);
   });
 

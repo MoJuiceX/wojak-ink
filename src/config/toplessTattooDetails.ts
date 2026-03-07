@@ -2,7 +2,7 @@ import type { G2Selection } from '@/types/generator';
 import { resolveGeneratorAssetUrl } from '@/utils/generatorAssetUrl';
 
 const TOPLESS_BASE_FILE = '../CLOTHES/CLOTHES_Topless_.png';
-const TATTOO_ASSET_VERSION = '20260305a';
+const TATTOO_ASSET_VERSION = '20260307a';
 
 export const TOPLESS_TATTOO_TRAIT_ID = 'Clothes_Topless';
 export const TOPLESS_TATTOO_SLOT_KEYS = ['tattoo1', 'tattoo2', 'tattoo3', 'tattoo4'] as const;
@@ -78,9 +78,11 @@ const TOPLESS_TATTOO_FILES = [
   'tattoos_3_skull 2.png',
   'tattoos_3_skull-flames.png',
   'tattoos_3_turtle.png',
+  'tattoos_3_foot-prints.png',
   'tattoos_4_$NECK.png',
   'tattoos_4_orange-font.png',
   'tattoos_4_sparrow.png',
+  'tattoos_4_jock.png',
 ] as const;
 
 const UPPERCASE_TOKEN_OVERRIDES: Record<string, string> = {

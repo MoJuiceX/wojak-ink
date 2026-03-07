@@ -215,8 +215,8 @@ export function GeneratorRightPanel() {
           />
         </div>
       )}
-      {/* Single color palette — hidden for full-face masks (no colorable parts) */}
-      {!isG1MilitaryBeret && !(activeLayer === 'Mask' && isFullFaceMaskSelected(selectedLayers.Mask)) && (
+      {/* Single color palette — hidden for full-face masks (no colorable parts) and Topless (tattoo slots replace it) */}
+      {!isG1MilitaryBeret && !(activeLayer === 'Mask' && isFullFaceMaskSelected(selectedLayers.Mask)) && g2Sel?.traitId !== KNOWN_TRAIT_IDS.Clothes_Topless && (
         <div className="flex-shrink-0" style={{ overflow: 'visible' }}>
           <div className="flex items-center justify-between mb-1.5" style={{ height: '14px', overflow: 'visible' }}>
             <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">Color</span>
