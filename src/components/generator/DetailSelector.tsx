@@ -9,6 +9,7 @@ import { memo } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Ban } from 'lucide-react';
 import { resolveGeneratorAssetUrl } from '@/utils/generatorAssetUrl';
+import { handleTraitImgError } from '@/utils/traitImgError';
 
 interface DetailOption {
   file: string;
@@ -67,20 +68,11 @@ export const DetailSelector = memo(function DetailSelector({
           {label}
         </span>
       )}
-      <div className="detail-selector-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 56px)', gap: 10, justifyContent: 'center' }}>
+      <div className="detail-selector-grid">
         {/* None option */}
         {allowNone && (
         <motion.button
-          className="w-14 h-14 rounded-lg overflow-hidden flex items-center justify-center"
-          style={{
-            background: 'var(--color-surface)',
-            border: !selectedOption
-              ? '2px solid var(--color-primary, #ff6b00)'
-              : '1px solid var(--color-border)',
-            boxShadow: !selectedOption
-              ? '0 0 12px var(--glow-primary, rgba(255,107,0,0.4))'
-              : 'none',
-          }}
+          className={`detail-option${!selectedOption ? ' detail-option--selected' : ''} w-14 h-14 rounded-lg overflow-hidden flex items-center justify-center`}
           whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
           whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
           onClick={() => onSelect(undefined)}
@@ -89,7 +81,7 @@ export const DetailSelector = memo(function DetailSelector({
         >
           <Ban
             size={20}
-            style={{ color: !selectedOption ? 'var(--color-primary, #ff6b00)' : 'var(--color-text-muted)' }}
+            className={!selectedOption ? '' : 'text-muted'}
           />
         </motion.button>
         )}
@@ -100,16 +92,7 @@ export const DetailSelector = memo(function DetailSelector({
           return (
             <motion.button
               key={opt.file}
-              className="w-14 h-14 rounded-lg overflow-hidden relative"
-              style={{
-                background: 'var(--color-surface)',
-                border: isSelected
-                  ? '2px solid var(--color-primary, #ff6b00)'
-                  : '1px solid var(--color-border)',
-                boxShadow: isSelected
-                  ? '0 0 12px var(--glow-primary, rgba(255,107,0,0.4))'
-                  : 'none',
-              }}
+              className={`detail-option${isSelected ? ' detail-option--selected' : ''} w-14 h-14 rounded-lg overflow-hidden relative`}
               whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
               whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
               onClick={() => onSelect(isSelected ? undefined : opt.file)}
@@ -129,6 +112,7 @@ export const DetailSelector = memo(function DetailSelector({
                       className="absolute inset-0 w-full h-full object-cover"
                       crossOrigin="anonymous"
                       loading="lazy"
+                      onError={handleTraitImgError}
                     />
                   ))}
                   <img
@@ -137,6 +121,7 @@ export const DetailSelector = memo(function DetailSelector({
                     className="absolute inset-0 w-full h-full object-cover"
                     crossOrigin="anonymous"
                     loading="lazy"
+                    onError={handleTraitImgError}
                   />
                 </div>
               ) : (
@@ -147,12 +132,12 @@ export const DetailSelector = memo(function DetailSelector({
                   crossOrigin="anonymous"
                   style={zoom ? { transform: `scale(${zoom}) translate(-16%, -14%)`, transformOrigin: 'top left' } : undefined}
                   loading="lazy"
+                  onError={handleTraitImgError}
                 />
               )}
               {isSelected && (
                 <motion.div
-                  className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
-                  style={{ background: 'var(--color-primary, #ff6b00)' }}
+                  className="detail-option-checkmark absolute top-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                 >
