@@ -294,6 +294,8 @@ export const TRAIT_NAME_MAP: Record<string, string> = {
   'hand gfy left': 'GFY Left',
   'hand left seedling': 'Seedling',
   'hand left brick': 'Brick',
+  'hand left pattek gold': 'Patek Gold',
+  'hand left pattek silver': 'Patek Silver',
   'wings': 'Wings',
 
   // === Clothes EXTRA overlays (Chia Farmer composites on tee/tank-top) ===

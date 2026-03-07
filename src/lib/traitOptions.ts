@@ -335,6 +335,8 @@ export function formatDisplayLabel(rawLabel: string | undefined): string {
     'hand gun left': 'Handgun',
     'hand left seedling': 'Seedling',
     'hand left brick': 'Brick',
+    'hand left pattek gold': 'Patek Gold',
+    'hand left pattek silver': 'Patek Silver',
     'hand gfy right': 'GFY Right',
     'hand gfy left': 'GFY Left',
   };
