@@ -157,7 +157,8 @@ function isAstronaut(path: string | undefined | null): boolean {
 /** Check if a path represents Straitjacket */
 function isStraightJacket(path: string | undefined | null): boolean {
   if (!path) return false;
-  return path.toLowerCase().includes('straigth-jacket');
+  const lower = path.toLowerCase();
+  return lower.includes('straitjacket') || lower.includes('straigth-jacket');
 }
 
 /** Check if an extra path is a hand item (not wings) */
