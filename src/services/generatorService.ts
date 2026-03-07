@@ -46,15 +46,12 @@ const BASE_SORT_ORDER = ['classic', 'rekt', 'rugged', 'bleeding', 'terminator'];
 async function loadManifest(): Promise<ManifestData> {
   if (manifestCache) return manifestCache;
 
-  try {
-    const response = await fetch(`${LAYER_BASE}/manifest.json`);
-    if (!response.ok) throw new Error('Failed to load layer manifest');
-    manifestCache = await response.json();
-    return manifestCache!;
-  } catch (error) {
-    console.error('Failed to load manifest:', error);
-    return {};
+  const response = await fetch(`${LAYER_BASE}/manifest.json`);
+  if (!response.ok) {
+    throw new Error(`Failed to load layer manifest: ${response.status} ${response.statusText}`);
   }
+  manifestCache = await response.json();
+  return manifestCache!;
 }
 
 function parseDisplayName(filepath: string): string {
