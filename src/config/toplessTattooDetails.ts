@@ -132,7 +132,7 @@ const TOPLESS_TATTOO_DETAIL_DEFINITIONS = TOPLESS_TATTOO_FILES.map((sourceFile) 
 
   return {
     slotKey,
-    file: `/assets/wojak-layers/tattoos/${encodeURIComponent(sourceFile)}?v=${TATTOO_ASSET_VERSION}`,
+    file: `/assets/wojak-layers/tattoos/${encodeURIComponent(sourceFile).replace(/%24/gi, '$')}?v=${TATTOO_ASSET_VERSION}`,
     name: formatTattooLabel(sourceFile),
   };
 });

@@ -37,7 +37,7 @@ describe('toplessTattooDetails', () => {
       name: 'AK47',
     });
     expect(TOPLESS_TATTOO_DETAIL_OPTIONS).toContainEqual({
-      file: '/assets/wojak-layers/tattoos/tattoos_4_%24NECK.png?v=20260307a',
+      file: '/assets/wojak-layers/tattoos/tattoos_4_$NECK.png?v=20260307a',
       name: '$NECK',
     });
     expect(TOPLESS_TATTOO_DETAIL_OPTIONS).toContainEqual({
