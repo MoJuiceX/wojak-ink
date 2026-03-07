@@ -156,6 +156,7 @@ export const SCENE_BACKGROUNDS: string[] = [
   `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Everythings-Fine.png`,
   `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Frozen Tundra.png`,
   `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Graveyard.png`,
+  `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_gym.png`,
   `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Heaven.png`,
   `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Hell.png`,
   `${LAYER_BASE}/BACKGROUND/Scene/BACKGROUND_Jungle.png`,

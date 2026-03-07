@@ -360,6 +360,7 @@ export const TRAIT_NAME_MAP: Record<string, string> = {
   'viking ship': 'Viking Ship',
   'volcano': 'Volcano',
   'wizard tower': 'Wizard Tower',
+  'gym': 'Gym',
 };
 
 /**

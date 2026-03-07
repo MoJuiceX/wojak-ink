@@ -67,6 +67,9 @@ export const TRAIT_COMBAT_MAP: Record<string, TraitCombatEntry> = {
   'Background_Dark-Alley': e('Background_Dark-Alley', 'Background', 'Dark Alley', false, 'SHADOW', 4, 'VENOM', 2, 'speed', 3),
   'Background_Steel-Forge': e('Background_Steel-Forge', 'Background', 'Steel Forge', false, 'METAL', 6, 'FIRE', 2, 'defense', 3),
 
+  // ── Background — Phase 8 (NEW) ────────────────────────────────────
+  'Background_Gym': e('Background_Gym', 'Background', 'Gym', false, 'MARTIAL', 6, 'NEUTRAL', 2, 'attack', 3),
+
   // ── Background — Phase 7 (NEW) (12) ───────────────────────────────
   'Background_Casino': e('Background_Casino', 'Background', 'Casino', false, 'SHADOW', 4, 'NEUTRAL', 2, 'speed', 3),
   'Background_Circus': e('Background_Circus', 'Background', 'Circus', false, 'GHOST', 5, 'SHADOW', 2, 'speed', 3),
