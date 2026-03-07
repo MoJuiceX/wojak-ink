@@ -90,12 +90,10 @@ function ActionBarTooltip({
       {visible && !disabled &&
         createPortal(
           <div
-            className="fixed px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap pointer-events-none z-[400] -translate-x-1/2 text-secondary"
+            className="action-bar-tooltip fixed px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap pointer-events-none z-[400] -translate-x-1/2 text-secondary"
             style={{
               left: pos.x,
               bottom: typeof window !== 'undefined' ? window.innerHeight - pos.y + 8 : 0,
-              background: 'var(--color-black-90)',
-              border: '1px solid var(--color-border)',
             }}
             role="tooltip"
           >
@@ -300,25 +298,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     variant?: 'primary' | 'secondary';
   }) => (
     <motion.button
-      className="relative flex items-center justify-center rounded-lg shrink-0 w-8 h-8"
-      style={{
-        background: isActive
-          ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.25), var(--color-primary-10))'
-          : 'transparent',
-        color: disabled
-          ? 'var(--color-text-muted)'
-          : isActive
-            ? 'white'
-            : 'var(--color-text-secondary)',
-        opacity: disabled ? 0.5 : 1,
-        border: isActive
-          ? '1px solid rgba(249, 115, 22, 0.6)'
-          : '1px solid transparent',
-        boxShadow: isActive
-          ? '0 0 20px var(--color-primary-30), inset 0 0 15px var(--color-primary-10)'
-          : 'none',
-        transition: 'all 0.3s ease',
-      }}
+      className={`action-btn${isActive ? ' action-btn--active' : ''}${disabled ? ' action-btn--disabled' : ''} relative flex items-center justify-center rounded-lg shrink-0 w-8 h-8`}
       whileHover={disabled || prefersReducedMotion ? undefined : { scale: 1.02 }}
       whileTap={disabled || prefersReducedMotion ? undefined : { scale: 0.98 }}
       onClick={onClick}
@@ -329,12 +309,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         {icon}
         {badge !== undefined && badge > 0 && (
           <span
-            className="absolute -top-2 -right-2 min-w-[16px] h-4 flex items-center justify-center text-[10px] font-bold rounded-full"
-            style={{
-              background: '#F97316',
-              color: 'white',
-              boxShadow: '0 0 8px var(--color-primary-50)',
-            }}
+            className="action-btn-badge absolute -top-2 -right-2 min-w-[16px] h-4 flex items-center justify-center text-[10px] font-bold rounded-full"
           >
             {badge}
           </span>
@@ -346,25 +321,14 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
   return (
     <div
-      className={`flex items-center justify-between px-1 lg:px-2 py-1.5 rounded-none lg:rounded-2xl flex-nowrap w-full ${className}`}
-      style={{
-        background: 'var(--color-black-30)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        border: '1px solid var(--color-border)',
-      }}
+      className={`action-bar-container flex items-center justify-between px-1 lg:px-2 py-1.5 rounded-none lg:rounded-2xl flex-nowrap w-full ${className}`}
     >
       {/* Left group — utility icons (grouped to prevent layout shift when mint section changes) */}
       <div className="flex items-center gap-0.5">
       {/* Randomize button — always randomizes all layers + colors */}
       <ActionBarTooltip content="Randomize">
         <motion.button
-          className="relative flex items-center justify-center rounded-lg shrink-0 w-8 h-8"
-          style={{
-            background: 'transparent',
-            border: 'none',
-            transition: 'all 0.3s ease',
-          }}
+          className="relative flex items-center justify-center rounded-lg shrink-0 w-8 h-8 bg-transparent border-none transition-all duration-300"
           whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
           whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
           onClick={handleRandomize}
@@ -403,8 +367,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
       {/* Visual group separator */}
       <div
-        className="h-6 w-px shrink-0 mx-0.5"
-        style={{ background: 'var(--color-border)' }}
+        className="h-6 w-px shrink-0 mx-0.5 bg-[var(--color-border)]"
       />
 
       {/* Save to favorites — desktop only in main bar (mobile: in overflow) */}
@@ -484,20 +447,13 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               initial={{ opacity: 0, y: isDesktop ? 4 : -4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: isDesktop ? 4 : -4 }}
-              className={`absolute ${isDesktop ? 'bottom-full mb-2' : 'top-full mt-2'} right-0 z-50 rounded-xl overflow-hidden py-1 whitespace-nowrap`}
-              style={{
-                background: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
-                boxShadow: '0 8px 32px var(--color-black-40)',
-              }}
+              className={`action-bar-dropdown absolute ${isDesktop ? 'bottom-full mb-2' : 'top-full mt-2'} right-0 z-50 rounded-xl overflow-hidden py-1 whitespace-nowrap`}
             >
               {/* Save — mobile only (desktop shows in main bar) */}
               {!isDesktop && (
                 <button
                   type="button"
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-white-5)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  className="action-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-primary"
                   onClick={() => {
                     setShowOverflowMenu(false);
                     handleSaveAndOpenFavorites();
@@ -508,8 +464,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
                   <span>Save</span>
                   {favorites.length > 0 && (
                     <span
-                      className="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
-                      style={{ background: 'var(--color-primary)', color: 'white' }}
+                      className="action-menu-item-badge ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
                     >
                       {favorites.length}
                     </span>
@@ -520,9 +475,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               {/* Free Mints / Leaderboard */}
               <button
                 type="button"
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-white-5)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                className="action-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-primary"
                 onClick={() => {
                   setShowOverflowMenu(false);
                   window.location.href = '/free-mints.html';
@@ -532,8 +485,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
                 <span>Free Mints</span>
                 {isWalletConnected && (credits?.free_mints_available ?? 0) > 0 && (
                   <span
-                    className="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
-                    style={{ background: 'var(--color-primary)', color: 'white' }}
+                    className="action-menu-item-badge ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
                   >
                     {credits!.free_mints_available}
                   </span>
@@ -543,9 +495,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               {/* Trait Prices */}
               <button
                 type="button"
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
-                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-white-5)')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                className="action-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-primary"
                 onClick={() => {
                   setShowOverflowMenu(false);
                   setShowPricing(true);
@@ -559,15 +509,13 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               {onToggleRightPanel && (
                 <button
                   type="button"
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-primary"
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-white-5)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  className="action-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-primary"
                   onClick={() => {
                     setShowOverflowMenu(false);
                     onToggleRightPanel();
                   }}
                 >
-                  <span style={{ fontFamily: 'monospace', fontSize: '14px', fontWeight: 700 }}>{'{ }'}</span>
+                  <span className="font-mono text-sm font-bold">{'{ }'}</span>
                   <span>{rightPanelMode !== 'colors' ? 'Colors' : 'Metadata'}</span>
                 </button>
               )}
@@ -581,8 +529,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
       {/* ── Mint Section ── */}
       <div
-        className="flex items-center gap-1 lg:gap-3 pl-1 lg:pl-2 ml-0.5 lg:ml-1"
-        style={{ borderLeft: '1px solid var(--color-border)' }}
+        className="flex items-center gap-1 lg:gap-3 pl-1 lg:pl-2 ml-0.5 lg:ml-1 border-l border-[var(--color-border)]"
       >
         {/* Free/Paid toggle — desktop: visibility:hidden to keep layout stable; mobile: display:none to save space */}
         {(isWalletConnected && hasFreeMintsAvailable && !showMintingPaused) ? (
@@ -624,12 +571,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
           <ActionBarTooltip content="Minting continues soon.">
             <button
               disabled
-              className="px-4 py-1.5 rounded-lg text-sm font-semibold"
-              style={{
-                background: 'var(--color-white-10)',
-                color: 'var(--color-text-muted)',
-                cursor: 'not-allowed',
-              }}
+              className="action-btn--paused px-4 py-1.5 rounded-lg text-sm font-semibold"
             >
               Soon
             </button>
