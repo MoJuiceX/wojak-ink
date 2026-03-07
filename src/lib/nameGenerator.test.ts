@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { generateRandomName, validateName, formatFullName, getPlaceholderHint, MAX_NAME_LENGTH } from './nameGenerator';
+import { generateRandomName, validateName, formatFullName, getPlaceholderHint, MAX_NAME_LENGTH, TRAIT_NAME_OVERRIDES } from './nameGenerator';
 
 describe('MAX_NAME_LENGTH', () => {
   it('is 15', () => {
@@ -154,6 +154,44 @@ describe('generateRandomName with traits', () => {
       { trait_type: 'Background', value: 'Wizard Tower' },
     ];
     for (let i = 0; i < 50; i++) {
+      const name = generateRandomName(traits);
+      expect(name.length).toBeLessThanOrEqual(MAX_NAME_LENGTH);
+    }
+  });
+});
+
+describe('TRAIT_NAME_OVERRIDES', () => {
+  it('has all names within MAX_NAME_LENGTH', () => {
+    for (const [trait, names] of Object.entries(TRAIT_NAME_OVERRIDES)) {
+      for (const name of names) {
+        expect(name.length, `"${name}" in ${trait} override exceeds ${MAX_NAME_LENGTH} chars`).toBeLessThanOrEqual(MAX_NAME_LENGTH);
+      }
+    }
+  });
+
+  it('maps known iconic traits', () => {
+    expect(TRAIT_NAME_OVERRIDES['Astronaut']).toBeDefined();
+    expect(TRAIT_NAME_OVERRIDES['Chia Farmer']).toBeDefined();
+    expect(TRAIT_NAME_OVERRIDES['Laser Eyes']).toBeDefined();
+    expect(TRAIT_NAME_OVERRIDES['Handgun']).toBeDefined();
+  });
+
+  it('includes trait overrides that can appear in generated names', () => {
+    // With 30% override chance and Astronaut at tier 3, over many runs some
+    // names should come from the Astronaut override pool.
+    const traits = [{ trait_type: 'Clothes', value: 'Astronaut' }];
+    const names = new Set(Array.from({ length: 200 }, () => generateRandomName(traits)));
+    const overridePool = new Set(TRAIT_NAME_OVERRIDES['Astronaut']);
+    const hasOverride = [...names].some((n) => overridePool.has(n));
+    expect(hasOverride).toBe(true);
+  });
+
+  it('never exceeds MAX_NAME_LENGTH when override fires', () => {
+    const traits = [
+      { trait_type: 'Clothes', value: 'Goose Suit' },
+      { trait_type: 'Extras', value: 'Diamond' },
+    ];
+    for (let i = 0; i < 100; i++) {
       const name = generateRandomName(traits);
       expect(name.length).toBeLessThanOrEqual(MAX_NAME_LENGTH);
     }

@@ -5,7 +5,11 @@
 import { getNameTheme } from './nameThemes';
 import { resolveMoods } from './moodMap';
 import type { MoodTag } from './moodMap';
-import { MOOD_POOLS, MOOD_COMBOS } from './moodPools';
+import { MOOD_POOLS, MOOD_COMBOS, TRAIT_NAME_OVERRIDES } from './moodPools';
+import { TIER_WEIGHTS } from './moodMap';
+
+// Re-export for tests
+export { TRAIT_NAME_OVERRIDES } from './moodPools';
 
 export const MAX_NAME_LENGTH = 15;
 
@@ -67,6 +71,52 @@ function generateFromMoods(primary: MoodTag, secondary: MoodTag): string {
 }
 
 /**
+ * Pick a name from trait-specific override pools via weighted random selection.
+ *
+ * Scans equipped traits for any that have a curated override pool in
+ * TRAIT_NAME_OVERRIDES, weights them by the same tier system used for
+ * mood scoring, and picks one name from the winning trait's pool.
+ *
+ * Returns undefined if no overrides match.
+ */
+function pickTraitOverride(traits: TraitInput[]): string | undefined {
+  // Build weighted entries: { pool, weight }
+  const entries: { pool: string[]; weight: number }[] = [];
+
+  for (const trait of traits) {
+    const weight = TIER_WEIGHTS[trait.trait_type] ?? 1;
+
+    // Handle Extras comma-separated values
+    const values =
+      trait.trait_type === 'Extras'
+        ? trait.value.split(', ')
+        : [trait.value];
+
+    for (const val of values) {
+      const pool = TRAIT_NAME_OVERRIDES[val];
+      if (pool && pool.length > 0) {
+        entries.push({ pool, weight });
+      }
+    }
+  }
+
+  if (entries.length === 0) return undefined;
+
+  // Weighted random selection among matching traits
+  const totalWeight = entries.reduce((sum, e) => sum + e.weight, 0);
+  let roll = Math.random() * totalWeight;
+  for (const entry of entries) {
+    roll -= entry.weight;
+    if (roll <= 0) {
+      return pickRandom(entry.pool);
+    }
+  }
+
+  // Fallback (shouldn't reach here, but just in case)
+  return pickRandom(entries[entries.length - 1].pool);
+}
+
+/**
  * Generate a random name, themed by traits (mood system) or clothing string (legacy).
  *
  * Signatures:
@@ -78,6 +128,12 @@ export function generateRandomName(traitsOrClothing?: TraitInput[] | string): st
   if (typeof traitsOrClothing === 'string' || traitsOrClothing === undefined) {
     // Legacy path: use default moods
     return generateFromMoods('chill', 'degen');
+  }
+
+  // Trait-specific override: 30% chance to pull from iconic trait name pools
+  if (Math.random() < 0.30) {
+    const override = pickTraitOverride(traitsOrClothing);
+    if (override) return override.slice(0, MAX_NAME_LENGTH);
   }
 
   // Array path: resolve moods from traits

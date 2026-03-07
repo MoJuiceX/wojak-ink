@@ -570,6 +570,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
     setErrorMessage(null);
     setPendingMintParams(null);
     setIdempotencyKey(null);
+    setCustomName('');
     stopPolling();
   }, [stopPolling]);
 
@@ -583,6 +584,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
     setRateLimitRetryAfterSeconds(null);
     setPendingMintParams(null);
     setIdempotencyKey(null);
+    setCustomName('');
     stopPolling();
   }, [stopPolling]);
 
