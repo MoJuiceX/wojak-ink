@@ -16,6 +16,7 @@ import { getG1MouthTransform, getG2MouthTransform } from './mouthPreviewPosition
 import { DEFAULT_BASE_PATH, DEFAULT_CLOTHES_PATH, DEFAULT_MOUTHBASE_PATH } from '@/lib/layerRegistry';
 import { G2_LAYER_BASE } from '@/config/layerAssetBase';
 import { SortControls, type TraitSortMode } from '@/components/generator/TraitSelector';
+import { handleTraitImgError } from '@/utils/traitImgError';
 
 const G2_BASE_PATH = G2_LAYER_BASE;
 
@@ -34,11 +35,7 @@ interface MouthLayerSelectorProps {
 function TraitCardSkeleton() {
   return (
     <div
-      className="aspect-square rounded-xl overflow-hidden animate-pulse"
-      style={{
-        background: 'var(--color-border)',
-        border: '1px solid var(--color-border)',
-      }}
+      className="trait-card-skeleton aspect-square rounded-xl overflow-hidden animate-pulse"
     />
   );
 }
@@ -63,19 +60,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
 
   return (
     <motion.button
-      className="w-full aspect-square relative rounded-xl overflow-hidden p-1"
-      style={{
-        background: 'var(--generator-trait-card-bg)',
-        border: isSelected
-          ? '2px solid var(--generator-selected-color, #F97316)'
-          : '1px solid var(--generator-trait-card-border)',
-        opacity: isDisabled ? 0.5 : 1,
-        cursor: isDisabled ? 'not-allowed' : 'pointer',
-        boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
-          : '0 2px 8px var(--color-black-20)',
-        transition: 'all 0.3s ease',
-      }}
+      className={`mouth-trait-card${isSelected ? ' mouth-trait-card--selected' : ''}${isDisabled ? ' mouth-trait-card--disabled' : ''} w-full aspect-square relative rounded-xl overflow-hidden p-1`}
       whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
       whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}
       transition={{ duration: 0.2 }}
@@ -85,11 +70,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
     >
       {badge && !isDisabled && !isSelected && (
         <div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-10 text-xs font-bold"
-          style={{
-            background: 'var(--generator-badge-color, #F97316)',
-            color: 'white',
-          }}
+          className="trait-card-badge absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-10 text-xs font-bold"
         >
           {badge}
         </div>
@@ -112,6 +93,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
             className="absolute inset-0 w-full h-full object-cover"
             crossOrigin="anonymous"
             loading="lazy"
+            onError={handleTraitImgError}
           />
           {/* Clothes layer (blue tee) */}
           <img
@@ -120,6 +102,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
             className="absolute inset-0 w-full h-full object-cover"
             crossOrigin="anonymous"
             loading="lazy"
+            onError={handleTraitImgError}
           />
           {/* Numb mouth layer (for add-on items) */}
           {showMouthUnderlay && (
@@ -129,6 +112,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
               className="absolute inset-0 w-full h-full object-cover"
               crossOrigin="anonymous"
               loading="lazy"
+              onError={handleTraitImgError}
             />
           )}
           {/* Mouth trait on top */}
@@ -138,6 +122,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
             className="absolute inset-0 w-full h-full object-cover"
             crossOrigin="anonymous"
             loading="lazy"
+            onError={handleTraitImgError}
           />
         </div>
         <div className="trait-label-overlay">
@@ -147,8 +132,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
       {/* Disabled info badge */}
       {isDisabled && disabledReason && (
         <div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
-          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
+          className="trait-card-disabled-badge absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
           title={disabledReason}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
@@ -159,8 +143,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
       {/* Check mark with pop animation */}
       {isSelected && !isDisabled && (
         <motion.div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
-          style={{ background: 'var(--generator-badge-color, #F97316)' }}
+          className="trait-card-checkmark absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 500, damping: 25 }}
@@ -248,19 +231,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick }:
 
   return (
     <motion.button
-      className="w-full aspect-square relative rounded-xl overflow-hidden p-1"
-      style={{
-        background: 'var(--generator-trait-card-bg)',
-        border: isSelected
-          ? '2px solid var(--generator-selected-color, #F97316)'
-          : '1px solid var(--generator-trait-card-border)',
-        opacity: isDisabled ? 0.5 : 1,
-        cursor: isDisabled ? 'not-allowed' : 'pointer',
-        boxShadow: isSelected
-          ? '0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30)'
-          : '0 2px 8px var(--color-black-20)',
-        transition: 'all 0.3s ease',
-      }}
+      className={`mouth-trait-card${isSelected ? ' mouth-trait-card--selected' : ''}${isDisabled ? ' mouth-trait-card--disabled' : ''} w-full aspect-square relative rounded-xl overflow-hidden p-1`}
       whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
       whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}
       transition={{ duration: 0.2 }}
@@ -284,6 +255,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick }:
             className="absolute inset-0 w-full h-full object-cover"
             crossOrigin="anonymous"
             loading="lazy"
+            onError={handleTraitImgError}
           />
           {/* Clothes layer (blue tee) */}
           <img
@@ -292,6 +264,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick }:
             className="absolute inset-0 w-full h-full object-cover"
             crossOrigin="anonymous"
             loading="lazy"
+            onError={handleTraitImgError}
           />
           {/* Fill layer with default color (for colorable traits like Bubble Gum) */}
           {fillSrc && (
@@ -316,6 +289,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick }:
               className="absolute inset-0 w-full h-full object-cover"
               crossOrigin="anonymous"
               loading="lazy"
+              onError={handleTraitImgError}
             />
           )}
         </div>
@@ -325,8 +299,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick }:
       </div>
       {isSelected && !isDisabled && (
         <motion.div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
-          style={{ background: 'var(--generator-badge-color, #F97316)' }}
+          className="trait-card-checkmark absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 500, damping: 25 }}
@@ -338,8 +311,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick }:
       )}
       {isDisabled && disabledReason && (
         <div
-          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
-          style={{ background: 'var(--color-black-70)', border: '1px solid var(--color-border)' }}
+          className="trait-card-disabled-badge absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center z-20"
           title={disabledReason}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--color-text-secondary)">
@@ -518,11 +490,7 @@ export function MouthLayerSelector({ className = '', sortMode = 'hot', onSortCha
       {/* Blocked overlay */}
       {isBlocked && (
         <div
-          className="p-4 rounded-xl text-center"
-          style={{
-            background: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-          }}
+          className="generator-notice-card p-4 rounded-xl text-center"
         >
           <p className="text-muted">
             Mouth layers are blocked by another trait selection
@@ -645,11 +613,7 @@ export function MouthLayerSelector({ className = '', sortMode = 'hot', onSortCha
       {/* Empty state */}
       {!isBlocked && !hasAnyOptions && (
         <div
-          className="p-8 rounded-xl text-center"
-          style={{
-            background: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-          }}
+          className="generator-notice-card p-8 rounded-xl text-center"
         >
           <p className="text-muted">
             No mouth traits available
