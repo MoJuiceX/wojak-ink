@@ -893,6 +893,77 @@ body {
   color: white;
 }
 
+/* ── Mouth Trait Cards — shared between ImageCard and G2MouthCard ──── */
+
+.mouth-trait-card {
+  background: var(--generator-trait-card-bg);
+  border: 1px solid var(--generator-trait-card-border);
+  box-shadow: 0 2px 8px var(--color-black-20);
+  transition: all 0.3s ease;
+}
+
+.mouth-trait-card--selected {
+  border: 2px solid var(--generator-selected-color);
+  box-shadow: 0 0 20px var(--generator-selected-glow, var(--color-primary-50)), 0 4px 12px var(--color-black-30);
+}
+
+.mouth-trait-card--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.trait-card-badge {
+  background: var(--generator-badge-color);
+  color: white;
+}
+
+.trait-card-checkmark {
+  background: var(--generator-badge-color);
+}
+
+.trait-card-disabled-badge {
+  background: var(--color-black-70);
+  border: 1px solid var(--color-border);
+}
+
+.trait-card-skeleton {
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+}
+
+.generator-notice-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+/* ── Detail Selector — option thumbnails for G2 trait variants ──── */
+
+.detail-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 56px);
+  gap: 10px;
+  justify-content: center;
+}
+
+.detail-option {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: none;
+}
+
+.detail-option--selected {
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 0 12px var(--glow-primary);
+}
+
+.detail-option--selected .lucide-ban {
+  color: var(--color-primary);
+}
+
+.detail-option-checkmark {
+  background: var(--color-primary);
+}
+
 /* Sliding pill that animates behind active tab via framer-motion layoutId */
 .generator-layer-tab-pill {
   background: rgba(255, 255, 255, 0.06);
