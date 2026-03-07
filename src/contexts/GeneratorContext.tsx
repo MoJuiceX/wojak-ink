@@ -49,6 +49,33 @@ function pickRandomColor(): string {
   return GENERATOR_PALETTE_HEX[Math.floor(Math.random() * GENERATOR_PALETTE_HEX.length)];
 }
 
+/**
+ * Find a unified trait by weighted trait name.
+ * Matches trait names to frequency keys using normalization.
+ * Pure function — safe to use outside React components.
+ */
+function findUnifiedTraitByName(
+  traits: UnifiedTrait[],
+  traitName: string
+): UnifiedTrait | null {
+  const normalizedTrait = normalizeName(traitName);
+
+  // Try exact match first
+  for (const t of traits) {
+    if (normalizeName(t.name) === normalizedTrait) return t;
+  }
+
+  // Try partial match (trait contains or is contained)
+  for (const t of traits) {
+    const normalizedName = normalizeName(t.name);
+    if (normalizedName.includes(normalizedTrait) || normalizedTrait.includes(normalizedName)) {
+      return t;
+    }
+  }
+
+  return null;
+}
+
 /** Build random colors for all user-pickable fill slots on a G2 trait */
 function buildRandomColors(trait: UnifiedTrait): Record<string, string> {
   const slots = getAllUserPickableFillSlots(trait.id, trait);
@@ -384,32 +411,6 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     }
 
     /**
-     * Find a unified trait by weighted trait name
-     * Matches trait names to frequency keys using normalization
-     */
-    const findUnifiedTraitByName = (
-      traits: UnifiedTrait[],
-      traitName: string
-    ): UnifiedTrait | null => {
-      const normalizedTrait = normalizeName(traitName);
-
-      // Try exact match first
-      for (const t of traits) {
-        if (normalizeName(t.name) === normalizedTrait) return t;
-      }
-
-      // Try partial match (trait contains or is contained)
-      for (const t of traits) {
-        const normalizedName = normalizeName(t.name);
-        if (normalizedName.includes(normalizedTrait) || normalizedTrait.includes(normalizedName)) {
-          return t;
-        }
-      }
-
-      return null;
-    };
-
-    /**
      * Select a random unified trait using weighted frequencies when available.
      * Returns both the path (for SelectedLayers) and the UnifiedTrait (for G2 hydration).
      * Falls back to uniform random if no weights defined or no match found.
@@ -569,22 +570,6 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
   }, [registerDynamicWeightedTraits]);
 
   const randomizeLayer = useCallback(async (layer: UILayerName) => {
-    const findUnifiedTraitByName = (
-      traits: UnifiedTrait[],
-      traitName: string
-    ): UnifiedTrait | null => {
-      const normalizedTrait = normalizeName(traitName);
-      for (const t of traits) {
-        if (normalizeName(t.name) === normalizedTrait) return t;
-      }
-      for (const t of traits) {
-        const normalizedName = normalizeName(t.name);
-        if (normalizedName.includes(normalizedTrait) || normalizedTrait.includes(normalizedName))
-          return t;
-      }
-      return null;
-    };
-
     const traits = await getUnifiedTraits(layer);
     if (traits.length === 0) return;
 
