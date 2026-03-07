@@ -547,7 +547,7 @@
 }
 
 .generator-action-btn.primary:hover {
-  background: #ff9500;
+  background: var(--color-primary-hover);
   box-shadow: 0 4px 16px var(--color-primary-40);
 }
 
