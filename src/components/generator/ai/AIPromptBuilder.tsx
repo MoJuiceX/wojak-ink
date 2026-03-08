@@ -5,16 +5,17 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { useAIEnhance } from '@/contexts/AIEnhanceContext';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { isSelectionPathEmpty } from '@/types/generator';
+import type { GeneratorLayerName } from '@/lib/memeLayers';
 import { AI_CATEGORIES } from '@/types/aiEnhance';
 import type { AICategory, AIStyleFamily, AIPresetOption } from '@/types/aiEnhance';
 import { AI_PRESET_CATALOG, getRandomPreset } from '@/config/aiEnhancePresets';
 
 type PromptSubStep = 'mode' | 'family' | 'option' | 'confirm';
 
-const CATEGORY_LAYER_KEYS: Record<AICategory, string[]> = {
+const CATEGORY_LAYER_KEYS: Record<AICategory, GeneratorLayerName[]> = {
   clothes: ['Clothes'],
   head: ['Head'],
-  facewear: ['Eye', 'Mask'],
+  facewear: ['Eyes', 'Mask'],
   background: ['Background'],
 };
 
