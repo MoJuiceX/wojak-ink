@@ -3545,6 +3545,14 @@ body {
   margin-bottom: var(--space-4);
 }
 
+.ai-result-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+}
+
 .response-text {
   display: flex;
   gap: var(--space-3);
