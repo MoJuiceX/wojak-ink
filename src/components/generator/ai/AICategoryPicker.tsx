@@ -42,8 +42,8 @@ export function AICategoryPicker({ currentImage }: AICategoryPickerProps) {
               whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
             >
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xl">{config.icon}</span>
-                <span className="font-semibold">{config.label}</span>
+                <span className="text-xl ai-category-icon">{config.icon}</span>
+                <span className="font-semibold ai-category-text">{config.label}</span>
                 {isEnhanced && <span className="text-sm" style={{ color: 'var(--color-success)' }}>&#10003;</span>}
               </div>
               <p className="text-secondary text-xs">

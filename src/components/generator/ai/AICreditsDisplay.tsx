@@ -5,9 +5,11 @@ import { useAIEnhance } from '@/contexts/AIEnhanceContext';
 export function AICreditsDisplay() {
   const { balance, isLoadingBalance, openShop } = useAIEnhance();
 
+  const badgeClass = `ai-credits-badge${balance === 0 && !isLoadingBalance ? ' ai-credits-badge--empty' : ''}`;
+
   return (
     <button
-      className="ai-credits-badge"
+      className={badgeClass}
       onClick={openShop}
       title="Buy AI credits"
     >

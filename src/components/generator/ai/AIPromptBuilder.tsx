@@ -61,7 +61,7 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
               className="ai-preset-btn"
               onClick={() => handlePresetClick(preset.prompt)}
               whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
-              whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+              whileTap={prefersReducedMotion ? {} : { scale: 0.95, boxShadow: '0 0 12px rgba(255, 107, 0, 0.4)' }}
             >
               {preset.label}
             </motion.button>
@@ -70,7 +70,7 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
             className="ai-preset-btn"
             onClick={handleRandomize}
             whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
-            whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+            whileTap={prefersReducedMotion ? {} : { scale: 0.95, boxShadow: '0 0 12px rgba(255, 107, 0, 0.4)' }}
             title="Random prompt"
           >
             🎲 Random
