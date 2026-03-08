@@ -34,6 +34,7 @@ export const QuickAccessBar: React.FC = () => {
     >
       {QUICK_LINKS.map((link, index) => (
         <motion.button
+          type="button"
           key={link.path}
           className="quick-access-btn"
           onClick={() => navigate(link.path)}

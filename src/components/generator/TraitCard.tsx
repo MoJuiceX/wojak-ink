@@ -36,6 +36,7 @@ export const TraitCard = memo(function TraitCard({
 
   return (
     <motion.button
+      type="button"
       className="relative aspect-square rounded-xl overflow-hidden transition-colors"
       style={{
         background: 'var(--color-surface)',

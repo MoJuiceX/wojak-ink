@@ -103,6 +103,7 @@ export function AchievementUnlockPopup({
           </motion.div>
 
           <motion.button
+            type="button"
             className="popup-claim-button"
             onClick={onClaim}
             initial={{ opacity: 0 }}

@@ -64,6 +64,7 @@ export const VoteButtons = memo(function VoteButtons({
   return (
     <div className={`vote-buttons-row${feedbackType ? ` is-${feedbackType}` : ''}`}>
       <motion.button
+        type="button"
         className={`btn vote-btn-pill vote-btn-fade${feedbackType === 'fade' ? ' recently-picked' : ''}`}
         onClick={onDislike}
         disabled={disabled}
@@ -74,6 +75,7 @@ export const VoteButtons = memo(function VoteButtons({
       </motion.button>
 
       <motion.button
+        type="button"
         className={`btn vote-btn-pill vote-btn-glaze${feedbackType === 'glaze' ? ' recently-picked' : ''}`}
         onClick={onLike}
         disabled={disabled}

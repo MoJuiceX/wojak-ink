@@ -105,6 +105,7 @@ export const FlickModeToggle = forwardRef<HTMLDivElement, FlickModeToggleProps>(
             <div className="voting-signin-emojis">🍩 💩</div>
             <p className="voting-signin-text">Sign in to vote on games!</p>
             <motion.button
+              type="button"
               className="voting-signin-btn"
               onClick={onSignInClick}
               whileHover={{ scale: 1.05 }}
@@ -131,6 +132,7 @@ export const FlickModeToggle = forwardRef<HTMLDivElement, FlickModeToggleProps>(
         <div className="voting-buttons-row">
           {/* Donut button (like) */}
           <motion.button
+            type="button"
             className={`vote-btn ${isDonutSelected ? 'selected' : ''} ${hasSelection && !isDonutSelected ? 'inactive' : ''}`}
             onClick={() => handleToggle('donut')}
             animate={!hasSelection ? floatAnimation : {}}
@@ -158,6 +160,7 @@ export const FlickModeToggle = forwardRef<HTMLDivElement, FlickModeToggleProps>(
 
           {/* Poop button (dislike) */}
           <motion.button
+            type="button"
             className={`vote-btn ${isPoopSelected ? 'selected' : ''} ${hasSelection && !isPoopSelected ? 'inactive' : ''}`}
             onClick={() => handleToggle('poop')}
             animate={!hasSelection ? floatAnimation : {}}
@@ -187,6 +190,7 @@ export const FlickModeToggle = forwardRef<HTMLDivElement, FlickModeToggleProps>(
         {/* View All Votes toggle */}
         <div className="voting-heatmap-section">
           <motion.button
+            type="button"
             className={`heatmap-toggle ${isHeatmapActive ? 'active' : ''} ${!hasSelection ? 'disabled' : ''}`}
             onClick={handleHeatmapToggle}
             disabled={!hasSelection || isHeatmapLoading}

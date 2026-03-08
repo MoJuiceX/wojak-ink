@@ -57,6 +57,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
         <h2>{title}</h2>
         <p>{description}</p>
         <motion.button
+          type="button"
           className="feature-cta"
           onClick={onCTA}
           whileHover={!prefersReducedMotion ? { scale: 1.05, x: 5 } : {}}

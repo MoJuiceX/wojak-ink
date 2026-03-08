@@ -35,6 +35,7 @@ export function BattleModeSelector({ value, onChange, hasAgent, disabled, onCrea
 
           return (
             <motion.button
+              type="button"
               key={mode.id}
               className={`battle-mode-option ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`}
               onClick={() => {

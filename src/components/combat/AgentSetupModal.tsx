@@ -92,7 +92,7 @@ export function AgentSetupModal({ isOpen, onClose }: AgentSetupModalProps) {
                 </div>
                 <h2>{oneTimeApiKey ? 'Agent Created' : 'Create AI Agent'}</h2>
               </div>
-              <button className="agent-modal-close" onClick={handleClose}>
+              <button type="button" className="agent-modal-close" onClick={handleClose}>
                 <X size={16} />
               </button>
             </div>
@@ -168,6 +168,7 @@ export function AgentSetupModal({ isOpen, onClose }: AgentSetupModalProps) {
                         Your API Key
                       </span>
                       <motion.button
+                        type="button"
                         className="btn btn-ghost min-h-11 min-w-11"
                         style={{ padding: '8px 12px', fontSize: '0.8125rem' }}
                         onClick={handleCopyKey}
@@ -192,6 +193,7 @@ export function AgentSetupModal({ isOpen, onClose }: AgentSetupModalProps) {
                           Webhook Secret
                         </span>
                         <motion.button
+                          type="button"
                           className="btn btn-ghost min-h-11 min-w-11"
                           style={{ padding: '8px 12px', fontSize: '0.8125rem' }}
                           onClick={handleCopySecret}
@@ -223,10 +225,11 @@ export function AgentSetupModal({ isOpen, onClose }: AgentSetupModalProps) {
             <div className="agent-modal-footer">
               {!oneTimeApiKey ? (
                 <>
-                  <button className="btn btn-secondary flex-1" onClick={handleClose}>
+                  <button type="button" className="btn btn-secondary flex-1" onClick={handleClose}>
                     Cancel
                   </button>
                   <button
+                    type="button"
                     className="btn btn-primary flex-1"
                     onClick={handleCreate}
                     disabled={isLoading || agentName.length < 3}
@@ -235,7 +238,7 @@ export function AgentSetupModal({ isOpen, onClose }: AgentSetupModalProps) {
                   </button>
                 </>
               ) : (
-                <button className="btn btn-primary flex-1" onClick={handleClose}>
+                <button type="button" className="btn btn-primary flex-1" onClick={handleClose}>
                   I've Saved My Key
                 </button>
               )}

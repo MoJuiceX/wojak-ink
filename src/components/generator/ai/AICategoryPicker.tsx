@@ -40,6 +40,7 @@ export function AICategoryPicker({ currentImage }: AICategoryPickerProps) {
           const isDisabled = key === 'head' && isHeadDisabled;
           return (
             <motion.button
+              type="button"
               key={key}
               className={`ai-category-btn ${isEnhanced ? 'ai-category-btn--enhanced' : ''} ${isDisabled ? 'ai-category-btn--disabled' : ''}`}
               onClick={() => !isDisabled && selectCategory(key)}
@@ -51,7 +52,7 @@ export function AICategoryPicker({ currentImage }: AICategoryPickerProps) {
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xl ai-category-icon">{config.icon}</span>
                 <span className="font-semibold ai-category-text">{config.label}</span>
-                {isEnhanced && <span className="text-sm" style={{ color: 'var(--color-success)' }}>&#10003;</span>}
+                {isEnhanced && <span className="text-sm text-success">&#10003;</span>}
               </div>
               <p className="text-secondary text-xs">
                 {isDisabled

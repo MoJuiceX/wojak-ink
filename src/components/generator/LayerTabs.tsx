@@ -69,6 +69,7 @@ function LayerTab({
 
   return (
     <motion.button
+      type="button"
       className={`generator-layer-tab relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg flex-1 lg:flex-none lg:px-3 lg:py-2 lg:gap-1 lg:min-w-[60px]${isActive ? ' generator-layer-tab--active' : ''}${isBlocked ? ' generator-layer-tab--blocked' : ''}`}
       variants={prefersReducedMotion ? undefined : layerTabVariants}
       whileHover={isBlocked ? undefined : 'hover'}

@@ -217,7 +217,7 @@ export default function BootSequence({
   return (
     <div className={`boot-sequence ${isFading ? 'fade-out' : ''}`}>
       {showClickPrompt && (
-        <div className="boot-click-prompt" onClick={handleClickToStart}>
+        <button type="button" className="boot-click-prompt" onClick={handleClickToStart}>
           <div className="boot-click-prompt-content">
             <div className="boot-click-prompt-title">ℹ️</div>
             <div className="boot-click-prompt-message">
@@ -227,7 +227,7 @@ export default function BootSequence({
               Audio playback requires user interaction.
             </div>
           </div>
-        </div>
+        </button>
       )}
 
       {/* Skip Intro Button - always visible, subtle at bottom */}

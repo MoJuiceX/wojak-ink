@@ -340,6 +340,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 >
                   {filteredActiveGames.map((id, index) => (
                     <motion.button
+                      type="button"
                       key={id}
                       className={`game-option ${selectedGame === id ? 'selected' : ''}`}
                       initial={{ opacity: 0, x: -10 }}
@@ -358,6 +359,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                   )}
                   {filteredDisabledGames.map((id, index) => (
                     <motion.button
+                      type="button"
                       key={id}
                       className={`game-option disabled ${selectedGame === id ? 'selected' : ''}`}
                       initial={{ opacity: 0, x: -10 }}

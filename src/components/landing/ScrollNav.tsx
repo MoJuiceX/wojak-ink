@@ -29,6 +29,7 @@ export const ScrollNav: React.FC<ScrollNavProps> = ({
     <nav className="scroll-nav" aria-label="Page sections">
       {sections.map((section, index) => (
         <motion.button
+          type="button"
           key={section.id}
           className={`scroll-nav-dot ${activeSection === index ? 'active' : ''}`}
           onClick={() => onNavigate(index)}

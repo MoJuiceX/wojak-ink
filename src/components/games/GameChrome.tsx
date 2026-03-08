@@ -56,6 +56,7 @@ export const GameChrome: React.FC<GameChromeProps> = ({
       >
         {/* Back button */}
         <motion.button
+          type="button"
           className="chrome-btn"
           onClick={onBack}
           whileHover={prefersReducedMotion ? {} : { scale: 1.1 }}
@@ -72,6 +73,7 @@ export const GameChrome: React.FC<GameChromeProps> = ({
         <div className="chrome-controls">
           {showPause && (onPause || onResume) && (
             <motion.button
+              type="button"
               className="chrome-btn"
               onClick={handlePauseToggle}
               whileHover={prefersReducedMotion ? {} : { scale: 1.1 }}
@@ -83,6 +85,7 @@ export const GameChrome: React.FC<GameChromeProps> = ({
           )}
 
           <motion.button
+            type="button"
             className="chrome-btn"
             onClick={onToggleSound}
             whileHover={prefersReducedMotion ? {} : { scale: 1.1 }}

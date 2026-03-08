@@ -233,6 +233,7 @@ export function AccountSettings() {
             </p>
             <SignInButton mode="modal">
               <motion.button
+                type="button"
                 className="px-6 py-3 rounded-lg font-medium text-white"
                 style={{ background: 'var(--color-primary)' }}
                 whileHover={{ scale: 1.02 }}

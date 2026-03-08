@@ -46,6 +46,7 @@ function ClerkUserButton({ showLabel }: { showLabel: boolean }) {
       <SignedOut>
         <SignInButton mode="modal">
           <motion.button
+            type="button"
             className="flex items-center gap-3 px-3 py-2 rounded-lg w-full transition-colors text-secondary"
             whileHover={{
               background: 'var(--color-surface-hover)',
@@ -63,6 +64,7 @@ function ClerkUserButton({ showLabel }: { showLabel: boolean }) {
       {/* Signed In: Navigate to Account page */}
       <SignedIn>
         <motion.button
+          type="button"
           onClick={() => navigate('/account')}
           className="flex items-center gap-3 px-3 py-2 rounded-lg w-full transition-colors"
           style={{

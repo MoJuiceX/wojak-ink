@@ -72,12 +72,12 @@ export const DetailSelector = memo(function DetailSelector({
         {/* None option */}
         {allowNone && (
         <motion.button
+          type="button"
           className={`detail-option${!selectedOption ? ' detail-option--selected' : ''} w-14 h-14 rounded-lg overflow-hidden flex items-center justify-center`}
           whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
           whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
           onClick={() => onSelect(undefined)}
           title="None"
-          type="button"
         >
           <Ban
             size={20}
@@ -91,13 +91,13 @@ export const DetailSelector = memo(function DetailSelector({
           const isSelected = selectedOption === opt.file;
           return (
             <motion.button
+              type="button"
               key={opt.file}
               className={`detail-option${isSelected ? ' detail-option--selected' : ''} w-14 h-14 rounded-lg overflow-hidden relative`}
               whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
               whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
               onClick={() => onSelect(isSelected ? undefined : opt.file)}
               title={opt.name}
-              type="button"
             >
               {underlayImages ? (
                 <div

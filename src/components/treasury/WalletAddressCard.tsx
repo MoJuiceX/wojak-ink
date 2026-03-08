@@ -66,6 +66,7 @@ export function WalletAddressCard({ address, explorerUrl }: WalletAddressCardPro
 
           {/* Copy button (icon only) */}
           <motion.button
+            type="button"
             className="w-8 h-8 flex items-center justify-center rounded-lg flex-shrink-0"
             style={{
               background: copied ? 'rgba(34, 197, 94, 0.2)' : 'var(--color-surface)',
@@ -83,6 +84,7 @@ export function WalletAddressCard({ address, explorerUrl }: WalletAddressCardPro
 
           {/* SpaceScan button (icon only) */}
           <motion.button
+            type="button"
             className="w-8 h-8 flex items-center justify-center rounded-lg flex-shrink-0 text-secondary"
             style={{
               background: 'var(--color-surface)',

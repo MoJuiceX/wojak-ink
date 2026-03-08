@@ -105,6 +105,7 @@ export function BattleNftPickerModal({ isOpen, onClose, onQueue, nfts, loading }
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '12px' }}>
                   {nfts.map((nft, index) => (
                     <motion.button
+                      type="button"
                       key={nft.nftId}
                       className="card p-0"
                       style={{

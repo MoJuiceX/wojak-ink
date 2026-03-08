@@ -114,6 +114,7 @@ export function AICreditsShop() {
 
             return (
               <motion.button
+                type="button"
                 key={bundle.tier}
                 className={`ai-shop-bundle ${isSelected ? 'ai-shop-bundle--selected' : ''}`}
                 onClick={() => setSelectedTier(bundle.tier)}
@@ -163,18 +164,19 @@ export function AICreditsShop() {
 
         {/* Error / Success */}
         {purchaseError && (
-          <p className="text-sm text-center" style={{ color: 'var(--color-error)' }}>
+          <p className="text-sm text-center text-error">
             {purchaseError}
           </p>
         )}
         {purchaseSuccess && (
-          <p className="text-sm text-center" style={{ color: 'var(--color-success)' }}>
+          <p className="text-sm text-center text-success">
             {purchaseSuccess}
           </p>
         )}
 
         {/* Buy button */}
         <motion.button
+          type="button"
           className="btn btn-primary w-full"
           onClick={handlePurchase}
           disabled={isPurchasing || !selectedBundle}

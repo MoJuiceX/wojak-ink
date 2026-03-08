@@ -279,6 +279,7 @@ export function HeatmapRain({ votes, type, containerRef, onComplete }: HeatmapRa
       {/* Close button - more prominent */}
       {!isComplete && (
         <motion.button
+          type="button"
           className="heatmap-close-btn"
           onClick={onComplete}
           initial={{ opacity: 0, scale: 0.8 }}

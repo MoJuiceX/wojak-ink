@@ -167,6 +167,7 @@ function CombatArenaInner() {
         {/* Create Agent CTA (if no agent and connected) */}
         {!hasAgent && isConnected && ownerDid && (
           <motion.button
+            type="button"
             className="agent-action-row w-full"
             onClick={() => setShowAgentModal(true)}
             whileHover={{ scale: 1.01 }}

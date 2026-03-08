@@ -40,6 +40,7 @@ export function AgentDashboard({ onSettings }: AgentDashboardProps) {
         </div>
         <div className="flex items-center gap-1">
           <button
+            type="button"
             className="btn btn-ghost"
             style={{ padding: 6 }}
             onClick={() => refreshAgent()}
@@ -50,6 +51,7 @@ export function AgentDashboard({ onSettings }: AgentDashboardProps) {
           </button>
           {onSettings && (
             <button
+              type="button"
               className="btn btn-ghost"
               style={{ padding: 6 }}
               onClick={onSettings}

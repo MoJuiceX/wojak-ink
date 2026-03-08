@@ -130,6 +130,7 @@ export const NFTSelectionModal: React.FC<NFTSelectionModalProps> = ({
                 <div className="nft-grid">
                   {nfts.map((nft, index) => (
                     <motion.button
+                      type="button"
                       key={nft.id}
                       className={`nft-option ${selectedNft?.id === nft.id ? 'selected' : ''}`}
                       initial={{ opacity: 0, scale: 0.8 }}

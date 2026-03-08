@@ -97,6 +97,7 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
       {/* Action buttons */}
       <div className="grid grid-cols-2 gap-2 w-full md:flex md:gap-3 md:justify-center">
         <motion.button
+          type="button"
           className="btn btn-primary"
           onClick={handleAcceptAndDone}
           {...buttonMotion}
@@ -104,6 +105,7 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
           Accept &amp; Done
         </motion.button>
         <motion.button
+          type="button"
           className="btn btn-secondary"
           onClick={handleAcceptAndContinue}
           {...buttonMotion}
@@ -111,6 +113,7 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
           Accept &amp; Continue
         </motion.button>
         <motion.button
+          type="button"
           className="btn btn-ghost"
           onClick={handleRetry}
           disabled={isEnhancing || balance < 1}
@@ -119,6 +122,7 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
           {isEnhancing ? 'Retrying...' : 'Retry (1 credit)'}
         </motion.button>
         <motion.button
+          type="button"
           className="btn btn-ghost"
           onClick={handleReject}
           {...buttonMotion}

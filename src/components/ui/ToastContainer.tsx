@@ -53,6 +53,7 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onDismiss }) => {
           <p className="toast-message">{toast.message}</p>
           {toast.action && (
             <button
+              type="button"
               className="toast-action"
               onClick={() => {
                 toast.action?.onClick();
@@ -65,6 +66,7 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onDismiss }) => {
         </div>
 
         <button
+          type="button"
           className="toast-close"
           onClick={() => onDismiss(toast.id)}
           aria-label="Dismiss"

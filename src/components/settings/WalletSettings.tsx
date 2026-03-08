@@ -88,6 +88,7 @@ export function WalletSettings() {
               Connect your wallet to access Treasury and exclusive features
             </p>
             <motion.button
+              type="button"
               className="px-6 py-3 rounded-lg font-medium text-white"
               style={{
                 background: 'var(--color-primary)',

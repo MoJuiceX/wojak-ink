@@ -73,6 +73,7 @@ export const InlineError: React.FC<InlineErrorProps> = ({
         <span>{errorMessage}</span>
         {onRetry && (
           <button
+            type="button"
             className="inline-error-retry-mini"
             onClick={handleRetry}
             disabled={retrying}
@@ -110,6 +111,7 @@ export const InlineError: React.FC<InlineErrorProps> = ({
 
         {(showDetails || fallbackUrl) && (
           <button
+            type="button"
             className="inline-error-toggle"
             onClick={() => setShowDetails(!showDetails)}
             aria-label="Toggle details"
@@ -151,6 +153,7 @@ export const InlineError: React.FC<InlineErrorProps> = ({
       <div className="inline-error-actions">
         {onRetry && (
           <button
+            type="button"
             className="inline-error-retry"
             onClick={handleRetry}
             disabled={retrying}

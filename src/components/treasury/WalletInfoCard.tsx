@@ -102,6 +102,7 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
         </p>
         {onConnect && (
           <motion.button
+            type="button"
             className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             style={{
               background: 'var(--color-primary)',
@@ -172,6 +173,7 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
         <div className="flex gap-3">
           {/* Copy button */}
           <motion.button
+            type="button"
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors"
             style={{
               background: 'var(--color-white-6)',
@@ -211,6 +213,7 @@ export function WalletInfoCard({ wallet, onConnect, isLoading = false }: WalletI
 
           {/* Explorer button */}
           <motion.button
+            type="button"
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors text-secondary"
             style={{
               background: 'var(--color-white-6)',

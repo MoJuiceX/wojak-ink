@@ -152,6 +152,7 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
 
         {selectedCollection && (
           <motion.button
+            type="button"
             className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg transition-colors flex-shrink-0 text-accent"
             style={{
               background: 'var(--color-surface)',
@@ -215,6 +216,7 @@ export function NFTCollections({ collections, isLoading = false }: NFTCollection
             >
               {collections.map((collection, index) => (
                 <motion.button
+                  type="button"
                   key={collection.collectionId}
                   className="relative aspect-square rounded-lg overflow-hidden text-left"
                   style={{

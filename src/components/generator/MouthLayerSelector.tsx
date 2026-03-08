@@ -60,6 +60,7 @@ function ImageCard({ image, isSelected, isDisabled, disabledReason, onClick, bad
 
   return (
     <motion.button
+      type="button"
       className={`mouth-trait-card${isSelected ? ' mouth-trait-card--selected' : ''}${isDisabled ? ' mouth-trait-card--disabled' : ''} w-full aspect-square relative rounded-xl overflow-hidden p-1`}
       whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
       whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}
@@ -231,6 +232,7 @@ function G2MouthCard({ trait, isSelected, isDisabled, disabledReason, onClick }:
 
   return (
     <motion.button
+      type="button"
       className={`mouth-trait-card${isSelected ? ' mouth-trait-card--selected' : ''}${isDisabled ? ' mouth-trait-card--disabled' : ''} w-full aspect-square relative rounded-xl overflow-hidden p-1`}
       whileHover={prefersReducedMotion || isDisabled ? undefined : { scale: 1.03 }}
       whileTap={prefersReducedMotion || isDisabled ? undefined : { scale: 0.98 }}

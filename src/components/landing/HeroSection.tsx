@@ -152,15 +152,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </AnimatePresence>
         </div>
 
-        <motion.div
+        <motion.button
+          type="button"
           className="scroll-indicator-inline"
           animate={!prefersReducedMotion ? { y: [0, 8, 0] } : {}}
           transition={{ duration: 1.5, repeat: Infinity }}
           onClick={onExplore}
+          aria-label="Scroll to explore content"
         >
           <span>Scroll to Explore</span>
           <div className="scroll-arrow">↓</div>
-        </motion.div>
+        </motion.button>
       </motion.div>
     </>
   );

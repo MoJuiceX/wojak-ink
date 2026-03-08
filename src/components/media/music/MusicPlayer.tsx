@@ -179,6 +179,7 @@ export function MusicPlayer({ tracks }: MusicPlayerProps) {
 
         {/* Play/Pause button with animation */}
         <motion.button
+          type="button"
           className="flex items-center justify-center"
           style={{
             width: 48,

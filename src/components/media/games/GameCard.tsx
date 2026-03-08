@@ -76,6 +76,7 @@ export const GameCard = memo(function GameCard({
 
   return (
     <motion.button
+      type="button"
       className="relative flex flex-col items-center p-5 sm:p-4 rounded-xl text-center hover-lift glow-section"
       style={{ ...cardStyle, ...disabledStyle, cursor: isDisabled ? 'not-allowed' : 'pointer' }}
       data-vote-target={game.id}
