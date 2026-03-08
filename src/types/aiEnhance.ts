@@ -3,6 +3,23 @@
 export type AICategory = 'clothes' | 'head' | 'facewear' | 'background';
 export type AICategoryFreedom = 'enhance' | 'free';
 
+export type AIMode = 'enhance' | 'create_new';
+
+export interface AIPresetOption {
+  label: string;
+  prompt: string;
+}
+
+export interface AIStyleFamily {
+  label: string;
+  options: AIPresetOption[];
+}
+
+export interface AICategoryPresets {
+  enhance?: AIStyleFamily[];
+  create_new: AIStyleFamily[];
+}
+
 export interface AICategoryConfig {
   label: string;
   icon: string;
