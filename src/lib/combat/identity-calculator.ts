@@ -9,6 +9,7 @@ import { getNaturePointsForColor } from './data/color-nature-map';
 import { getDetailBonus, getLogoBonus } from './data/detail-combat-map';
 import { getNatureByStats } from './data/natures';
 import { getAbilitiesForType } from './data/abilities';
+import type { AICombatMapping } from './data/ai-combat-map';
 
 interface TraitInput {
   traitId: string;
@@ -20,6 +21,7 @@ interface IdentityInput {
   colors: Record<string, string>;   // traitId → hex color
   details: Record<string, string>;  // traitId → detail option name
   logoOption?: string;              // Astronaut coin logo name
+  aiEnhancements?: Record<string, AICombatMapping>;
 }
 
 export function calculateCombatIdentity(input: IdentityInput): CombatIdentity {
@@ -29,8 +31,24 @@ export function calculateCombatIdentity(input: IdentityInput): CombatIdentity {
   const statScores: Record<StatName, number> = {} as Record<StatName, number>;
   for (const s of STAT_NAMES) statScores[s] = 0;
 
-  // Source 1: Trait points
-  for (const { traitId } of input.traits) {
+  // Source 1: Trait points (with AI enhancement overrides)
+  const aiOverriddenLayers = new Set<string>();
+
+  if (input.aiEnhancements) {
+    for (const [layer, mapping] of Object.entries(input.aiEnhancements)) {
+      aiOverriddenLayers.add(layer);
+      typeScores[mapping.primaryType] += mapping.primaryPts;
+      if (mapping.secondaryType) {
+        typeScores[mapping.secondaryType] += mapping.secondaryPts;
+      }
+      if (mapping.natureStat) {
+        statScores[mapping.natureStat] += mapping.natureStatPts;
+      }
+    }
+  }
+
+  for (const { traitId, layer } of input.traits) {
+    if (aiOverriddenLayers.has(layer)) continue;
     const entry = getTraitCombat(traitId);
     if (!entry) continue;
     typeScores[entry.typePoints.primary] += entry.typePoints.primaryPts;

@@ -145,7 +145,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const [showOverflowMenu, setShowOverflowMenu] = useState(false);
   const overflowMenuRef = useRef<HTMLDivElement>(null);
   const lastRandomizeRef = useRef<number>(0);
-  const { openLightbox, creations, isAIEnhancedMode, enhancedImage, isLightboxOpen, isShopOpen } = useAIEnhance();
+  const { openLightbox, creations, isAIEnhancedMode, enhancedImage, isLightboxOpen, isShopOpen, acceptedOptions, acceptedFamilies, enhancedCategories } = useAIEnhance();
   const [showCreationsGallery, setShowCreationsGallery] = useState(false);
   const [canvasImageBase64, setCanvasImageBase64] = useState<string | null>(null);
 
@@ -226,12 +226,26 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       }
       const colorsForApi: Record<string, string> = { ...(selectedColors || {}) };
 
+      // Build AI attributes from accepted options
+      const aiData = isAIEnhancedMode && enhancedCategories.size > 0
+        ? {
+            aiEnhanced: true,
+            aiAttributes: Object.entries(acceptedOptions)
+              .filter(([, opt]) => opt != null)
+              .map(([category, opt]) => ({
+                category,
+                label: opt!.label,
+                familyLabel: (acceptedFamilies as Record<string, string>)[category] ?? '',
+              })),
+          }
+        : undefined;
+
       setIsMintModalOpen(true);
-      prepareMint(imageBlob, layersForApi, colorsForApi, effectiveMintType);
+      prepareMint(imageBlob, layersForApi, colorsForApi, effectiveMintType, aiData);
     } catch (err) {
       console.error('[ActionBar] Failed to prepare mint:', err);
     }
-  }, [isWalletConnected, canExport, has7Traits, selectedLayers, selectedColors, hasFreeMintsAvailable, mintType, connect, prepareMint, g2Selections, isAIEnhancedMode, enhancedImage]);
+  }, [isWalletConnected, canExport, has7Traits, selectedLayers, selectedColors, hasFreeMintsAvailable, mintType, connect, prepareMint, g2Selections, isAIEnhancedMode, enhancedImage, acceptedOptions, acceptedFamilies, enhancedCategories]);
 
   const handleEnhanceClick = useCallback(async () => {
     if (!canExport) return;

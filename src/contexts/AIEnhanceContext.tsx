@@ -49,6 +49,8 @@ export interface AIEnhanceContextValue {
   acceptResult: () => void;
   resetToLayers: () => void;
   isAIEnhancedMode: boolean;
+  acceptedOptions: Partial<Record<AICategory, AIPresetOption>>;
+  acceptedFamilies: Partial<Record<AICategory, string>>;
 
   // Creations gallery
   creations: AIEnhancement[];
@@ -92,6 +94,8 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   // AI Enhanced Mode
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
   const [enhancedCategories, setEnhancedCategories] = useState<Set<AICategory>>(new Set());
+  const [acceptedOptions, setAcceptedOptions] = useState<Partial<Record<AICategory, AIPresetOption>>>({});
+  const [acceptedFamilies, setAcceptedFamilies] = useState<Partial<Record<AICategory, string>>>({});
 
   // Creations
   const [creations, setCreations] = useState<AIEnhancement[]>([]);
@@ -225,16 +229,20 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
 
   // --- Accept result ---
   const acceptResult = useCallback(() => {
-    if (!currentResult) return;
+    if (!currentResult || !selectedOption) return;
     const imageData = `data:image/png;base64,${currentResult.imageBase64}`;
     setEnhancedImage(imageData);
     setEnhancedCategories((prev) => new Set([...prev, currentResult.category]));
-  }, [currentResult]);
+    setAcceptedOptions((prev) => ({ ...prev, [currentResult.category]: selectedOption }));
+    setAcceptedFamilies((prev) => ({ ...prev, [currentResult.category]: selectedFamily?.label ?? '' }));
+  }, [currentResult, selectedOption, selectedFamily]);
 
   // --- Reset ---
   const resetToLayers = useCallback(() => {
     setEnhancedImage(null);
     setEnhancedCategories(new Set());
+    setAcceptedOptions({});
+    setAcceptedFamilies({});
   }, []);
 
   const clearResult = useCallback(() => setCurrentResult(null), []);
@@ -303,6 +311,8 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     acceptResult,
     resetToLayers,
     isAIEnhancedMode,
+    acceptedOptions,
+    acceptedFamilies,
     creations,
     isLoadingCreations,
     fetchCreations,

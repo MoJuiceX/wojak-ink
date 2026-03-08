@@ -97,6 +97,8 @@ interface PendingMintParams {
   selectedLayers: Record<string, string>;
   selectedColors: Record<string, string>;
   mintType: 'free' | 'paid';
+  aiEnhanced?: boolean;
+  aiAttributes?: Array<{ category: string; label: string; familyLabel: string }>;
 }
 
 interface MintContextValue {
@@ -117,7 +119,8 @@ interface MintContextValue {
     imageBlob: Blob,
     selectedLayers: Record<string, string>,
     selectedColors: Record<string, string>,
-    mintType: 'free' | 'paid'
+    mintType: 'free' | 'paid',
+    aiData?: { aiEnhanced: boolean; aiAttributes: Array<{ category: string; label: string; familyLabel: string }> }
   ) => void;
   confirmMint: () => Promise<void>;
   confirmPayment: (launcherId: string) => Promise<void>;
@@ -173,12 +176,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
   const [traitPricing, setTraitPricing] = useState<Record<string, { usageCount: number; effectiveUsage: number; surchargeXch: number }>>({});
   const [top3Traits, setTop3Traits] = useState<Record<string, string[]>>({});
   const [mintingPaused, setMintingPaused] = useState(false);
-  const [pendingMintParams, setPendingMintParams] = useState<{
-    imageBlob: Blob;
-    selectedLayers: Record<string, string>;
-    selectedColors: Record<string, string>;
-    mintType: 'free' | 'paid';
-  } | null>(null);
+  const [pendingMintParams, setPendingMintParams] = useState<PendingMintParams | null>(null);
   const [customName, setCustomName] = useState('');
   const [idempotencyKey, setIdempotencyKey] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -595,9 +593,14 @@ export function MintProvider({ children }: { children: ReactNode }) {
       imageBlob: Blob,
       selectedLayers: Record<string, string>,
       selectedColors: Record<string, string>,
-      mintType: 'free' | 'paid'
+      mintType: 'free' | 'paid',
+      aiData?: { aiEnhanced: boolean; aiAttributes: Array<{ category: string; label: string; familyLabel: string }> }
     ) => {
-      setPendingMintParams({ imageBlob, selectedLayers, selectedColors, mintType });
+      setPendingMintParams({
+        imageBlob, selectedLayers, selectedColors, mintType,
+        aiEnhanced: aiData?.aiEnhanced,
+        aiAttributes: aiData?.aiAttributes,
+      });
       setIdempotencyKey(crypto.randomUUID());
       setMintStep('confirming');
       setErrorMessage(null);
@@ -634,6 +637,8 @@ export function MintProvider({ children }: { children: ReactNode }) {
           mintType: params.mintType,
           idempotencyKey: key,
           customName: customName.trim() || undefined,
+          aiEnhanced: params.aiEnhanced || undefined,
+          aiAttributes: params.aiAttributes || undefined,
         }),
       });
 

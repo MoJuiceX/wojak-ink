@@ -62,8 +62,8 @@ interface SubmitBody {
   // combatMoves removed — auto-assigned server-side in process.ts
   /** Whether this Wojak was AI-enhanced (adds AI metadata attributes) */
   aiEnhanced?: boolean;
-  /** AI edit details: [{ category: 'clothes', prompt: 'Add flame pattern' }, ...] */
-  aiAttributes?: Array<{ category: string; prompt: string }>;
+  /** AI edit details: [{ category: 'clothes', label: 'Tiger Stripes', familyLabel: 'Animal Prints' }, ...] */
+  aiAttributes?: Array<{ category: string; label: string; familyLabel?: string }>;
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {

@@ -26,6 +26,7 @@ import { calculateCombatIdentity } from '../../../src/lib/combat/identity-calcul
 import { assignMoves } from '../../../src/lib/combat/move-assigner';
 import { getMoveById } from '../../../src/lib/combat/data/moves';
 import { deriveCombatTraitIdFromPath } from '../../../src/lib/combat/selectionTraitId';
+import { lookupAICombat, type AICombatMapping } from '../../../src/lib/combat/data/ai-combat-map';
 
 // Re-export MintError for backwards compatibility (callers may import from process.ts)
 export { MintError };
@@ -134,6 +135,38 @@ export async function updateJobStep(db: D1Database, jobId: number, step: string)
   ).bind(step, jobId).run();
 }
 
+// ─── AI Combat Overrides ───
+
+function buildAICombatOverrides(
+  aiMetadataJson: string | null
+): Record<string, AICombatMapping> | undefined {
+  if (!aiMetadataJson) return undefined;
+  try {
+    const aiMeta = JSON.parse(aiMetadataJson) as {
+      aiEnhanced?: boolean;
+      aiAttributes?: Array<{ category: string; label?: string; familyLabel?: string }>;
+    };
+    if (!aiMeta.aiEnhanced || !Array.isArray(aiMeta.aiAttributes)) return undefined;
+
+    const categoryToLayer: Record<string, string> = {
+      clothes: 'Clothes',
+      head: 'Head',
+      background: 'Background',
+    };
+
+    const overrides: Record<string, AICombatMapping> = {};
+    for (const attr of aiMeta.aiAttributes) {
+      const layer = categoryToLayer[attr.category];
+      if (!layer || !attr.label) continue;
+      const mapping = lookupAICombat(attr.familyLabel ?? '', attr.label);
+      if (mapping) overrides[layer] = mapping;
+    }
+    return Object.keys(overrides).length > 0 ? overrides : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 // ─── Main Processor ───
 
 /**
@@ -207,10 +240,12 @@ export async function processJob(
         if (hex) combatColorMap[traitId] = hex;
       }
 
+      const aiCombatOverrides = buildAICombatOverrides(job.ai_metadata_json);
       const combatIdentity = calculateCombatIdentity({
         traits: combatTraitEntries,
         colors: combatColorMap,
         details: {},
+        aiEnhancements: aiCombatOverrides,
       });
 
       const combatMoveAssignment = assignMoves(combatIdentity);
@@ -222,25 +257,39 @@ export async function processJob(
         moves: combatMoveAssignment.valid ? combatMoveAssignment.moves : ['', '', '', ''],
       }));
 
-      // ── AI Enhancement attributes (only when AI-enhanced) ──
+      // ── AI Enhancement metadata (replaces trait values + adds combat overrides) ──
       if (job.ai_metadata_json) {
         try {
           const aiMeta = JSON.parse(job.ai_metadata_json) as {
             aiEnhanced?: boolean;
-            aiAttributes?: Array<{ category: string; prompt: string }>;
+            aiAttributes?: Array<{ category: string; label?: string; prompt?: string; familyLabel?: string }>;
           };
-          if (aiMeta.aiEnhanced && Array.isArray(aiMeta.aiAttributes)) {
-            attributes.push({ trait_type: 'AI Enhanced', value: 'Yes' });
+          if (aiMeta.aiEnhanced && Array.isArray(aiMeta.aiAttributes) && aiMeta.aiAttributes.length > 0) {
+            const categoryToTraitType: Record<string, string> = {
+              clothes: 'Clothes',
+              head: 'Head',
+              background: 'Background',
+              facewear: 'Face Wear',
+            };
+
             for (const attr of aiMeta.aiAttributes) {
-              if (attr.category && attr.prompt) {
-                const label = attr.category.charAt(0).toUpperCase() + attr.category.slice(1);
-                attributes.push({ trait_type: `AI ${label}`, value: attr.prompt });
+              if (!attr.category) continue;
+              const traitType = categoryToTraitType[attr.category];
+              const displayValue = attr.label || attr.prompt;
+              if (!traitType || !displayValue) continue;
+
+              const existing = attributes.find((a) => a.trait_type === traitType);
+              if (existing) {
+                existing.value = displayValue;
+              } else {
+                attributes.push({ trait_type: traitType, value: displayValue });
               }
             }
+
+            attributes.push({ trait_type: 'AI Enhanced', value: 'Yes' });
             attributes.push({ trait_type: 'AI Edits Count', value: String(aiMeta.aiAttributes.length) });
           }
         } catch {
-          // Malformed AI metadata — skip silently, don't block the mint
           console.warn(`[MintProcessor] Job ${jobId} has invalid ai_metadata_json, skipping AI attributes`);
         }
       }
@@ -580,10 +629,12 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
     if (hex) combatColorMap[traitId] = hex;
   }
 
+  const aiCombatOverrides = buildAICombatOverrides(job.ai_metadata_json);
   const identity = calculateCombatIdentity({
     traits: combatTraitEntries,
     colors: combatColorMap,
     details: {},
+    aiEnhancements: aiCombatOverrides,
   });
 
   // Auto-assign moves based on combat identity (3 damage + 1 status)
