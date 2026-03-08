@@ -12,6 +12,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import type { AvatarData } from '../constants/avatars';
 import { getRandomEmoji } from '../constants/avatars';
+import { safeStorage } from '@/utils/safeStorage';
 
 // Types
 export interface User {
@@ -70,8 +71,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const checkExistingSession = async () => {
     try {
-      const token = localStorage.getItem(AUTH_TOKEN_KEY);
-      const savedUserData = localStorage.getItem(USER_DATA_KEY);
+      const token = safeStorage.getItem(AUTH_TOKEN_KEY);
+      const savedUserData = safeStorage.getItem(USER_DATA_KEY);
 
       if (token && savedUserData) {
         // For now, use local storage as the source of truth
@@ -83,8 +84,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           const decoded = jwtDecode<{ exp?: number }>(token);
           if (decoded.exp && decoded.exp * 1000 < Date.now()) {
             // Token expired
-            localStorage.removeItem(AUTH_TOKEN_KEY);
-            localStorage.removeItem(USER_DATA_KEY);
+            safeStorage.removeItem(AUTH_TOKEN_KEY);
+            safeStorage.removeItem(USER_DATA_KEY);
             setIsLoading(false);
             return;
           }
@@ -96,8 +97,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     } catch (error) {
       console.error('Session check failed:', error);
-      localStorage.removeItem(AUTH_TOKEN_KEY);
-      localStorage.removeItem(USER_DATA_KEY);
+      safeStorage.removeItem(AUTH_TOKEN_KEY);
+      safeStorage.removeItem(USER_DATA_KEY);
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +111,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const decoded = jwtDecode<GoogleTokenPayload>(credential);
 
       // Check if user exists in local storage (simulating database)
-      const existingUsers = JSON.parse(localStorage.getItem('wojak_users') || '{}');
+      const existingUsers = safeStorage.getJSON<Record<string, User>>('wojak_users', {});
       const existingUser = existingUsers[decoded.sub];
 
       let userData: User;
@@ -143,11 +144,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       // Save to "database" (localStorage for now)
       existingUsers[decoded.sub] = userData;
-      localStorage.setItem('wojak_users', JSON.stringify(existingUsers));
+      safeStorage.setJSON('wojak_users', existingUsers);
 
       // Save session
-      localStorage.setItem(AUTH_TOKEN_KEY, credential);
-      localStorage.setItem(USER_DATA_KEY, JSON.stringify(userData));
+      safeStorage.setItem(AUTH_TOKEN_KEY, credential);
+      safeStorage.setJSON(USER_DATA_KEY, userData);
 
       setUser(userData);
       setIsNewUser(newUser);
@@ -160,8 +161,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const signOut = useCallback(() => {
-    localStorage.removeItem(AUTH_TOKEN_KEY);
-    localStorage.removeItem(USER_DATA_KEY);
+    safeStorage.removeItem(AUTH_TOKEN_KEY);
+    safeStorage.removeItem(USER_DATA_KEY);
     setUser(null);
     setIsNewUser(false);
   }, []);
@@ -171,7 +172,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       // Check if username is taken (in local storage for now)
-      const existingUsers = JSON.parse(localStorage.getItem('wojak_users') || '{}');
+      const existingUsers = safeStorage.getJSON<Record<string, User>>('wojak_users', {});
       const usernameLower = username.toLowerCase();
 
       for (const [googleId, userData] of Object.entries(existingUsers)) {
@@ -189,8 +190,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       // Save to "database"
       existingUsers[user.googleId] = updatedUser;
-      localStorage.setItem('wojak_users', JSON.stringify(existingUsers));
-      localStorage.setItem(USER_DATA_KEY, JSON.stringify(updatedUser));
+      safeStorage.setJSON('wojak_users', existingUsers);
+      safeStorage.setJSON(USER_DATA_KEY, updatedUser);
 
       setUser(updatedUser);
       return true;
@@ -210,10 +211,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       };
 
       // Save to "database"
-      const existingUsers = JSON.parse(localStorage.getItem('wojak_users') || '{}');
+      const existingUsers = safeStorage.getJSON<Record<string, User>>('wojak_users', {});
       existingUsers[user.googleId] = updatedUser;
-      localStorage.setItem('wojak_users', JSON.stringify(existingUsers));
-      localStorage.setItem(USER_DATA_KEY, JSON.stringify(updatedUser));
+      safeStorage.setJSON('wojak_users', existingUsers);
+      safeStorage.setJSON(USER_DATA_KEY, updatedUser);
 
       setUser(updatedUser);
     } catch (error) {
@@ -243,10 +244,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     // Save to "database"
-    const existingUsers = JSON.parse(localStorage.getItem('wojak_users') || '{}');
+    const existingUsers = safeStorage.getJSON<Record<string, User>>('wojak_users', {});
     existingUsers[user.googleId] = updatedUser;
-    localStorage.setItem('wojak_users', JSON.stringify(existingUsers));
-    localStorage.setItem(USER_DATA_KEY, JSON.stringify(updatedUser));
+    safeStorage.setJSON('wojak_users', existingUsers);
+    safeStorage.setJSON(USER_DATA_KEY, updatedUser);
 
     setUser(updatedUser);
   }, [user]);

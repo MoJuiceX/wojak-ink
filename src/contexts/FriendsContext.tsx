@@ -9,6 +9,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/clerkSafe';
 import { useUserProfile } from './UserProfileContext';
+import { safeStorage } from '@/utils/safeStorage';
 
 const FRIENDS_STORAGE_KEY = 'wojak_friends';
 
@@ -73,10 +74,9 @@ export function FriendsProvider({ children }: { children: React.ReactNode }) {
 
   // Save friends to localStorage (define before using in effects)
   const saveFriendsToStorage = useCallback((uid: string, friendIds: string[]) => {
-    const stored = localStorage.getItem(FRIENDS_STORAGE_KEY);
-    const allFriends = stored ? JSON.parse(stored) : {};
+    const allFriends = safeStorage.getJSON<Record<string, string[]>>(FRIENDS_STORAGE_KEY, {});
     allFriends[uid] = friendIds;
-    localStorage.setItem(FRIENDS_STORAGE_KEY, JSON.stringify(allFriends));
+    safeStorage.setJSON(FRIENDS_STORAGE_KEY, allFriends);
   }, []);
 
   // Load friends from database on mount, with localStorage fallback
@@ -115,16 +115,9 @@ export function FriendsProvider({ children }: { children: React.ReactNode }) {
       if (cancelled) return;
 
       // Fallback to localStorage
-      const stored = localStorage.getItem(FRIENDS_STORAGE_KEY);
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          const userFriends = parsed[currentUserId] || [];
-          setFriends(userFriends);
-        } catch (e) {
-          console.error('[Friends] Failed to parse stored friends:', e);
-        }
-      }
+      const allFriends = safeStorage.getJSON<Record<string, string[]>>(FRIENDS_STORAGE_KEY, {});
+      const userFriends = allFriends[currentUserId] || [];
+      setFriends(userFriends);
       setIsLoading(false);
     }
 

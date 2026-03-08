@@ -20,6 +20,7 @@ import { getRecentSales, type SaleRecord } from './salesDatabank';
 import { fetchCollectionStats } from './nftDataService';
 import { getCurrentXchPrice } from './historicalPriceService';
 import { loadWfpMetadataLite } from './wfpCollectionData';
+import { safeStorage } from '@/utils/safeStorage';
 
 // ============ Types for JSON Data ============
 
@@ -793,14 +794,14 @@ class BigPulpService implements IBigPulpService {
 
     // Get fallback values from localStorage
     const getFallbacks = () => ({
-      totalVolume: parseFloat(localStorage.getItem(FALLBACK_VOLUME_KEY) || '0'),
-      tradeCount: parseInt(localStorage.getItem(FALLBACK_TRADES_KEY) || '0', 10),
+      totalVolume: parseFloat(safeStorage.getItem(FALLBACK_VOLUME_KEY) || '0'),
+      tradeCount: parseInt(safeStorage.getItem(FALLBACK_TRADES_KEY) || '0', 10),
     });
 
     // Save successful values as fallbacks
     const saveFallbacks = (volume: number, trades: number) => {
-      if (volume > 0) localStorage.setItem(FALLBACK_VOLUME_KEY, String(volume));
-      if (trades > 0) localStorage.setItem(FALLBACK_TRADES_KEY, String(trades));
+      if (volume > 0) safeStorage.setItem(FALLBACK_VOLUME_KEY, String(volume));
+      if (trades > 0) safeStorage.setItem(FALLBACK_TRADES_KEY, String(trades));
     };
 
     // Fetch real listings, collection stats, and current XCH price in parallel

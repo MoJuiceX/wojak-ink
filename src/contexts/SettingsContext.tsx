@@ -23,6 +23,7 @@ import type {
   MotionPreference,
   AppSettings,
 } from '@/types/settings';
+import { safeStorage } from '@/utils/safeStorage';
 
 // Inline defaults (previously from settingsThemes.ts)
 const DEFAULT_SETTINGS: SettingsState = {
@@ -85,7 +86,7 @@ function loadSettings(): SettingsState {
   if (typeof window === 'undefined') return DEFAULT_SETTINGS;
 
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = safeStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
       return {
@@ -116,11 +117,7 @@ function loadSettings(): SettingsState {
 }
 
 function saveSettings(settings: SettingsState): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-  } catch {
-    // localStorage unavailable
-  }
+  safeStorage.setJSON(STORAGE_KEY, settings);
 }
 
 // ============ DOM Application Utilities ============

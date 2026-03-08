@@ -21,6 +21,7 @@ import {
   CAMEL_SPAWN_INTERVAL,
 } from './config';
 import './OrangeJuggle.game.css';
+import { safeStorage } from '@/utils/safeStorage';
 
 const JUGGLE_SPRITE = '/assets/Games/games_media/juggle.webp';
 const SAD_IMAGES = [
@@ -104,11 +105,11 @@ const OrangeJuggleGame: React.FC = () => {
   const bounceSoundRef = useRef<(() => void) | null>(null);
 
   const [highScore, setHighScore] = useState(() => {
-    return parseInt(localStorage.getItem('orangeJuggleHighScore') || '0', 10);
+    return parseInt(safeStorage.getItem('orangeJuggleHighScore') || '0', 10);
   });
   const [localLeaderboard, setLocalLeaderboard] = useState<LocalLeaderboardEntry[]>(() => {
     try {
-      return JSON.parse(localStorage.getItem('orangeJuggleLeaderboard') || '[]');
+      return JSON.parse(safeStorage.getItem('orangeJuggleLeaderboard') || '[]');
     } catch {
       return [];
     }
@@ -225,7 +226,7 @@ const OrangeJuggleGame: React.FC = () => {
 
     if (score > highScore) {
       setHighScore(score);
-      localStorage.setItem('orangeJuggleHighScore', String(score));
+      safeStorage.setItem('orangeJuggleHighScore', String(score));
     }
   };
 
@@ -247,7 +248,7 @@ const OrangeJuggleGame: React.FC = () => {
 
     if (score > highScore) {
       setHighScore(score);
-      localStorage.setItem('orangeJuggleHighScore', String(score));
+      safeStorage.setItem('orangeJuggleHighScore', String(score));
     }
   };
 
@@ -266,7 +267,7 @@ const OrangeJuggleGame: React.FC = () => {
       .slice(0, 10);
 
     setLocalLeaderboard(updated);
-    localStorage.setItem('orangeJuggleLeaderboard', JSON.stringify(updated));
+    safeStorage.setJSON('orangeJuggleLeaderboard', updated);
     setPlayerName('');
     setGameState('menu');
   };

@@ -9,6 +9,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { debounce } from '@/utils/debounce';
 import { useAuth } from '../../contexts/AuthContext';
 import { validateUsername, generateUsernameSuggestions } from '../../utils/validation';
+import { safeStorage } from '@/utils/safeStorage';
 import { Avatar } from '../Avatar/Avatar';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import './UsernamePicker.css';
@@ -43,7 +44,7 @@ export const UsernamePicker: React.FC<UsernamePickerProps> = ({
       try {
         // Simulate API call - in production, this would check against the backend
         // For now, we check localStorage for existing usernames
-        const existingUsers = JSON.parse(localStorage.getItem('wojak_users') || '{}');
+        const existingUsers = safeStorage.getJSON<Record<string, unknown>>('wojak_users', {});
         const isTaken = Object.values(existingUsers).some(
           (u: unknown) => (u as { username?: string }).username?.toLowerCase() === name.toLowerCase()
         );

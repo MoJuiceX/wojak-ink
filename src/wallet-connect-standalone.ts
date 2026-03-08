@@ -6,6 +6,7 @@
 
 import SignClient from '@walletconnect/sign-client';
 import { WalletConnectModal } from '@walletconnect/modal';
+import { safeStorage } from '@/utils/safeStorage';
 
 const PROJECT_ID = '500876ce87398e4721f71b6aa681a193';
 const CHIA_CHAIN = 'chia:mainnet';
@@ -83,10 +84,10 @@ async function connect() {
         : (result as { address?: string })?.address || '';
 
       if (address) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        safeStorage.setJSON(STORAGE_KEY, {
           topic: session.topic,
           address,
-        }));
+        });
         // Dispatch event so the page can react
         window.dispatchEvent(new CustomEvent('sage-wallet-connected', { detail: { address } }));
       }

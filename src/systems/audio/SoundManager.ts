@@ -12,6 +12,7 @@
  */
 
 import { type SoundName, type SoundDefinition, SOUND_DEFINITIONS } from './sounds';
+import { safeStorage } from '@/utils/safeStorage';
 
 interface SoundInstance {
   audio: HTMLAudioElement;
@@ -444,28 +445,24 @@ class SoundManagerClass {
       uiVolume: this.uiVolume,
       isMuted: this.isMuted
     };
-    try {
-      localStorage.setItem('wojak-sound-prefs', JSON.stringify(prefs));
-    } catch {
-      // localStorage might be unavailable
-    }
+    safeStorage.setJSON('wojak-sound-prefs', prefs);
   }
 
   /**
    * Load preferences from localStorage
    */
   private loadPreferences(): void {
-    try {
-      const saved = localStorage.getItem('wojak-sound-prefs');
-      if (saved) {
-        const prefs = JSON.parse(saved);
-        this.masterVolume = prefs.masterVolume ?? 1;
-        this.sfxVolume = prefs.sfxVolume ?? 1;
-        this.uiVolume = prefs.uiVolume ?? 1;
-        this.isMuted = prefs.isMuted ?? false;
-      }
-    } catch {
-      // Use defaults
+    const prefs = safeStorage.getJSON<{
+      masterVolume?: number;
+      sfxVolume?: number;
+      uiVolume?: number;
+      isMuted?: boolean;
+    } | null>('wojak-sound-prefs', null);
+    if (prefs) {
+      this.masterVolume = prefs.masterVolume ?? 1;
+      this.sfxVolume = prefs.sfxVolume ?? 1;
+      this.uiVolume = prefs.uiVolume ?? 1;
+      this.isMuted = prefs.isMuted ?? false;
     }
   }
 }

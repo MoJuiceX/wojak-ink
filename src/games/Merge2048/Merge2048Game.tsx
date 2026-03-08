@@ -22,6 +22,7 @@ import { useHaptic } from '@/hooks/useHaptic';
 import { useArcadeLights } from '@/contexts/ArcadeLightsContext';
 import type { GameEvent } from '@/config/arcade-light-mappings';
 import ArcadeGameOverScreen from '@/components/media/games/ArcadeGameOverScreen';
+import { safeStorage } from '@/utils/safeStorage';
 import { generateGameScorecard } from '@/systems/sharing/GameScorecard';
 import { captureGameArea } from '@/systems/sharing/captureDOM';
 import { getNftImageUrl as getCollectionNftImageUrl } from '@/services/constants';
@@ -294,7 +295,7 @@ const Merge2048Game: React.FC = () => {
   const [tiles, setTiles] = useState<Tile[]>([]);
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(() => {
-    const saved = localStorage.getItem('merge2048-best');
+    const saved = safeStorage.getItem('merge2048-best');
     return saved ? parseInt(saved, 10) : 0;
   });
   const [gameState, setGameState] = useState<GameState>('playing');
@@ -714,7 +715,7 @@ const Merge2048Game: React.FC = () => {
               const newScore = prev + scoreGain;
               setBestScore((best) => {
                 const updated = Math.max(best, newScore);
-                localStorage.setItem('merge2048-best', String(updated));
+                safeStorage.setItem('merge2048-best', String(updated));
                 return updated;
               });
               return newScore;

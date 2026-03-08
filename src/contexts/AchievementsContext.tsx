@@ -19,6 +19,7 @@ import type {
   UserAchievementProgress,
   AchievementStats,
 } from '@/types/achievement';
+import { safeStorage } from '@/utils/safeStorage';
 
 // LocalStorage keys (kept for stats only, not progress)
 const STATS_STORAGE_KEY = 'wojak_achievement_stats';
@@ -119,16 +120,8 @@ export function AchievementsProvider({ children }: { children: React.ReactNode }
 
   // Load owned items from localStorage
   const loadOwnedItemsCount = useCallback((): number => {
-    try {
-      const stored = localStorage.getItem(OWNED_ITEMS_KEY);
-      if (stored) {
-        const items = JSON.parse(stored);
-        return Array.isArray(items) ? items.length : 0;
-      }
-    } catch (e) {
-      console.error('[Achievements] Failed to load owned items:', e);
-    }
-    return 0;
+    const items = safeStorage.getJSON<unknown[]>(OWNED_ITEMS_KEY, []);
+    return Array.isArray(items) ? items.length : 0;
   }, []);
 
   // Load progress from server on mount
@@ -145,7 +138,7 @@ export function AchievementsProvider({ children }: { children: React.ReactNode }
     }
 
     // Load stats from localStorage (stats are local-only)
-    const storedStats = localStorage.getItem(STATS_STORAGE_KEY);
+    const storedStats = safeStorage.getItem(STATS_STORAGE_KEY);
     if (storedStats) {
       try {
         setStats(prev => ({ ...prev, ...JSON.parse(storedStats) }));
@@ -185,7 +178,7 @@ export function AchievementsProvider({ children }: { children: React.ReactNode }
   // Save stats to localStorage
   const saveStats = useCallback((newStats: AchievementStats) => {
     setStats(newStats);
-    localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(newStats));
+    safeStorage.setJSON(STATS_STORAGE_KEY, newStats);
   }, []);
 
   // Update stats from external sources

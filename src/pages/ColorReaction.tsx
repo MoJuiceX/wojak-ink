@@ -18,6 +18,7 @@ import { getComboTier, type GameEvent } from '@/config/arcade-light-mappings';
 import { useGameSounds } from '@/hooks/useGameSounds';
 import { GAME_OVER_SEQUENCE } from '@/lib/juice/brandConstants';
 import { createManagedAudio } from '@/utils/audioElement';
+import { safeStorage } from '@/utils/safeStorage';
 import {
   FRUITS,
   COLORS,
@@ -287,7 +288,7 @@ const ColorReaction: React.FC = () => {
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
   const [meetsMinimumActions, setMeetsMinimumActions] = useState(false);
   const [highScore, setHighScore] = useState(() => {
-    return parseInt(localStorage.getItem('colorReactionHighScore') || '0', 10);
+    return parseInt(safeStorage.getItem('colorReactionHighScore') || '0', 10);
   });
 
   // Arcade lights: React to game over (must be after highScore state is defined)
@@ -626,7 +627,7 @@ const ColorReaction: React.FC = () => {
     if (isNewBest) {
       setIsNewPersonalBest(true);
       setHighScore(finalScore);
-      localStorage.setItem('colorReactionHighScore', String(finalScore));
+      safeStorage.setItem('colorReactionHighScore', String(finalScore));
       playWojakChime();
     } else {
       setIsNewPersonalBest(false);

@@ -15,6 +15,7 @@ import { getSdkError } from '@walletconnect/utils';
 import type { SessionTypes, ProposalTypes } from '@walletconnect/types';
 
 import { isValidChiaAddress } from '@/lib/validation';
+import { safeStorage } from '@/utils/safeStorage';
 import {
   ChiaMethod,
   CHIA_CHAIN,
@@ -160,7 +161,7 @@ export function useSageWalletStandalone(
       metadata: sess.peer?.metadata,
     });
     
-    localStorage.setItem(config.storageKey, JSON.stringify({ topic: sess.topic, address: addr }));
+    safeStorage.setJSON(config.storageKey, { topic: sess.topic, address: addr });
     config.onConnect?.(addr);
     
     return addr;
@@ -173,7 +174,7 @@ export function useSageWalletStandalone(
     setAddress('');
     setSession(null);
     setError(null);
-    localStorage.removeItem(config.storageKey);
+    safeStorage.removeItem(config.storageKey);
     config.onDisconnect?.();
   }, [config.storageKey, config.onDisconnect]); // eslint-disable-line react-hooks/exhaustive-deps
   

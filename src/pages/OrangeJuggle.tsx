@@ -9,6 +9,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { GameSEO } from '@/components/seo/GameSEO';
 import { ArcadeGameOverScreen } from '@/components/media/games/ArcadeGameOverScreen';
 // import { useMedia } from '@/contexts/MediaContext'; // Temporarily disabled
+import { safeStorage } from '@/utils/safeStorage';
 import './OrangeJuggle.css';
 
 
@@ -163,7 +164,7 @@ const OrangeJuggle: React.FC = () => {
 
   // High scores and leaderboard
   const [highScore, setHighScore] = useState(() => {
-    return parseInt(localStorage.getItem('orangeJuggleHighScore') || '0', 10);
+    return parseInt(safeStorage.getItem('orangeJuggleHighScore') || '0', 10);
   });
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
@@ -1133,7 +1134,7 @@ const OrangeJuggle: React.FC = () => {
               setGameState('saveScore');
               if (currentScore > highScore) {
                 setHighScore(currentScore);
-                localStorage.setItem('orangeJuggleHighScore', String(currentScore));
+                safeStorage.setItem('orangeJuggleHighScore', String(currentScore));
               }
             } else {
               hapticOJLevelComplete(); // Extended celebration burst
@@ -1161,7 +1162,7 @@ const OrangeJuggle: React.FC = () => {
             setGameState('saveScore'); // Still allow saving score
             if (currentScore > highScore) {
               setHighScore(currentScore);
-              localStorage.setItem('orangeJuggleHighScore', String(currentScore));
+              safeStorage.setItem('orangeJuggleHighScore', String(currentScore));
             }
           }
           return 0;

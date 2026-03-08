@@ -19,6 +19,7 @@ import {
   type ReactNode,
 } from 'react';
 import { LAYOUT } from '@/config/layout';
+import { safeStorage } from '@/utils/safeStorage';
 
 const SIDEBAR_PINNED_KEY = 'wojak-sidebar-pinned-state';
 const SCROLL_THRESHOLD = 10;
@@ -75,7 +76,7 @@ export function LayoutProvider({ children }: LayoutProviderProps) {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [sidebarPinnedState, setSidebarPinnedStateInternal] = useState<SidebarPinnedState>(() => {
     if (typeof window === 'undefined') return 'none';
-    const stored = localStorage.getItem(SIDEBAR_PINNED_KEY);
+    const stored = safeStorage.getItem(SIDEBAR_PINNED_KEY);
     if (stored === 'minimized' || stored === 'expanded') return stored;
     return 'none';
   });
@@ -101,11 +102,7 @@ export function LayoutProvider({ children }: LayoutProviderProps) {
   // Persist sidebar pinned state
   const setSidebarPinnedState = useCallback((state: SidebarPinnedState) => {
     setSidebarPinnedStateInternal(state);
-    try {
-      localStorage.setItem(SIDEBAR_PINNED_KEY, state);
-    } catch {
-      // localStorage may be unavailable
-    }
+    safeStorage.setItem(SIDEBAR_PINNED_KEY, state);
   }, []);
 
   // Handle window resize with debounce

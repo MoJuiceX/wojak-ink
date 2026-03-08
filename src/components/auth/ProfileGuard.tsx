@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react';
 import { useUserProfileOptional } from '@/contexts/UserProfileContext';
 import OnboardingModal from '@/components/auth/OnboardingModal';
+import { safeStorage } from '@/utils/safeStorage';
 
 // Check if Clerk is configured
 const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -31,7 +32,7 @@ export function ProfileGuard({ children }: ProfileGuardProps) {
     if (!userProfile.isSignedIn || !userProfile.isLoaded) return;
 
     // Check if user previously skipped onboarding
-    const wasSkipped = localStorage.getItem(ONBOARDING_SKIPPED_KEY) === 'true';
+    const wasSkipped = safeStorage.getItem(ONBOARDING_SKIPPED_KEY) === 'true';
 
     // Show onboarding modal if profile is incomplete and not skipped
     queueMicrotask(() => {
@@ -44,13 +45,13 @@ export function ProfileGuard({ children }: ProfileGuardProps) {
   }, [userProfile]);
 
   const handleSkip = () => {
-    localStorage.setItem(ONBOARDING_SKIPPED_KEY, 'true');
+    safeStorage.setItem(ONBOARDING_SKIPPED_KEY, 'true');
     setShowOnboarding(false);
   };
 
   const handleComplete = () => {
     // Clear skipped flag on successful completion
-    localStorage.removeItem(ONBOARDING_SKIPPED_KEY);
+    safeStorage.removeItem(ONBOARDING_SKIPPED_KEY);
     setShowOnboarding(false);
   };
 

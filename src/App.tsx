@@ -35,6 +35,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { GameLoading } from '@/components/games/GameLoading';
 import { GameErrorBoundary } from '@/components/games/GameError';
 import { getBootDestination, shouldSkipBootSequence } from '@/lib/bootNavigation';
+import { safeStorage } from '@/utils/safeStorage';
 // Lazy load all pages for code splitting
 const Gallery = lazy(() => import('./pages/Gallery'));
 const Treasury = lazy(() => import('./pages/Treasury'));
@@ -95,14 +96,8 @@ const hasSeenBoot = () => {
 
 // Check if user has permanently disabled boot sequence in settings
 const hasSkipBootSetting = () => {
-  try {
-    const stored = localStorage.getItem('wojak-settings');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return parsed?.app?.skipBootSequence === true;
-    }
-  } catch { /* intentionally empty */ }
-  return false;
+  const parsed = safeStorage.getJSON<{ app?: { skipBootSequence?: boolean } }>('wojak-settings', {});
+  return parsed?.app?.skipBootSequence === true;
 };
 
 const markBootComplete = () => {

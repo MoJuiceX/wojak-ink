@@ -10,6 +10,7 @@
  */
 
 import { rateLimitedFetch } from '@/utils/rateLimiter';
+import { safeStorage } from '@/utils/safeStorage';
 
 // ============ Types ============
 
@@ -77,23 +78,15 @@ let priceCache: PriceCache = {
 };
 
 function loadCacheFromStorage(): void {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      priceCache = JSON.parse(stored);
-    }
-  } catch (error) {
-    console.warn('[PriceService] Failed to load cache:', error);
+  const stored = safeStorage.getJSON<typeof priceCache | null>(STORAGE_KEY, null);
+  if (stored) {
+    priceCache = stored;
   }
 }
 
 function saveCacheToStorage(): void {
-  try {
-    priceCache.lastUpdated = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(priceCache));
-  } catch (error) {
-    console.warn('[PriceService] Failed to save cache:', error);
-  }
+  priceCache.lastUpdated = new Date().toISOString();
+  safeStorage.setJSON(STORAGE_KEY, priceCache);
 }
 
 // ============ Date Helpers ============
@@ -480,5 +473,5 @@ export function clearPriceCache(): void {
     catXch: {},
     lastUpdated: '',
   };
-  localStorage.removeItem(STORAGE_KEY);
+  safeStorage.removeItem(STORAGE_KEY);
 }

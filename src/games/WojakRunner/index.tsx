@@ -16,6 +16,7 @@ import {
   SAD_IMAGES,
 } from './config';
 import './WojakRunner.game.css';
+import { safeStorage } from '@/utils/safeStorage';
 
 interface Obstacle {
   id: number;
@@ -58,11 +59,11 @@ const WojakRunnerGame: React.FC = () => {
   const [distance, setDistance] = useState(0);
   const [speed, setSpeed] = useState(5);
   const [highScore, setHighScore] = useState(() => {
-    return parseInt(localStorage.getItem('wojakRunnerHighScore') || '0', 10);
+    return parseInt(safeStorage.getItem('wojakRunnerHighScore') || '0', 10);
   });
   const [playerName, setPlayerName] = useState('');
   const [localLeaderboard, setLocalLeaderboard] = useState<LocalLeaderboardEntry[]>(() => {
-    const saved = localStorage.getItem('wojakRunnerLeaderboard');
+    const saved = safeStorage.getItem('wojakRunnerLeaderboard');
     return saved ? JSON.parse(saved) : [];
   });
   const [sadImage, setSadImage] = useState('');
@@ -152,7 +153,7 @@ const WojakRunnerGame: React.FC = () => {
       .slice(0, 10);
 
     setLocalLeaderboard(updatedLeaderboard);
-    localStorage.setItem('wojakRunnerLeaderboard', JSON.stringify(updatedLeaderboard));
+    safeStorage.setJSON('wojakRunnerLeaderboard', updatedLeaderboard);
     setPlayerName('');
     goToMenu();
   };
@@ -162,7 +163,7 @@ const WojakRunnerGame: React.FC = () => {
 
     if (finalScore > highScore) {
       setHighScore(finalScore);
-      localStorage.setItem('wojakRunnerHighScore', String(finalScore));
+      safeStorage.setItem('wojakRunnerHighScore', String(finalScore));
     }
 
     setScoreSubmitted(true);

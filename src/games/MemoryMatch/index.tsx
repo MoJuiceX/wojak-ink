@@ -17,6 +17,7 @@ import {
 } from './config';
 import { getNftImageUrl } from '@/services/constants';
 import { loadWfpMetadataLite } from '@/services/wfpCollectionData';
+import { safeStorage } from '@/utils/safeStorage';
 import './MemoryMatch.game.css';
 
 interface NFTMetadata {
@@ -76,12 +77,11 @@ const MemoryMatchGame: React.FC = () => {
   const [devMode, setDevMode] = useState(false);
 
   const [localLeaderboard, setLocalLeaderboard] = useState<LocalLeaderboardEntry[]>(() => {
-    const saved = localStorage.getItem('memoryMatchLeaderboard');
-    return saved ? JSON.parse(saved) : [];
+    return safeStorage.getJSON<LocalLeaderboardEntry[]>('memoryMatchLeaderboard', []);
   });
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [highScore, setHighScore] = useState(() => {
-    return parseInt(localStorage.getItem('memoryMatchHighScore') || '0', 10);
+    return parseInt(safeStorage.getItem('memoryMatchHighScore') || '0', 10);
   });
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
   const [showLeaderboardPanel, setShowLeaderboardPanel] = useState(false);
@@ -285,7 +285,7 @@ const MemoryMatchGame: React.FC = () => {
       .slice(0, 10);
 
     setLocalLeaderboard(updatedLeaderboard);
-    localStorage.setItem('memoryMatchLeaderboard', JSON.stringify(updatedLeaderboard));
+    safeStorage.setJSON('memoryMatchLeaderboard', updatedLeaderboard);
     setPlayerName('');
     goToMenu();
   };
@@ -295,7 +295,7 @@ const MemoryMatchGame: React.FC = () => {
 
     if (finalScore > highScore) {
       setHighScore(finalScore);
-      localStorage.setItem('memoryMatchHighScore', String(finalScore));
+      safeStorage.setItem('memoryMatchHighScore', String(finalScore));
     }
 
     setScoreSubmitted(true);

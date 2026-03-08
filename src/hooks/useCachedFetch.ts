@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { safeStorage } from '@/utils/safeStorage';
 
 interface CacheEntry<T> {
   data: T;
@@ -85,29 +86,18 @@ function getCachedData<T>(
 
   // Check localStorage fallback
   if (useLocalStorage) {
-    try {
-      const stored = localStorage.getItem(cacheKey);
-      if (stored) {
-        const parsed = JSON.parse(stored) as CacheEntry<T>;
-        if (isCacheValid(parsed)) {
-          // Restore to memory cache
-          memoryCache.set(cacheKey, parsed);
-          return parsed.data;
-        }
-      }
-    } catch {
-      // Silently fail
+    const parsed = safeStorage.getJSON<CacheEntry<T> | null>(cacheKey, null);
+    if (parsed && isCacheValid(parsed)) {
+      // Restore to memory cache
+      memoryCache.set(cacheKey, parsed);
+      return parsed.data;
     }
   }
 
   // Cache expired or missing
   memoryCache.delete(cacheKey);
   if (useLocalStorage) {
-    try {
-      localStorage.removeItem(cacheKey);
-    } catch {
-      // Silently fail
-    }
+    safeStorage.removeItem(cacheKey);
   }
 
   return null;
@@ -133,11 +123,7 @@ function setCachedData<T>(
 
   // Store in localStorage
   if (useLocalStorage) {
-    try {
-      localStorage.setItem(cacheKey, JSON.stringify(entry));
-    } catch (e) {
-      console.warn('Failed to store in localStorage:', e);
-    }
+    safeStorage.setJSON(cacheKey, entry);
   }
 }
 
@@ -362,11 +348,7 @@ export function useCachedFetch<T>(
     // Clear cache
     memoryCache.delete(cacheKey);
     if (useLocalStorage) {
-      try {
-        localStorage.removeItem(cacheKey);
-      } catch {
-        // Silently fail
-      }
+      safeStorage.removeItem(cacheKey);
     }
 
     // Remove from in-flight tracking

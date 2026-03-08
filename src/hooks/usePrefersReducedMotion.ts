@@ -9,6 +9,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { safeStorage } from '@/utils/safeStorage';
 
 /**
  * Hook for detecting reduced motion preference
@@ -85,14 +86,10 @@ export function setAppReducedMotion(enabled: boolean): void {
   }
 
   // Persist to localStorage
-  try {
-    if (enabled) {
-      localStorage.setItem('reduced-motion', 'true');
-    } else {
-      localStorage.removeItem('reduced-motion');
-    }
-  } catch {
-    // localStorage may not be available
+  if (enabled) {
+    safeStorage.setItem('reduced-motion', 'true');
+  } else {
+    safeStorage.removeItem('reduced-motion');
   }
 }
 
@@ -101,13 +98,9 @@ export function setAppReducedMotion(enabled: boolean): void {
  * Call this once during app startup
  */
 export function initReducedMotion(): void {
-  try {
-    const stored = localStorage.getItem('reduced-motion');
-    if (stored === 'true') {
-      document.documentElement.setAttribute('data-reduced-motion', 'true');
-    }
-  } catch {
-    // localStorage may not be available
+  const stored = safeStorage.getItem('reduced-motion');
+  if (stored === 'true') {
+    document.documentElement.setAttribute('data-reduced-motion', 'true');
   }
 }
 

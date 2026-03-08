@@ -12,6 +12,7 @@
  */
 
 import type { HeatMapCell } from '@/types/bigpulp';
+import { safeStorage } from '@/utils/safeStorage';
 
 // ============ Types ============
 
@@ -61,17 +62,13 @@ export function saveHeatmapToCache(
     labels: string[];
   }
 ): void {
-  try {
-    const cached: CachedHeatmapData = {
-      version: CACHE_VERSION,
-      data,
-      timestamp: Date.now(),
-      priceBinConfig: priceBinConfig || extractPriceBinConfig(data),
-    };
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cached));
-  } catch (error) {
-    console.warn('[HeatmapCache] Failed to save to cache:', error);
-  }
+  const cached: CachedHeatmapData = {
+    version: CACHE_VERSION,
+    data,
+    timestamp: Date.now(),
+    priceBinConfig: priceBinConfig || extractPriceBinConfig(data),
+  };
+  safeStorage.setJSON(CACHE_KEY, cached);
 }
 
 /**
@@ -106,31 +103,23 @@ function extractPriceBinConfig(data: HeatMapCell[][]): CachedHeatmapData['priceB
  * Returns null if no cache, expired, or schema mismatch
  */
 export function loadHeatmapFromCache(): CachedHeatmapData | null {
-  try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (!raw) return null;
+  const cached = safeStorage.getJSON<CachedHeatmapData | null>(CACHE_KEY, null);
+  if (!cached) return null;
 
-    const cached: CachedHeatmapData = JSON.parse(raw);
-
-    // Check schema version
-    if (cached.version !== CACHE_VERSION) {
-      clearHeatmapCache();
-      return null;
-    }
-
-    // Check if completely expired (24 hours)
-    const age = Date.now() - cached.timestamp;
-    if (age > EXPIRY_THRESHOLD_MS) {
-      clearHeatmapCache();
-      return null;
-    }
-
-    return cached;
-  } catch (error) {
-    console.warn('[HeatmapCache] Failed to load from cache:', error);
+  // Check schema version
+  if (cached.version !== CACHE_VERSION) {
     clearHeatmapCache();
     return null;
   }
+
+  // Check if completely expired (24 hours)
+  const age = Date.now() - cached.timestamp;
+  if (age > EXPIRY_THRESHOLD_MS) {
+    clearHeatmapCache();
+    return null;
+  }
+
+  return cached;
 }
 
 /**
@@ -162,11 +151,7 @@ export function getCacheMetadata(cached: CachedHeatmapData | null): CacheMetadat
  * Clear the heatmap cache
  */
 export function clearHeatmapCache(): void {
-  try {
-    localStorage.removeItem(CACHE_KEY);
-  } catch (error) {
-    console.warn('[HeatmapCache] Failed to clear cache:', error);
-  }
+  safeStorage.removeItem(CACHE_KEY);
 }
 
 /**

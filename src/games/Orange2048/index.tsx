@@ -6,6 +6,7 @@ import { GameShell } from '@/systems/game-ui';
 import { useEffects, EffectsLayer } from '@/systems/effects';
 import { ORANGE_2048_CONFIG, GRID_SIZE, TILE_EMOJI } from './config';
 import './Orange2048.game.css';
+import { safeStorage } from '@/utils/safeStorage';
 
 type Grid = (number | null)[][];
 
@@ -20,7 +21,7 @@ const Orange2048Game: React.FC = () => {
   const [grid, setGrid] = useState<Grid>(() => createEmptyGrid());
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(() => {
-    return parseInt(localStorage.getItem('orange2048HighScore') || '0', 10);
+    return parseInt(safeStorage.getItem('orange2048HighScore') || '0', 10);
   });
   // Reserved for info modal: const [showInfo, setShowInfo] = useState(false);
 
@@ -151,7 +152,7 @@ const Orange2048Game: React.FC = () => {
 
     if (newScore > highScore) {
       setHighScore(newScore);
-      localStorage.setItem('orange2048HighScore', String(newScore));
+      safeStorage.setItem('orange2048HighScore', String(newScore));
     }
 
     // Check for 2048 win

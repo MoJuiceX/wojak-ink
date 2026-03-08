@@ -7,6 +7,8 @@
  * - Guess distribution (1-6 guesses)
  */
 
+import { safeStorage } from '@/utils/safeStorage';
+
 export interface WordleStats {
   gamesPlayed: number;
   gamesWon: number;
@@ -39,12 +41,12 @@ export function getDefaultStats(): WordleStats {
  * Returns defaults if missing or invalid
  */
 export function loadStats(): WordleStats {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) {
-      return getDefaultStats();
-    }
+  const stored = safeStorage.getItem(STORAGE_KEY);
+  if (!stored) {
+    return getDefaultStats();
+  }
 
+  try {
     const parsed = JSON.parse(stored);
 
     // Validate structure
@@ -81,11 +83,7 @@ export function loadStats(): WordleStats {
  * Save stats to localStorage
  */
 export function saveStats(stats: WordleStats): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
-  } catch (error) {
-    console.error('[Wordle Stats] Failed to save stats:', error);
-  }
+  safeStorage.setJSON(STORAGE_KEY, stats);
 }
 
 /**

@@ -4,7 +4,7 @@
  * Control buttons for randomize, undo/redo, save, export, and MINT.
  */
 
-import { useState, useCallback, useEffect, useRef, useLayoutEffect } from 'react';
+import { useState, useCallback, useEffect, useRef, useLayoutEffect, lazy } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
@@ -33,9 +33,12 @@ import { MintFlowModal } from './MintFlowModal';
 import { GeneratorInfo } from './GeneratorInfo';
 import { PricingLightbox } from './PricingLightbox';
 import { useAIEnhance } from '@/contexts/AIEnhanceContext';
-import { AIEnhanceLightbox } from './ai/AIEnhanceLightbox';
-import { AICreationsGallery } from './ai/AICreationsGallery';
-import { AICreditsShop } from './ai/AICreditsShop';
+import { safeStorage } from '@/utils/safeStorage';
+
+// Lazy-load AI components — only needed when user opens the AI wizard
+const AIEnhanceLightbox = lazy(() => import('./ai/AIEnhanceLightbox').then(m => ({ default: m.AIEnhanceLightbox })));
+const AICreationsGallery = lazy(() => import('./ai/AICreationsGallery').then(m => ({ default: m.AICreationsGallery })));
+const AICreditsShop = lazy(() => import('./ai/AICreditsShop').then(m => ({ default: m.AICreditsShop })));
 
 interface ActionBarProps {
   className?: string;
@@ -142,13 +145,13 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const [showOverflowMenu, setShowOverflowMenu] = useState(false);
   const overflowMenuRef = useRef<HTMLDivElement>(null);
   const lastRandomizeRef = useRef<number>(0);
-  const { openLightbox, creations, isAIEnhancedMode, enhancedImage } = useAIEnhance();
+  const { openLightbox, creations, isAIEnhancedMode, enhancedImage, isLightboxOpen, isShopOpen } = useAIEnhance();
   const [showCreationsGallery, setShowCreationsGallery] = useState(false);
   const [canvasImageBase64, setCanvasImageBase64] = useState<string | null>(null);
 
   // First-visit: auto-open How It Works modal
   useEffect(() => {
-    const seen = localStorage.getItem('wojak_generator_seen');
+    const seen = safeStorage.getItem('wojak_generator_seen');
     if (!seen) {
       const timer = setTimeout(() => {
         setIsFirstVisitInfo(true);
@@ -689,7 +692,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         onClose={() => {
           setShowGeneratorInfo(false);
           if (isFirstVisitInfo) {
-            localStorage.setItem('wojak_generator_seen', 'true');
+            safeStorage.setItem('wojak_generator_seen', 'true');
             setIsFirstVisitInfo(false);
           }
         }}
@@ -701,17 +704,29 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         onClose={() => setShowPricing(false)}
       />
 
-      {/* AI Enhance Lightbox */}
-      <AIEnhanceLightbox currentImage={canvasImageBase64} />
+      {/* AI Enhance Lightbox — lazy-loaded, mounted only when open */}
+      {isLightboxOpen && (
+        <Suspense fallback={null}>
+          <AIEnhanceLightbox currentImage={canvasImageBase64} />
+        </Suspense>
+      )}
 
-      {/* AI Creations Gallery */}
-      <AICreationsGallery
-        isOpen={showCreationsGallery}
-        onClose={() => setShowCreationsGallery(false)}
-      />
+      {/* AI Creations Gallery — lazy-loaded */}
+      {showCreationsGallery && (
+        <Suspense fallback={null}>
+          <AICreationsGallery
+            isOpen={showCreationsGallery}
+            onClose={() => setShowCreationsGallery(false)}
+          />
+        </Suspense>
+      )}
 
-      {/* AI Credits Shop */}
-      <AICreditsShop />
+      {/* AI Credits Shop — lazy-loaded */}
+      {isShopOpen && (
+        <Suspense fallback={null}>
+          <AICreditsShop />
+        </Suspense>
+      )}
     </div>
   );
 }

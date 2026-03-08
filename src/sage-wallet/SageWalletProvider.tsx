@@ -16,6 +16,7 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 import { isValidChiaAddress } from '@/lib/validation';
+import { safeStorage } from '@/utils/safeStorage';
 import { createSignClient, createWalletConnectModal } from './lazy-wallet-client';
 import type { SessionTypes, ProposalTypes } from '@walletconnect/types';
 
@@ -234,7 +235,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     }));
 
     // Save to localStorage
-    localStorage.setItem(config.storageKey, JSON.stringify({ topic: session.topic, address }));
+    safeStorage.setJSON(config.storageKey, { topic: session.topic, address });
     
     // Callback
     config.onConnect?.(address);
@@ -243,7 +244,7 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
 
   const handleDisconnect = useCallback(() => {
     currentSessionRef.current = null;
-    localStorage.removeItem(config.storageKey);
+    safeStorage.removeItem(config.storageKey);
     
     setState({
       status: 'disconnected',

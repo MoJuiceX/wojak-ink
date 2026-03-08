@@ -21,6 +21,7 @@ import {
   useRefreshPortfolio,
 } from '@/hooks/data/useTreasuryData';
 import type { NFTCollection } from '@/services/treasuryService';
+import { safeStorage } from '@/utils/safeStorage';
 
 // Actions
 type TreasuryAction =
@@ -158,8 +159,8 @@ export function TreasuryProvider({ children, mockData: _mockData = true }: Treas
 
   // Load preferences from localStorage
   useEffect(() => {
-    const savedSound = localStorage.getItem('treasury-sound');
-    const savedHaptics = localStorage.getItem('treasury-haptics');
+    const savedSound = safeStorage.getItem('treasury-sound');
+    const savedHaptics = safeStorage.getItem('treasury-haptics');
 
     if (savedSound !== null) {
       dispatch({ type: 'SET_SOUND_ENABLED', payload: savedSound === 'true' });
@@ -190,12 +191,12 @@ export function TreasuryProvider({ children, mockData: _mockData = true }: Treas
 
   // Preferences
   const setSoundEnabled = useCallback((enabled: boolean) => {
-    localStorage.setItem('treasury-sound', String(enabled));
+    safeStorage.setItem('treasury-sound', String(enabled));
     dispatch({ type: 'SET_SOUND_ENABLED', payload: enabled });
   }, []);
 
   const setHapticsEnabled = useCallback((enabled: boolean) => {
-    localStorage.setItem('treasury-haptics', String(enabled));
+    safeStorage.setItem('treasury-haptics', String(enabled));
     dispatch({ type: 'SET_HAPTICS_ENABLED', payload: enabled });
   }, []);
 

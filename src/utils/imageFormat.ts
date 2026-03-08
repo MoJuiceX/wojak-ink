@@ -4,6 +4,8 @@
  * Handle WebP/PNG fallback, IPFS URL caching, and format detection.
  */
 
+import { safeStorage } from '@/utils/safeStorage';
+
 const IPFS_CACHE_KEY = 'ipfs_url_cache';
 const IPFS_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -33,7 +35,7 @@ export function getCachedIPFSUrl(ipfsHash: string): string {
     gateway: gatewayUrl,
     timestamp: Date.now(),
   };
-  localStorage.setItem(IPFS_CACHE_KEY, JSON.stringify(cache));
+  safeStorage.setJSON(IPFS_CACHE_KEY, cache);
 
   return gatewayUrl;
 }
@@ -42,33 +44,24 @@ export function getCachedIPFSUrl(ipfsHash: string): string {
  * Get IPFS cache from localStorage
  */
 function getIPFSCache(): Record<string, CachedIPFSUrl> {
-  try {
-    const cached = localStorage.getItem(IPFS_CACHE_KEY);
-    return cached ? JSON.parse(cached) : {};
-  } catch {
-    return {};
-  }
+  return safeStorage.getJSON<Record<string, CachedIPFSUrl>>(IPFS_CACHE_KEY, {});
 }
 
 /**
  * Clear expired IPFS cache entries
  */
 export function cleanIPFSCache(): void {
-  try {
-    const cache = getIPFSCache();
-    const now = Date.now();
-    const cleaned: Record<string, CachedIPFSUrl> = {};
+  const cache = getIPFSCache();
+  const now = Date.now();
+  const cleaned: Record<string, CachedIPFSUrl> = {};
 
-    Object.entries(cache).forEach(([key, entry]) => {
-      if (now - entry.timestamp < IPFS_CACHE_TTL) {
-        cleaned[key] = entry;
-      }
-    });
+  Object.entries(cache).forEach(([key, entry]) => {
+    if (now - entry.timestamp < IPFS_CACHE_TTL) {
+      cleaned[key] = entry;
+    }
+  });
 
-    localStorage.setItem(IPFS_CACHE_KEY, JSON.stringify(cleaned));
-  } catch {
-    // Silently fail
-  }
+  safeStorage.setJSON(IPFS_CACHE_KEY, cleaned);
 }
 
 /**

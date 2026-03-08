@@ -13,6 +13,7 @@ import { useLeaderboard } from '@/hooks/data/useLeaderboard';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useGameEffects, GameEffects } from '@/components/media';
 import { useGameNavigationGuard } from '@/hooks/useGameNavigationGuard';
+import { safeStorage } from '@/utils/safeStorage';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { GameSEO } from '@/components/seo/GameSEO';
 import { ArcadeGameOverScreen } from '@/components/media/games/ArcadeGameOverScreen';
@@ -223,12 +224,12 @@ const OrangeSnake: React.FC = () => {
   // React state for UI
   const [score, setScore] = useState(STARTING_LENGTH);
   const [highScore, setHighScore] = useState(() => {
-    return parseInt(localStorage.getItem('orangeSnakeHighScore') || '0', 10);
+    return parseInt(safeStorage.getItem('orangeSnakeHighScore') || '0', 10);
   });
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(() => {
-    return localStorage.getItem('orangeSnakeSoundEnabled') !== 'false';
+    return safeStorage.getItem('orangeSnakeSoundEnabled') !== 'false';
   });
 
   const gameStartTimeRef = useRef<number>(0);
@@ -238,7 +239,7 @@ const OrangeSnake: React.FC = () => {
   const toggleSound = useCallback(() => {
     const newState = !soundEnabled;
     setSoundEnabled(newState);
-    localStorage.setItem('orangeSnakeSoundEnabled', String(newState));
+    safeStorage.setItem('orangeSnakeSoundEnabled', String(newState));
     hapticButton();
   }, [soundEnabled, hapticButton]);
 
@@ -533,7 +534,7 @@ const OrangeSnake: React.FC = () => {
 
     if (maxLength > highScore) {
       setHighScore(maxLength);
-      localStorage.setItem('orangeSnakeHighScore', String(maxLength));
+      safeStorage.setItem('orangeSnakeHighScore', String(maxLength));
       setIsNewPersonalBest(true);
     }
 

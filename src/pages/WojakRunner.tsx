@@ -16,6 +16,7 @@ import { captureGameArea } from '@/systems/sharing/captureDOM';
 import { generateGameScorecard } from '@/systems/sharing/GameScorecard';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { createManagedAudio } from '@/utils/audioElement';
+import { safeStorage } from '@/utils/safeStorage';
 import './WojakRunner.css';
 
 interface Obstacle {
@@ -111,13 +112,13 @@ const WojakRunner: React.FC = () => {
   const [distance, setDistance] = useState(0);
   const [speed, setSpeed] = useState(6); // Start moderate, gets harder over time
   const [highScore, setHighScore] = useState(() => {
-    return parseInt(localStorage.getItem('wojakRunnerHighScore') || '0', 10);
+    return parseInt(safeStorage.getItem('wojakRunnerHighScore') || '0', 10);
   });
   const [gameScreenshot, setGameScreenshot] = useState<string | null>(null);
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(() => {
-    return localStorage.getItem('wojakRunnerSoundEnabled') !== 'false';
+    return safeStorage.getItem('wojakRunnerSoundEnabled') !== 'false';
   });
 
   // Simple score popup state (backup if GameEffects doesn't work)
@@ -675,7 +676,7 @@ const WojakRunner: React.FC = () => {
             setGameState('gameover');
             if (finalScore > highScore) {
               setHighScore(finalScore);
-              localStorage.setItem('wojakRunnerHighScore', String(finalScore));
+              safeStorage.setItem('wojakRunnerHighScore', String(finalScore));
             }
           }
         }
