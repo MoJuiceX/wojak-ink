@@ -46,41 +46,41 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
     : { whileHover: { scale: 1.02 }, whileTap: { scale: 0.98 } };
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Images side-by-side (desktop) or stacked (mobile) */}
-      <div className="flex flex-col gap-4 md:flex-row md:gap-6 items-center">
+    <div className="flex flex-col gap-4 items-center">
+      {/* Side-by-side images */}
+      <div className="flex flex-col gap-4 md:flex-row md:gap-6 items-center justify-center">
         {/* Original */}
         {currentImage && (
-          <div className="flex-1 flex flex-col items-center">
+          <div className="flex flex-col items-center">
             <p className="ai-result-label mb-2">Original</p>
             <img
               src={currentImage}
               alt="Original Wojak"
-              className="w-48 h-48 md:w-64 md:h-64 object-contain"
+              className="w-48 h-48 md:w-56 md:h-56 object-contain"
               style={{ borderRadius: 'var(--radius-lg)' }}
             />
           </div>
         )}
 
         {/* AI Result */}
-        <div className="flex-1 flex flex-col items-center">
+        <div className="flex flex-col items-center">
           <p className="ai-result-label mb-2">AI Enhanced</p>
           <img
             src={resultImageSrc}
             alt="AI Enhanced Wojak"
-            className="w-48 h-48 md:w-64 md:h-64 object-contain"
+            className="w-48 h-48 md:w-56 md:h-56 object-contain"
             style={{ borderRadius: 'var(--radius-lg)' }}
           />
         </div>
       </div>
 
       {/* Prompt used */}
-      <p className="text-secondary text-xs text-center">
-        Prompt: &quot;{currentResult.prompt}&quot;
+      <p className="text-muted text-xs text-center">
+        &quot;{currentResult.prompt}&quot;
       </p>
 
       {/* Action buttons */}
-      <div className="grid grid-cols-2 gap-2 md:flex md:gap-3 md:justify-center">
+      <div className="grid grid-cols-2 gap-2 w-full md:flex md:gap-3 md:justify-center">
         <motion.button
           className="btn btn-primary"
           onClick={handleAcceptAndDone}
@@ -111,11 +111,6 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
           Reject
         </motion.button>
       </div>
-
-      {/* Credits remaining */}
-      <p className="text-muted text-xs text-center">
-        Credits remaining: {balance}
-      </p>
     </div>
   );
 }

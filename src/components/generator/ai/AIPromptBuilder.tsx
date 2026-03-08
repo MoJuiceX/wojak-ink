@@ -44,10 +44,10 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
     <div className="flex flex-col gap-4">
       {/* Category header */}
       <div className="flex items-center gap-2">
-        <span className="text-xl">{categoryConfig.icon}</span>
+        <span className="text-lg">{categoryConfig.icon}</span>
         <span className="font-semibold">{categoryConfig.label}</span>
-        <span className="text-secondary text-xs">
-          {categoryConfig.freedom === 'enhance' ? '(enhance existing)' : '(full freedom)'}
+        <span className="ai-shop-info-pill">
+          {categoryConfig.freedom === 'enhance' ? 'enhance existing' : 'full freedom'}
         </span>
       </div>
 

@@ -33,36 +33,31 @@ export function AILoadingState({ currentImage }: AILoadingStateProps) {
     : AI_LOADING_MESSAGES[messageIndex];
 
   return (
-    <div className="flex flex-col gap-4 md:flex-row items-center">
-      {/* Original image */}
-      {currentImage && (
-        <div className="flex-1 flex justify-center">
-          <div>
+    <div className="flex flex-col gap-4 items-center">
+      {/* Side-by-side images */}
+      <div className="flex flex-col gap-4 md:flex-row md:gap-6 items-center justify-center">
+        {/* Original */}
+        {currentImage && (
+          <div className="flex flex-col items-center">
             <p className="ai-result-label mb-2">Original</p>
             <img
               src={currentImage}
               alt="Original Wojak"
-              className="w-48 h-48 md:w-64 md:h-64 object-contain"
+              className="w-48 h-48 md:w-56 md:h-56 object-contain"
               style={{ borderRadius: 'var(--radius-lg)' }}
             />
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Shimmer placeholder */}
-      <div className="flex-1 flex justify-center">
-        <div>
+        {/* Shimmer placeholder */}
+        <div className="flex flex-col items-center">
           <p className="ai-result-label mb-2">AI Enhanced</p>
-          <div
-            className="ai-shimmer w-48 h-48 md:w-64 md:h-64"
-          />
+          <div className="ai-shimmer w-48 h-48 md:w-56 md:h-56" />
         </div>
       </div>
 
       {/* Rotating message */}
-      <div className="w-full text-center mt-2">
-        <p className="text-secondary text-sm">{currentMessage}</p>
-      </div>
+      <p className="text-secondary text-sm text-center">{currentMessage}</p>
     </div>
   );
 }

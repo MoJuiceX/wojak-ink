@@ -94,8 +94,8 @@ export function AICreditsShop() {
             const perCredit = bundle.priceXch / bundle.credits;
             const savings =
               bundle.credits > 1
-                ? (BASE_PRICE_PER_CREDIT * bundle.credits - bundle.priceXch).toFixed(2)
-                : null;
+                ? (BASE_PRICE_PER_CREDIT * bundle.credits - bundle.priceXch)
+                : 0;
 
             return (
               <motion.button
@@ -105,42 +105,41 @@ export function AICreditsShop() {
                 whileHover={prefersReducedMotion ? {} : { scale: 1.01 }}
                 whileTap={prefersReducedMotion ? {} : { scale: 0.99 }}
               >
-                {/* Left: credits + badge */}
+                {/* Left: credits number + label + badge inline */}
                 <div className="ai-shop-bundle-left">
                   <span className="ai-shop-bundle-credits">
                     {bundle.credits}
                   </span>
-                  <div className="flex flex-col">
-                    <span className="ai-shop-bundle-label">
-                      credit{bundle.credits !== 1 ? 's' : ''}
+                  <span className="ai-shop-bundle-label">
+                    credit{bundle.credits !== 1 ? 's' : ''}
+                  </span>
+                  {bundle.badge && (
+                    <span
+                      className={`ai-bundle-badge ${
+                        bundle.badge === 'POPULAR'
+                          ? 'ai-bundle-badge--popular'
+                          : 'ai-bundle-badge--value'
+                      }`}
+                    >
+                      {bundle.badge}
                     </span>
-                    {bundle.badge && (
-                      <span
-                        className={`ai-bundle-badge ${
-                          bundle.badge === 'POPULAR'
-                            ? 'ai-bundle-badge--popular'
-                            : 'ai-bundle-badge--value'
-                        }`}
-                      >
-                        {bundle.badge}
-                      </span>
-                    )}
-                  </div>
+                  )}
                 </div>
 
-                {/* Right: pricing details */}
+                {/* Right: price top, details bottom */}
                 <div className="ai-shop-bundle-right">
                   <span className="ai-shop-bundle-price">
                     {bundle.priceXch} XCH
                   </span>
-                  <span className="ai-shop-bundle-per-credit">
-                    {perCredit.toFixed(3)} XCH/credit
+                  <span className="ai-shop-bundle-details">
+                    {perCredit.toFixed(3)}/credit
+                    {bundle.discount && (
+                      <> &middot; <span className="ai-shop-bundle-discount">{bundle.discount}</span></>
+                    )}
+                    {savings > 0 && (
+                      <> &middot; <span className="ai-shop-bundle-savings">save {savings.toFixed(2)}</span></>
+                    )}
                   </span>
-                  {savings && Number(savings) > 0 && (
-                    <span className="ai-shop-bundle-savings">
-                      Save {savings} XCH
-                    </span>
-                  )}
                 </div>
               </motion.button>
             );
