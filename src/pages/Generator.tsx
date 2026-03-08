@@ -11,6 +11,7 @@ import './Generator.css';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { GeneratorProvider, useGenerator } from '@/contexts/GeneratorContext';
+import { useAIEnhance } from '@/contexts/AIEnhanceContext';
 import {
   PreviewWithControls,
   LayerTabs,
@@ -56,6 +57,7 @@ function GeneratorContent() {
   // Use 1024px breakpoint to match Generator.css media queries
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const { isInitialized, generatorError } = useGenerator();
+  const { isAIEnhancedMode, enhancedCategories, resetToLayers } = useAIEnhance();
   const [rightPanelMode, setRightPanelMode] = useState<RightPanelMode>('colors');
   const mobileScrollRef = useRef<HTMLDivElement>(null);
 
@@ -80,6 +82,22 @@ function GeneratorContent() {
   ) : (
     <>
       <div className="generator-content">
+        {isAIEnhancedMode && (
+          <div className="ai-enhanced-banner flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-accent font-semibold text-sm">AI Enhanced</span>
+              <span className="text-secondary text-xs">
+                {[...enhancedCategories].join(', ')}
+              </span>
+            </div>
+            <button
+              className="btn btn-ghost text-xs"
+              onClick={resetToLayers}
+            >
+              Reset to Layers
+            </button>
+          </div>
+        )}
         {/* Left: Preview Section */}
         <div className="generator-preview">
           {/* Category Tabs on top (both desktop and mobile) */}
