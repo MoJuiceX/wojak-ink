@@ -57,7 +57,7 @@ export function useFlickVoting(pageType: VotePageType) {
     } catch (error) {
       console.error('Failed to fetch vote counts:', error);
       // Fallback to localStorage cache
-      const cached = safeStorage.getJSON<Record<string, unknown>>(cacheKey(pageType), {});
+      const cached = safeStorage.getJSON<VoteStore>(cacheKey(pageType), {});
       if (Object.keys(cached).length > 0) setVotes(cached);
     }
   }, [pageType]);

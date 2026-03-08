@@ -103,6 +103,11 @@ async function main() {
   await build({
     configFile: false,
     publicDir: false,
+    resolve: {
+      alias: {
+        '@': path.join(repoRoot, 'src'),
+      },
+    },
     build: {
       emptyOutDir: false,
       outDir: assetsDir,
