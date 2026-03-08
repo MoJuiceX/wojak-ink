@@ -142,7 +142,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const [showOverflowMenu, setShowOverflowMenu] = useState(false);
   const overflowMenuRef = useRef<HTMLDivElement>(null);
   const lastRandomizeRef = useRef<number>(0);
-  const { openLightbox, isAIEnhancedMode, openShop, creations } = useAIEnhance();
+  const { openLightbox, creations } = useAIEnhance();
   const [showCreationsGallery, setShowCreationsGallery] = useState(false);
   const [canvasImageBase64, setCanvasImageBase64] = useState<string | null>(null);
 

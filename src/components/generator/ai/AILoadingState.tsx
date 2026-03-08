@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { AI_LOADING_MESSAGES } from '@/config/aiLoadingMessages';
 
 const MESSAGE_INTERVAL = 2500; // 2.5 seconds
@@ -11,7 +11,6 @@ interface AILoadingStateProps {
 export function AILoadingState({ currentImage }: AILoadingStateProps) {
   const [messageIndex, setMessageIndex] = useState(0);
   const [showFallback, setShowFallback] = useState(false);
-  const startTimeRef = useRef(Date.now());
 
   // Rotate messages
   useEffect(() => {
