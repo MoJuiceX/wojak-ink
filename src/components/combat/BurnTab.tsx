@@ -9,6 +9,7 @@ import { Flame, ExternalLink, AlertTriangle, Coins, Swords } from 'lucide-react'
 import { useOptionalGame } from '@/contexts/GameContext';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useToast } from '@/contexts/ToastContext';
+import { API_ENDPOINTS } from '@/services/constants';
 
 interface BurnableFighter {
   nftId: string;
@@ -107,7 +108,7 @@ function useCollection(did: string | null) {
     queryKey: ['collection', did],
     queryFn: async () => {
       if (!did) return { nfts: [] as CollectionNft[] };
-      const res = await fetch(`/api/game/collection?did=${encodeURIComponent(did)}`);
+      const res = await fetch(`${API_ENDPOINTS.gameCollection}?did=${encodeURIComponent(did)}`);
       if (!res.ok) throw new Error('Failed to load collection');
       const data = await res.json();
       return { nfts: (data.nfts ?? []).map((n: { nftId: string; editionNumber: number; name?: string; imageUri?: string | null }) => ({

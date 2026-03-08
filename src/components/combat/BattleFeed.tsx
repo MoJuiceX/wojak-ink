@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Play, ChevronDown } from 'lucide-react';
+import { API_ENDPOINTS } from '@/services/constants';
 
 interface BattleNft {
   id: string;
@@ -47,7 +48,7 @@ export function BattleFeed() {
 
   const fetchBattles = useCallback(async (currentOffset: number, append = false) => {
     try {
-      const res = await fetch(`/api/game/battle-list?status=history&limit=${limit}&offset=${currentOffset}`);
+      const res = await fetch(`${API_ENDPOINTS.gameBattleList}?status=history&limit=${limit}&offset=${currentOffset}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       const newBattles = data.battles ?? [];

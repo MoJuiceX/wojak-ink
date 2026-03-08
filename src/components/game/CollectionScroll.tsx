@@ -6,6 +6,7 @@ import { BurnButton } from './BurnButton';
 import { useSageWallet } from '@/sage-wallet';
 import { useGame } from '@/contexts/GameContext';
 import { calculateBurnCredits } from '@/lib/burnCredits';
+import { API_ENDPOINTS } from '@/services/constants';
 
 const FALLBACK_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' fill='%2312121a'%3E%3Crect width='200' height='200' rx='14'/%3E%3Ctext x='100' y='108' text-anchor='middle' fill='%23606070' font-size='14' font-family='system-ui'%3EImage unavailable%3C/text%3E%3C/svg%3E";
 
@@ -216,7 +217,7 @@ export function CollectionScroll({ did }: CollectionScrollProps) {
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/game/collection?did=${did}`)
+    fetch(`${API_ENDPOINTS.gameCollection}?did=${did}`)
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then(data => {
         if (!cancelled && data.success) setNfts(data.nfts);

@@ -28,6 +28,7 @@ import { useSageWallet } from '@/sage-wallet';
 import { fetchCollectionStats } from '@/services/tradeValuesService';
 import { useMetadataAttributes, type MetadataAttribute } from '@/components/generator/MetadataPreview';
 import { isValidChiaAddress } from '@/lib/validation';
+import { API_ENDPOINTS } from '@/services/constants';
 import {
   POLL_MAX_DURATION,
   POST_ACCEPT_WINDOW_MS,
@@ -189,7 +190,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
   const refetchCredits = useCallback(async () => {
     if (!address || !isValidChiaAddress(address)) return;
     try {
-      const res = await fetch(`/api/credits/balance?wallet=${encodeURIComponent(address)}`);
+      const res = await fetch(`${API_ENDPOINTS.creditsBalance}?wallet=${encodeURIComponent(address)}`);
       if (!res.ok) return;
       const data = await res.json();
       setCredits({
@@ -217,7 +218,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     const fetchPricing = () => {
-      fetch('/api/mint/pricing')
+      fetch(API_ENDPOINTS.mintPricing)
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (cancelled) return;

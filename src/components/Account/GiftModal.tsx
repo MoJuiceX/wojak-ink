@@ -11,6 +11,7 @@ import { X, Gift, Loader2, Send, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/lib/clerkSafe';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useFriends } from '@/contexts/FriendsContext';
+import { API_ENDPOINTS } from '@/services/constants';
 import './GiftModal.css';
 
 interface Friend {
@@ -91,7 +92,7 @@ export function GiftModal({
     const fetchItems = async () => {
       try {
         const token = await getToken();
-        const res = await fetch('/api/inventory', {
+        const res = await fetch(API_ENDPOINTS.inventory, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {

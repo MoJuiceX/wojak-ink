@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useGame } from '@/contexts/GameContext';
 import { useSageWallet } from '@/sage-wallet';
+import { API_ENDPOINTS } from '@/services/constants';
 import { GateChecklist } from '@/components/game/GateChecklist';
 import { PowerLevelDisplay } from '@/components/game/PowerLevelDisplay';
 import { OnboardingChecklist } from '@/components/game/OnboardingChecklist';
@@ -34,7 +35,7 @@ function DashboardContent() {
 
   useEffect(() => {
     if (isRegistered && player?.did) {
-      fetch(`/api/fight-club/my-score?did=${player.did}`)
+      fetch(`${API_ENDPOINTS.fightClubMyScore}?did=${player.did}`)
         .then(r => { if (!r.ok) throw new Error('Failed to fetch score'); return r.json(); })
         .then(data => {
           if (data.success) {

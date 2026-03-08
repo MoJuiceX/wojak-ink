@@ -10,6 +10,7 @@ import { X, ExternalLink, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { bech32m } from 'bech32';
 import { getNftImageUrl } from '../../services/marketApi';
+import { API_ENDPOINTS } from '@/services/constants';
 
 interface CollectionNFT {
   nftId: string;
@@ -113,7 +114,7 @@ export function DIDCollectionModal({ did, displayName, onClose }: DIDCollectionM
   const { data, isLoading, error } = useQuery<CollectionResponse>({
     queryKey: ['did-collection', did],
     queryFn: async () => {
-      const res = await fetch(`/api/game/collection?did=${encodeURIComponent(did)}`);
+      const res = await fetch(`${API_ENDPOINTS.gameCollection}?did=${encodeURIComponent(did)}`);
       if (!res.ok) throw new Error('Failed to fetch collection');
       return res.json();
     },

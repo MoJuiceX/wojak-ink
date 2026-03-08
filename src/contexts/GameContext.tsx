@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useClerkAuth } from '@/contexts/ClerkAuthContext';
+import { API_ENDPOINTS } from '@/services/constants';
 
 const SESSION_KEY = 'wojak_game_session';
 const GUEST_ID_KEY = 'wojak_guest_id';
@@ -199,7 +200,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!getToken) return;
       const token = await getToken();
       if (!token || cancelled) return;
-      const res = await fetch('/api/game/me', {
+      const res = await fetch(API_ENDPOINTS.gameMe, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
       const data = await res.json();
@@ -261,7 +262,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const linkDid = useCallback(async (did: string, walletAddress?: string) => {
     const headers = await getAuthHeaders();
-    const res = await fetch('/api/game/link-did', {
+    const res = await fetch(API_ENDPOINTS.gameLinkDid, {
       method: 'POST',
       headers,
       body: JSON.stringify({ did, walletAddress: walletAddress ?? '' }),

@@ -15,6 +15,7 @@ import { Loader2, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { useGenerator } from '@/contexts/GeneratorContext';
+import { API_ENDPOINTS } from '@/services/constants';
 
 interface PricingLightboxProps {
   isOpen: boolean;
@@ -382,7 +383,7 @@ export function PricingLightbox({ isOpen, onClose }: PricingLightboxProps) {
     setLoading(true);
     setError(null);
 
-    fetch('/api/mint/pricing')
+    fetch(API_ENDPOINTS.mintPricing)
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load pricing');
         return res.json();

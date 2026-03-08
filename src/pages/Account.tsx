@@ -30,6 +30,7 @@ import { DrawerEditor } from '@/components/Shop/DrawerEditor';
 import { GiftModal } from '@/components/Account/GiftModal';
 import type { InventoryItem } from '@/components/Account/InventorySection';
 
+import { API_ENDPOINTS } from '@/services/constants';
 import '@/components/Account/Account.css';
 import { PageSEO } from '@/components/seo';
 
@@ -77,7 +78,7 @@ export default function Account() {
     queryFn: async () => {
       const token = await getToken();
       if (!token) return null;
-      const res = await fetch('/api/game/me', {
+      const res = await fetch(API_ENDPOINTS.gameMe, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
       if (!res.ok) return null;
@@ -93,7 +94,7 @@ export default function Account() {
     queryKey: ['player-did', walletAddress],
     queryFn: async () => {
       if (!walletAddress) return null;
-      const res = await fetch(`/api/game/player?wallet=${encodeURIComponent(walletAddress)}`);
+      const res = await fetch(`${API_ENDPOINTS.gamePlayer}?wallet=${encodeURIComponent(walletAddress)}`);
       if (!res.ok) return null;
       const data = await res.json();
       return data.player?.did as string | null;
@@ -132,7 +133,7 @@ export default function Account() {
     setLinkingDid(true);
     try {
       const token = await getToken();
-      const res = await fetch('/api/game/link-did', {
+      const res = await fetch(API_ENDPOINTS.gameLinkDid, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -199,7 +200,7 @@ export default function Account() {
     setDisplayNameSaving(true);
     try {
       const token = await getToken();
-      const res = await fetch('/api/profile/display-name', {
+      const res = await fetch(API_ENDPOINTS.profileDisplayName, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -236,7 +237,7 @@ export default function Account() {
 
       try {
         const token = await getToken();
-        const res = await fetch('/api/shop/consumables', {
+        const res = await fetch(API_ENDPOINTS.shopConsumables, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -259,7 +260,7 @@ export default function Account() {
       return;
     }
     let cancelled = false;
-    fetch(`/api/profile/display-name?did=${encodeURIComponent(playerDid)}`)
+    fetch(`${API_ENDPOINTS.profileDisplayName}?did=${encodeURIComponent(playerDid)}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!cancelled && data) {
@@ -311,7 +312,7 @@ export default function Account() {
 
       try {
         const token = await getToken();
-        const res = await fetch('/api/inventory', {
+        const res = await fetch(API_ENDPOINTS.inventory, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -663,7 +664,7 @@ export default function Account() {
             // Refresh inventory after gifting
             try {
               const token = await getToken();
-              const res = await fetch('/api/inventory', {
+              const res = await fetch(API_ENDPOINTS.inventory, {
                 headers: { Authorization: `Bearer ${token}` },
               });
               if (res.ok) {

@@ -11,6 +11,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Loader2, Star, Sparkles, Coins, Wallet } from 'lucide-react';
 import { useSageWallet, SageConnectButton } from '@/sage-wallet';
+import { API_ENDPOINTS } from '@/services/constants';
 import { Lightbox } from '@/components/ui/Lightbox';
 
 interface LeaderboardEntry {
@@ -82,7 +83,7 @@ export function CreditLeaderboard({ isOpen, onClose }: CreditLeaderboardProps) {
       setUserCredits(null);
       return;
     }
-    fetch(`/api/credits/balance?wallet=${address}`)
+    fetch(`${API_ENDPOINTS.creditsBalance}?wallet=${address}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {

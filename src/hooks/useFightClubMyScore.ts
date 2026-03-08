@@ -3,6 +3,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useGame } from '@/contexts/GameContext';
+import { API_ENDPOINTS } from '@/services/constants';
 
 export interface MyScoreData {
     success: boolean;
@@ -26,7 +27,7 @@ export function useFightClubMyScore() {
         queryKey: ['fight-club-my-score', player?.did],
         queryFn: async (): Promise<MyScoreData> => {
             const params = player?.did ? `?did=${encodeURIComponent(player.did)}` : '';
-            const res = await fetch(`/api/fight-club/my-score${params}`);
+            const res = await fetch(`${API_ENDPOINTS.fightClubMyScore}${params}`);
             if (!res.ok) throw new Error('Failed to fetch');
             return res.json();
         },

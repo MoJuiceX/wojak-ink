@@ -10,6 +10,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useClerkAuth } from '@/contexts/ClerkAuthContext';
 import { createDefaultAvatar, type UserAvatar } from '@/types/avatar';
+import { API_ENDPOINTS } from '@/services/constants';
 
 // localStorage key for profile fallback
 const PROFILE_STORAGE_KEY = 'wojak_user_profile';
@@ -143,7 +144,7 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3000); // 3s timeout
 
-      const response = await authenticatedFetch('/api/profile', {
+      const response = await authenticatedFetch(API_ENDPOINTS.profile, {
         signal: controller.signal,
       }).finally(() => clearTimeout(timeoutId));
 
@@ -267,7 +268,7 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const response = await authenticatedFetch('/api/profile', {
+      const response = await authenticatedFetch(API_ENDPOINTS.profile, {
         method: 'POST',
         body: JSON.stringify(data),
         signal: controller.signal,

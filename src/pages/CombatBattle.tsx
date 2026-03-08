@@ -10,6 +10,7 @@ import { PageTransition } from '@/components/layout/PageTransition';
 import { BattleView } from '@/components/combat/BattleView';
 import { ArenaNav } from '@/components/combat/ArenaNav';
 import { useSageWallet } from '@/sage-wallet/SageWalletProvider';
+import { API_ENDPOINTS } from '@/services/constants';
 import { useState, useEffect } from 'react';
 
 export default function CombatBattle() {
@@ -28,7 +29,7 @@ export default function CombatBattle() {
       const ownerDid = dids[0];
 
       try {
-        const res = await fetch(`/api/combat/fighter?ownerDid=${encodeURIComponent(ownerDid)}`);
+        const res = await fetch(`${API_ENDPOINTS.combatFighter}?ownerDid=${encodeURIComponent(ownerDid)}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const fighters = data.fighters ?? [];

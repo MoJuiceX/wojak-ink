@@ -20,6 +20,7 @@ import { getBaseStats } from '@/lib/combat/data/base-stats';
 import { calculateHP } from '@/lib/combat/stat-calculator';
 import type { CombatType } from '@/lib/combat/types';
 import type { TurnResult } from '@/lib/combat/battle-state';
+import { API_ENDPOINTS } from '@/services/constants';
 
 // ── Interfaces ──────────────────────────────────────────────────────────────
 
@@ -168,7 +169,7 @@ export function BattleReplay({ battleId }: BattleReplayProps) {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`/api/combat/battle?id=${battleId}`);
+        const res = await fetch(`${API_ENDPOINTS.combatBattle}?id=${battleId}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (data.error) {

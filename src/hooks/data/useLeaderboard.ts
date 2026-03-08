@@ -13,6 +13,7 @@ import { useAuth } from '@/lib/clerkSafe';
 import { leaderboardKeys } from '@/config/query/queryKeys';
 import { DATA_CACHE_MAP } from '@/config/query/cacheConfig';
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch';
+import { API_ENDPOINTS } from '@/services/constants';
 import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useAchievements } from '@/contexts/AchievementsContext';
 
@@ -100,7 +101,7 @@ async function fetchLeaderboard(
   offset: number = 0
 ): Promise<LeaderboardResponse> {
   const response = await fetch(
-    `/api/leaderboard/${gameId}?limit=${limit}&offset=${offset}`
+    `${API_ENDPOINTS.leaderboard}/${gameId}?limit=${limit}&offset=${offset}`
   );
 
   if (!response.ok) {
@@ -165,7 +166,7 @@ export function useLeaderboard(gameId: string) {
       const idempotencyKey = crypto.randomUUID();
 
       try {
-        const response = await authenticatedFetch('/api/leaderboard/submit', {
+        const response = await authenticatedFetch(`${API_ENDPOINTS.leaderboard}/submit`, {
           method: 'POST',
           body: JSON.stringify({ gameId, score, level, metadata, idempotencyKey }),
         });

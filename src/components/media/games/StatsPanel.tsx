@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { BarChart3, Gamepad2, Trophy, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/lib/clerkSafe';
 import { GAME_NAMES, type GameId } from '@/types/leaderboard';
+import { API_ENDPOINTS } from '@/services/constants';
 
 // Check if Clerk is configured
 const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -50,7 +51,7 @@ export function StatsPanel() {
       }
 
       try {
-        const response = await fetch(`/api/scores/${userId}`);
+        const response = await fetch(`${API_ENDPOINTS.scores}/${userId}`);
         if (!response.ok) throw new Error('Failed to fetch');
 
         const data = await response.json();
