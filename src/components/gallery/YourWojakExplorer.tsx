@@ -239,8 +239,8 @@ function AttributesTab({ attributes }: { attributes: Array<{ trait_type: string;
 
   return (
     <div className="grid grid-cols-2 gap-3">
-      {attributes.map((trait, index) => (
-        <AttributeCard key={index} trait={trait} />
+      {attributes.map((trait) => (
+        <AttributeCard key={trait.trait_type} trait={trait} />
       ))}
     </div>
   );

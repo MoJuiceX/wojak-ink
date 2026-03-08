@@ -163,7 +163,7 @@ export function GuildMemberList({
               </div>
 
               {canManageMembers && member.role !== 'leader' && (
-                <button className="member-menu-button" type="button">⋮</button>
+                <button className="member-menu-button" type="button" aria-label="Member options">⋮</button>
               )}
             </div>
           );
@@ -175,9 +175,9 @@ export function GuildMemberList({
         <div className="action-menu-overlay" onClick={() => { setShowActionSheet(false); setSelectedMember(null); }}>
           <div className="action-menu" onClick={(e) => e.stopPropagation()}>
             <div className="action-menu-header">{selectedMember.username}</div>
-            {getActionSheetButtons().map((button, index) => (
+            {getActionSheetButtons().map((button) => (
               <button
-                key={index}
+                key={button.text}
                 type="button"
                 className={`action-menu-button ${button.role === 'destructive' ? 'destructive' : ''} ${button.role === 'cancel' ? 'cancel' : ''}`}
                 onClick={() => {

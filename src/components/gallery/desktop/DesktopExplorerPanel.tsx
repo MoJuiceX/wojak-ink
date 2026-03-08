@@ -301,8 +301,8 @@ function AttributesTab({
 }) {
   return (
     <div className="grid grid-cols-2 gap-3">
-      {nft.traits.map((trait, index) => (
-        <AttributeCard key={index} trait={trait} getTooltipData={getTooltipData} />
+      {nft.traits.map((trait) => (
+        <AttributeCard key={trait.category} trait={trait} getTooltipData={getTooltipData} />
       ))}
     </div>
   );

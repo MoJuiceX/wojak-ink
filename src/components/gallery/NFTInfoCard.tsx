@@ -354,12 +354,12 @@ function MetadataTabContent({ nft }: { nft: NFT }) {
   return (
     <>
       <div className="grid grid-cols-2 gap-2">
-        {nft.traits.map((trait, index) => {
+        {nft.traits.map((trait) => {
           const rankData = getTooltipData(trait.category, trait.value);
 
           return (
             <div
-              key={index}
+              key={trait.category}
               className={`trait-card p-3 ${getTraitRarityClass(trait.rarity)}`}
             >
               {/* Category label */}
