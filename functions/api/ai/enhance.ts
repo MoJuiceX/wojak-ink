@@ -6,10 +6,10 @@ import {
   buildConstrainedPrompt,
   AI_CATEGORIES,
 } from './_shared';
-import type { AIEnv, AICategory } from './_shared';
+import type { AIEnv, AICategory, AIMode } from './_shared';
 
 const REVE_EDIT_URL = 'https://api.reve.com/v1/image/edit';
-const MAX_PROMPT_LENGTH = 200;
+const MAX_PROMPT_LENGTH = 500;
 
 export const onRequest: PagesFunction<AIEnv> = async (context) => {
   const { request, env } = context;
@@ -23,6 +23,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     imageBase64?: string;
     category?: string;
     prompt?: string;
+    mode?: string;
     parentEnhancementId?: number;
     baseLayersJson?: string;
   };
@@ -32,7 +33,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     return errorResponse('Invalid JSON', 400);
   }
 
-  const { walletAddress, imageBase64, category, prompt, parentEnhancementId, baseLayersJson } = body;
+  const { walletAddress, imageBase64, category, prompt, mode, parentEnhancementId, baseLayersJson } = body;
 
   // --- Validate ---
   if (!walletAddress || walletAddress.length < 10) {
@@ -64,7 +65,8 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   }
 
   // --- Build constrained prompt ---
-  const constrainedPrompt = buildConstrainedPrompt(cat, trimmedPrompt);
+  const validMode: AIMode = (mode === 'enhance' || mode === 'create_new') ? mode : 'enhance';
+  const constrainedPrompt = buildConstrainedPrompt(cat, trimmedPrompt, validMode);
 
   // --- Call Reve Edit API ---
   let reveResponse: Response;
@@ -79,6 +81,9 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
       body: JSON.stringify({
         edit_instruction: constrainedPrompt,
         reference_image: imageBase64,
+        aspect_ratio: '1:1',
+        version: 'latest',
+        test_time_scaling: 1,
       }),
     });
   } catch (err) {
@@ -117,6 +122,11 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
 
   if (!reveData.image) {
     return errorResponse('AI service returned no image. Try again.', 502);
+  }
+
+  // Log actual Reve credit usage for cost tracking
+  if (reveData.credits_used) {
+    console.log(`Reve credits used: ${reveData.credits_used}, remaining: ${reveData.credits_remaining}, version: ${reveData.version}`);
   }
 
   // --- Save to R2 ---

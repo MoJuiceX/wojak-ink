@@ -52,21 +52,47 @@ export const AI_CATEGORIES: Record<AICategory, { label: string; icon: string; fr
   background: { label: 'Background', icon: '\u{1F5BC}', freedom: 'free' },
 };
 
-// --- Prompt Templates ---
+// --- Art Style Anchor ---
+// Concise style description for Reve's auto-enhancement to build on.
+// Kept short because Reve auto-enhances the edit_instruction internally.
 
-export const PROMPT_TEMPLATES: Record<AICategory, string> = {
-  clothes:
-    'Modify only the clothing in this illustration: {user_prompt}. Keep the same garment type and shape. Do not change the face, head, background, or illustration style.',
-  head:
-    'Modify only the headwear in this illustration: {user_prompt}. Keep the same hat type and shape. Do not change the face, clothing, background, or illustration style.',
-  facewear:
-    'Add to the character\'s face area: {user_prompt}. Maintain the line-art illustration style of the character.',
-  background:
-    'Replace the background of this illustration: {user_prompt}. Keep the character in the foreground exactly as-is. Do not modify the character.',
+const STYLE =
+  'Wojak meme-style illustration with thick black outlines, flat solid colors, no gradients, no shading, no photorealism.';
+
+// --- Prompt Templates ---
+// Now mode-aware: each category has templates for 'enhance' and/or 'create_new'.
+
+export type AIMode = 'enhance' | 'create_new';
+
+export const PROMPT_TEMPLATES: Record<AICategory, Partial<Record<AIMode, string>>> = {
+  clothes: {
+    enhance:
+      `${STYLE} Edit ONLY the clothing: {user_prompt}. Keep the same clothing shape and structure. Keep thick black outlines and flat color fills. Preserve all logos, emblems, and markings on other areas. Do not change face, head, skin, headwear, or background.`,
+    create_new:
+      `${STYLE} Replace the clothing entirely with: {user_prompt}. Keep thick black outlines and flat solid color fills. Keep the character's pose, face, skin, head, and background completely unchanged.`,
+  },
+  head: {
+    enhance:
+      `${STYLE} Edit ONLY the headwear: {user_prompt}. Keep the same headwear shape and structure. Keep thick black outlines and flat color fills. Preserve all logos, emblems, and markings on other areas. Do not change face, clothing, skin, or background.`,
+    create_new:
+      `${STYLE} Replace the headwear entirely with: {user_prompt}. Keep thick black outlines and flat solid color fills. Keep the character's face, clothing, skin, and background completely unchanged.`,
+  },
+  facewear: {
+    enhance:
+      `${STYLE} Edit ONLY the face accessory: {user_prompt}. Keep the same accessory shape and structure. Keep thick black outlines and flat color fills. Preserve all existing details on other areas. Do not change clothing, headwear, or background.`,
+    create_new:
+      `${STYLE} Add face accessory: {user_prompt}. Use thick black outlines and flat colors matching the illustration. Position naturally on the face, sitting under any hat brim. Preserve all existing details on other areas. Do not change clothing, headwear, or background.`,
+  },
+  background: {
+    create_new:
+      `${STYLE} Replace ONLY the background: {user_prompt}. Draw the background in the same flat cartoon illustration style with thick black outlines and solid color fills — no photorealism, no gradients, no realistic textures. Apply a very subtle soft-focus blur to the entire background for depth-of-field. Keep the center area mostly empty and clear so the character is unobstructed. Place scene details on the edges — top-left, top-right, left side, right side — with the middle open. Keep the character completely unchanged and sharp — same pose, outfit, colors, line-art. Preserve all details on the character.`,
+  },
 };
 
-export function buildConstrainedPrompt(category: AICategory, userPrompt: string): string {
-  return PROMPT_TEMPLATES[category].replace('{user_prompt}', userPrompt.trim());
+export function buildConstrainedPrompt(category: AICategory, userPrompt: string, mode: AIMode = 'enhance'): string {
+  const categoryTemplates = PROMPT_TEMPLATES[category];
+  const template = categoryTemplates[mode] ?? categoryTemplates.create_new ?? '';
+  return template.replace('{user_prompt}', userPrompt.trim());
 }
 
 // --- Env Bindings ---
