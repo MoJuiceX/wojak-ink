@@ -424,8 +424,8 @@ export function prefetchWalletData(): void {
   // Delay startup API calls by 15 seconds to avoid rate limits
   // This gives time for other more critical API calls to complete first
   setTimeout(() => {
-    fetchWalletData(true, true).catch(() => {
-      // Background prefetch failed silently - will use cached data
+    fetchWalletData(true, true).catch((err) => {
+      console.warn('[Treasury] Background prefetch failed, using cached data:', err);
     });
   }, 15000);
 }

@@ -29,7 +29,7 @@ export const RetryCard = memo<RetryCardProps>(({
       initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
     >
-      <span style={{ fontSize: 48 }}>{icon}</span>
+      <span className="text-5xl">{icon}</span>
       <p>{message}</p>
       <motion.button
         type="button"
@@ -55,14 +55,14 @@ export const NetworkError: React.FC<{ onRetry?: () => void }> = ({ onRetry }) =>
   return (
     <div className="network-error">
       <motion.div
+        className="text-5xl"
         animate={prefersReducedMotion ? {} : { y: [0, -10, 0] }}
         transition={{ duration: 2, repeat: Infinity }}
-        style={{ fontSize: 48 }}
       >
         📡
       </motion.div>
-      <h3 className="text-primary" style={{ margin: 0 }}>Connection Lost</h3>
-      <p className="text-secondary" style={{ margin: 0 }}>
+      <h3 className="text-primary m-0">Connection Lost</h3>
+      <p className="text-secondary m-0">
         Please check your internet connection
       </p>
       {onRetry && (

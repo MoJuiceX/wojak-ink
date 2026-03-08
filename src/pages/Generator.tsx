@@ -7,6 +7,7 @@
 
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, RotateCcw, Images, Wand2 } from 'lucide-react';
 import './Generator.css';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -24,6 +25,7 @@ import {
   GeneratorMobileColorPanel,
 } from '@/components/generator';
 import { MetadataPreview } from '@/components/generator/MetadataPreview';
+import { AICreationsGallery } from '@/components/generator/ai/AICreationsGallery';
 import { PageSEO } from '@/components/seo';
 
 type RightPanelMode = 'colors' | 'metadata';
@@ -33,11 +35,7 @@ function GeneratorErrorBanner() {
   if (!generatorError) return null;
   return (
     <div
-      className="card-static flex items-center justify-between gap-3 p-3 mb-4"
-      style={{
-        borderLeft: '4px solid var(--color-error)',
-        background: 'var(--color-error-10)',
-      }}
+      className="card-static card-error flex items-center justify-between gap-3 p-3 mb-4"
       role="alert"
     >
       <span className="text-secondary flex-1 text-sm">{generatorError}</span>
@@ -57,9 +55,10 @@ function GeneratorContent() {
   // Use 1024px breakpoint to match Generator.css media queries
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const { isInitialized, generatorError } = useGenerator();
-  const { isAIEnhancedMode, enhancedCategories, resetToLayers } = useAIEnhance();
+  const { isAIEnhancedMode, enhancedCategories, resetToLayers, openLightbox } = useAIEnhance();
   const [rightPanelMode, setRightPanelMode] = useState<RightPanelMode>('colors');
   const mobileScrollRef = useRef<HTMLDivElement>(null);
+  const [showCreationsGallery, setShowCreationsGallery] = useState(false);
 
   // Bottom nav now visible on generator — height calc in Generator.css accounts for it
 
@@ -67,8 +66,7 @@ function GeneratorContent() {
 
   const mainContent = hasError ? (
     <div
-      className="card-static p-6 text-center mb-4"
-      style={{ borderLeft: '4px solid var(--color-error)' }}
+      className="card-static card-error p-6 text-center mb-4"
     >
       <p className="text-secondary mb-2">The generator could not load. You can try refreshing the page.</p>
       <button
@@ -82,26 +80,10 @@ function GeneratorContent() {
   ) : (
     <>
       <div className="generator-content">
-        {isAIEnhancedMode && (
-          <div className="ai-enhanced-banner flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-accent font-semibold text-sm">AI Enhanced</span>
-              <span className="text-secondary text-xs">
-                {[...enhancedCategories].join(', ')}
-              </span>
-            </div>
-            <button
-              className="btn btn-ghost text-xs"
-              onClick={resetToLayers}
-            >
-              Reset to Layers
-            </button>
-          </div>
-        )}
         {/* Left: Preview Section */}
         <div className="generator-preview">
-          {/* Category Tabs on top (both desktop and mobile) */}
-          <div className="generator-categories">
+          {/* Category Tabs on top — locked in AI Enhanced mode */}
+          <div className={`generator-categories${isAIEnhancedMode ? ' generator-ai-locked' : ''}`}>
             <LayerTabs />
           </div>
 
@@ -122,12 +104,51 @@ function GeneratorContent() {
 
         </div>
 
-        {/* Right: Grid (3 cols) + Details/Colors panel (desktop) or grid + color box (mobile) */}
-        <div className="generator-options">
-          {/* Trait grid — scrollable box; on mobile shows at least 9 items (3x3) */}
-          <div className="generator-options-grid-container">
-            <TraitSelector />
+        {/* Right: Grid (3 cols) + Details/Colors panel — with AI overlay when enhanced */}
+        <div className={`generator-options${isAIEnhancedMode ? ' generator-options--ai-mode' : ''}`}>
+          {/* Grid wrapper — gives overlay a reference frame centered on the grid only */}
+          <div className="generator-options-grid-wrapper">
+            <div className="generator-options-grid-container">
+              <TraitSelector />
+            </div>
+
+            {/* AI Enhanced Mode overlay — centered on trait grid */}
+            {isAIEnhancedMode && (
+              <div className="generator-ai-overlay">
+                <div className="generator-ai-overlay-content">
+                  <Sparkles size={28} className="text-accent" />
+                  <h3 className="generator-ai-overlay-title">AI Enhanced</h3>
+                  <p className="text-secondary text-sm">
+                    {[...enhancedCategories].join(' \u00B7 ')}
+                  </p>
+                  <div className="flex flex-col gap-2 mt-3 w-full" style={{ maxWidth: 220 }}>
+                    <button
+                      className="btn btn-primary text-sm"
+                      onClick={openLightbox}
+                    >
+                      <Wand2 size={14} />
+                      <span>Continue Enhancing</span>
+                    </button>
+                    <button
+                      className="btn btn-secondary text-sm"
+                      onClick={() => setShowCreationsGallery(true)}
+                    >
+                      <Images size={14} />
+                      <span>AI Creations</span>
+                    </button>
+                    <button
+                      className="btn btn-ghost text-sm"
+                      onClick={resetToLayers}
+                    >
+                      <RotateCcw size={14} />
+                      <span>Reset to Layers</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
+
           {/* Mobile only: color picker and G2 panel in their own visible box below the grid */}
           {!isDesktop && <GeneratorMobileColorPanel />}
           {/* Desktop: 4th column = colors/details or metadata preview */}
@@ -164,6 +185,12 @@ function GeneratorContent() {
           )}
         </div>
       </div>
+
+      {/* AI Creations Gallery — opened from AI mode overlay */}
+      <AICreationsGallery
+        isOpen={showCreationsGallery}
+        onClose={() => setShowCreationsGallery(false)}
+      />
     </>
   );
 

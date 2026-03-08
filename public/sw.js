@@ -11,7 +11,7 @@
 const CACHE_NAME = 'wojak-games-v3';
 const STATIC_CACHE = 'wojak-static-v3';
 const DYNAMIC_CACHE = 'wojak-dynamic-v5';
-const LAYER_CACHE = 'wojak-layers-v1';
+const LAYER_CACHE = 'wojak-layers-v2';
 const NFT_IMAGE_CACHE = 'wojak-nft-images-v1';
 const NFT_CACHE_MAX = 500;
 const LAYER_CACHE_MAX = 600;
@@ -149,6 +149,22 @@ self.addEventListener('fetch', (event) => {
     url.hostname === 'ipfs.io'
   ) {
     event.respondWith(handleIPFSImage(request));
+    return;
+  }
+
+  // Handle R2 layer manifests — network-first (updated when new traits are added)
+  if (url.hostname === 'layers.wojak.ink' && url.pathname.endsWith('/manifest.json')) {
+    event.respondWith(
+      fetch(request, { mode: 'cors' })
+        .then((networkResponse) => {
+          if (networkResponse.ok) {
+            const clone = networkResponse.clone();
+            caches.open(DYNAMIC_CACHE).then((cache) => cache.put(request, clone));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || new Response('Offline', { status: 503 })))
+    );
     return;
   }
 

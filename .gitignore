@@ -1,6 +1,9 @@
 # Claude worktrees
 .claude/worktrees/
 
+# Secrets
+.dev.vars
+
 # Logs
 logs
 *.log

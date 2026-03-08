@@ -5,6 +5,9 @@ export type AICategoryFreedom = 'enhance' | 'free';
 
 export type AIMode = 'enhance' | 'create_new';
 
+/** Sub-steps within the 'prompt' wizard step. */
+export type PromptSubStep = 'mode' | 'family' | 'option' | 'confirm';
+
 export interface AIPresetOption {
   label: string;
   prompt: string;

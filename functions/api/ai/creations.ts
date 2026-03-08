@@ -27,9 +27,19 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
       .bind(wallet, limit)
       .all();
 
+    // Map snake_case DB columns to camelCase for the frontend
+    const creations = (rows.results ?? []).map((row: Record<string, unknown>) => ({
+      id: row.id,
+      r2Key: row.r2_key,
+      category: row.category,
+      prompt: row.prompt,
+      parentEnhancementId: row.parent_enhancement_id,
+      createdAt: row.created_at,
+    }));
+
     return jsonResponse({
-      creations: rows.results ?? [],
-      total: rows.results?.length ?? 0,
+      creations,
+      total: creations.length,
     });
   } catch (err) {
     console.error('AI creations error:', err);

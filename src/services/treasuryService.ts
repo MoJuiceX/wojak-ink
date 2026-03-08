@@ -653,7 +653,7 @@ async function fetchNFTCollections(): Promise<NFTCollection[]> {
     throw apiError('Both MintGarden and SpaceScan NFT sources failed', 502);
   }
 
-  backfillMissingThumbnails(collections).catch(() => {});
+  backfillMissingThumbnails(collections).catch((err) => console.warn('[Treasury] Thumbnail backfill failed:', err));
   return collections;
 }
 
@@ -849,8 +849,8 @@ class TreasuryService implements ITreasuryService {
 
     // Delay startup API calls to avoid rate limits
     setTimeout(() => {
-      this.fetchWalletData(false).catch(() => {
-        // Background prefetch failed silently - we have fallback data
+      this.fetchWalletData(false).catch((err) => {
+        console.warn('[Treasury] Background prefetch failed, using fallback data:', err);
       });
     }, 5000);
   }

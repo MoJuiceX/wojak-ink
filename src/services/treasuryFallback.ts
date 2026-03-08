@@ -744,8 +744,8 @@ export async function initTreasuryData(
         // Step 4b: Failure (freshData is null) - silently keep using cached data
         // No error shown to user, no action needed
       })
-      .catch(() => {
-        // Unexpected error - silently ignore, keep using cached data
+      .catch((err) => {
+        console.warn('[Treasury] Unexpected refresh error, keeping cached data:', err);
       });
   }
 

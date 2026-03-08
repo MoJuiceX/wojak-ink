@@ -83,7 +83,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
         reference_image: imageBase64,
         aspect_ratio: '1:1',
         version: 'latest',
-        test_time_scaling: 1,
+        test_time_scaling: 2,
       }),
     });
   } catch (err) {

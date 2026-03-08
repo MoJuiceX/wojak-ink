@@ -142,7 +142,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const [showOverflowMenu, setShowOverflowMenu] = useState(false);
   const overflowMenuRef = useRef<HTMLDivElement>(null);
   const lastRandomizeRef = useRef<number>(0);
-  const { openLightbox, creations } = useAIEnhance();
+  const { openLightbox, creations, isAIEnhancedMode, enhancedImage } = useAIEnhance();
   const [showCreationsGallery, setShowCreationsGallery] = useState(false);
   const [canvasImageBase64, setCanvasImageBase64] = useState<string | null>(null);
 
@@ -199,11 +199,20 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     if (!canExport || !has7Traits) return;
 
     try {
-      const webpBlob = await exportImage(selectedLayers, {
-        format: 'png',
-        includeBackground: true,
-        size: { preset: '1024' },
-      }, g2Selections, selectedColors);
+      let imageBlob: Blob;
+
+      if (isAIEnhancedMode && enhancedImage) {
+        // Convert AI enhanced base64 data URL to a Blob
+        const res = await fetch(enhancedImage);
+        if (!res.ok) throw new Error(`Failed to fetch image: HTTP ${res.status}`);
+        imageBlob = await res.blob();
+      } else {
+        imageBlob = await exportImage(selectedLayers, {
+          format: 'png',
+          includeBackground: true,
+          size: { preset: '1024' },
+        }, g2Selections, selectedColors);
+      }
 
       const effectiveMintType = hasFreeMintsAvailable ? mintType : 'paid';
       const layersForApi: Record<string, string> = {};
@@ -215,11 +224,11 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       const colorsForApi: Record<string, string> = { ...(selectedColors || {}) };
 
       setIsMintModalOpen(true);
-      prepareMint(webpBlob, layersForApi, colorsForApi, effectiveMintType);
+      prepareMint(imageBlob, layersForApi, colorsForApi, effectiveMintType);
     } catch (err) {
       console.error('[ActionBar] Failed to prepare mint:', err);
     }
-  }, [isWalletConnected, canExport, has7Traits, selectedLayers, selectedColors, hasFreeMintsAvailable, mintType, connect, prepareMint, g2Selections]);
+  }, [isWalletConnected, canExport, has7Traits, selectedLayers, selectedColors, hasFreeMintsAvailable, mintType, connect, prepareMint, g2Selections, isAIEnhancedMode, enhancedImage]);
 
   const handleEnhanceClick = useCallback(async () => {
     if (!canExport) return;
@@ -326,6 +335,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     variant?: 'primary' | 'secondary';
   }) => (
     <motion.button
+      type="button"
       className={`action-btn${isActive ? ' action-btn--active' : ''}${disabled ? ' action-btn--disabled' : ''} relative flex items-center justify-center rounded-lg shrink-0 w-8 h-8`}
       whileHover={disabled || prefersReducedMotion ? undefined : { scale: 1.02 }}
       whileTap={disabled || prefersReducedMotion ? undefined : { scale: 0.98 }}
@@ -356,6 +366,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       {/* Randomize button — always randomizes all layers + colors */}
       <ActionBarTooltip content="Randomize">
         <motion.button
+          type="button"
           className="relative flex items-center justify-center rounded-lg shrink-0 w-8 h-8 bg-transparent border-none transition-all duration-300"
           whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
           whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
@@ -450,15 +461,17 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         </AnimatePresence>
       </div>
 
-      {/* Enhance with AI */}
-      <ActionBarTooltip content="Enhance with AI">
-        <ActionButton
-          onClick={handleEnhanceClick}
-          disabled={!hasSelection}
-          icon={<Wand2 size={18} />}
-          label="Enhance with AI"
-        />
-      </ActionBarTooltip>
+      {/* Enhance with AI — hidden when already in AI Enhanced mode */}
+      {!isAIEnhancedMode && (
+        <ActionBarTooltip content="Enhance with AI">
+          <ActionButton
+            onClick={handleEnhanceClick}
+            disabled={!hasSelection}
+            icon={<Wand2 size={18} />}
+            label="Enhance with AI"
+          />
+        </ActionBarTooltip>
+      )}
 
       {/* How It Works — visible on all screens */}
       <ActionBarTooltip content="How It Works">
@@ -645,6 +658,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
             content={isSoldOut ? 'All 4,200 Wojaks minted!' : !has7Traits ? 'Select all 7 traits to mint' : 'Mint your Wojak'}
           >
             <motion.button
+              type="button"
               className="action-bar-mint-btn relative flex items-center justify-center rounded-lg shrink-0 w-8 h-8"
               whileHover={!canMint || prefersReducedMotion ? undefined : { scale: 1.05 }}
               whileTap={!canMint || prefersReducedMotion ? undefined : { scale: 0.95 }}

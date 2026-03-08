@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, Download } from 'lucide-react';
 import { useGenerator } from '@/contexts/GeneratorContext';
+import { useAIEnhance } from '@/contexts/AIEnhanceContext';
 import { renderToCanvas } from '@/services/canvasRenderer';
 import type { ExportOptions } from '@/types/generator';
 import {
@@ -21,6 +22,7 @@ interface ExportPanelProps {
 
 export function ExportPanel({ className = '' }: ExportPanelProps) {
   const { isExportOpen, toggleExport, exportWojak, previewImage, favorites, selectedLayers, g2Selections, generatorError, clearGeneratorError } = useGenerator();
+  const { isAIEnhancedMode, enhancedImage } = useAIEnhance();
   const prefersReducedMotion = useReducedMotion();
 
   const getNextProjectName = useCallback(() => {
@@ -77,17 +79,34 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
     return () => { cancelled = true; };
   }, [includeBackground, isExportOpen, selectedLayers, g2Selections]);
 
-  const displayPreview = localPreview || previewImage;
+  // In AI-enhanced mode, always show the enhanced image
+  const displayPreview = isAIEnhancedMode ? enhancedImage : (localPreview || previewImage);
 
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      const options: ExportOptions = {
-        format: 'png',
-        size: { preset: '1024' },
-        includeBackground,
-      };
-      await exportWojak(options, filename);
+      if (isAIEnhancedMode && enhancedImage) {
+        // AI mode: download the enhanced image directly
+        const res = await fetch(enhancedImage);
+        if (!res.ok) throw new Error(`Failed to fetch image: HTTP ${res.status}`);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filename || 'wojak'}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else {
+        // Normal mode: render from layers
+        const options: ExportOptions = {
+          format: 'png',
+          size: { preset: '1024' },
+          includeBackground,
+        };
+        await exportWojak(options, filename);
+      }
     } catch {
       // Error is stored in context (generatorError) and shown in banner + below
     } finally {
@@ -136,7 +155,7 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
               className="relative w-full"
               style={{
                 aspectRatio: '1 / 1',
-                background: !includeBackground
+                background: !isAIEnhancedMode && !includeBackground
                   ? 'repeating-conic-gradient(var(--color-white-6) 0% 25%, rgba(255,255,255,0.02) 0% 50%) 50% / 16px 16px'
                   : 'transparent',
               }}
@@ -185,65 +204,68 @@ export function ExportPanel({ className = '' }: ExportPanelProps) {
                 onFocus={(e) => e.target.select()}
               />
 
-              {/* Background toggle - aligned with input edges */}
-              <div className="flex items-center justify-between px-4">
-                <span className="text-sm text-secondary">
-                  Background
-                </span>
-                <div
-                  className="relative cursor-pointer"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    width: '52px',
-                    height: '24px',
-                    borderRadius: '9999px',
-                    background: includeBackground
-                      ? 'var(--color-primary)'
-                      : 'var(--color-white-10)',
-                    flexShrink: 0,
-                    transition: 'background 0.2s ease',
-                  }}
-                  onClick={() => setIncludeBackground(!includeBackground)}
-                  role="switch"
-                  aria-checked={includeBackground}
-                  aria-label="Include background"
-                >
-                  <span
-                    style={{
-                      position: 'absolute',
-                      fontSize: '9px',
-                      fontWeight: 600,
-                      lineHeight: 1,
-                      color: includeBackground ? 'rgba(255,255,255,0.9)' : 'var(--color-white-40)',
-                      left: includeBackground ? '6px' : undefined,
-                      right: includeBackground ? undefined : '6px',
-                      userSelect: 'none',
-                      pointerEvents: 'none',
-                    }}
-                    aria-hidden="true"
-                  >
-                    {includeBackground ? 'ON' : 'OFF'}
+              {/* Background toggle - hidden in AI mode (not applicable) */}
+              {!isAIEnhancedMode && (
+                <div className="flex items-center justify-between px-4">
+                  <span className="text-sm text-secondary">
+                    Background
                   </span>
-                  <motion.div
+                  <div
+                    className="relative cursor-pointer"
                     style={{
-                      position: 'absolute',
-                      width: '18px',
-                      height: '18px',
-                      top: '3px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      width: '52px',
+                      height: '24px',
                       borderRadius: '9999px',
-                      background: 'white',
+                      background: includeBackground
+                        ? 'var(--color-primary)'
+                        : 'var(--color-white-10)',
+                      flexShrink: 0,
+                      transition: 'background 0.2s ease',
                     }}
-                    animate={{
-                      left: includeBackground ? '31px' : '3px',
-                    }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                  />
+                    onClick={() => setIncludeBackground(!includeBackground)}
+                    role="switch"
+                    aria-checked={includeBackground}
+                    aria-label="Include background"
+                  >
+                    <span
+                      style={{
+                        position: 'absolute',
+                        fontSize: '9px',
+                        fontWeight: 600,
+                        lineHeight: 1,
+                        color: includeBackground ? 'rgba(255,255,255,0.9)' : 'var(--color-white-40)',
+                        left: includeBackground ? '6px' : undefined,
+                        right: includeBackground ? undefined : '6px',
+                        userSelect: 'none',
+                        pointerEvents: 'none',
+                      }}
+                      aria-hidden="true"
+                    >
+                      {includeBackground ? 'ON' : 'OFF'}
+                    </span>
+                    <motion.div
+                      style={{
+                        position: 'absolute',
+                        width: '18px',
+                        height: '18px',
+                        top: '3px',
+                        borderRadius: '9999px',
+                        background: 'white',
+                      }}
+                      animate={{
+                        left: includeBackground ? '31px' : '3px',
+                      }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Download button */}
               <motion.button
+                type="button"
                 className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl font-semibold text-sm text-white"
                 style={{
                   background: isExporting

@@ -65,7 +65,7 @@ export function GuildPage() {
 
           {/* Desktop: Coming Soon badge in top right */}
           <motion.div
-            className="coming-soon-badge-desktop"
+            className="coming-soon-badge-desktop hidden md:block"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
@@ -77,7 +77,6 @@ export function GuildPage() {
               border: '1px solid var(--color-primary-40)',
               borderRadius: 12,
               padding: '12px 20px',
-              display: 'none',
             }}
           >
             <span style={{ color: 'var(--color-primary)', fontWeight: 600, fontSize: '0.9rem' }}>

@@ -747,6 +747,7 @@ function WojaksTab() {
             className={`view-btn${viewMode === 'list' ? ' active' : ''}`}
             onClick={() => setViewMode('list')}
             title="List view"
+            aria-label="List view"
           >
             ☰
           </button>
@@ -755,6 +756,7 @@ function WojaksTab() {
             className={`view-btn${viewMode === 'grid' ? ' active' : ''}`}
             onClick={() => setViewMode('grid')}
             title="Grid view"
+            aria-label="Grid view"
           >
             ▦
           </button>

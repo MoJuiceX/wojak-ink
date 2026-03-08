@@ -208,58 +208,72 @@ function AppContent() {
                   <Route
                     path="gallery"
                     element={
-                      <Suspense fallback={<PageSkeleton type="gallery" />}>
-                        <Gallery />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="gallery" />}>
+                          <Gallery />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
                     path="gallery/:nftId"
                     element={
-                      <Suspense fallback={<PageSkeleton type="detail" />}>
-                        <Gallery />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="detail" />}>
+                          <Gallery />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
                     path="treasury"
                     element={
-                      <Suspense fallback={<PageSkeleton type="treasury" />}>
-                        <Treasury />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="treasury" />}>
+                          <Treasury />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
                     path="bigpulp"
                     element={
-                      <Suspense fallback={<PageSkeleton type="bigpulp" />}>
-                        <BigPulp />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="bigpulp" />}>
+                          <BigPulp />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   {/* Chat routes */}
                   <Route
                     path="chat"
                     element={
-                      <Suspense fallback={<PageSkeleton type="settings" />}>
-                        <ChatHub />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="settings" />}>
+                          <ChatHub />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
                     path="chat/whale"
                     element={
-                      <Suspense fallback={<PageSkeleton type="settings" />}>
-                        <WhaleChat />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="settings" />}>
+                          <WhaleChat />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
                     path="chat/holder"
                     element={
-                      <Suspense fallback={<PageSkeleton type="settings" />}>
-                        <HolderChat />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="settings" />}>
+                          <HolderChat />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
@@ -283,9 +297,11 @@ function AppContent() {
                   <Route
                     path="games"
                     element={
-                      <Suspense fallback={<PageSkeleton type="media" />}>
-                        <GamesHub />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="media" />}>
+                          <GamesHub />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
@@ -309,17 +325,21 @@ function AppContent() {
                   <Route
                     path="account"
                     element={
-                      <Suspense fallback={<PageSkeleton type="settings" />}>
-                        <Account />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="settings" />}>
+                          <Account />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
                     path="profile/:userId"
                     element={
-                      <Suspense fallback={<PageSkeleton type="settings" />}>
-                        <Profile />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="settings" />}>
+                          <Profile />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   {/* Redirect /friends to /account - Friends feature now uses lightbox */}
@@ -330,17 +350,21 @@ function AppContent() {
                   <Route
                     path="guild"
                     element={
-                      <Suspense fallback={<PageSkeleton type="settings" />}>
-                        <Guild />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="settings" />}>
+                          <Guild />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
                     path="shop"
                     element={
-                      <Suspense fallback={<PageSkeleton type="settings" />}>
-                        <Shop />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="settings" />}>
+                          <Shop />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
@@ -351,41 +375,51 @@ function AppContent() {
                   <Route
                     path="fight-club"
                     element={
-                      <Suspense fallback={<PageSkeleton type="media" />}>
-                        <FightClub />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="media" />}>
+                          <FightClub />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
                     path="fight-club/battle"
                     element={
-                      <Suspense fallback={<PageSkeleton type="media" />}>
-                        <FightClub />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="media" />}>
+                          <FightClub />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
                     path="fight-club/vote"
                     element={
-                      <Suspense fallback={<PageSkeleton type="media" />}>
-                        <FightClub />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="media" />}>
+                          <FightClub />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
                     path="fight-club/rankings"
                     element={
-                      <Suspense fallback={<PageSkeleton type="media" />}>
-                        <FightClub />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="media" />}>
+                          <FightClub />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
                     path="fight-club/burn"
                     element={
-                      <Suspense fallback={<PageSkeleton type="media" />}>
-                        <FightClub />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="media" />}>
+                          <FightClub />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
@@ -401,9 +435,11 @@ function AppContent() {
                   <Route
                     path="admin"
                     element={
-                      <Suspense fallback={<PageSkeleton type="settings" />}>
-                        <Admin />
-                      </Suspense>
+                      <ErrorBoundary>
+                        <Suspense fallback={<PageSkeleton type="settings" />}>
+                          <Admin />
+                        </Suspense>
+                      </ErrorBoundary>
                     }
                   />
                   <Route

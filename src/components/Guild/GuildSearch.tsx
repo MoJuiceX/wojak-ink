@@ -7,11 +7,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Loader2 } from 'lucide-react';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function debounce<T extends (...args: any[]) => any>(fn: T, ms: number): T {
-  let timer: ReturnType<typeof setTimeout>;
-  return ((...args: Parameters<T>) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); }) as unknown as T;
-}
+import { debounce } from '@/utils/debounce';
 import { useGuild } from '../../contexts/GuildContext';
 import { GuildCard } from './GuildCard';
 import type { Guild } from '../../types/guild';

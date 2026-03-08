@@ -6,7 +6,8 @@
  */
 import { useCallback, useRef } from 'react';
 
-type AnyFn = (...args: unknown[]) => unknown;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Generic constraint requires `any` for contravariant parameter compatibility
+type AnyFn = (...args: any[]) => any;
 
 /**
  * Debounce a function to prevent rapid calls

@@ -1,7 +1,8 @@
 // src/components/generator/ai/AICreationsGallery.tsx
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
+import { Wand2 } from 'lucide-react';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { useAIEnhance } from '@/contexts/AIEnhanceContext';
 import type { AIEnhancement } from '@/types/aiEnhance';
@@ -12,9 +13,10 @@ interface AICreationsGalleryProps {
 }
 
 export function AICreationsGallery({ isOpen, onClose }: AICreationsGalleryProps) {
-  const { creations, isLoadingCreations, fetchCreations } = useAIEnhance();
+  const { creations, isLoadingCreations, fetchCreations, loadImageForEnhancing } = useAIEnhance();
   const prefersReducedMotion = useReducedMotion();
   const [selectedCreation, setSelectedCreation] = useState<AIEnhancement | null>(null);
+  const [isLoadingImage, setIsLoadingImage] = useState(false);
 
   // Reset selection when gallery closes so it opens fresh next time
   const handleClose = () => {
@@ -27,6 +29,28 @@ export function AICreationsGallery({ isOpen, onClose }: AICreationsGalleryProps)
       fetchCreations();
     }
   }, [isOpen, fetchCreations]);
+
+  // Fetch the R2 image, convert to base64 data URL, load into AI wizard
+  const handleContinueEnhancing = useCallback(async (creation: AIEnhancement) => {
+    setIsLoadingImage(true);
+    try {
+      const res = await fetch(`/api/ai/image/${creation.r2Key}`);
+      if (!res.ok) throw new Error('Failed to fetch image');
+      const blob = await res.blob();
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        loadImageForEnhancing(dataUrl);
+        setSelectedCreation(null);
+        onClose();
+      };
+      reader.readAsDataURL(blob);
+    } catch (err) {
+      console.error('Failed to load creation for enhancing:', err);
+    } finally {
+      setIsLoadingImage(false);
+    }
+  }, [loadImageForEnhancing, onClose]);
 
   return (
     <Lightbox
@@ -67,12 +91,22 @@ export function AICreationsGallery({ isOpen, onClose }: AICreationsGalleryProps)
                 {new Date(selectedCreation.createdAt).toLocaleDateString()}
               </p>
             </div>
-            <button
-              className="btn btn-ghost text-sm"
-              onClick={() => setSelectedCreation(null)}
-            >
-              ← Back to gallery
-            </button>
+            <div className="flex gap-2">
+              <button
+                className="btn btn-primary text-sm"
+                onClick={() => handleContinueEnhancing(selectedCreation)}
+                disabled={isLoadingImage}
+              >
+                <Wand2 size={14} />
+                <span>{isLoadingImage ? 'Loading...' : 'Continue Enhancing'}</span>
+              </button>
+              <button
+                className="btn btn-ghost text-sm"
+                onClick={() => setSelectedCreation(null)}
+              >
+                ← Back
+              </button>
+            </div>
           </div>
         )}
 
@@ -81,6 +115,7 @@ export function AICreationsGallery({ isOpen, onClose }: AICreationsGalleryProps)
           <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
             {creations.map((creation) => (
               <motion.button
+                type="button"
                 key={creation.id}
                 className="card p-1 overflow-hidden"
                 onClick={() => setSelectedCreation(creation)}

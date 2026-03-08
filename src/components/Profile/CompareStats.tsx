@@ -168,7 +168,7 @@ export const CompareStats: React.FC<CompareStatsProps> = ({
           {/* Header */}
           <div className="compare-header">
             <h2>VS Comparison</h2>
-            <button className="close-button" onClick={onClose}>
+            <button className="close-button" onClick={onClose} aria-label="Close comparison">
               <X size={20} />
             </button>
           </div>

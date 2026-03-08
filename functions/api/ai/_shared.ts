@@ -53,11 +53,14 @@ export const AI_CATEGORIES: Record<AICategory, { label: string; icon: string; fr
 };
 
 // --- Art Style Anchor ---
-// Concise style description for Reve's auto-enhancement to build on.
-// Kept short because Reve auto-enhances the edit_instruction internally.
+// Strong style anchor to keep Reve faithful to the wojak illustration style.
+// Emphasizes preservation of the original character at all costs.
 
 const STYLE =
   'Wojak meme-style illustration with thick black outlines, flat solid colors, no gradients, no shading, no photorealism.';
+
+const PRESERVE =
+  'CRITICAL: The character MUST remain EXACTLY the same size, position, proportions, and zoom level as the reference image. Do NOT resize, zoom out, crop, reposition, or redraw the character. Maintain pixel-perfect fidelity to the original character illustration including all line weights, facial features, and color fills.';
 
 // --- Prompt Templates ---
 // Now mode-aware: each category has templates for 'enhance' and/or 'create_new'.
@@ -67,25 +70,25 @@ export type AIMode = 'enhance' | 'create_new';
 export const PROMPT_TEMPLATES: Record<AICategory, Partial<Record<AIMode, string>>> = {
   clothes: {
     enhance:
-      `${STYLE} Edit ONLY the clothing: {user_prompt}. Keep the same clothing shape and structure. Keep thick black outlines and flat color fills. Preserve all logos, emblems, and markings on other areas. Do not change face, head, skin, headwear, or background.`,
+      `${STYLE} ${PRESERVE} Edit ONLY the clothing: {user_prompt}. Keep the same clothing shape and structure. Keep thick black outlines and flat color fills. Preserve all logos, emblems, and markings on other areas. Do not change face, head, skin, headwear, or background. Do not change the character's size or position.`,
     create_new:
-      `${STYLE} Replace the clothing entirely with: {user_prompt}. Keep thick black outlines and flat solid color fills. Keep the character's pose, face, skin, head, and background completely unchanged.`,
+      `${STYLE} ${PRESERVE} Replace the clothing entirely with: {user_prompt}. Keep thick black outlines and flat solid color fills. Keep the character's pose, face, skin, head, and background completely unchanged. Do not change the character's size or position.`,
   },
   head: {
     enhance:
-      `${STYLE} Edit ONLY the headwear: {user_prompt}. Keep the same headwear shape and structure. Keep thick black outlines and flat color fills. Preserve all logos, emblems, and markings on other areas. Do not change face, clothing, skin, or background.`,
+      `${STYLE} ${PRESERVE} Edit ONLY the headwear: {user_prompt}. Keep the same headwear shape and structure. Keep thick black outlines and flat color fills. Preserve all logos, emblems, and markings on other areas. Do not change face, clothing, skin, or background. Do not change the character's size or position.`,
     create_new:
-      `${STYLE} Replace the headwear entirely with: {user_prompt}. Keep thick black outlines and flat solid color fills. Keep the character's face, clothing, skin, and background completely unchanged.`,
+      `${STYLE} ${PRESERVE} Replace the headwear entirely with: {user_prompt}. Keep thick black outlines and flat solid color fills. Keep the character's face, clothing, skin, and background completely unchanged. Do not change the character's size or position.`,
   },
   facewear: {
     enhance:
-      `${STYLE} Edit ONLY the face accessory: {user_prompt}. Keep the same accessory shape and structure. Keep thick black outlines and flat color fills. Preserve all existing details on other areas. Do not change clothing, headwear, or background.`,
+      `${STYLE} ${PRESERVE} Edit ONLY the face accessory: {user_prompt}. Keep the same accessory shape and structure. Keep thick black outlines and flat color fills. Preserve all existing details on other areas. Do not change clothing, headwear, or background.`,
     create_new:
-      `${STYLE} Add face accessory: {user_prompt}. Use thick black outlines and flat colors matching the illustration. Position naturally on the face, sitting under any hat brim. Preserve all existing details on other areas. Do not change clothing, headwear, or background.`,
+      `${STYLE} ${PRESERVE} Add face accessory: {user_prompt}. Use thick black outlines and flat colors matching the illustration. Position naturally on the face, sitting under any hat brim. Preserve all existing details on other areas. Do not change clothing, headwear, or background.`,
   },
   background: {
     create_new:
-      `${STYLE} Replace ONLY the background: {user_prompt}. Draw the background in the same flat cartoon illustration style with thick black outlines and solid color fills — no photorealism, no gradients, no realistic textures. Apply a very subtle soft-focus blur to the entire background for depth-of-field. Keep the center area mostly empty and clear so the character is unobstructed. Place scene details on the edges — top-left, top-right, left side, right side — with the middle open. Keep the character completely unchanged and sharp — same pose, outfit, colors, line-art. Preserve all details on the character.`,
+      `${STYLE} ${PRESERVE} Replace ONLY the background: {user_prompt}. IMPORTANT STYLE RULES: Draw the background as a simple, minimalistic flat cartoon — like a Wojak meme background. Use only flat solid color fills, thick black outlines, and very simple shapes. NO realistic detail, NO complex textures, NO photorealism, NO gradients, NO lighting effects, NO shadows, NO 3D depth. Think simple MS Paint-level drawing with clean shapes. Apply a gentle gaussian blur to the entire background so it sits behind the character. COMPOSITION: The center of the image MUST be empty and clear — no objects, no detail, no visual clutter in the middle. ALL scene elements (furniture, walls, objects, landscape features) go ONLY on the far left edge, far right edge, top edge, and bottom edge. The middle 50% of the background should be a simple flat color or very minimal. The character must remain EXACTLY the same — same size, same position, same pose, same outfit, same colors, same line-art, same zoom level. Do not alter the character in any way.`,
   },
 };
 

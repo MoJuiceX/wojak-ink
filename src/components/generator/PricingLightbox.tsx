@@ -238,15 +238,15 @@ function CategoryAccordion({
                     </button>
                   ))}
                 </div>
-                <span className="text-muted" style={{ width: 80, textAlign: 'right', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                <span className="text-muted section-label" style={{ width: 80, textAlign: 'right' }}>
                   Minted
                 </span>
                 {isSurchargeCategory && (
                   <>
-                    <span className="text-muted" style={{ width: 80, textAlign: 'right', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    <span className="text-muted section-label" style={{ width: 80, textAlign: 'right' }}>
                       Total
                     </span>
-                    <span className="text-muted" style={{ width: 72, textAlign: 'right', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    <span className="text-muted section-label" style={{ width: 72, textAlign: 'right' }}>
                       Credits
                     </span>
                   </>

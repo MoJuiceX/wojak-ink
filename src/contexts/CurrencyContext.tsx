@@ -233,9 +233,11 @@ function CurrencyProviderInner({
       if (!hasFetchedRef.current) {
         hasFetchedRef.current = true;
         setIsLoading(true);
-        Promise.all([refreshBalance(), fetchLoginStreakStatus()]).finally(() => {
-          setIsLoading(false);
-        });
+        Promise.all([refreshBalance(), fetchLoginStreakStatus()])
+          .catch((err) => console.warn('[Currency] Initial load failed:', err))
+          .finally(() => {
+            setIsLoading(false);
+          });
       }
     } else {
       setCurrency(DEFAULT_CURRENCY);

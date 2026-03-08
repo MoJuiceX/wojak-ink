@@ -4,7 +4,8 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useSageWallet } from '@/sage-wallet';
-import type { AICategory, AIEnhancement, AIEnhanceResult, AIWizardStep } from '@/types/aiEnhance';
+import type { AICategory, AIEnhancement, AIEnhanceResult, AIWizardStep, PromptSubStep } from '@/types/aiEnhance';
+import type { AIStyleFamily, AIPresetOption } from '@/types/aiEnhance';
 
 export interface AIEnhanceContextValue {
   // Balance
@@ -22,6 +23,15 @@ export interface AIEnhanceContextValue {
   selectCategory: (cat: AICategory) => void;
   selectedMode: 'enhance' | 'create_new' | null;
   setSelectedMode: (mode: 'enhance' | 'create_new') => void;
+
+  // Prompt sub-step (managed here so lightbox back button can navigate)
+  promptSubStep: PromptSubStep;
+  setPromptSubStep: (step: PromptSubStep) => void;
+  selectedFamily: AIStyleFamily | null;
+  setSelectedFamily: (f: AIStyleFamily | null) => void;
+  selectedOption: AIPresetOption | null;
+  setSelectedOption: (o: AIPresetOption | null) => void;
+  handlePromptBack: () => void;
 
   // Enhancement
   isEnhancing: boolean;
@@ -68,6 +78,11 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   const [wizardStep, setWizardStep] = useState<AIWizardStep>('category');
   const [selectedCategory, setSelectedCategory] = useState<AICategory | null>(null);
   const [selectedMode, setSelectedMode] = useState<'enhance' | 'create_new' | null>(null);
+
+  // Prompt sub-steps
+  const [promptSubStep, setPromptSubStep] = useState<PromptSubStep>('mode');
+  const [selectedFamily, setSelectedFamily] = useState<AIStyleFamily | null>(null);
+  const [selectedOption, setSelectedOption] = useState<AIPresetOption | null>(null);
 
   // Enhancement
   const [isEnhancing, setIsEnhancing] = useState(false);
@@ -126,10 +141,36 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   const selectCategory = useCallback((cat: AICategory) => {
     setSelectedCategory(cat);
     setSelectedMode(null);
+    setPromptSubStep('mode');
+    setSelectedFamily(null);
+    setSelectedOption(null);
     setWizardStep('prompt');
     setEnhanceError(null);
     setCurrentResult(null);
   }, []);
+
+  // --- Prompt back navigation (called by lightbox header back button) ---
+  const handlePromptBack = useCallback(() => {
+    setEnhanceError(null);
+    if (promptSubStep === 'confirm') {
+      setPromptSubStep('option');
+    } else if (promptSubStep === 'option') {
+      setSelectedFamily(null);
+      setSelectedOption(null);
+      setPromptSubStep('family');
+    } else if (promptSubStep === 'family') {
+      // Background always skips mode → go to category
+      // All other categories show mode step
+      if (selectedCategory === 'background') {
+        setWizardStep('category');
+      } else {
+        setSelectedMode(null);
+        setPromptSubStep('mode');
+      }
+    } else if (promptSubStep === 'mode') {
+      setWizardStep('category');
+    }
+  }, [promptSubStep, selectedCategory]);
 
   // --- Submit enhancement ---
   const submitEnhance = useCallback(async (
@@ -244,6 +285,13 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     selectCategory,
     selectedMode,
     setSelectedMode,
+    promptSubStep,
+    setPromptSubStep,
+    selectedFamily,
+    setSelectedFamily,
+    selectedOption,
+    setSelectedOption,
+    handlePromptBack,
     isEnhancing,
     enhanceError,
     clearError,
