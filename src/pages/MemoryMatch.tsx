@@ -13,6 +13,7 @@ import { useTimeUrgency, getUrgencyClass } from '@/hooks/useTimeUrgency';
 import { useGameNavigationGuard } from '@/hooks/useGameNavigationGuard';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { getAllNfts, isReady as isPreloaderReady, initGalleryPreloader } from '@/services/galleryPreloader';
+import { safeStorage } from '@/utils/safeStorage';
 import { getNftImageUrl } from '@/services/constants';
 import { loadWfpMetadataLite } from '@/services/wfpCollectionData';
 import { GameSEO } from '@/components/seo/GameSEO';
@@ -277,11 +278,11 @@ const MemoryMatch: React.FC = () => {
 
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [highScore, setHighScore] = useState(() => {
-    return parseInt(localStorage.getItem('memoryMatchHighScore') || '0', 10);
+    return parseInt(safeStorage.getItem('memoryMatchHighScore') || '0', 10);
   });
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(() => {
-    const saved = localStorage.getItem('memoryMatchSoundEnabled');
+    const saved = safeStorage.getItem('memoryMatchSoundEnabled');
     return saved !== null ? saved === 'true' : true;
   });
 
@@ -822,7 +823,7 @@ const MemoryMatch: React.FC = () => {
     // Update local high score (only if positive score)
     if (finalScore > highScore && finalScore > 0) {
       setHighScore(finalScore);
-      localStorage.setItem('memoryMatchHighScore', String(finalScore));
+      safeStorage.setItem('memoryMatchHighScore', String(finalScore));
     }
 
     // Don't submit negative or zero scores to leaderboard
@@ -1327,7 +1328,7 @@ const MemoryMatch: React.FC = () => {
             // Update local high score
             if (totalScoreRef.current > highScoreRef.current) {
               setHighScore(totalScoreRef.current);
-              localStorage.setItem('memoryMatchHighScore', String(totalScoreRef.current));
+              safeStorage.setItem('memoryMatchHighScore', String(totalScoreRef.current));
             }
           }
           

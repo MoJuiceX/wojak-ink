@@ -8,6 +8,8 @@
  * This service caches data in localStorage for offline access and fast reads.
  */
 
+import { safeStorage } from '@/utils/safeStorage';
+
 // ============ Types ============
 
 export interface SaleRecord {
@@ -58,28 +60,23 @@ const salesByTrait: Map<string, SaleRecord[]> = new Map(); // "category:value" -
 // ============ Persistence ============
 
 function loadDatabank(): void {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
+  const stored = safeStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    try {
       const parsed = JSON.parse(stored);
       if (parsed.version === DATABANK_VERSION) {
         databank = parsed;
         rebuildIndexes();
       }
-      // else: version mismatch, start fresh (silent)
+    } catch (error) {
+      console.warn('[SalesDatabank] Failed to parse:', error);
     }
-  } catch (error) {
-    console.warn('[SalesDatabank] Failed to load:', error);
   }
 }
 
 function saveDatabank(): void {
-  try {
-    databank.lastUpdated = new Date().toISOString();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(databank));
-  } catch (error) {
-    console.warn('[SalesDatabank] Failed to save:', error);
-  }
+  databank.lastUpdated = new Date().toISOString();
+  safeStorage.setJSON(STORAGE_KEY, databank);
 }
 
 function rebuildIndexes(): void {
@@ -318,7 +315,7 @@ export function clearDatabank(): void {
   };
   salesByNftId.clear();
   salesByTrait.clear();
-  localStorage.removeItem(STORAGE_KEY);
+  safeStorage.removeItem(STORAGE_KEY);
 }
 
 /**

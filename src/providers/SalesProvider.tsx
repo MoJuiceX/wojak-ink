@@ -9,6 +9,7 @@
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { initializeSalesDatabank, loadFromServer } from '@/services/salesDatabank';
+import { safeStorage } from '@/utils/safeStorage';
 
 interface SalesProviderProps {
   children: React.ReactNode;
@@ -19,7 +20,7 @@ const LAST_SYNC_KEY = 'wojak_sales_last_sync';
 
 // Get hours since last sync
 export function getHoursSinceLastSync(): number {
-  const lastSync = localStorage.getItem(LAST_SYNC_KEY);
+  const lastSync = safeStorage.getItem(LAST_SYNC_KEY);
   if (!lastSync) return Infinity;
   const hours = (Date.now() - parseInt(lastSync, 10)) / (1000 * 60 * 60);
   return hours;
@@ -27,7 +28,7 @@ export function getHoursSinceLastSync(): number {
 
 // Mark sync as complete
 export function markSyncComplete(): void {
-  localStorage.setItem(LAST_SYNC_KEY, Date.now().toString());
+  safeStorage.setItem(LAST_SYNC_KEY, Date.now().toString());
 }
 
 export function SalesProvider({ children }: SalesProviderProps) {

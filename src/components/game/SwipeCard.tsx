@@ -5,6 +5,7 @@
 import { motion, useMotionValue, useTransform, useMotionValueEvent, animate } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
 import { useState, useCallback, useRef, useEffect, useLayoutEffect, memo } from 'react';
+import { safeStorage } from '@/utils/safeStorage';
 
 const SWIPE_THRESHOLD = 100;
 
@@ -185,20 +186,16 @@ export const SwipeCard = memo(function SwipeCard({
   // First-card wiggle animation
   useEffect(() => {
     if (isFirst && !reducedMotion && stackPosition === 0) {
-      try {
-        if (!localStorage.getItem('wojak_vote_first_visit')) {
-          const id = setTimeout(() => setShouldWiggle(true), 0);
-          return () => clearTimeout(id);
-        }
-      } catch { /* localStorage unavailable */ }
+      if (!safeStorage.getItem('wojak_vote_first_visit')) {
+        const id = setTimeout(() => setShouldWiggle(true), 0);
+        return () => clearTimeout(id);
+      }
     }
   }, [isFirst, reducedMotion, stackPosition]);
 
   const handleWiggleEnd = useCallback(() => {
     setShouldWiggle(false);
-    try {
-      localStorage.setItem('wojak_vote_first_visit', '1');
-    } catch { /* localStorage unavailable */ }
+    safeStorage.setItem('wojak_vote_first_visit', '1');
   }, []);
 
   // Drag handlers

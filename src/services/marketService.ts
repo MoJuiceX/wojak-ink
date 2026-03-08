@@ -12,6 +12,7 @@ import {
   STORAGE_KEYS,
   getNftImageUrl,
 } from './constants';
+import { safeStorage } from '@/utils/safeStorage';
 
 // ============ Types ============
 
@@ -109,45 +110,35 @@ function extractPrice(obj: Record<string, unknown>): number | null {
 // ============ LocalStorage Cache ============
 
 function loadCachedListings(): NFTListing[] | null {
-  try {
-    const cached = localStorage.getItem(STORAGE_KEYS.listings);
-    if (!cached) return null;
+  const data = safeStorage.getJSON<{ listings: NFTListing[]; timestamp: number } | null>(STORAGE_KEYS.listings, null);
+  if (!data) return null;
 
-    const data = JSON.parse(cached);
-    const age = Date.now() - data.timestamp;
+  const age = Date.now() - data.timestamp;
 
-    if (age > CACHE_DURATIONS.localStorage) {
-      localStorage.removeItem(STORAGE_KEYS.listings);
-      return null;
-    }
-
-    const listings = data.listings as NFTListing[];
-
-    // Only populate memory cache with non-empty data to prevent cache poisoning
-    if (listings.length > 0) {
-      listingsCache.data = listings;
-      listingsCache.timestamp = data.timestamp;
-    }
-
-    return listings;
-  } catch {
+  if (age > CACHE_DURATIONS.localStorage) {
+    safeStorage.removeItem(STORAGE_KEYS.listings);
     return null;
   }
+
+  const listings = data.listings;
+
+  // Only populate memory cache with non-empty data to prevent cache poisoning
+  if (listings.length > 0) {
+    listingsCache.data = listings;
+    listingsCache.timestamp = data.timestamp;
+  }
+
+  return listings;
 }
 
 function saveListingsToCache(listings: NFTListing[]): void {
   // Never cache empty results — they indicate API failure, not "no listings"
   if (listings.length === 0) return;
 
-  try {
-    const data = {
-      listings,
-      timestamp: Date.now(),
-    };
-    localStorage.setItem(STORAGE_KEYS.listings, JSON.stringify(data));
-  } catch (error) {
-    console.warn('[MarketService] Failed to cache listings:', error);
-  }
+  safeStorage.setJSON(STORAGE_KEYS.listings, {
+    listings,
+    timestamp: Date.now(),
+  });
 }
 
 // ============ API Fetchers ============

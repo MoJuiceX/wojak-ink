@@ -22,6 +22,7 @@ import type {
   GuildRole,
 } from '../types/guild';
 import { GUILD_CONSTANTS, getLevelFromXp } from '../types/guild';
+import { safeStorage } from '@/utils/safeStorage';
 
 // Storage keys
 const GUILDS_KEY = 'wojak_guilds';
@@ -89,49 +90,37 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   // Helper functions for localStorage
   const getGuilds = useCallback((): Record<string, Guild> => {
-    try {
-      return JSON.parse(localStorage.getItem(GUILDS_KEY) || '{}');
-    } catch {
-      return {};
-    }
+    return safeStorage.getJSON<Record<string, Guild>>(GUILDS_KEY, {});
   }, []);
 
   const saveGuilds = useCallback((guilds: Record<string, Guild>) => {
-    localStorage.setItem(GUILDS_KEY, JSON.stringify(guilds));
+    safeStorage.setJSON(GUILDS_KEY, guilds);
   }, []);
 
   const getGuildMembers = useCallback((guildId: string): GuildMember[] => {
-    try {
-      const allMembers = JSON.parse(localStorage.getItem(GUILD_MEMBERS_KEY) || '{}');
-      return allMembers[guildId] || [];
-    } catch {
-      return [];
-    }
+    const allMembers = safeStorage.getJSON<Record<string, GuildMember[]>>(GUILD_MEMBERS_KEY, {});
+    return allMembers[guildId] || [];
   }, []);
 
   const saveGuildMembers = useCallback((guildId: string, members: GuildMember[]) => {
-    const allMembers = JSON.parse(localStorage.getItem(GUILD_MEMBERS_KEY) || '{}');
+    const allMembers = safeStorage.getJSON<Record<string, GuildMember[]>>(GUILD_MEMBERS_KEY, {});
     allMembers[guildId] = members;
-    localStorage.setItem(GUILD_MEMBERS_KEY, JSON.stringify(allMembers));
+    safeStorage.setJSON(GUILD_MEMBERS_KEY, allMembers);
   }, []);
 
   const getUserGuildId = useCallback((userId: string): string | null => {
-    try {
-      const userGuilds = JSON.parse(localStorage.getItem(USER_GUILD_KEY) || '{}');
-      return userGuilds[userId] || null;
-    } catch {
-      return null;
-    }
+    const userGuilds = safeStorage.getJSON<Record<string, string>>(USER_GUILD_KEY, {});
+    return userGuilds[userId] || null;
   }, []);
 
   const setUserGuildId = useCallback((userId: string, guildId: string | null) => {
-    const userGuilds = JSON.parse(localStorage.getItem(USER_GUILD_KEY) || '{}');
+    const userGuilds = safeStorage.getJSON<Record<string, string>>(USER_GUILD_KEY, {});
     if (guildId) {
       userGuilds[userId] = guildId;
     } else {
       delete userGuilds[userId];
     }
-    localStorage.setItem(USER_GUILD_KEY, JSON.stringify(userGuilds));
+    safeStorage.setJSON(USER_GUILD_KEY, userGuilds);
   }, []);
 
   const addGuildActivity = useCallback((
@@ -141,7 +130,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     username: string,
     data: Record<string, unknown> = {}
   ) => {
-    const allActivity = JSON.parse(localStorage.getItem(GUILD_ACTIVITY_KEY) || '{}');
+    const allActivity = safeStorage.getJSON<Record<string, GuildActivity[]>>(GUILD_ACTIVITY_KEY, {});
     const guildActivities = allActivity[guildId] || [];
 
     const newActivity: GuildActivity = {
@@ -155,7 +144,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     guildActivities.unshift(newActivity);
     allActivity[guildId] = guildActivities.slice(0, 50); // Keep last 50 activities
-    localStorage.setItem(GUILD_ACTIVITY_KEY, JSON.stringify(allActivity));
+    safeStorage.setJSON(GUILD_ACTIVITY_KEY, allActivity);
 
     if (myGuild?.id === guildId) {
       setGuildActivity(allActivity[guildId]);
@@ -200,12 +189,12 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setMyRole(myMember?.role || null);
 
       // Load activity
-      const allActivity = JSON.parse(localStorage.getItem(GUILD_ACTIVITY_KEY) || '{}');
+      const allActivity = safeStorage.getJSON<Record<string, GuildActivity[]>>(GUILD_ACTIVITY_KEY, {});
       setGuildActivity(allActivity[guildId] || []);
 
       // Load pending requests if leader/officer
       if (myMember?.role === 'leader' || myMember?.role === 'officer') {
-        const allRequests = JSON.parse(localStorage.getItem(GUILD_REQUESTS_KEY) || '{}');
+        const allRequests = safeStorage.getJSON<Record<string, GuildJoinRequest[]>>(GUILD_REQUESTS_KEY, {});
         setPendingRequests((allRequests[guildId] || []).filter((r: GuildJoinRequest) => r.status === 'pending'));
       }
     } catch (error) {
@@ -219,7 +208,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (!user) return;
 
     try {
-      const allInvites = JSON.parse(localStorage.getItem(GUILD_INVITES_KEY) || '{}');
+      const allInvites = safeStorage.getJSON<Record<string, GuildInvite[]>>(GUILD_INVITES_KEY, {});
       const userInvites = (allInvites[user.id] || []).filter(
         (i: GuildInvite) => i.status === 'pending' && new Date(i.expiresAt) > new Date()
       );
@@ -358,9 +347,9 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     saveGuilds(guilds);
 
     // Clear members
-    const allMembers = JSON.parse(localStorage.getItem(GUILD_MEMBERS_KEY) || '{}');
+    const allMembers = safeStorage.getJSON<Record<string, GuildMember[]>>(GUILD_MEMBERS_KEY, {});
     delete allMembers[myGuild.id];
-    localStorage.setItem(GUILD_MEMBERS_KEY, JSON.stringify(allMembers));
+    safeStorage.setJSON(GUILD_MEMBERS_KEY, allMembers);
 
     setMyGuild(null);
     setMyGuildMembers([]);
@@ -390,7 +379,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (!user || !myGuild) throw new Error('Not in a guild');
     if (myRole !== 'leader' && myRole !== 'officer') throw new Error('No permission');
 
-    const allInvites = JSON.parse(localStorage.getItem(GUILD_INVITES_KEY) || '{}');
+    const allInvites = safeStorage.getJSON<Record<string, GuildInvite[]>>(GUILD_INVITES_KEY, {});
     const userInvites = allInvites[userId] || [];
 
     // Check if already invited
@@ -414,7 +403,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     userInvites.push(invite);
     allInvites[userId] = userInvites;
-    localStorage.setItem(GUILD_INVITES_KEY, JSON.stringify(allInvites));
+    safeStorage.setJSON(GUILD_INVITES_KEY, allInvites);
 
     return invite;
   }, [user, myGuild, myRole]);
@@ -516,7 +505,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const acceptRequest = useCallback(async (requestId: string) => {
     if (!user || !myGuild) return;
 
-    const allRequests = JSON.parse(localStorage.getItem(GUILD_REQUESTS_KEY) || '{}');
+    const allRequests = safeStorage.getJSON<Record<string, GuildJoinRequest[]>>(GUILD_REQUESTS_KEY, {});
     const guildRequests = allRequests[myGuild.id] || [];
     const requestIndex = guildRequests.findIndex((r: GuildJoinRequest) => r.id === requestId);
 
@@ -531,7 +520,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     // Add member
     const members = getGuildMembers(myGuild.id);
-    const allUsers = JSON.parse(localStorage.getItem('wojak_users') || '{}');
+    const allUsers = safeStorage.getJSON<Record<string, unknown>>('wojak_users', {});
     const requestUser = Object.values(allUsers).find((u: unknown) => (u as { id?: string }).id === request.userId) as { displayName?: string } | undefined;
 
     const newMember: GuildMember = {
@@ -564,7 +553,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     // Update request status
     guildRequests[requestIndex].status = 'accepted';
     allRequests[myGuild.id] = guildRequests;
-    localStorage.setItem(GUILD_REQUESTS_KEY, JSON.stringify(allRequests));
+    safeStorage.setJSON(GUILD_REQUESTS_KEY, allRequests);
 
     addGuildActivity(myGuild.id, 'member_joined', request.userId, request.username);
 
@@ -576,7 +565,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const declineRequest = useCallback(async (requestId: string) => {
     if (!myGuild) return;
 
-    const allRequests = JSON.parse(localStorage.getItem(GUILD_REQUESTS_KEY) || '{}');
+    const allRequests = safeStorage.getJSON<Record<string, GuildJoinRequest[]>>(GUILD_REQUESTS_KEY, {});
     const guildRequests = allRequests[myGuild.id] || [];
     const requestIndex = guildRequests.findIndex((r: GuildJoinRequest) => r.id === requestId);
 
@@ -584,7 +573,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     guildRequests[requestIndex].status = 'declined';
     allRequests[myGuild.id] = guildRequests;
-    localStorage.setItem(GUILD_REQUESTS_KEY, JSON.stringify(allRequests));
+    safeStorage.setJSON(GUILD_REQUESTS_KEY, allRequests);
 
     setPendingRequests(prev => prev.filter(r => r.id !== requestId));
   }, [myGuild]);
@@ -593,7 +582,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const acceptInvite = useCallback(async (inviteId: string) => {
     if (!user) return;
 
-    const allInvites = JSON.parse(localStorage.getItem(GUILD_INVITES_KEY) || '{}');
+    const allInvites = safeStorage.getJSON<Record<string, GuildInvite[]>>(GUILD_INVITES_KEY, {});
     const userInvites = allInvites[user.id] || [];
     const inviteIndex = userInvites.findIndex((i: GuildInvite) => i.id === inviteId);
 
@@ -640,7 +629,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     // Update invite status
     userInvites[inviteIndex].status = 'accepted';
     allInvites[user.id] = userInvites;
-    localStorage.setItem(GUILD_INVITES_KEY, JSON.stringify(allInvites));
+    safeStorage.setJSON(GUILD_INVITES_KEY, allInvites);
 
     addGuildActivity(invite.guildId, 'member_joined', user.id, newMember.username);
 
@@ -652,7 +641,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const declineInvite = useCallback(async (inviteId: string) => {
     if (!user) return;
 
-    const allInvites = JSON.parse(localStorage.getItem(GUILD_INVITES_KEY) || '{}');
+    const allInvites = safeStorage.getJSON<Record<string, GuildInvite[]>>(GUILD_INVITES_KEY, {});
     const userInvites = allInvites[user.id] || [];
     const inviteIndex = userInvites.findIndex((i: GuildInvite) => i.id === inviteId);
 
@@ -660,7 +649,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     userInvites[inviteIndex].status = 'declined';
     allInvites[user.id] = userInvites;
-    localStorage.setItem(GUILD_INVITES_KEY, JSON.stringify(allInvites));
+    safeStorage.setJSON(GUILD_INVITES_KEY, allInvites);
 
     setMyInvites(prev => prev.filter(i => i.id !== inviteId));
   }, [user]);
@@ -687,7 +676,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       throw new Error('You are already in a guild');
     }
 
-    const allRequests = JSON.parse(localStorage.getItem(GUILD_REQUESTS_KEY) || '{}');
+    const allRequests = safeStorage.getJSON<Record<string, GuildJoinRequest[]>>(GUILD_REQUESTS_KEY, {});
     const guildRequests = allRequests[guildId] || [];
 
     // Check for existing pending request
@@ -710,7 +699,7 @@ export const GuildProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     guildRequests.push(request);
     allRequests[guildId] = guildRequests;
-    localStorage.setItem(GUILD_REQUESTS_KEY, JSON.stringify(allRequests));
+    safeStorage.setJSON(GUILD_REQUESTS_KEY, allRequests);
   }, [user, getUserGuildId]);
 
   // Fetch guild leaderboard

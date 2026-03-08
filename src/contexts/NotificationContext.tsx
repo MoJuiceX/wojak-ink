@@ -14,6 +14,7 @@ import React, {
 } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth } from './AuthContext';
+import { safeStorage } from '@/utils/safeStorage';
 import type {
   NotificationPreferences,
   PushSubscriptionData,
@@ -85,7 +86,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
       // Store subscription data
       if (subscription) {
-        localStorage.setItem(PUSH_SUBSCRIPTION_KEY, JSON.stringify(subscription.toJSON()));
+        safeStorage.setJSON(PUSH_SUBSCRIPTION_KEY, subscription.toJSON());
       }
     } catch (err) {
       console.error('Error checking push subscription:', err);
@@ -96,7 +97,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   // Load preferences from localStorage
   const loadPreferences = (userId: string) => {
     try {
-      const stored = localStorage.getItem(`${NOTIFICATION_PREFS_KEY}_${userId}`);
+      const stored = safeStorage.getItem(`${NOTIFICATION_PREFS_KEY}_${userId}`);
       if (stored) {
         setPreferences(JSON.parse(stored));
       } else {
@@ -132,7 +133,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   // Save preferences to localStorage
   const savePreferences = (userId: string, prefs: NotificationPreferences) => {
     try {
-      localStorage.setItem(`${NOTIFICATION_PREFS_KEY}_${userId}`, JSON.stringify(prefs));
+      safeStorage.setJSON(`${NOTIFICATION_PREFS_KEY}_${userId}`, prefs);
     } catch (error) {
       console.error('Error saving notification preferences:', error);
     }
@@ -197,7 +198,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       // Store subscription data
       if (subscription) {
         const subData: PushSubscriptionData = subscription.toJSON() as PushSubscriptionData;
-        localStorage.setItem(PUSH_SUBSCRIPTION_KEY, JSON.stringify(subData));
+        safeStorage.setJSON(PUSH_SUBSCRIPTION_KEY, subData);
 
         // In production, send to server:
         // await fetch('/api/notifications/subscribe', {
@@ -234,7 +235,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
         // });
       }
 
-      localStorage.removeItem(PUSH_SUBSCRIPTION_KEY);
+      safeStorage.removeItem(PUSH_SUBSCRIPTION_KEY);
       setIsSubscribed(false);
       return true;
     } catch (error) {

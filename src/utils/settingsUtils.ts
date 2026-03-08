@@ -5,6 +5,8 @@
  * Used by AudioContext and other services.
  */
 
+import { safeStorage } from '@/utils/safeStorage';
+
 // Theme types
 export type ThemeMode = 'light' | 'dark' | 'orange' | 'green';
 
@@ -29,13 +31,9 @@ const SETTINGS_STORAGE_KEY = 'wojak_app_settings';
  * Load settings from localStorage
  */
 export function loadSettings(): AppSettings {
-  try {
-    const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
-    if (stored) {
-      return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
-    }
-  } catch (e) {
-    console.warn('Failed to load settings:', e);
+  const stored = safeStorage.getJSON<Partial<AppSettings> | null>(SETTINGS_STORAGE_KEY, null);
+  if (stored) {
+    return { ...DEFAULT_SETTINGS, ...stored };
   }
   return DEFAULT_SETTINGS;
 }
@@ -44,11 +42,7 @@ export function loadSettings(): AppSettings {
  * Save settings to localStorage
  */
 export function saveSettings(settings: AppSettings): void {
-  try {
-    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
-  } catch (e) {
-    console.warn('Failed to save settings:', e);
-  }
+  safeStorage.setJSON(SETTINGS_STORAGE_KEY, settings);
 }
 
 /**

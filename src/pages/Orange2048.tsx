@@ -7,6 +7,7 @@ import { generateGameScorecard } from '@/systems/sharing/GameScorecard';
 import { GameButton } from '@/components/ui/GameButton';
 import { useGameTouch } from '@/hooks/useGameTouch';
 import { useIsMobile } from '@/hooks/useMediaQuery';
+import { safeStorage } from '@/utils/safeStorage';
 import './Orange2048.css';
 
 type Grid = (number | null)[][];
@@ -59,7 +60,7 @@ const Orange2048: React.FC = () => {
   const [grid, setGrid] = useState<Grid>(() => createEmptyGrid());
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(() => {
-    return parseInt(localStorage.getItem('orange2048HighScore') || '0', 10);
+    return parseInt(safeStorage.getItem('orange2048HighScore') || '0', 10);
   });
   const [showInfo, setShowInfo] = useState(false);
 
@@ -268,7 +269,7 @@ const Orange2048: React.FC = () => {
         const newScore = prev + totalScore;
         if (newScore > highScore) {
           setHighScore(newScore);
-          localStorage.setItem('orange2048HighScore', String(newScore));
+          safeStorage.setItem('orange2048HighScore', String(newScore));
         }
         return newScore;
       });

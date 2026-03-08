@@ -1,4 +1,5 @@
 import { type HapticPattern, HAPTIC_PATTERNS, scalePattern } from './patterns';
+import { safeStorage } from '@/utils/safeStorage';
 
 class HapticManagerClass {
   private isSupported: boolean = false;
@@ -118,32 +119,23 @@ class HapticManagerClass {
    * Save preferences to localStorage
    */
   private savePreferences(): void {
-    if (typeof localStorage === 'undefined') return;
-    try {
-      const prefs = {
-        isEnabled: this.isEnabled,
-        intensity: this.intensity
-      };
-      localStorage.setItem('wojak-haptic-prefs', JSON.stringify(prefs));
-    } catch {
-      // Ignore storage errors
-    }
+    safeStorage.setJSON('wojak-haptic-prefs', {
+      isEnabled: this.isEnabled,
+      intensity: this.intensity
+    });
   }
 
   /**
    * Load preferences from localStorage
    */
   private loadPreferences(): void {
-    if (typeof localStorage === 'undefined') return;
-    try {
-      const saved = localStorage.getItem('wojak-haptic-prefs');
-      if (saved) {
-        const prefs = JSON.parse(saved);
-        this.isEnabled = prefs.isEnabled ?? true;
-        this.intensity = prefs.intensity ?? 1;
-      }
-    } catch {
-      // Use defaults
+    const prefs = safeStorage.getJSON<{
+      isEnabled?: boolean;
+      intensity?: number;
+    } | null>('wojak-haptic-prefs', null);
+    if (prefs) {
+      this.isEnabled = prefs.isEnabled ?? true;
+      this.intensity = prefs.intensity ?? 1;
     }
   }
 }

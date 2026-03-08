@@ -7,6 +7,7 @@
 
 import type { LeaderboardEntry } from '@/hooks/data/useLeaderboard';
 import type { LeaderboardTarget } from './types';
+import { safeStorage } from '@/utils/safeStorage';
 
 // ============================================
 // MILESTONE TYPES
@@ -282,14 +283,14 @@ export function isNewPersonalBest(score: number, currentHighScore: number): bool
  * Get high score from local storage.
  */
 export function getStoredHighScore(): number {
-  return parseInt(localStorage.getItem('flappyOrangeHighScore') || '0', 10);
+  return parseInt(safeStorage.getItem('flappyOrangeHighScore') || '0', 10);
 }
 
 /**
  * Save high score to local storage.
  */
 export function saveHighScore(score: number): void {
-  localStorage.setItem('flappyOrangeHighScore', String(score));
+  safeStorage.setItem('flappyOrangeHighScore', String(score));
 }
 
 // ============================================

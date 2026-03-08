@@ -17,6 +17,7 @@ import { ArcadeGameOverScreen } from '@/components/media/games/ArcadeGameOverScr
 import { useGameEffects } from '@/components/media/games/effects/useGameEffects';
 import { GAME_OVER_SEQUENCE } from '@/lib/juice/brandConstants';
 import { createManagedAudio } from '@/utils/audioElement';
+import { safeStorage } from '@/utils/safeStorage';
 import './BrickByBrick.css';
 
 interface Block {
@@ -266,7 +267,7 @@ const BrickByBrick: React.FC = () => {
   const [level, setLevel] = useState(1);
   const [levelScore, setLevelScore] = useState(0); // Blocks stacked in current level
   const [highScore, setHighScore] = useState(() => {
-    return parseInt(localStorage.getItem('brickByBrickHighScore') || '0', 10);
+    return parseInt(safeStorage.getItem('brickByBrickHighScore') || '0', 10);
   });
   const [speed, setSpeed] = useState(1.5);
   const [direction, setDirection] = useState(1);
@@ -696,7 +697,7 @@ const BrickByBrick: React.FC = () => {
       setGameState('gameover');
       if (score > highScore) {
         setHighScore(score);
-        localStorage.setItem('brickByBrickHighScore', String(score));
+        safeStorage.setItem('brickByBrickHighScore', String(score));
       }
       return;
     }
@@ -848,7 +849,7 @@ const BrickByBrick: React.FC = () => {
         setGameState('gameover');
         if (newScore > highScore) {
           setHighScore(newScore);
-          localStorage.setItem('brickByBrickHighScore', String(newScore));
+          safeStorage.setItem('brickByBrickHighScore', String(newScore));
           playWojakChime(); // Signature chime on new high score
         }
       }
@@ -872,7 +873,7 @@ const BrickByBrick: React.FC = () => {
       setGameState('gameover');
       if (newScore > highScore) {
         setHighScore(newScore);
-        localStorage.setItem('brickByBrickHighScore', String(newScore));
+        safeStorage.setItem('brickByBrickHighScore', String(newScore));
       }
       return;
     }

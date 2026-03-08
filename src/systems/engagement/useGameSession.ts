@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { useEffects, getGameOverPreset, getComboPreset } from '../effects';
+import { safeStorage } from '@/utils/safeStorage';
 
 // Game ID type - can be extended as new games are added
 export type GameId =
@@ -69,7 +70,7 @@ export const useGameSession = (options: GameSessionOptions) => {
 
   // Load high score from localStorage on mount
   useEffect(() => {
-    const savedHighScore = localStorage.getItem(getHighScoreKey(gameId));
+    const savedHighScore = safeStorage.getItem(getHighScoreKey(gameId));
     if (savedHighScore) {
       setState(prev => ({
         ...prev,
@@ -80,7 +81,7 @@ export const useGameSession = (options: GameSessionOptions) => {
 
   // Initialize session (can be called to refresh stats)
   const initSession = useCallback(async () => {
-    const savedHighScore = localStorage.getItem(getHighScoreKey(gameId));
+    const savedHighScore = safeStorage.getItem(getHighScoreKey(gameId));
     setState(prev => ({
       ...prev,
       highScore: savedHighScore ? parseInt(savedHighScore, 10) : 0
@@ -205,7 +206,7 @@ export const useGameSession = (options: GameSessionOptions) => {
 
     // Update high score locally
     if (isNewHighScore && currentScore > 0) {
-      localStorage.setItem(getHighScoreKey(gameId), String(currentScore));
+      safeStorage.setItem(getHighScoreKey(gameId), String(currentScore));
       setState(prev => ({ ...prev, highScore: currentScore, isPlaying: false }));
       onHighScore?.(currentScore);
     } else {

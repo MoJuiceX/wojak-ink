@@ -19,6 +19,7 @@ import {
   AI_REACTION_ZONE,
   SAD_IMAGES,
 } from './config';
+import { safeStorage } from '@/utils/safeStorage';
 import './OrangePong.game.css';
 
 interface LocalLeaderboardEntry {
@@ -56,12 +57,12 @@ const OrangePongGame: React.FC = () => {
   const [playerName, setPlayerName] = useState('');
   const [sadImage, setSadImage] = useState('');
   const [localLeaderboard, setLocalLeaderboard] = useState<LocalLeaderboardEntry[]>(() => {
-    const saved = localStorage.getItem('orangePongLeaderboard');
+    const saved = safeStorage.getItem('orangePongLeaderboard');
     return saved ? JSON.parse(saved) : [];
   });
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [highScore, setHighScore] = useState(() => {
-    return parseInt(localStorage.getItem('orangePongHighScore') || '0', 10);
+    return parseInt(safeStorage.getItem('orangePongHighScore') || '0', 10);
   });
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
   const [showLeaderboardPanel, setShowLeaderboardPanel] = useState(false);
@@ -148,7 +149,7 @@ const OrangePongGame: React.FC = () => {
       .slice(0, 10);
 
     setLocalLeaderboard(updatedLeaderboard);
-    localStorage.setItem('orangePongLeaderboard', JSON.stringify(updatedLeaderboard));
+    safeStorage.setJSON('orangePongLeaderboard', updatedLeaderboard);
     setPlayerName('');
     goToMenu();
   };
@@ -158,7 +159,7 @@ const OrangePongGame: React.FC = () => {
 
     if (finalScore > highScore) {
       setHighScore(finalScore);
-      localStorage.setItem('orangePongHighScore', String(finalScore));
+      safeStorage.setItem('orangePongHighScore', String(finalScore));
     }
 
     setScoreSubmitted(true);

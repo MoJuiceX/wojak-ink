@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { safeStorage } from '@/utils/safeStorage';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -48,13 +49,8 @@ export const PWAProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setShowInstallBanner(false);
         return;
       }
-      if (typeof localStorage === 'undefined') {
-        setShowInstallBanner(false);
-        return;
-      }
-
       // Check if user dismissed recently (24 hours)
-      const dismissedTime = localStorage.getItem('pwa-install-dismissed');
+      const dismissedTime = safeStorage.getItem('pwa-install-dismissed');
       if (dismissedTime) {
         const hoursSinceDismissed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60);
         if (hoursSinceDismissed < 24) {
@@ -64,7 +60,7 @@ export const PWAProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
 
       // Check if user has played enough games (engagement threshold)
-      const gamesPlayed = parseInt(localStorage.getItem('games-played') || '0');
+      const gamesPlayed = parseInt(safeStorage.getItem('games-played') || '0');
       if (gamesPlayed < 3) {
         setShowInstallBanner(false);
         return;
@@ -95,18 +91,14 @@ export const PWAProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setInstallPromptEvent(null);
 
       // Track installation
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('pwa-installed', 'true');
-      }
+      safeStorage.setItem('pwa-installed', 'true');
     };
 
     window.addEventListener('appinstalled', handleAppInstalled);
 
     // Check if already installed
-    if (typeof localStorage !== 'undefined') {
-      if (localStorage.getItem('pwa-installed') === 'true' || isStandalone) {
-        queueMicrotask(() => setIsInstalled(true));
-      }
+    if (safeStorage.getItem('pwa-installed') === 'true' || isStandalone) {
+      queueMicrotask(() => setIsInstalled(true));
     }
 
     return () => {
@@ -153,9 +145,7 @@ export const PWAProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Dismiss the install prompt (for 24 hours)
   const dismissInstallPrompt = useCallback(() => {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('pwa-install-dismissed', Date.now().toString());
-    }
+    safeStorage.setItem('pwa-install-dismissed', Date.now().toString());
     setInstallDismissedAt(Date.now());
   }, []);
 

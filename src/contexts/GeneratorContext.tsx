@@ -28,6 +28,7 @@ import { createSelectionResolver } from '@/lib/selectionResolver';
 import { toExternal, fromExternal, normalizeG2Selection } from '@/lib/selectionAdapter';
 import { getAllUserPickableFillSlots } from '@/lib/g2FillTreatments';
 import { GENERATOR_PALETTE_HEX } from '@/components/generator/ColorPicker';
+import { safeStorage } from '@/utils/safeStorage';
 import { assembleG2Selection } from '@/contexts/generatorG2Helpers';
 import { filterRandomizableTraitsForLayer } from '@/lib/generatorExtras';
 import { renderPreview, renderThumbnail, downloadImage } from '@/services/canvasRenderer';
@@ -234,24 +235,15 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
 
   // Load favorites from localStorage
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('wojak-favorites');
-      if (stored) {
-        const favorites = JSON.parse(stored) as FavoriteWojak[];
-        dispatch({ type: 'LOAD_FAVORITES', favorites });
-      }
-    } catch {
-      // Ignore parse errors
+    const favorites = safeStorage.getJSON<FavoriteWojak[]>('wojak-favorites', []);
+    if (favorites.length > 0) {
+      dispatch({ type: 'LOAD_FAVORITES', favorites });
     }
   }, []);
 
   // Save favorites to localStorage
   useEffect(() => {
-    try {
-      localStorage.setItem('wojak-favorites', JSON.stringify(state.favorites));
-    } catch {
-      // Ignore storage errors
-    }
+    safeStorage.setJSON('wojak-favorites', state.favorites);
   }, [state.favorites]);
 
   // Derived dual shape for mint/renderer/legacy consumers

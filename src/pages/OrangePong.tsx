@@ -8,6 +8,7 @@ import { useIsMobile } from '@/hooks/useMediaQuery';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { GameSEO } from '@/components/seo/GameSEO';
 import { ArcadeGameOverScreen } from '@/components/media/games/ArcadeGameOverScreen';
+import { safeStorage } from '@/utils/safeStorage';
 import './OrangePong.css';
 
 const PADDLE_HEIGHT = 80;
@@ -88,7 +89,7 @@ const OrangePong: React.FC = () => {
   const [ballVY, setBallVY] = useState(3);
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [highScore, setHighScore] = useState(() => {
-    return parseInt(localStorage.getItem('orangePongHighScore') || '0', 10);
+    return parseInt(safeStorage.getItem('orangePongHighScore') || '0', 10);
   });
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
 
@@ -229,7 +230,7 @@ const OrangePong: React.FC = () => {
     // Update local high score
     if (finalScore > highScore) {
       setHighScore(finalScore);
-      localStorage.setItem('orangePongHighScore', String(finalScore));
+      safeStorage.setItem('orangePongHighScore', String(finalScore));
     }
 
     scoreSubmittedRef.current = true;

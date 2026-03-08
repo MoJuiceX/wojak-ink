@@ -31,6 +31,7 @@ import { useMetadataAttributes } from './MetadataPreview';
 import { MintFlowModal } from './MintFlowModal';
 import { GeneratorInfo } from './GeneratorInfo';
 import { PricingLightbox } from './PricingLightbox';
+import { safeStorage } from '@/utils/safeStorage';
 
 interface ActionBarProps {
   className?: string;
@@ -140,7 +141,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
   // First-visit: auto-open How It Works modal
   useEffect(() => {
-    const seen = localStorage.getItem('wojak_generator_seen');
+    const seen = safeStorage.getItem('wojak_generator_seen');
     if (!seen) {
       const timer = setTimeout(() => {
         setIsFirstVisitInfo(true);
@@ -619,7 +620,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         onClose={() => {
           setShowGeneratorInfo(false);
           if (isFirstVisitInfo) {
-            localStorage.setItem('wojak_generator_seen', 'true');
+            safeStorage.setItem('wojak_generator_seen', 'true');
             setIsFirstVisitInfo(false);
           }
         }}

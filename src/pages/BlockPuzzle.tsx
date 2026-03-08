@@ -18,6 +18,7 @@ import { generateGameScorecard } from '@/systems/sharing/GameScorecard';
 import { ArcadeGameOverScreen } from '@/components/media/games/ArcadeGameOverScreen';
 import { GameButton } from '@/components/ui/GameButton';
 import { createManagedAudio } from '@/utils/audioElement';
+import { safeStorage } from '@/utils/safeStorage';
 import {
   FREEZE_DURATIONS,
   SHAKE_CONFIG,
@@ -255,14 +256,14 @@ const BlockPuzzle: React.FC = () => {
 
   // High score
   const [highScore, setHighScore] = useState(() => {
-    return parseInt(localStorage.getItem('blockPuzzleHighScore') || '0', 10);
+    return parseInt(safeStorage.getItem('blockPuzzleHighScore') || '0', 10);
   });
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
 
   // Sound and pause state
   const [soundEnabled, setSoundEnabled] = useState(() => {
-    return localStorage.getItem('blockPuzzleSoundEnabled') !== 'false';
+    return safeStorage.getItem('blockPuzzleSoundEnabled') !== 'false';
   });
   const [isPaused, setIsPaused] = useState(false);
 
@@ -930,7 +931,7 @@ const BlockPuzzle: React.FC = () => {
 
     if (finalScore > highScore) {
       setHighScore(finalScore);
-      localStorage.setItem('blockPuzzleHighScore', String(finalScore));
+      safeStorage.setItem('blockPuzzleHighScore', String(finalScore));
       setIsNewPersonalBest(true);
     }
 

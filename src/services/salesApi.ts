@@ -11,6 +11,7 @@
 import { COLLECTION_ID } from './marketApi';
 import { dexieQueue } from '../utils/rateLimiter';
 import { loadWfpMetadataLite } from './wfpCollectionData';
+import { safeStorage } from '@/utils/safeStorage';
 
 const DEXIE_API = 'https://api.dexie.space/v1';
 
@@ -324,48 +325,45 @@ function buildTraitIndex(
  * Load cached sales data from localStorage
  */
 function loadCachedSales(): SalesIndexResult | null {
-  try {
-    const cached = localStorage.getItem(SALES_CACHE_KEY);
-    if (!cached) return null;
+  const data = safeStorage.getJSON<{
+    trades: unknown[];
+    byNftIdArray: [string, unknown][];
+    byTraitArray: [string, unknown][];
+    totalTrades: number;
+    timestamp: number;
+  } | null>(SALES_CACHE_KEY, null);
+  if (!data) return null;
 
-    const data = JSON.parse(cached);
-    const age = Date.now() - data.timestamp;
+  const age = Date.now() - data.timestamp;
 
-    // Cache valid for 24 hours
-    if (age > 24 * 60 * 60 * 1000) {
-      localStorage.removeItem(SALES_CACHE_KEY);
-      return null;
-    }
-
-    // Reconstruct Maps
-    return {
-      trades: data.trades,
-      byNftId: new Map(data.byNftIdArray),
-      byTrait: new Map(data.byTraitArray),
-      totalTrades: data.totalTrades,
-      lastUpdated: new Date(data.timestamp)
-    };
-  } catch {
+  // Cache valid for 24 hours
+  if (age > 24 * 60 * 60 * 1000) {
+    safeStorage.removeItem(SALES_CACHE_KEY);
     return null;
   }
+
+  // Reconstruct Maps
+  return {
+    trades: data.trades as SalesIndexResult['trades'],
+    byNftId: new Map(data.byNftIdArray) as SalesIndexResult['byNftId'],
+    byTrait: new Map(data.byTraitArray) as SalesIndexResult['byTrait'],
+    totalTrades: data.totalTrades,
+    lastUpdated: new Date(data.timestamp)
+  };
 }
 
 /**
  * Save sales data to localStorage
  */
 function saveSalesToCache(result: SalesIndexResult): void {
-  try {
-    const data = {
-      trades: result.trades,
-      byNftIdArray: Array.from(result.byNftId.entries()),
-      byTraitArray: Array.from(result.byTrait.entries()),
-      totalTrades: result.totalTrades,
-      timestamp: Date.now()
-    };
-    localStorage.setItem(SALES_CACHE_KEY, JSON.stringify(data));
-  } catch (error) {
-    console.warn('[SalesAPI] Failed to cache sales data:', error);
-  }
+  const data = {
+    trades: result.trades,
+    byNftIdArray: Array.from(result.byNftId.entries()),
+    byTraitArray: Array.from(result.byTrait.entries()),
+    totalTrades: result.totalTrades,
+    timestamp: Date.now()
+  };
+  safeStorage.setJSON(SALES_CACHE_KEY, data);
 }
 
 /**

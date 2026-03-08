@@ -26,6 +26,7 @@ import type {
   RepeatMode,
 } from '@/types/media';
 import { useSettings } from './SettingsContext';
+import { safeStorage } from '@/utils/safeStorage';
 
 // ============ Initial States ============
 
@@ -456,27 +457,15 @@ export function MediaProvider({ children }: MediaProviderProps) {
 
   // Load preferences from localStorage
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('wojak-media-preferences');
-      if (stored) {
-        const prefs = JSON.parse(stored) as MediaPreferences;
-        dispatch({ type: 'LOAD_PREFERENCES', preferences: prefs });
-      }
-    } catch {
-      // Ignore parse errors
+    const prefs = safeStorage.getJSON<MediaPreferences | null>('wojak-media-preferences', null);
+    if (prefs) {
+      dispatch({ type: 'LOAD_PREFERENCES', preferences: prefs });
     }
   }, []);
 
   // Save preferences to localStorage
   useEffect(() => {
-    try {
-      localStorage.setItem(
-        'wojak-media-preferences',
-        JSON.stringify(state.preferences)
-      );
-    } catch {
-      // Ignore storage errors
-    }
+    safeStorage.setJSON('wojak-media-preferences', state.preferences);
   }, [state.preferences]);
 
   // Sync video element

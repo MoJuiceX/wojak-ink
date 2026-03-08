@@ -1,3 +1,5 @@
+import { safeStorage } from '@/utils/safeStorage';
+
 /**
  * Treasury Fallback Service
  *
@@ -445,26 +447,19 @@ async function fetchWithTimeout(
  * @returns Cached data or null if not found/invalid
  */
 export function loadCache(): TreasuryCache | null {
-  try {
-    const cached = localStorage.getItem(CACHE_KEY);
-    if (!cached) return null;
+  const data = safeStorage.getJSON<TreasuryCache | null>(CACHE_KEY, null);
+  if (!data) return null;
 
-    const data = JSON.parse(cached) as TreasuryCache;
-
-    // Validate required fields exist
-    if (!data.tokens || !Array.isArray(data.tokens) || typeof data.lastUpdated !== 'number') {
-      console.warn('[TreasuryFallback] Invalid cache structure, ignoring');
-      return null;
-    }
-
-    // Update the human-readable time (recompute on every load)
-    data.lastUpdatedHuman = getRelativeTime(data.lastUpdated);
-
-    return data;
-  } catch (error) {
-    console.warn('[TreasuryFallback] Failed to load cache:', error);
+  // Validate required fields exist
+  if (!data.tokens || !Array.isArray(data.tokens) || typeof data.lastUpdated !== 'number') {
+    console.warn('[TreasuryFallback] Invalid cache structure, ignoring');
     return null;
   }
+
+  // Update the human-readable time (recompute on every load)
+  data.lastUpdatedHuman = getRelativeTime(data.lastUpdated);
+
+  return data;
 }
 
 /**
@@ -472,16 +467,11 @@ export function loadCache(): TreasuryCache | null {
  * @param data - Treasury data to cache
  */
 export function saveCache(data: TreasuryCache): void {
-  try {
-    // Update timestamp and human-readable time before saving
-    data.lastUpdated = Date.now();
-    data.lastUpdatedHuman = getRelativeTime(data.lastUpdated);
+  // Update timestamp and human-readable time before saving
+  data.lastUpdated = Date.now();
+  data.lastUpdatedHuman = getRelativeTime(data.lastUpdated);
 
-    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-  } catch (error) {
-    console.warn('[TreasuryFallback] Failed to save cache:', error);
-    // Non-critical error - continue without caching
-  }
+  safeStorage.setJSON(CACHE_KEY, data);
 }
 
 /**

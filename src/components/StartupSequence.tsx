@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import './StartupSequence.css'
 import BootSequence, { TANGY_BOOT_LINES } from './BootSequence'
+import { safeStorage } from '@/utils/safeStorage'
 // Treasury prefetch removed — was clogging the SpaceScan rate limiter queue,
 // causing the Treasury page's own API calls to fail silently.
 // TanStack Query in useTreasuryData.ts handles all data fetching.
@@ -26,15 +27,11 @@ export default function StartupSequence({ onComplete }: StartupSequenceProps) {
     setIsSkipping(true)
 
     // Save preference to skip intro on future visits
-    try {
-      const stored = localStorage.getItem('wojak-settings')
-      const settings = stored ? JSON.parse(stored) : {}
-      settings.app = settings.app || {}
-      settings.app.skipBootSequence = true
-      localStorage.setItem('wojak-settings', JSON.stringify(settings))
-    } catch {
-      // Ignore storage errors
-    }
+    const settings = safeStorage.getJSON<Record<string, unknown>>('wojak-settings', {})
+    const app = (settings.app || {}) as Record<string, unknown>
+    app.skipBootSequence = true
+    settings.app = app
+    safeStorage.setJSON('wojak-settings', settings)
 
     // Fade out boot audio smoothly over 500ms
     if (bootAudioRef.current) {

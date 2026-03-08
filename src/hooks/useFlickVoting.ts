@@ -9,6 +9,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '@/lib/clerkSafe';
+import { safeStorage } from '@/utils/safeStorage';
 
 // Page types for voting - extend this as you add more pages
 export type VotePageType = 'games' | 'gallery' | 'media' | 'shop';
@@ -51,21 +52,13 @@ export function useFlickVoting(pageType: VotePageType) {
         const counts = data.counts || {};
         setVotes(counts);
         // Write-through to localStorage for offline fallback
-        try {
-          localStorage.setItem(cacheKey(pageType), JSON.stringify(counts));
-        } catch {
-          // Ignore quota errors
-        }
+        safeStorage.setJSON(cacheKey(pageType), counts);
       }
     } catch (error) {
       console.error('Failed to fetch vote counts:', error);
       // Fallback to localStorage cache
-      try {
-        const stored = localStorage.getItem(cacheKey(pageType));
-        if (stored) setVotes(JSON.parse(stored));
-      } catch {
-        // Ignore localStorage errors
-      }
+      const cached = safeStorage.getJSON<Record<string, unknown>>(cacheKey(pageType), {});
+      if (Object.keys(cached).length > 0) setVotes(cached);
     }
   }, [pageType]);
 

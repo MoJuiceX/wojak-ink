@@ -19,6 +19,7 @@ import type {
   SubmitScoreResult,
   GameId,
 } from '../types/leaderboard';
+import { safeStorage } from '@/utils/safeStorage';
 
 // Stored score record shape (from localStorage)
 interface StoredScore {
@@ -74,20 +75,12 @@ export const LeaderboardProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   // Get all scores from localStorage
   const getAllScores = useCallback(() => {
-    try {
-      return JSON.parse(localStorage.getItem(SCORES_KEY) || '[]');
-    } catch {
-      return [];
-    }
+    return safeStorage.getJSON<StoredScore[]>(SCORES_KEY, []);
   }, []);
 
   // Get all users from localStorage
   const getAllUsers = useCallback(() => {
-    try {
-      return JSON.parse(localStorage.getItem('wojak_users') || '{}');
-    } catch {
-      return {};
-    }
+    return safeStorage.getJSON<Record<string, unknown>>('wojak_users', {});
   }, []);
 
   // Filter scores by timeframe
@@ -295,7 +288,7 @@ export const LeaderboardProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       // Save score
       allScores.push(newScore);
-      localStorage.setItem(SCORES_KEY, JSON.stringify(allScores));
+      safeStorage.setJSON(SCORES_KEY, allScores);
 
       // Calculate new rank if NFT holder
       let newRank: number | undefined;

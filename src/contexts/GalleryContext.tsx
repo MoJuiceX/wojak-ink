@@ -19,6 +19,7 @@ import type { NFT, CharacterType, SortMode, FilterMode } from '@/types/nft';
 import { useGalleryNFTs } from '@/hooks/data/useGalleryData';
 import { useListings } from '@/hooks/data/useMarket';
 import { imagePreloader } from '@/services/imagePreloader';
+import { safeStorage } from '@/utils/safeStorage';
 
 const SWIPE_HINT_KEY = 'wojak-seen-swipe-hint';
 
@@ -148,7 +149,7 @@ export function GalleryProvider({ children }: GalleryProviderProps) {
   const [activeInfoTab, setActiveInfoTab] = useState<'main' | 'metadata' | 'combat' | 'history'>('main');
   const [hasSeenSwipeHint, setHasSeenSwipeHint] = useState(() => {
     if (typeof window === 'undefined') return true;
-    return localStorage.getItem(SWIPE_HINT_KEY) === 'true';
+    return safeStorage.getItem(SWIPE_HINT_KEY) === 'true';
   });
 
   // Preloading
@@ -331,11 +332,7 @@ export function GalleryProvider({ children }: GalleryProviderProps) {
 
   const dismissSwipeHint = useCallback(() => {
     setHasSeenSwipeHint(true);
-    try {
-      localStorage.setItem(SWIPE_HINT_KEY, 'true');
-    } catch {
-      // localStorage may be unavailable
-    }
+    safeStorage.setItem(SWIPE_HINT_KEY, 'true');
   }, []);
 
   // Track navigation direction for smarter preloading

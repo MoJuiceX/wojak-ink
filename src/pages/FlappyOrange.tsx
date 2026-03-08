@@ -16,6 +16,7 @@ import { GameSEO } from '@/components/seo/GameSEO';
 import { ArcadeGameOverScreen } from '@/components/media/games/ArcadeGameOverScreen';
 import { getFlappyOrangeScorecardDataUrl, type FlappyScorecardData } from '@/systems/sharing/FlappyOrangeScorecard';
 import { createManagedAudio } from '@/utils/audioElement';
+import { safeStorage } from '@/utils/safeStorage';
 // UI Components extracted from this file
 import {
   ShareModal,
@@ -351,7 +352,7 @@ const FlappyOrange: React.FC = () => {
   const [isNewPersonalBest, setIsNewPersonalBest] = useState(false);
   const [scoreSubmitted, setScoreSubmitted] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(() => {
-    return localStorage.getItem('flappyOrangeSoundEnabled') !== 'false';
+    return safeStorage.getItem('flappyOrangeSoundEnabled') !== 'false';
   });
   const [floatingScores, setFloatingScores] = useState<Array<{
     id: string;

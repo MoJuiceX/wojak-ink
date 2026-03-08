@@ -11,6 +11,7 @@ import { useGenerator } from '@/contexts/GeneratorContext';
 import type { UILayerName } from '@/lib/layerRegistry';
 import type { UnifiedTrait } from '@/services/generatorService';
 import { LAYER_BASE } from '@/config/layerAssetBase';
+import { safeStorage } from '@/utils/safeStorage';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -205,17 +206,13 @@ const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 const STORAGE_KEY = 'wojak-audit-results';
 
 function loadResults(): Map<string, Verdict> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return new Map(JSON.parse(raw) as [string, Verdict][]);
-  } catch {
-    /* ignore */
-  }
+  const raw = safeStorage.getJSON<[string, Verdict][] | null>(STORAGE_KEY, null);
+  if (raw) return new Map(raw);
   return new Map();
 }
 
 function saveResults(results: Map<string, Verdict>) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify([...results]));
+  safeStorage.setJSON(STORAGE_KEY, [...results]);
 }
 
 // ---------------------------------------------------------------------------
@@ -329,7 +326,7 @@ export function TraitAuditWizard({ onClose }: TraitAuditWizardProps) {
 
   const clearResults = useCallback(() => {
     setResults(new Map());
-    localStorage.removeItem(STORAGE_KEY);
+    safeStorage.removeItem(STORAGE_KEY);
   }, []);
 
   const handleClose = useCallback(() => {

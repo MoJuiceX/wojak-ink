@@ -10,6 +10,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useClerkAuth } from '@/contexts/ClerkAuthContext';
 import { createDefaultAvatar, type UserAvatar } from '@/types/avatar';
+import { safeStorage } from '@/utils/safeStorage';
 
 // localStorage key for profile fallback
 const PROFILE_STORAGE_KEY = 'wojak_user_profile';
@@ -112,24 +113,12 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
 
   // Load profile from localStorage (fallback)
   const loadProfileFromStorage = useCallback((): UserProfile | null => {
-    try {
-      const stored = localStorage.getItem(PROFILE_STORAGE_KEY);
-      if (stored) {
-        return JSON.parse(stored);
-      }
-    } catch (e) {
-      console.error('[UserProfile] Error loading from localStorage:', e);
-    }
-    return null;
+    return safeStorage.getJSON<UserProfile | null>(PROFILE_STORAGE_KEY, null);
   }, []);
 
   // Save profile to localStorage (fallback)
   const saveProfileToStorage = useCallback((profile: UserProfile) => {
-    try {
-      localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
-    } catch (e) {
-      console.error('[UserProfile] Error saving to localStorage:', e);
-    }
+    safeStorage.setJSON(PROFILE_STORAGE_KEY, profile);
   }, []);
 
   // Fetch profile from API with timeout, fallback to localStorage

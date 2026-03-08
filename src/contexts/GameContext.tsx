@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useClerkAuth } from '@/contexts/ClerkAuthContext';
+import { safeStorage } from '@/utils/safeStorage';
 
 const SESSION_KEY = 'wojak_game_session';
 const GUEST_ID_KEY = 'wojak_guest_id';
@@ -31,18 +32,13 @@ function generateRandomId(): string {
 
 // Generate or retrieve stable guest ID
 function getGuestId(): string {
-  try {
-    let id = localStorage.getItem(GUEST_ID_KEY);
-    if (!id || !/^guest_[a-z0-9]{16}$/.test(id)) {
-      // Generate new ID if missing or invalid format
-      id = 'guest_' + generateRandomId();
-      localStorage.setItem(GUEST_ID_KEY, id);
-    }
-    return id;
-  } catch {
-    // Fallback if localStorage not available - still generate valid format
-    return 'guest_' + generateRandomId();
+  let id = safeStorage.getItem(GUEST_ID_KEY);
+  if (!id || !/^guest_[a-z0-9]{16}$/.test(id)) {
+    // Generate new ID if missing or invalid format
+    id = 'guest_' + generateRandomId();
+    safeStorage.setItem(GUEST_ID_KEY, id);
   }
+  return id;
 }
 
 
