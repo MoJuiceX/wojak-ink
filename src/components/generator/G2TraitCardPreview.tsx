@@ -12,6 +12,7 @@ import { getDerivedColor, getFlagSvgDataUrl } from '@/services/canvasRenderer';
 import { DEFAULT_CLOTHES_PATH, DEFAULT_BASE_PATH, DEFAULT_MOUTHBASE_PATH } from '@/lib/layerRegistry';
 import { getFillSlotBehavior, type DerivedFillSlotConfig } from '@/lib/g2FillTreatments';
 import { G2_LAYER_BASE, COIN_LOGOS_BASE } from '@/config/layerAssetBase';
+import { handleTraitImgError } from '@/utils/traitImgError';
 
 const G2_BASE_PATH = G2_LAYER_BASE;
 const DEFAULT_MOUTH_PATH = DEFAULT_MOUTHBASE_PATH;
@@ -20,7 +21,7 @@ const DEFAULT_MOUTH_PATH = DEFAULT_MOUTHBASE_PATH;
 
 /** Full-size absolutely-positioned image */
 function Img({ src, alt = '' }: { src: string; alt?: string }) {
-  return <img src={src} alt={alt} className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" loading="lazy" />;
+  return <img src={src} alt={alt} className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" loading="lazy" onError={handleTraitImgError} />;
 }
 
 /** Color overlay masked to a fill image (multiply blend) */
@@ -68,7 +69,7 @@ interface PreviewProps {
 }
 
 function renderLivePreview(url: string, name: string) {
-  return <img src={url} alt={name} className="absolute inset-0 w-full h-full object-contain" crossOrigin="anonymous" loading="lazy" />;
+  return <img src={url} alt={name} className="absolute inset-0 w-full h-full object-contain" crossOrigin="anonymous" loading="lazy" onError={handleTraitImgError} />;
 }
 
 function renderNinjaTurtleFit(

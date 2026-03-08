@@ -13,6 +13,7 @@ import {
   type MaskCategory,
   type MaskVariant,
 } from './maskData';
+import { handleTraitImgError } from '@/utils/traitImgError';
 
 export interface MaskVariantPickerProps {
   selectedPath: string | undefined;
@@ -65,6 +66,7 @@ export function MaskVariantPicker({ selectedPath, onSelect }: MaskVariantPickerP
                   style={{ background: 'var(--color-surface)' }}
                   crossOrigin="anonymous"
                   loading="lazy"
+                  onError={handleTraitImgError}
                 />
                 <div className="flex-1 text-left">
                   <div className="text-sm font-medium">{category.label}</div>
@@ -110,6 +112,7 @@ export function MaskVariantPicker({ selectedPath, onSelect }: MaskVariantPickerP
                           className="w-full h-full object-contain"
                           crossOrigin="anonymous"
                           loading="lazy"
+                          onError={handleTraitImgError}
                         />
                         {isVariantSelected && (
                           <div
