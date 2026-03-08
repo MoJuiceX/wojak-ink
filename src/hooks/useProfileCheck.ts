@@ -9,6 +9,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/clerkSafe';
 import { useAuthenticatedFetch } from './useAuthenticatedFetch';
+import { API_ENDPOINTS } from '@/services/constants';
 
 // Check if Clerk is configured
 const CLERK_ENABLED = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -46,7 +47,7 @@ export function useProfileCheck(): UseProfileCheckResult {
     }
 
     try {
-      const response = await authenticatedFetch('/api/profile', { signal });
+      const response = await authenticatedFetch(API_ENDPOINTS.profile, { signal });
 
       if (response.ok) {
         const data = await response.json();

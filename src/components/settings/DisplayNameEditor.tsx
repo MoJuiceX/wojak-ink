@@ -9,6 +9,7 @@ import { useOptionalGame } from '@/contexts/GameContext';
 import { settingsSectionVariants } from '@/config/settingsAnimations';
 import { validateDIDName } from '@/lib/nameGenerator';
 import { useAuthenticatedFetch } from '@/hooks/useAuthenticatedFetch';
+import { API_ENDPOINTS } from '@/services/constants';
 
 const SOURCE_LABELS: Record<string, string> = {
   custom: 'Custom',
@@ -37,7 +38,7 @@ export function DisplayNameEditor() {
   const fetchDisplayName = useCallback(async () => {
     if (!did) return;
     try {
-      const res = await fetch(`/api/profile/display-name?did=${encodeURIComponent(did)}`);
+      const res = await fetch(`${API_ENDPOINTS.profileDisplayName}?did=${encodeURIComponent(did)}`);
       if (res.ok) {
         const data = await res.json();
         setDisplayName(data.displayName || '');
@@ -66,7 +67,7 @@ export function DisplayNameEditor() {
     setSuccess(false);
 
     try {
-      const res = await authenticatedFetch('/api/profile/display-name', {
+      const res = await authenticatedFetch(API_ENDPOINTS.profileDisplayName, {
         method: 'PUT',
         body: JSON.stringify({
           did,

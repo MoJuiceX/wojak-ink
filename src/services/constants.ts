@@ -80,6 +80,53 @@ export function getMintGardenWalletUrl(address: string): string {
   return `https://mintgarden.io/addresses/${address}`;
 }
 
+// ============ Internal API Endpoints ============
+// Only endpoints used in 2+ files are centralized here.
+
+export const API_ENDPOINTS = {
+  // Mint
+  mintPricing: '/api/mint/pricing',
+
+  // Credits
+  creditsBalance: '/api/credits/balance',
+
+  // Shop
+  shopConsumables: '/api/shop/consumables',
+
+  // Inventory
+  inventory: '/api/inventory',
+
+  // Profile
+  profile: '/api/profile',
+  profileDisplayName: '/api/profile/display-name',
+
+  // Game
+  gameMe: '/api/game/me',
+  gamePlayer: '/api/game/player',
+
+  gameLinkDid: '/api/game/link-did',
+  gameCollection: '/api/game/collection',
+  gameLeaderboard: '/api/game/leaderboard',
+  gameBattleList: '/api/game/battle-list',
+  gameBattleQueue: '/api/game/battle-queue',
+
+  // Fight Club
+  fightClubMyScore: '/api/fight-club/my-score',
+
+  // Combat
+  combatFighter: '/api/combat/fighter',
+  combatBattle: '/api/combat/battle',
+
+  // Subscription
+  subscriptionStatus: '/api/subscription/status',
+
+  // Leaderboard
+  leaderboard: '/api/leaderboard',
+
+  // Scores
+  scores: '/api/scores',
+} as const;
+
 // ============ Cache Durations ============
 
 export const CACHE_DURATIONS = {

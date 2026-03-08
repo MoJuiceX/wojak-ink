@@ -12,6 +12,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Crown, Clock, Zap } from 'lucide-react';
 import { useSageWallet } from '@/sage-wallet';
 import { useToast } from '@/contexts/ToastContext';
+import { API_ENDPOINTS } from '@/services/constants';
 
 interface SubscriptionStatus {
   tier: 'trial' | 'free' | 'premium';
@@ -42,7 +43,7 @@ export function SubscriptionBanner({ playerDid }: SubscriptionBannerProps) {
     queryKey: ['subscription-status', playerDid],
     queryFn: async () => {
       if (!playerDid) return null;
-      const res = await fetch(`/api/subscription/status?did=${encodeURIComponent(playerDid)}`);
+      const res = await fetch(`${API_ENDPOINTS.subscriptionStatus}?did=${encodeURIComponent(playerDid)}`);
       if (!res.ok) throw new Error('Failed to fetch subscription');
       const data = await res.json();
       return data as SubscriptionStatus;

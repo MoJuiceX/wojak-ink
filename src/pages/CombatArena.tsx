@@ -20,6 +20,7 @@ import { AgentSetupModal } from '@/components/combat/AgentSetupModal';
 import { BattleCounter } from '@/components/combat/BattleCounter';
 import { AgentProvider, useAgent } from '@/contexts/AgentContext';
 import { useSageWallet } from '@/sage-wallet';
+import { API_ENDPOINTS } from '@/services/constants';
 import type { CombatType } from '@/lib/combat/types';
 
 interface FighterSummary {
@@ -65,7 +66,7 @@ function CombatArenaInner() {
     if (!ownerDid) return;
     setIsLoadingFighters(true);
 
-    fetch(`/api/combat/fighter?ownerDid=${encodeURIComponent(ownerDid)}`)
+    fetch(`${API_ENDPOINTS.combatFighter}?ownerDid=${encodeURIComponent(ownerDid)}`)
       .then((res) => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
       .then((data) => {
         const list = data.fighters ?? [];

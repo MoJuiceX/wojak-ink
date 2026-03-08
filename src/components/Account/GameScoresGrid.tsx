@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react';
 import { Trophy, Hash } from 'lucide-react';
 import { MINI_GAMES } from '@/config/games';
+import { API_ENDPOINTS } from '@/services/constants';
 import './Account.css';
 
 interface GameScore {
@@ -41,7 +42,7 @@ export function GameScoresGrid({ userId, scores: initialScores }: GameScoresGrid
 
     async function fetchScores() {
       try {
-        const response = await fetch(`/api/scores/${userId}`);
+        const response = await fetch(`${API_ENDPOINTS.scores}/${userId}`);
         if (response.ok) {
           const data = await response.json();
           setScores(data.scores || []);

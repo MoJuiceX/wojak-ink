@@ -1,6 +1,7 @@
 // Game Leaderboard — Players and Top Wojaks tabs with podium + list.
 import { useState, useEffect, useCallback } from 'react';
 import { useGame } from '@/contexts/GameContext';
+import { API_ENDPOINTS } from '@/services/constants';
 import { GamePodium } from '@/components/game/GamePodium';
 import { GameLeaderboardList } from '@/components/game/GameLeaderboardList';
 import { GamePositionBar } from '@/components/game/GamePositionBar';
@@ -58,7 +59,7 @@ function LeaderboardContent() {
     setPlayersLoading(true);
     setPlayersError(false);
     try {
-      const res = await fetch(`/api/game/leaderboard?limit=50&offset=${offset}`);
+      const res = await fetch(`${API_ENDPOINTS.gameLeaderboard}?limit=50&offset=${offset}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.success) {

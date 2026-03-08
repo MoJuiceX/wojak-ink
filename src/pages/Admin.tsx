@@ -9,6 +9,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useLayout } from '@/hooks/useLayout';
+import { API_ENDPOINTS } from '@/services/constants';
 
 
 // ─── Types ───
@@ -530,7 +531,7 @@ export default function Admin() {
       const authHeaders = { 'Authorization': `Bearer ${adminSecret}` };
 
       const [pricingRes, mintsRes, creditsRes, flaggedRes] = await Promise.all([
-        fetch('/api/mint/pricing'),
+        fetch(API_ENDPOINTS.mintPricing),
         fetch('/api/admin/recent-mints?limit=20', { headers: authHeaders }),
         fetch('/api/admin/credit-stats', { headers: authHeaders }),
         fetch('/api/mint/admin/flagged', { headers: authHeaders }),

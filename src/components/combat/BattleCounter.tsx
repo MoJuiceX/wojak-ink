@@ -8,6 +8,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Zap, Clock, Crown } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { API_ENDPOINTS } from '@/services/constants';
 
 interface SubscriptionStatus {
   tier: 'trial' | 'free' | 'premium';
@@ -27,7 +28,7 @@ export function BattleCounter({ playerDid }: BattleCounterProps) {
     queryKey: ['subscription-status', playerDid],
     queryFn: async () => {
       if (!playerDid) return null;
-      const res = await fetch(`/api/subscription/status?did=${encodeURIComponent(playerDid)}`);
+      const res = await fetch(`${API_ENDPOINTS.subscriptionStatus}?did=${encodeURIComponent(playerDid)}`);
       if (!res.ok) throw new Error('Failed to fetch subscription');
       const data = await res.json();
       return data as SubscriptionStatus;

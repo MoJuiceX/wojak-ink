@@ -33,6 +33,7 @@ import { useIsMobile } from '../../hooks/useMediaQuery';
 import type { GameId } from '../../types/leaderboard';
 import { GAME_NAMES, ACTIVE_GAME_IDS, DISABLED_GAME_IDS } from '../../types/leaderboard';
 import { CombatLeaderboard } from '../combat';
+import { API_ENDPOINTS } from '@/services/constants';
 import './Leaderboard.css';
 import './MobilePodium.css';
 
@@ -178,7 +179,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
     requestAbortRef.current = controller;
 
     try {
-      const response = await fetch(`/api/leaderboard/${gameId}?limit=100&timeframe=${tf}`, {
+      const response = await fetch(`${API_ENDPOINTS.leaderboard}/${gameId}?limit=100&timeframe=${tf}`, {
         signal: controller.signal,
       });
       if (!response.ok) {

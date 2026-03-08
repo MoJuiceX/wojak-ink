@@ -7,7 +7,7 @@
  */
 
 import { useLocation, useNavigate } from 'react-router-dom';
-import { MINTGARDEN_COLLECTION_URL } from '@/services/constants';
+import { MINTGARDEN_COLLECTION_URL, API_ENDPOINTS } from '@/services/constants';
 import { lazy, Suspense, memo, useState, useCallback, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Swords, ExternalLink, Wallet, Info } from 'lucide-react';
@@ -58,7 +58,7 @@ function useFloorPrice() {
   return useQuery({
     queryKey: ['floor-price'],
     queryFn: async () => {
-      const res = await fetch('/api/mint/pricing');
+      const res = await fetch(API_ENDPOINTS.mintPricing);
       if (!res.ok) return null;
       const data = await res.json();
       return data.floorPrice as number | null;
@@ -73,7 +73,7 @@ function usePlayerDid(walletAddress: string | null) {
     queryKey: ['player-did', walletAddress],
     queryFn: async () => {
       if (!walletAddress) return null;
-      const res = await fetch(`/api/game/player?wallet=${encodeURIComponent(walletAddress)}`);
+      const res = await fetch(`${API_ENDPOINTS.gamePlayer}?wallet=${encodeURIComponent(walletAddress)}`);
       if (!res.ok) return null;
       const data = await res.json();
       return data.player?.did as string | null;

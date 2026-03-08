@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useGame } from '@/contexts/GameContext';
 import { useSageWallet } from '@/sage-wallet';
+import { API_ENDPOINTS } from '@/services/constants';
 import { BattleCard } from './BattleCard';
 import { BattleQueuePanel } from './BattleQueuePanel';
 
@@ -52,7 +53,7 @@ export function BattleView() {
     try {
       const params = new URLSearchParams({ status: 'active', limit: '20' });
       if (player?.did) params.set('voterDid', player.did);
-      const res = await fetch(`/api/game/battle-list?${params}`);
+      const res = await fetch(`${API_ENDPOINTS.gameBattleList}?${params}`);
       const data = await res.json();
       if (data.success) {
         setBattles(data.battles);
@@ -67,7 +68,7 @@ export function BattleView() {
   const loadHistory = useCallback(async (offset: number, append: boolean) => {
     try {
       const params = new URLSearchParams({ status: 'history', limit: '10', offset: String(offset) });
-      const res = await fetch(`/api/game/battle-list?${params}`);
+      const res = await fetch(`${API_ENDPOINTS.gameBattleList}?${params}`);
       const data = await res.json();
       if (data.success) {
         const newBattles = data.battles as Battle[];
@@ -95,7 +96,7 @@ export function BattleView() {
     setCancellingNft(nftId);
     try {
       const headers = await getAuthHeaders();
-      const res = await fetch('/api/game/battle-queue', {
+      const res = await fetch(API_ENDPOINTS.gameBattleQueue, {
         method: 'DELETE',
         headers,
         body: JSON.stringify({ did: player.did, nftId }),

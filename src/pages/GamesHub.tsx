@@ -32,6 +32,7 @@ import { useFlickVoting } from '@/hooks/useFlickVoting';
 import { SoundManager } from '@/systems/audio';
 import '@/styles/voting.css';
 import { PageSEO } from '@/components/seo';
+import { API_ENDPOINTS } from '@/services/constants';
 
 const LEADERBOARD_EXCLUDE_GAMES = ['combat'];
 
@@ -82,7 +83,7 @@ export default function GamesHub() {
         const token = await getToken();
         if (!token) return;
 
-        const res = await fetch('/api/shop/consumables', {
+        const res = await fetch(API_ENDPOINTS.shopConsumables, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -275,7 +276,7 @@ export default function GamesHub() {
       try {
         const token = await getToken();
         if (token) {
-          const res = await fetch('/api/shop/consumables', {
+          const res = await fetch(API_ENDPOINTS.shopConsumables, {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (res.ok) {

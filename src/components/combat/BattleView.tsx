@@ -31,6 +31,7 @@ import { getBaseStats } from '@/lib/combat/data/base-stats';
 import { calculateHP } from '@/lib/combat/stat-calculator';
 import { getMoveById } from '@/lib/combat/data/moves';
 import { TYPE_EFFECTS } from '@/lib/combat/particles';
+import { API_ENDPOINTS } from '@/services/constants';
 
 // ── Interfaces ──────────────────────────────────────────────────────────────
 
@@ -363,7 +364,7 @@ export function BattleView({ battleId, playerNftId, staticBattleData, autoPlay, 
   // ── Fetch battle state ──────────────────────────────────────────────────
   const fetchBattle = useCallback(async () => {
     try {
-      const res = await fetch(`/api/combat/battle?id=${battleId}`);
+      const res = await fetch(`${API_ENDPOINTS.combatBattle}?id=${battleId}`);
       if (!res.ok) {
         setError(`Battle fetch failed (${res.status})`);
         return;

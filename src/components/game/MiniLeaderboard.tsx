@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useGame } from '@/contexts/GameContext';
+import { API_ENDPOINTS } from '@/services/constants';
 
 interface LeaderboardEntry {
   rank: number;
@@ -30,7 +31,7 @@ export function MiniLeaderboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/game/leaderboard?limit=10')
+    fetch(`${API_ENDPOINTS.gameLeaderboard}?limit=10`)
       .then(res => res.json())
       .then(data => {
         if (data.success) setEntries(data.entries);

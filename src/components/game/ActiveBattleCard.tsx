@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Swords } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { API_ENDPOINTS } from '@/services/constants';
 
 const FALLBACK_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' fill='%2312121a'%3E%3Crect width='200' height='200' rx='14'/%3E%3Ctext x='100' y='108' text-anchor='middle' fill='%23606070' font-size='14' font-family='system-ui'%3EImage unavailable%3C/text%3E%3C/svg%3E";
 
@@ -40,7 +41,7 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/game/battle-list?voterDid=${did}&status=active`)
+    fetch(`${API_ENDPOINTS.gameBattleList}?voterDid=${did}&status=active`)
       .then(r => r.json())
       .then(data => {
         if (!cancelled && data.success) setBattles(data.battles || []);

@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { Trophy } from 'lucide-react';
 import { Avatar } from '@/components/Avatar/Avatar';
 import { GAME_NAMES, type GameId } from '@/types/leaderboard';
+import { API_ENDPOINTS } from '@/services/constants';
 
 interface TopScore {
   gameId: GameId;
@@ -39,7 +40,7 @@ export function LeaderboardPanel() {
     // Fetch top score per game from server (already ordered by popularity)
     const fetchTopScores = async () => {
       try {
-        const response = await fetch('/api/leaderboard/top-per-game');
+        const response = await fetch(`${API_ENDPOINTS.leaderboard}/top-per-game`);
         if (!response.ok) throw new Error('Failed to fetch');
 
         const data = await response.json();

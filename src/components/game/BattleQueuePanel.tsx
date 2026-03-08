@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useGame } from '@/contexts/GameContext';
+import { API_ENDPOINTS } from '@/services/constants';
 import { BattleNftPickerModal } from './BattleNftPickerModal';
 
 interface OwnedNft {
@@ -32,7 +33,7 @@ export function BattleQueuePanel({ onQueued, queuedNftIds = [] }: BattleQueuePan
   useEffect(() => {
     if (!player?.did) return;
     queueMicrotask(() => setLoading(true));
-    fetch(`/api/game/collection?did=${player.did}`)
+    fetch(`${API_ENDPOINTS.gameCollection}?did=${player.did}`)
       .then(r => r.json())
       .then(data => {
         if (data.success && data.nfts) {
@@ -48,7 +49,7 @@ export function BattleQueuePanel({ onQueued, queuedNftIds = [] }: BattleQueuePan
 
     try {
       const headers = await getAuthHeaders();
-      const res = await fetch('/api/game/battle-queue', {
+      const res = await fetch(API_ENDPOINTS.gameBattleQueue, {
         method: 'POST',
         headers,
         body: JSON.stringify({
