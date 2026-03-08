@@ -40,9 +40,15 @@ PINATA_GATEWAY = "bronze-used-crow-589.mypinata.cloud"
 # Example: https://media.wojak.ink/farmers-plot
 # FARMERS_PLOT_MEDIA_BASE_URL = "https://media.wojak.ink/farmers-plot"
 
+# R2 Bucket for AI-enhanced images
+[[r2_buckets]]
+binding = "AI_EDITS_BUCKET"
+bucket_name = "wojak-ai-edits"
+
 # Secrets (set via `wrangler pages secret put --project-name=wojak-ink` or Cloudflare Dashboard):
 # - CLERK_DOMAIN: Your Clerk domain (e.g., your-app.clerk.accounts.dev)
 # - CHAT_JWT_SECRET: Secret for signing chat tokens (generate with: openssl rand -base64 32)
 # - PINATA_JWT: Pinata API JWT for IPFS uploads (already set)
 # - MINTGARDEN_API_KEY: MintGarden Dynamic Minting API key (run: wrangler pages secret put MINTGARDEN_API_KEY)
+# - REVE_API_KEY: Reve AI Edit API key (run: wrangler pages secret put REVE_API_KEY)
 # - CREATOR_PAYOUT_ADDRESS: set in Dashboard Variables (paid-mint XCH recipient). If unset, code uses TREASURY_ADDRESS.
