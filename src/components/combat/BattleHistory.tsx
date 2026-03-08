@@ -44,18 +44,25 @@ export function BattleHistory({ nftId, limit = 20, onSelectBattle }: BattleHisto
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     (async () => {
       try {
-        const res = await fetch(`/api/combat/history?nftId=${nftId}&limit=${limit}`);
+        const res = await fetch(`/api/combat/history?nftId=${nftId}&limit=${limit}`, {
+          signal: controller.signal,
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        setBattles(data.battles ?? []);
+        if (!controller.signal.aborted) setBattles(data.battles ?? []);
       } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
         console.error('[BattleHistory] Fetch error:', err);
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     })();
+
+    return () => controller.abort();
   }, [nftId, limit]);
 
   if (isLoading) {

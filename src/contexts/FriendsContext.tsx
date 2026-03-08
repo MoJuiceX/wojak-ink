@@ -88,14 +88,17 @@ export function FriendsProvider({ children }: { children: React.ReactNode }) {
     }
 
     const currentUserId = userId; // Capture for async closure
+    let cancelled = false;
 
     async function loadFriends() {
       setIsLoading(true);
       try {
         // Try loading from database first (with auth)
         const response = await authFetch('/api/friends');
+        if (cancelled) return;
         if (response.ok) {
           const data = await response.json();
+          if (cancelled) return;
           const friendIds = data.friendIds || [];
           setFriends(friendIds);
           // Update localStorage cache
@@ -108,6 +111,8 @@ export function FriendsProvider({ children }: { children: React.ReactNode }) {
       } catch {
         // intentionally empty
       }
+
+      if (cancelled) return;
 
       // Fallback to localStorage
       const stored = localStorage.getItem(FRIENDS_STORAGE_KEY);
@@ -124,6 +129,7 @@ export function FriendsProvider({ children }: { children: React.ReactNode }) {
     }
 
     loadFriends();
+    return () => { cancelled = true; };
   }, [isSignedIn, userId, saveFriendsToStorage, authFetch]);
 
   // Fetch friend profiles when friends list changes
@@ -136,6 +142,7 @@ export function FriendsProvider({ children }: { children: React.ReactNode }) {
 
     // Reset profilesLoaded when friends change
     setProfilesLoaded(false);
+    const controller = new AbortController();
 
     async function fetchProfiles() {
       setIsLoading(true);
@@ -144,7 +151,9 @@ export function FriendsProvider({ children }: { children: React.ReactNode }) {
         const profiles = await Promise.all(
           friends.map(async (friendId) => {
             try {
-              const response = await fetch(`/api/profile/${friendId}`);
+              const response = await fetch(`/api/profile/${friendId}`, {
+                signal: controller.signal,
+              });
               if (!response.ok) {
                 const errorText = await response.text();
                 console.warn(`[Friends] Profile fetch failed for ${friendId}:`, response.status, errorText);
@@ -157,22 +166,28 @@ export function FriendsProvider({ children }: { children: React.ReactNode }) {
                 avatar: data.avatar,
               } as UserSummary;
             } catch (err) {
+              if (err instanceof DOMException && err.name === 'AbortError') return null;
               console.warn(`[Friends] Profile fetch error for ${friendId}:`, err);
               return null;
             }
           })
         );
+        if (controller.signal.aborted) return;
         const validProfiles = profiles.filter(Boolean) as UserSummary[];
         setFriendProfiles(validProfiles);
       } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
         console.error('[Friends] Failed to fetch friend profiles:', error);
       } finally {
-        setIsLoading(false);
-        setProfilesLoaded(true);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+          setProfilesLoaded(true);
+        }
       }
     }
 
     fetchProfiles();
+    return () => controller.abort();
   }, [friends]);
 
   // Add friend - saves to both backend (primary) and localStorage (cache)

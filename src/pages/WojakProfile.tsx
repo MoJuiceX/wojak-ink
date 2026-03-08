@@ -61,18 +61,31 @@ function ProfileContent() {
 
   useEffect(() => {
     if (!edition) return;
+    const controller = new AbortController();
+
     queueMicrotask(() => {
-      setLoading(true);
-      setError(false);
+      if (!controller.signal.aborted) {
+        setLoading(true);
+        setError(false);
+      }
     });
-    fetch(`/api/game/wojak/${edition}`)
-      .then(r => r.json())
+
+    fetch(`/api/game/wojak/${edition}`, { signal: controller.signal })
+      .then(r => { if (!r.ok) throw new Error('Failed to load wojak'); return r.json(); })
       .then(d => {
+        if (controller.signal.aborted) return;
         if (d.success) setData(d);
         else setError(true);
       })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+      .catch(err => {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        setError(true);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
+    return () => controller.abort();
   }, [edition]);
 
   if (loading) {

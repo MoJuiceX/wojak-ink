@@ -55,7 +55,12 @@ export const FinalCTA: React.FC = () => {
   const [leftImages, setLeftImages] = useState<string[]>(() => getRandomImages(3, 0));
   const [rightImages, setRightImages] = useState<string[]>(() => getRandomImages(3, 5));
 
-  // Rotate images
+  // Rotate images — uses refs to avoid resetting the interval on every state change
+  const leftImagesRef = React.useRef(leftImages);
+  const rightImagesRef = React.useRef(rightImages);
+  useEffect(() => { leftImagesRef.current = leftImages; }, [leftImages]);
+  useEffect(() => { rightImagesRef.current = rightImages; }, [rightImages]);
+
   useEffect(() => {
     if (prefersReducedMotion) return;
 
@@ -66,7 +71,8 @@ export const FinalCTA: React.FC = () => {
       setter(prev => {
         const newImages = [...prev];
         const randomIndex = Math.floor(Math.random() * 3);
-        const allCurrentImages = [...leftImages, ...rightImages];
+        const otherSide = side === 'left' ? rightImagesRef.current : leftImagesRef.current;
+        const allCurrentImages = [...prev, ...otherSide];
         const currentSet = new Set(allCurrentImages);
         const available = CTA_IMAGES.filter(img => !currentSet.has(img));
         if (available.length > 0) {
@@ -77,7 +83,7 @@ export const FinalCTA: React.FC = () => {
     }, 7000);
 
     return () => clearInterval(interval);
-  }, [prefersReducedMotion, leftImages, rightImages]);
+  }, [prefersReducedMotion]);
 
   return (
     <div className="final-cta-container">
@@ -177,11 +183,12 @@ export const FinalCTA: React.FC = () => {
         <p>Become part of the Wojak Farmer's Plot community</p>
 
         <motion.button
+          type="button"
           className="enter-grove-btn large"
           onClick={() => navigate('/gallery')}
           whileHover={{
             scale: 1.05,
-            boxShadow: '0 0 50px rgba(249, 115, 22, 0.6)',
+            boxShadow: '0 0 50px rgba(255, 107, 0, 0.6)',
           }}
           whileTap={{ scale: 0.95 }}
         >

@@ -34,23 +34,28 @@ export function DisplayNameEditor() {
   const [success, setSuccess] = useState(false);
 
   // Fetch current display name
-  const fetchDisplayName = useCallback(async () => {
+  const fetchDisplayName = useCallback(async (signal?: AbortSignal) => {
     if (!did) return;
     try {
-      const res = await fetch(`/api/profile/display-name?did=${encodeURIComponent(did)}`);
+      const res = await fetch(`/api/profile/display-name?did=${encodeURIComponent(did)}`, { signal });
+      if (signal?.aborted) return;
       if (res.ok) {
         const data = await res.json();
+        if (signal?.aborted) return;
         setDisplayName(data.displayName || '');
         setNameSource(data.source);
         setInputValue(data.displayName || '');
       }
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
       console.error('[DisplayNameEditor] Fetch error:', err);
     }
   }, [did]);
 
   useEffect(() => {
-    fetchDisplayName();
+    const controller = new AbortController();
+    fetchDisplayName(controller.signal);
+    return () => controller.abort();
   }, [fetchDisplayName]);
 
   // Handle save

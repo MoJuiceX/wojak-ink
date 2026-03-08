@@ -32,19 +32,29 @@ export function CombatLeaderboard() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
     (async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`/api/combat/leaderboard?sortBy=${sortBy}&limit=50`);
+        const res = await fetch(`/api/combat/leaderboard?sortBy=${sortBy}&limit=50`, {
+          signal: controller.signal,
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        setFighters(data.fighters ?? []);
+        if (!controller.signal.aborted) {
+          setFighters(data.fighters ?? []);
+        }
       } catch (err) {
-        console.error('[CombatLeaderboard] Fetch error:', err);
+        if (!controller.signal.aborted) {
+          console.error('[CombatLeaderboard] Fetch error:', err);
+        }
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     })();
+    return () => controller.abort();
   }, [sortBy]);
 
   return (

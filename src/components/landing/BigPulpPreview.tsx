@@ -26,6 +26,7 @@ export const BigPulpPreview: React.FC = () => {
   useEffect(() => {
     const fullText = SAMPLE_INSIGHTS[insightIndex];
     let charIndex = 0;
+    let delayTimer: ReturnType<typeof setTimeout> | null = null;
     setDisplayText('');
 
     const typingInterval = setInterval(() => {
@@ -35,13 +36,16 @@ export const BigPulpPreview: React.FC = () => {
       } else {
         clearInterval(typingInterval);
         // Move to next insight after delay
-        setTimeout(() => {
+        delayTimer = setTimeout(() => {
           setInsightIndex((prev) => (prev + 1) % SAMPLE_INSIGHTS.length);
         }, 3000);
       }
     }, 50);
 
-    return () => clearInterval(typingInterval);
+    return () => {
+      clearInterval(typingInterval);
+      if (delayTimer) clearTimeout(delayTimer);
+    };
   }, [insightIndex]);
 
   return (
