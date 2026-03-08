@@ -27,6 +27,7 @@ import { AchievementsProvider } from '@/contexts/AchievementsContext';
 import { PreloadProvider } from '@/components/preload/PreloadProvider';
 import { SageWalletProvider } from '@/sage-wallet';
 import { MintProvider } from '@/contexts/MintContext';
+import { AIEnhanceProvider } from '@/contexts/AIEnhanceContext';
 import { SalesProvider } from '@/providers/SalesProvider';
 import { GlobalVideoPlayer } from '@/components/media/video/GlobalVideoPlayer';
 import StartupSequence from '@/components/StartupSequence';
@@ -611,6 +612,7 @@ function App() {
                 }}
               >
                 <MintProvider>
+                <AIEnhanceProvider>
                 <UserProfileProvider>
                   <FriendsProvider>
                     <AchievementsProvider>
@@ -620,6 +622,7 @@ function App() {
                     </AchievementsProvider>
                   </FriendsProvider>
                 </UserProfileProvider>
+                </AIEnhanceProvider>
                 </MintProvider>
               </SageWalletProvider>
             </BrowserRouter>
