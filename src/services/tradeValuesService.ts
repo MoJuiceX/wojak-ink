@@ -153,29 +153,6 @@ export async function refreshTradeValues(): Promise<TradeValuesData> {
   return fetchTradeValues();
 }
 
-/**
- * Get API status
- */
-export async function getAPIStatus(): Promise<{
-  status: string;
-  last_updated: string | null;
-  total_sales: number;
-  total_traits: number;
-}> {
-  try {
-    const response = await fetch(`${WORKER_API_URL}/status`);
-    if (!response.ok) throw new Error('Status check failed');
-    return await response.json();
-  } catch {
-    return {
-      status: 'offline',
-      last_updated: null,
-      total_sales: 0,
-      total_traits: 0,
-    };
-  }
-}
-
 // Cache for NFT metadata
 let nftMetadataCache: Array<{ edition: number; attributes: Array<{ trait_type: string; value: string }> }> | null = null;
 
