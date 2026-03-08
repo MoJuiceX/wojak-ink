@@ -1,0 +1,182 @@
+import {
+  jsonResponse,
+  errorResponse,
+  optionsResponse,
+  getAICreditBalance,
+  buildConstrainedPrompt,
+  AI_CATEGORIES,
+} from './_shared';
+import type { AIEnv, AICategory } from './_shared';
+
+const REVE_EDIT_URL = 'https://api.reve.com/v1/image/edit';
+const MAX_PROMPT_LENGTH = 200;
+
+export const onRequest: PagesFunction<AIEnv> = async (context) => {
+  const { request, env } = context;
+
+  if (request.method === 'OPTIONS') return optionsResponse();
+  if (request.method !== 'POST') return errorResponse('Method not allowed', 405);
+
+  // --- Parse body ---
+  let body: {
+    walletAddress?: string;
+    imageBase64?: string;
+    category?: string;
+    prompt?: string;
+    parentEnhancementId?: number;
+    baseLayersJson?: string;
+  };
+  try {
+    body = await request.json();
+  } catch {
+    return errorResponse('Invalid JSON', 400);
+  }
+
+  const { walletAddress, imageBase64, category, prompt, parentEnhancementId, baseLayersJson } = body;
+
+  // --- Validate ---
+  if (!walletAddress || walletAddress.length < 10) {
+    return errorResponse('Missing or invalid walletAddress', 400);
+  }
+  if (!imageBase64 || imageBase64.length < 100) {
+    return errorResponse('Missing or invalid imageBase64', 400);
+  }
+  if (!category || !AI_CATEGORIES[category as AICategory]) {
+    return errorResponse('Invalid category. Must be: clothes, head, facewear, background', 400);
+  }
+  if (!prompt || prompt.trim().length === 0 || prompt.length > MAX_PROMPT_LENGTH) {
+    return errorResponse(`Prompt is required (max ${MAX_PROMPT_LENGTH} characters)`, 400);
+  }
+  if (!env.REVE_API_KEY) {
+    return errorResponse('AI enhancement is not configured', 503);
+  }
+  if (!env.AI_EDITS_BUCKET) {
+    return errorResponse('Image storage is not configured', 503);
+  }
+
+  const cat = category as AICategory;
+  const trimmedPrompt = prompt.trim();
+
+  // --- Check balance ---
+  const balance = await getAICreditBalance(env.DB, walletAddress);
+  if (balance < 1) {
+    return errorResponse('Not enough AI credits. Buy more to continue.', 402);
+  }
+
+  // --- Build constrained prompt ---
+  const constrainedPrompt = buildConstrainedPrompt(cat, trimmedPrompt);
+
+  // --- Call Reve Edit API ---
+  let reveResponse: Response;
+  try {
+    reveResponse = await fetch(REVE_EDIT_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.REVE_API_KEY}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        edit_instruction: constrainedPrompt,
+        reference_image: imageBase64,
+      }),
+    });
+  } catch (err) {
+    console.error('Reve API network error:', err);
+    return errorResponse('AI service is unavailable. Try again.', 502);
+  }
+
+  if (reveResponse.status === 429) {
+    return errorResponse('Too many requests. Wait a moment and try again.', 429);
+  }
+
+  if (!reveResponse.ok) {
+    const errText = await reveResponse.text().catch(() => 'Unknown error');
+    console.error(`Reve API error ${reveResponse.status}:`, errText);
+    return errorResponse('AI enhancement failed. Try again.', 502);
+  }
+
+  let reveData: {
+    image?: string;
+    content_violation?: boolean;
+    request_id?: string;
+    version?: string;
+    credits_used?: number;
+    credits_remaining?: number;
+  };
+  try {
+    reveData = await reveResponse.json();
+  } catch {
+    return errorResponse('Invalid response from AI service.', 502);
+  }
+
+  // --- Content violation check ---
+  if (reveData.content_violation) {
+    return errorResponse('This edit was blocked by content policy. Try a different prompt.', 422);
+  }
+
+  if (!reveData.image) {
+    return errorResponse('AI service returned no image. Try again.', 502);
+  }
+
+  // --- Save to R2 ---
+  const enhancementId = Date.now(); // Temporary; will be replaced by DB insert ID
+  const r2Key = `ai-edits/${walletAddress}/${enhancementId}.png`;
+
+  try {
+    const imageBuffer = Uint8Array.from(atob(reveData.image), (c) => c.charCodeAt(0));
+    await env.AI_EDITS_BUCKET.put(r2Key, imageBuffer, {
+      httpMetadata: { contentType: 'image/png' },
+    });
+  } catch (err) {
+    console.error('R2 upload error:', err);
+    return errorResponse('Failed to save your edit. Try again.', 500);
+  }
+
+  // --- Record in D1 (enhancement + credit usage) ---
+  try {
+    const insertResult = await env.DB
+      .prepare(
+        `INSERT INTO ai_enhancements
+          (wallet_address, r2_key, category, prompt, constrained_prompt, reve_request_id, reve_version, parent_enhancement_id, base_layers_json)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      )
+      .bind(
+        walletAddress,
+        r2Key,
+        cat,
+        trimmedPrompt,
+        constrainedPrompt,
+        reveData.request_id ?? null,
+        reveData.version ?? null,
+        parentEnhancementId ?? null,
+        baseLayersJson ?? null,
+      )
+      .run();
+
+    const dbEnhancementId = insertResult.meta?.last_row_id;
+
+    await env.DB
+      .prepare('INSERT INTO ai_credit_usage (wallet_address, enhancement_id, credits_spent) VALUES (?, ?, 1)')
+      .bind(walletAddress, dbEnhancementId)
+      .run();
+  } catch (err) {
+    console.error('D1 insert error:', err);
+    // Image is saved to R2 but credit not deducted — acceptable state
+    // User got the image, we just failed to track it
+    return errorResponse('Edit succeeded but failed to record. Contact support.', 500);
+  }
+
+  // --- Return result ---
+  const newBalance = await getAICreditBalance(env.DB, walletAddress);
+
+  return jsonResponse({
+    imageBase64: reveData.image,
+    r2Key,
+    enhancementId: r2Key,
+    category: cat,
+    prompt: trimmedPrompt,
+    creditsRemaining: newBalance,
+    reveRequestId: reveData.request_id,
+  });
+};
