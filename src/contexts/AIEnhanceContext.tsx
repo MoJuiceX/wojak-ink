@@ -143,7 +143,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           walletAddress: address,
-          imageBase64,
+          imageBase64: imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64,
           category,
           prompt,
           parentEnhancementId: parentId,

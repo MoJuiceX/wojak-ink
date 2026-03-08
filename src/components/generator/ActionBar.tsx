@@ -232,9 +232,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       const reader = new FileReader();
       reader.onload = () => {
         const dataUrl = reader.result as string;
-        // Strip the data:image/png;base64, prefix
-        const base64 = dataUrl.split(',')[1];
-        setCanvasImageBase64(base64);
+        setCanvasImageBase64(dataUrl);
         openLightbox();
       };
       reader.readAsDataURL(blob);

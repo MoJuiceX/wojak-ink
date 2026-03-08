@@ -13,7 +13,7 @@ interface AIPromptBuilderProps {
 }
 
 export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
-  const { selectedCategory, submitEnhance, isEnhancing, enhanceError, clearError, balance } = useAIEnhance();
+  const { selectedCategory, submitEnhance, isEnhancing, enhanceError, clearError, balance, openShop } = useAIEnhance();
   const prefersReducedMotion = useReducedMotion();
   const [promptText, setPromptText] = useState('');
 
@@ -107,15 +107,26 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
       </div>
 
       {/* Submit button */}
-      <motion.button
-        className="btn btn-primary w-full"
-        onClick={handleSubmit}
-        disabled={!canSubmit}
-        whileHover={canSubmit && !prefersReducedMotion ? { scale: 1.02 } : {}}
-        whileTap={canSubmit && !prefersReducedMotion ? { scale: 0.98 } : {}}
-      >
-        {isEnhancing ? 'Enhancing...' : balance < 1 ? 'No credits — Buy more' : 'Enhance — 1 credit'}
-      </motion.button>
+      {balance < 1 ? (
+        <motion.button
+          className="btn btn-primary w-full"
+          onClick={openShop}
+          whileHover={!prefersReducedMotion ? { scale: 1.02 } : {}}
+          whileTap={!prefersReducedMotion ? { scale: 0.98 } : {}}
+        >
+          No credits — Buy more
+        </motion.button>
+      ) : (
+        <motion.button
+          className="btn btn-primary w-full"
+          onClick={handleSubmit}
+          disabled={!canSubmit}
+          whileHover={canSubmit && !prefersReducedMotion ? { scale: 1.02 } : {}}
+          whileTap={canSubmit && !prefersReducedMotion ? { scale: 0.98 } : {}}
+        >
+          {isEnhancing ? 'Enhancing...' : 'Enhance — 1 credit'}
+        </motion.button>
+      )}
     </div>
   );
 }
