@@ -5,14 +5,14 @@
  * Phase 1: Redesigned layout - 45/55 split on desktop, 3-col mobile grid.
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, RotateCcw, Images, Wand2 } from 'lucide-react';
 import './Generator.css';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { GeneratorProvider, useGenerator } from '@/contexts/GeneratorContext';
-import { useAIEnhance } from '@/contexts/AIEnhanceContext';
+import { AIEnhanceProvider, useAIEnhance } from '@/contexts/AIEnhanceContext';
 import {
   PreviewWithControls,
   LayerTabs,
@@ -25,8 +25,10 @@ import {
   GeneratorMobileColorPanel,
 } from '@/components/generator';
 import { MetadataPreview } from '@/components/generator/MetadataPreview';
-import { AICreationsGallery } from '@/components/generator/ai/AICreationsGallery';
 import { PageSEO } from '@/components/seo';
+
+// Lazy-load AI gallery — only shown when user opens it
+const AICreationsGallery = lazy(() => import('@/components/generator/ai/AICreationsGallery').then(m => ({ default: m.AICreationsGallery })));
 
 type RightPanelMode = 'colors' | 'metadata';
 
@@ -186,11 +188,15 @@ function GeneratorContent() {
         </div>
       </div>
 
-      {/* AI Creations Gallery — opened from AI mode overlay */}
-      <AICreationsGallery
-        isOpen={showCreationsGallery}
-        onClose={() => setShowCreationsGallery(false)}
-      />
+      {/* AI Creations Gallery — lazy-loaded, mounted only when open */}
+      {showCreationsGallery && (
+        <Suspense fallback={null}>
+          <AICreationsGallery
+            isOpen={showCreationsGallery}
+            onClose={() => setShowCreationsGallery(false)}
+          />
+        </Suspense>
+      )}
     </>
   );
 
@@ -232,7 +238,9 @@ function GeneratorContent() {
 export default function Generator() {
   return (
     <GeneratorProvider>
-      <GeneratorContent />
+      <AIEnhanceProvider>
+        <GeneratorContent />
+      </AIEnhanceProvider>
     </GeneratorProvider>
   );
 }

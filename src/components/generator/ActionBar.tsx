@@ -4,7 +4,7 @@
  * Control buttons for randomize, undo/redo, save, export, and MINT.
  */
 
-import { useState, useCallback, useEffect, useRef, useLayoutEffect, lazy } from 'react';
+import { useState, useCallback, useEffect, useRef, useLayoutEffect, lazy, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
