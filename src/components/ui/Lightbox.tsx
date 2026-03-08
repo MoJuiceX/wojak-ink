@@ -22,6 +22,8 @@ export interface LightboxProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
+  /** Custom header content — replaces the title text but keeps the close button */
+  headerContent?: React.ReactNode;
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'gallery';
   /** Extra class name applied to the .lightbox-content container */
@@ -43,6 +45,7 @@ export function Lightbox({
   isOpen,
   onClose,
   title,
+  headerContent,
   children,
   size = 'md',
   contentClassName,
@@ -167,8 +170,8 @@ export function Lightbox({
             tabIndex={-1}
             onKeyDown={handleKeyDown}
           >
-            {/* External close button (no title) — sits outside the box */}
-            {!title && (
+            {/* External close button (no title/headerContent) — sits outside the box */}
+            {!title && !headerContent && (
               <button
                 type="button"
                 className="lightbox-close lightbox-close--external"
@@ -181,11 +184,15 @@ export function Lightbox({
 
             <div className={`lightbox-content ${size === 'gallery' ? 'lightbox-gallery' : ''} ${contentClassName || ''}`}>
               {/* Header with inline close */}
-              {title && (
+              {(title || headerContent) && (
                 <div className="lightbox-header">
-                  <h2 id="lightbox-title" className="lightbox-title">
-                    {title}
-                  </h2>
+                  {headerContent ? (
+                    <div className="lightbox-header-custom">{headerContent}</div>
+                  ) : (
+                    <h2 id="lightbox-title" className="lightbox-title">
+                      {title}
+                    </h2>
+                  )}
                   <button
                     type="button"
                     className="lightbox-close"

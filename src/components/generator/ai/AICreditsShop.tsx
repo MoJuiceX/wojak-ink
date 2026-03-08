@@ -5,11 +5,14 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { useAIEnhance } from '@/contexts/AIEnhanceContext';
 import { AI_CREDIT_BUNDLES } from '@/types/aiEnhance';
+import { Sparkles } from 'lucide-react';
+
+const BASE_PRICE_PER_CREDIT = 0.08; // XCH — tier 1 single credit
 
 export function AICreditsShop() {
   const { isShopOpen, closeShop, balance, refetchBalance } = useAIEnhance();
   const prefersReducedMotion = useReducedMotion();
-  const [selectedTier, setSelectedTier] = useState('15'); // Default to POPULAR
+  const [selectedTier, setSelectedTier] = useState('15');
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const [purchaseSuccess, setPurchaseSuccess] = useState<string | null>(null);
@@ -27,7 +30,7 @@ export function AICreditsShop() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          walletAddress: 'TODO_WALLET', // Will be wired to actual wallet in integration
+          walletAddress: 'TODO_WALLET',
           tier: selectedBundle.tier,
         }),
       });
@@ -39,8 +42,6 @@ export function AICreditsShop() {
         return;
       }
 
-      // TODO: Integrate with wallet offer file acceptance flow
-      // For now, auto-confirm for development
       const confirmRes = await fetch('/api/ai/credits/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -68,49 +69,85 @@ export function AICreditsShop() {
     <Lightbox
       isOpen={isShopOpen}
       onClose={closeShop}
-      title="Buy AI Credits"
+      title="AI Credits"
       size="md"
     >
       <div className="flex flex-col gap-4">
-        {/* Current balance */}
-        <div className="text-center">
-          <span className="text-secondary text-sm">Current balance: </span>
-          <span className="font-semibold">{balance} credits</span>
+        {/* Hero balance + info */}
+        <div className="ai-shop-balance">
+          <div className="ai-shop-balance-icon">
+            <Sparkles size={18} />
+          </div>
+          <span className="ai-shop-balance-count">{balance}</span>
+          <span className="ai-shop-balance-label">
+            credit{balance !== 1 ? 's' : ''} remaining
+          </span>
+          <span className="ai-shop-info-pill">
+            1 credit = 1 enhancement
+          </span>
         </div>
 
         {/* Bundle list */}
         <div className="flex flex-col gap-2">
-          {AI_CREDIT_BUNDLES.map((bundle) => (
-            <motion.button
-              key={bundle.tier}
-              className={`ai-bundle-option ${selectedTier === bundle.tier ? 'ai-bundle-option--selected' : ''}`}
-              onClick={() => setSelectedTier(bundle.tier)}
-              whileHover={prefersReducedMotion ? {} : { scale: 1.01 }}
-              whileTap={prefersReducedMotion ? {} : { scale: 0.99 }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold">{bundle.credits} credit{bundle.credits !== 1 ? 's' : ''}</span>
-                  {bundle.badge && (
-                    <span className={`ai-bundle-badge ${bundle.badge === 'POPULAR' ? 'ai-bundle-badge--popular' : 'ai-bundle-badge--value'}`}>
-                      {bundle.badge}
+          {AI_CREDIT_BUNDLES.map((bundle) => {
+            const isSelected = selectedTier === bundle.tier;
+            const perCredit = bundle.priceXch / bundle.credits;
+            const savings =
+              bundle.credits > 1
+                ? (BASE_PRICE_PER_CREDIT * bundle.credits - bundle.priceXch).toFixed(2)
+                : null;
+
+            return (
+              <motion.button
+                key={bundle.tier}
+                className={`ai-shop-bundle ${isSelected ? 'ai-shop-bundle--selected' : ''}`}
+                onClick={() => setSelectedTier(bundle.tier)}
+                whileHover={prefersReducedMotion ? {} : { scale: 1.01 }}
+                whileTap={prefersReducedMotion ? {} : { scale: 0.99 }}
+              >
+                {/* Left: credits + badge */}
+                <div className="ai-shop-bundle-left">
+                  <span className="ai-shop-bundle-credits">
+                    {bundle.credits}
+                  </span>
+                  <div className="flex flex-col">
+                    <span className="ai-shop-bundle-label">
+                      credit{bundle.credits !== 1 ? 's' : ''}
+                    </span>
+                    {bundle.badge && (
+                      <span
+                        className={`ai-bundle-badge ${
+                          bundle.badge === 'POPULAR'
+                            ? 'ai-bundle-badge--popular'
+                            : 'ai-bundle-badge--value'
+                        }`}
+                      >
+                        {bundle.badge}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right: pricing details */}
+                <div className="ai-shop-bundle-right">
+                  <span className="ai-shop-bundle-price">
+                    {bundle.priceXch} XCH
+                  </span>
+                  <span className="ai-shop-bundle-per-credit">
+                    {perCredit.toFixed(3)} XCH/credit
+                  </span>
+                  {savings && Number(savings) > 0 && (
+                    <span className="ai-shop-bundle-savings">
+                      Save {savings} XCH
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  {bundle.discount && (
-                    <span className="text-xs" style={{ color: 'var(--color-success)' }}>
-                      {bundle.discount}
-                    </span>
-                  )}
-                  <span className="font-semibold">{bundle.priceXch} XCH</span>
-                </div>
-              </div>
-            </motion.button>
-          ))}
+              </motion.button>
+            );
+          })}
         </div>
 
-        {/* Error / Success messages */}
+        {/* Error / Success */}
         {purchaseError && (
           <p className="text-sm text-center" style={{ color: 'var(--color-error)' }}>
             {purchaseError}
@@ -135,8 +172,9 @@ export function AICreditsShop() {
             : `Buy ${selectedBundle?.credits ?? 0} credits \u2014 ${selectedBundle?.priceXch ?? 0} XCH`}
         </motion.button>
 
-        <p className="text-muted text-xs text-center">
-          1 credit = 1 AI enhancement. Credits are non-refundable.
+        {/* Disclaimer */}
+        <p className="text-muted text-xs text-center" style={{ opacity: 0.6 }}>
+          Credits are non-refundable. Powered by Reve AI.
         </p>
       </div>
     </Lightbox>

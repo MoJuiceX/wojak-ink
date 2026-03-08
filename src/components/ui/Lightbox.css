@@ -84,6 +84,11 @@
   margin: 0;
 }
 
+.lightbox-header-custom {
+  flex: 1;
+  min-width: 0;
+}
+
 /* Close Button */
 .lightbox-close {
   display: flex;
