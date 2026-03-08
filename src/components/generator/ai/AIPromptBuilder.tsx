@@ -280,11 +280,11 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
             <p className="text-sm">{selectedOption.label}</p>
           </div>
 
-          <hr style={{ borderColor: 'var(--color-border)' }} />
+          <hr className="ai-confirm-divider" />
 
           {/* Error */}
           {enhanceError && (
-            <p className="text-sm" style={{ color: 'var(--color-error)' }}>{enhanceError}</p>
+            <p className="text-sm text-error">{enhanceError}</p>
           )}
 
           {/* Action button */}

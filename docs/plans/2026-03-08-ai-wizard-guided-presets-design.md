@@ -99,7 +99,7 @@ All prefixed with the STYLE constant. All suffixed with preservation instruction
 const CATEGORY_TO_LAYERS: Record<AICategory, string[]> = {
   clothes: ['Clothes'],
   head: ['Head'],
-  facewear: ['Eye', 'Mask'],
+  facewear: ['Eyes', 'Mask'],
   background: ['Background'],
 };
 

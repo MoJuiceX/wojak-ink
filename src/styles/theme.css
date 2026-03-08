@@ -3659,6 +3659,12 @@ body {
   font-size: 0.8rem;
 }
 
+.ai-confirm-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 0;
+}
+
 .ai-confirm-disclaimer {
   font-size: 0.7rem;
   color: var(--color-text-muted);
