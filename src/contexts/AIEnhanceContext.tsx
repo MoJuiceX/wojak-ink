@@ -20,6 +20,8 @@ export interface AIEnhanceContextValue {
   setWizardStep: (step: AIWizardStep) => void;
   selectedCategory: AICategory | null;
   selectCategory: (cat: AICategory) => void;
+  selectedMode: 'enhance' | 'create_new' | null;
+  setSelectedMode: (mode: 'enhance' | 'create_new') => void;
 
   // Enhancement
   isEnhancing: boolean;
@@ -43,6 +45,9 @@ export interface AIEnhanceContextValue {
   isLoadingCreations: boolean;
   fetchCreations: () => Promise<void>;
 
+  // Load a gallery creation for further enhancement
+  loadImageForEnhancing: (imageDataUrl: string) => void;
+
   // Shop
   isShopOpen: boolean;
   openShop: () => void;
@@ -62,6 +67,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [wizardStep, setWizardStep] = useState<AIWizardStep>('category');
   const [selectedCategory, setSelectedCategory] = useState<AICategory | null>(null);
+  const [selectedMode, setSelectedMode] = useState<'enhance' | 'create_new' | null>(null);
 
   // Enhancement
   const [isEnhancing, setIsEnhancing] = useState(false);
@@ -119,6 +125,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   // --- Category ---
   const selectCategory = useCallback((cat: AICategory) => {
     setSelectedCategory(cat);
+    setSelectedMode(null);
     setWizardStep('prompt');
     setEnhanceError(null);
     setCurrentResult(null);
@@ -146,6 +153,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
           imageBase64: imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64,
           category,
           prompt,
+          mode: selectedMode ?? 'enhance',
           parentEnhancementId: parentId,
           baseLayersJson: layersJson,
         }),
@@ -172,7 +180,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsEnhancing(false);
     }
-  }, [address]);
+  }, [address, selectedMode]);
 
   // --- Accept result ---
   const acceptResult = useCallback(() => {
@@ -208,6 +216,17 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     }
   }, [address]);
 
+  // --- Load gallery creation for further enhancement ---
+  const loadImageForEnhancing = useCallback((imageDataUrl: string) => {
+    setEnhancedImage(imageDataUrl);
+    setEnhancedCategories(new Set()); // Reset — we don't know prior edits
+    setIsLightboxOpen(true);
+    setWizardStep('category');
+    setSelectedCategory(null);
+    setCurrentResult(null);
+    setEnhanceError(null);
+  }, []);
+
   // --- Shop ---
   const openShop = useCallback(() => setIsShopOpen(true), []);
   const closeShop = useCallback(() => setIsShopOpen(false), []);
@@ -223,6 +242,8 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     setWizardStep,
     selectedCategory,
     selectCategory,
+    selectedMode,
+    setSelectedMode,
     isEnhancing,
     enhanceError,
     clearError,
@@ -237,6 +258,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     creations,
     isLoadingCreations,
     fetchCreations,
+    loadImageForEnhancing,
     isShopOpen,
     openShop,
     closeShop,
