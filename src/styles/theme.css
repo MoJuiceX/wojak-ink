@@ -3545,12 +3545,126 @@ body {
   margin-bottom: var(--space-4);
 }
 
+/* === AI Enhance === */
+
 .ai-result-label {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 0.25rem 0;
+}
+
+.ai-category-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.ai-category-btn:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--glow-primary);
+}
+
+.ai-category-btn--enhanced {
+  border-color: var(--color-success);
+}
+
+.ai-preset-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-preset-btn:hover {
+  border-color: var(--color-primary);
+  background: rgba(255, 107, 0, 0.08);
+}
+
+.ai-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface) 25%,
+    rgba(255, 255, 255, 0.06) 50%,
+    var(--color-surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: ai-shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-lg);
+}
+
+@keyframes ai-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.ai-credits-badge {
+  background: rgba(255, 107, 0, 0.15);
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.ai-credits-badge:hover {
+  background: rgba(255, 107, 0, 0.25);
+}
+
+.ai-enhanced-banner {
+  background: rgba(255, 107, 0, 0.08);
+  border: 1px solid rgba(255, 107, 0, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 1rem;
+}
+
+.ai-bundle-option {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-bundle-option:hover {
+  border-color: var(--color-primary);
+}
+
+.ai-bundle-option--selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.ai-bundle-badge {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+}
+
+.ai-bundle-badge--popular {
+  background: rgba(255, 107, 0, 0.2);
+  color: var(--color-primary);
+}
+
+.ai-bundle-badge--value {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--color-success);
 }
 
 .response-text {
