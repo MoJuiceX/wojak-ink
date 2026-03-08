@@ -3,130 +3,320 @@
 import { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useAIEnhance } from '@/contexts/AIEnhanceContext';
-import { AI_PRESETS, getRandomPrompt } from '@/config/aiEnhancePresets';
+import { useGenerator } from '@/contexts/GeneratorContext';
+import { isSelectionPathEmpty } from '@/types/generator';
 import { AI_CATEGORIES } from '@/types/aiEnhance';
+import type { AICategory, AIStyleFamily, AIPresetOption } from '@/types/aiEnhance';
+import { AI_PRESET_CATALOG, getRandomPreset } from '@/config/aiEnhancePresets';
 
-const MAX_PROMPT_LENGTH = 200;
+type PromptSubStep = 'mode' | 'family' | 'option' | 'confirm';
+
+const CATEGORY_LAYER_KEYS: Record<AICategory, string[]> = {
+  clothes: ['Clothes'],
+  head: ['Head'],
+  facewear: ['Eye', 'Mask'],
+  background: ['Background'],
+};
+
+/** Extract a display name from a layer path like 'layers/Head/crown.png' -> 'Crown' */
+function layerDisplayName(path: string | undefined): string {
+  if (!path) return '';
+  const filename = path.split('/').pop()?.replace('.png', '')?.replace(/-/g, ' ') ?? '';
+  return filename.charAt(0).toUpperCase() + filename.slice(1);
+}
+
+/** Inline back button for internal sub-navigation */
+function BackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      className="text-secondary text-xs cursor-pointer hover:text-white mb-3 flex items-center gap-1"
+      onClick={onClick}
+    >
+      &larr; Back
+    </button>
+  );
+}
 
 interface AIPromptBuilderProps {
   currentImage: string | null;
 }
 
 export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
-  const { selectedCategory, submitEnhance, isEnhancing, enhanceError, clearError, balance, openShop } = useAIEnhance();
+  const {
+    selectedCategory,
+    selectedMode,
+    setSelectedMode,
+    setWizardStep,
+    submitEnhance,
+    isEnhancing,
+    enhanceError,
+    clearError,
+    balance,
+    openShop,
+  } = useAIEnhance();
+  const { selectedLayers } = useGenerator();
   const prefersReducedMotion = useReducedMotion();
-  const [promptText, setPromptText] = useState('');
+
+  // Determine if the user has a layer selected for this category
+  const hasLayer = (() => {
+    if (!selectedCategory) return false;
+    const keys = CATEGORY_LAYER_KEYS[selectedCategory];
+    return keys.some((k) => !isSelectionPathEmpty(selectedLayers[k]));
+  })();
+
+  // Should we skip the mode sub-step?
+  const shouldSkipMode = selectedCategory === 'background' || !hasLayer;
+
+  // Compute initial sub-step: if mode should be skipped, start at 'family'
+  const [subStep, setSubStep] = useState<PromptSubStep>(() =>
+    shouldSkipMode ? 'family' : 'mode'
+  );
+  const [selectedFamily, setSelectedFamily] = useState<AIStyleFamily | null>(null);
+  const [selectedOption, setSelectedOption] = useState<AIPresetOption | null>(null);
+
+  // When shouldSkipMode is true and we haven't set mode yet, set it synchronously
+  // before render. This is safe because setSelectedMode is a context setter and
+  // we're calling it only when mode is null (first render for this category).
+  if (shouldSkipMode && !selectedMode) {
+    setSelectedMode('create_new');
+  }
+
+  // Get the layer display name for the enhance card
+  const layerName = (() => {
+    if (!selectedCategory) return '';
+    const keys = CATEGORY_LAYER_KEYS[selectedCategory];
+    for (const k of keys) {
+      const path = selectedLayers[k];
+      if (!isSelectionPathEmpty(path)) return layerDisplayName(path);
+    }
+    return '';
+  })();
+
+  // Get families for the current category and mode
+  const families = (() => {
+    if (!selectedCategory || !selectedMode) return [];
+    const presets = AI_PRESET_CATALOG[selectedCategory];
+    return (selectedMode === 'enhance' ? presets.enhance : presets.create_new) ?? [];
+  })();
 
   if (!selectedCategory) return null;
 
-  const presets = AI_PRESETS[selectedCategory] ?? [];
   const categoryConfig = AI_CATEGORIES[selectedCategory];
 
-  const handlePresetClick = (prompt: string) => {
-    setPromptText(prompt);
+  // --- Handlers ---
+
+  const handleModeSelect = (mode: 'enhance' | 'create_new') => {
+    setSelectedMode(mode);
     clearError();
+    setSubStep('family');
   };
 
-  const handleRandomize = () => {
-    const random = getRandomPrompt(selectedCategory);
-    setPromptText(random);
+  const handleFamilySelect = (family: AIStyleFamily) => {
+    setSelectedFamily(family);
+    setSelectedOption(null);
     clearError();
+    setSubStep('option');
   };
 
-  const handleSubmit = () => {
-    if (!currentImage || !promptText.trim() || isEnhancing) return;
-    submitEnhance(currentImage, selectedCategory, promptText.trim());
+  const handleSurpriseMe = () => {
+    if (!selectedMode) return;
+    const result = getRandomPreset(selectedCategory, selectedMode);
+    if (result) {
+      setSelectedFamily(result.family);
+      setSelectedOption(result.option);
+      clearError();
+      setSubStep('confirm');
+    }
   };
 
-  const canSubmit = promptText.trim().length > 0 && !isEnhancing && balance >= 1 && currentImage;
+  const handleOptionSelect = (option: AIPresetOption) => {
+    setSelectedOption(option);
+    clearError();
+    setSubStep('confirm');
+  };
 
-  return (
-    <div className="flex flex-col gap-4">
-      {/* Category header */}
-      <div className="flex items-center gap-2">
-        <span className="text-lg">{categoryConfig.icon}</span>
-        <span className="font-semibold">{categoryConfig.label}</span>
-        <span className="ai-shop-info-pill">
-          {categoryConfig.freedom === 'enhance' ? 'enhance existing' : 'full freedom'}
-        </span>
-      </div>
+  const handleConfirm = () => {
+    if (!currentImage || !selectedOption || isEnhancing) return;
+    submitEnhance(currentImage, selectedCategory, selectedOption.prompt);
+  };
 
-      {/* Presets */}
-      <div>
-        <p className="text-secondary text-xs mb-2">Quick presets</p>
-        <div className="flex flex-wrap gap-2">
-          {presets.map((preset) => (
-            <motion.button
-              key={preset.prompt}
-              className="ai-preset-btn"
-              onClick={() => handlePresetClick(preset.prompt)}
-              whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
-              whileTap={prefersReducedMotion ? {} : { scale: 0.95, boxShadow: '0 0 12px rgba(255, 107, 0, 0.4)' }}
-            >
-              {preset.label}
-            </motion.button>
-          ))}
+  const handleInternalBack = () => {
+    clearError();
+    if (subStep === 'confirm') {
+      setSubStep('option');
+    } else if (subStep === 'option') {
+      setSelectedFamily(null);
+      setSelectedOption(null);
+      setSubStep('family');
+    } else if (subStep === 'family') {
+      if (shouldSkipMode) {
+        // Go back to category (parent handles this)
+        setWizardStep('category');
+      } else {
+        setSubStep('mode');
+      }
+    }
+  };
+
+  // --- Sub-step: mode ---
+  if (subStep === 'mode' && !shouldSkipMode) {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <motion.button
-            className="ai-preset-btn"
-            onClick={handleRandomize}
-            whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
-            whileTap={prefersReducedMotion ? {} : { scale: 0.95, boxShadow: '0 0 12px rgba(255, 107, 0, 0.4)' }}
-            title="Random prompt"
+            className="ai-category-btn"
+            onClick={() => handleModeSelect('enhance')}
+            whileHover={prefersReducedMotion ? {} : { scale: 1.03 }}
+            whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
           >
-            🎲 Random
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xl ai-category-icon">&#10024;</span>
+              <span className="font-semibold ai-category-text">Enhance my {layerName}</span>
+            </div>
+            <p className="text-secondary text-xs">Modify existing style</p>
+          </motion.button>
+
+          <motion.button
+            className="ai-category-btn"
+            onClick={() => handleModeSelect('create_new')}
+            whileHover={prefersReducedMotion ? {} : { scale: 1.03 }}
+            whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xl ai-category-icon">&#127195;</span>
+              <span className="font-semibold ai-category-text">Create new {categoryConfig.label.toLowerCase()}</span>
+            </div>
+            <p className="text-secondary text-xs">Start from scratch</p>
           </motion.button>
         </div>
       </div>
+    );
+  }
 
-      {/* Freeform input */}
-      <div>
-        <textarea
-          className="input w-full"
-          rows={3}
-          maxLength={MAX_PROMPT_LENGTH}
-          placeholder={
-            categoryConfig.freedom === 'enhance'
-              ? 'Describe how to change the style (e.g. "Add a flame pattern")'
-              : 'Describe what you want (e.g. "Cyberpunk city at night")'
-          }
-          value={promptText}
-          onChange={(e) => {
-            setPromptText(e.target.value);
-            clearError();
-          }}
-          disabled={isEnhancing}
-        />
-        <div className="flex justify-between text-xs mt-1">
-          <span className="text-muted">
-            {promptText.length}/{MAX_PROMPT_LENGTH}
-          </span>
-          {enhanceError && (
-            <span style={{ color: 'var(--color-error)' }}>{enhanceError}</span>
-          )}
+  // --- Sub-step: family ---
+  if (subStep === 'family') {
+    return (
+      <div className="flex flex-col gap-4">
+        <BackButton onClick={handleInternalBack} />
+        <div className="grid grid-cols-2 gap-3">
+          {families.map((family) => {
+            const emoji = family.label.charAt(0);
+            const name = family.label.slice(2).trim();
+            return (
+              <motion.button
+                key={family.label}
+                className="ai-category-btn"
+                onClick={() => handleFamilySelect(family)}
+                whileHover={prefersReducedMotion ? {} : { scale: 1.03 }}
+                whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xl ai-category-icon">{emoji}</span>
+                  <span className="font-semibold ai-category-text">{name}</span>
+                </div>
+              </motion.button>
+            );
+          })}
+
+          {/* Surprise Me */}
+          <motion.button
+            className="ai-category-btn"
+            onClick={handleSurpriseMe}
+            whileHover={prefersReducedMotion ? {} : { scale: 1.03 }}
+            whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xl ai-category-icon">&#127922;</span>
+              <span className="font-semibold ai-category-text">Surprise Me</span>
+            </div>
+          </motion.button>
         </div>
       </div>
+    );
+  }
 
-      {/* Submit button */}
-      {balance < 1 ? (
-        <motion.button
-          className="btn btn-primary w-full"
-          onClick={openShop}
-          whileHover={!prefersReducedMotion ? { scale: 1.02 } : {}}
-          whileTap={!prefersReducedMotion ? { scale: 0.98 } : {}}
-        >
-          No credits — Buy more
-        </motion.button>
-      ) : (
-        <motion.button
-          className="btn btn-primary w-full"
-          onClick={handleSubmit}
-          disabled={!canSubmit}
-          whileHover={canSubmit && !prefersReducedMotion ? { scale: 1.02 } : {}}
-          whileTap={canSubmit && !prefersReducedMotion ? { scale: 0.98 } : {}}
-        >
-          {isEnhancing ? 'Enhancing...' : 'Enhance — 1 credit'}
-        </motion.button>
-      )}
-    </div>
-  );
+  // --- Sub-step: option ---
+  if (subStep === 'option' && selectedFamily) {
+    return (
+      <div className="flex flex-col gap-4">
+        <BackButton onClick={handleInternalBack} />
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-lg">{selectedFamily.label.charAt(0)}</span>
+          <span className="font-semibold">{selectedFamily.label.slice(2).trim()}</span>
+        </div>
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+          {selectedFamily.options.map((option) => (
+            <motion.button
+              key={option.label}
+              className="ai-preset-btn"
+              onClick={() => handleOptionSelect(option)}
+              whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+              whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+            >
+              {option.label}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // --- Sub-step: confirm ---
+  if (subStep === 'confirm' && selectedOption) {
+    return (
+      <div className="flex flex-col gap-4">
+        <BackButton onClick={handleInternalBack} />
+        <div className="ai-confirm-card p-4 flex flex-col gap-3">
+          {/* Summary */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">{selectedMode === 'enhance' ? '\u2728' : '\uD83C\uDD95'}</span>
+              <span className="font-semibold">{categoryConfig.label}</span>
+            </div>
+            {selectedFamily && (
+              <p className="text-secondary text-sm">{selectedFamily.label}</p>
+            )}
+            <p className="text-sm">{selectedOption.label}</p>
+          </div>
+
+          <hr style={{ borderColor: 'var(--color-border)' }} />
+
+          {/* Error */}
+          {enhanceError && (
+            <p className="text-sm" style={{ color: 'var(--color-error)' }}>{enhanceError}</p>
+          )}
+
+          {/* Action button */}
+          {balance < 1 ? (
+            <motion.button
+              className="btn btn-primary w-full"
+              onClick={openShop}
+              whileHover={!prefersReducedMotion ? { scale: 1.02 } : {}}
+              whileTap={!prefersReducedMotion ? { scale: 0.98 } : {}}
+            >
+              No credits &mdash; Buy more
+            </motion.button>
+          ) : (
+            <motion.button
+              className="btn btn-primary w-full"
+              onClick={handleConfirm}
+              disabled={isEnhancing || !currentImage}
+              whileHover={!isEnhancing && !prefersReducedMotion ? { scale: 1.02 } : {}}
+              whileTap={!isEnhancing && !prefersReducedMotion ? { scale: 0.98 } : {}}
+            >
+              {isEnhancing ? 'Enhancing...' : 'Enhance \u2014 1 credit'}
+            </motion.button>
+          )}
+
+          {/* Disclaimer */}
+          <p className="ai-confirm-disclaimer text-muted text-xs text-center">
+            Results may vary &mdash; no charge if you discard
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback (should not reach here normally)
+  return null;
 }
