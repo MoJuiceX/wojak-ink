@@ -35,7 +35,7 @@ function DashboardContent() {
   useEffect(() => {
     if (isRegistered && player?.did) {
       fetch(`/api/fight-club/my-score?did=${player.did}`)
-        .then(r => r.json())
+        .then(r => { if (!r.ok) throw new Error('Failed to fetch score'); return r.json(); })
         .then(data => {
           if (data.success) {
             setPowerData({
@@ -51,7 +51,7 @@ function DashboardContent() {
             });
           }
         })
-        .catch(() => { /* silent */ });
+        .catch((err) => console.warn('[GameDashboard] Fetch error:', err));
     }
   }, [isRegistered, player?.did]);
 

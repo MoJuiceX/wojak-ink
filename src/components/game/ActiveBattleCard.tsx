@@ -41,11 +41,11 @@ export function ActiveBattleCard({ did }: ActiveBattleCardProps) {
   useEffect(() => {
     let cancelled = false;
     fetch(`/api/game/battle-list?voterDid=${did}&status=active`)
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then(data => {
         if (!cancelled && data.success) setBattles(data.battles || []);
       })
-      .catch(() => { /* silent */ })
+      .catch((err) => console.warn('[ActiveBattleCard] Fetch error:', err))
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [did]);

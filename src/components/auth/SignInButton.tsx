@@ -61,6 +61,7 @@ export const SignInButton: React.FC<SignInButtonProps> = ({
         const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
           headers: { Authorization: `Bearer ${response.access_token}` },
         });
+        if (!userInfo.ok) throw new Error('Failed to fetch user info');
         const userData = await userInfo.json();
         await signInWithGoogle(JSON.stringify(userData));
       } catch (error) {

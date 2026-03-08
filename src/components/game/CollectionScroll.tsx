@@ -217,7 +217,7 @@ export function CollectionScroll({ did }: CollectionScrollProps) {
   useEffect(() => {
     let cancelled = false;
     fetch(`/api/game/collection?did=${did}`)
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then(data => {
         if (!cancelled && data.success) setNfts(data.nfts);
       })

@@ -544,6 +544,7 @@ const MemoryMatch: React.FC = () => {
       // Load pre-computed filter data for instant level loading
       try {
         const filterRes = await fetch('/assets/nft-data/memory-match-filters.json');
+        if (!filterRes.ok) throw new Error('Filter data unavailable');
         const filters = await filterRes.json();
         setFilterData(filters);
       } catch (err) {

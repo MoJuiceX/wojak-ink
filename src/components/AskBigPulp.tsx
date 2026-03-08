@@ -147,7 +147,7 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [comboRes, traitsRes, hpRes, hpNftsRes, comboBadgesRes, comboBadgesNftsRes] = await Promise.all([
+        const responses = await Promise.all([
           fetch('/assets/BigPulp/combo_database.json'),
           fetch('/assets/BigPulp/trait_insights.json'),
           fetch('/assets/BigPulp/hp_traits.json'),
@@ -155,6 +155,9 @@ const AskBigPulp: React.FC<AskBigPulpProps> = ({ onNftClick }) => {
           fetch('/assets/BigPulp/combos_badges.json'),
           fetch('/assets/BigPulp/combo_badges_nfts.json')
         ]);
+        const failedRes = responses.find(r => !r.ok);
+        if (failedRes) throw new Error(`Failed to load BigPulp data: ${failedRes.status}`);
+        const [comboRes, traitsRes, hpRes, hpNftsRes, comboBadgesRes, comboBadgesNftsRes] = responses;
         const combos = await comboRes.json();
         const traits = await traitsRes.json();
         const hp = await hpRes.json();

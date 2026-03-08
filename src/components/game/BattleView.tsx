@@ -53,6 +53,7 @@ export function BattleView() {
       const params = new URLSearchParams({ status: 'active', limit: '20' });
       if (player?.did) params.set('voterDid', player.did);
       const res = await fetch(`/api/game/battle-list?${params}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.success) {
         setBattles(data.battles);
@@ -68,6 +69,7 @@ export function BattleView() {
     try {
       const params = new URLSearchParams({ status: 'history', limit: '10', offset: String(offset) });
       const res = await fetch(`/api/game/battle-list?${params}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.success) {
         const newBattles = data.battles as Battle[];

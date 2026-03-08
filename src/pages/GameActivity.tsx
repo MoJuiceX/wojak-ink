@@ -14,6 +14,7 @@ const PAGE_SIZE = 20;
 async function fetchActivityEvents(did: string, offset: number): Promise<{ events: ActivityEvent[]; ok: boolean }> {
   try {
     const res = await fetch(`/api/game/activity?did=${did}&limit=${PAGE_SIZE}&offset=${offset}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (data.success) {
       return { events: data.events as ActivityEvent[], ok: true };

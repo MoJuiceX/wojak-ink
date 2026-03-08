@@ -28,13 +28,13 @@ export function CreatorStatsCard({ walletAddress }: CreatorStatsCardProps) {
   useEffect(() => {
     let cancelled = false;
     fetch(`/api/game/creator-stats?wallet=${walletAddress}`)
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then(data => {
         if (!cancelled && data.success && data.hasStats) {
           setStats(data.stats);
         }
       })
-      .catch(() => { /* silent */ })
+      .catch((err) => console.warn('[CreatorStatsCard] Fetch error:', err))
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [walletAddress]);

@@ -294,6 +294,7 @@ export function Shop({ onClose }: ShopProps) {
         headers.Authorization = `Bearer ${token}`;
       }
       const res = await fetch(url, { headers });
+      if (!res.ok) throw new Error(`Shop items fetch failed: ${res.status}`);
       const data = await res.json();
       if (data.items) {
         setItems(data.items);
@@ -312,6 +313,7 @@ export function Shop({ onClose }: ShopProps) {
       const res = await fetch('/api/shop/inventory', {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (!res.ok) throw new Error(`Inventory fetch failed: ${res.status}`);
       const data = await res.json();
       if (data.inventory) {
         setInventory(data.inventory);
@@ -395,7 +397,8 @@ export function Shop({ onClose }: ShopProps) {
 
       if (res.ok) {
         // Refresh data in background
-        Promise.all([fetchItems(), fetchInventory(), refreshBalance()]);
+        Promise.all([fetchItems(), fetchInventory(), refreshBalance()])
+          .catch((err) => console.warn('[Shop] Background refresh failed:', err));
       } else {
         // Revert optimistic state on failure
         setPurchasedId(null);
@@ -641,7 +644,7 @@ export function Shop({ onClose }: ShopProps) {
         <div className="shop-title-row">
           <h1>Two Grove Shop</h1>
           {onClose && (
-            <button className="close-button" onClick={onClose} aria-label="Close shop">
+            <button type="button" className="close-button" onClick={onClose} aria-label="Close shop">
               ✕
             </button>
           )}
@@ -663,6 +666,7 @@ export function Shop({ onClose }: ShopProps) {
           const isDisabled = cat.value !== 'consumable'; // Only Ammo tab is enabled
           return (
             <button
+              type="button"
               key={cat.value}
               className={`category-tab ${activeCategory === cat.value ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`}
               onClick={() => !isDisabled && setActiveCategory(cat.value)}
@@ -728,6 +732,7 @@ export function Shop({ onClose }: ShopProps) {
                       {owned ? (
                         canEquip ? (
                           <button
+                            type="button"
                             className={`carousel-btn equip ${equippedItem ? 'unequip' : ''}`}
                             onClick={() => handleEquip(item)}
                             disabled={isEquiping}
@@ -745,6 +750,7 @@ export function Shop({ onClose }: ShopProps) {
                         )
                       ) : (
                         <button
+                          type="button"
                           className={`carousel-btn buy ${purchasedId === item.id ? 'purchased' : ''} ${revertingId === item.id ? 'reverting' : ''} ${!isSignedIn ? 'signin-required' : ''} ${!affordable && isSignedIn ? 'not-affordable' : ''}`}
                           disabled={purchasedId === item.id || (item.is_limited === 1 && item.stock_remaining === 0)}
                           onClick={() => handlePurchase(item)}
@@ -767,14 +773,16 @@ export function Shop({ onClose }: ShopProps) {
             {/* Navigation Arrows */}
             {filteredItems.length > 1 && (
               <>
-                <button 
+                <button
+                  type="button"
                   className={`carousel-nav prev ${carouselIndex === 0 ? 'hidden' : ''}`}
                   onClick={(e) => { e.stopPropagation(); prevItem(); }}
                   aria-label="Previous item"
                 >
                   <ChevronLeft size={24} />
                 </button>
-                <button 
+                <button
+                  type="button"
                   className={`carousel-nav next ${carouselIndex === filteredItems.length - 1 ? 'hidden' : ''}`}
                   onClick={(e) => { e.stopPropagation(); nextItem(); }}
                   aria-label="Next item"

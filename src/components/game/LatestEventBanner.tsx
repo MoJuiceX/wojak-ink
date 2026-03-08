@@ -16,11 +16,11 @@ export function LatestEventBanner({ did }: LatestEventBannerProps) {
   useEffect(() => {
     let cancelled = false;
     fetch(`/api/game/activity?did=${did}&limit=5`)
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then(data => {
         if (!cancelled && data.success) setEvents(data.events);
       })
-      .catch(() => { /* silent */ });
+      .catch((err) => console.warn('[LatestEventBanner] Fetch error:', err));
     return () => { cancelled = true; };
   }, [did]);
 

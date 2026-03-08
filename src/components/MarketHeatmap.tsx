@@ -86,6 +86,8 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
           fetch('/assets/BigPulp/combo_badges_nfts.json')
         ]);
 
+        if (!combosRes.ok) throw new Error(`Combos fetch failed: HTTP ${combosRes.status}`);
+        if (!nftsRes.ok) throw new Error(`NFTs fetch failed: HTTP ${nftsRes.status}`);
         const combosData = await combosRes.json();
         const nftsData = await nftsRes.json();
 
@@ -144,6 +146,7 @@ const MarketHeatmap: React.FC<MarketHeatmapProps> = ({ rankData, onNftClick }) =
         // Load rank data if not provided (from static file - fast)
         if (!rankData) {
           const analysisRes = await fetch('/assets/BigPulp/all_nft_analysis.json');
+          if (!analysisRes.ok) throw new Error(`HTTP ${analysisRes.status}`);
           const analysisData = await analysisRes.json();
           const ranks: Record<string, number> = {};
           for (const [id, data] of Object.entries(analysisData)) {

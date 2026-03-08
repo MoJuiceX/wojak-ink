@@ -84,6 +84,7 @@ const TraitValues: React.FC<TraitValuesProps> = ({ onTraitClick }) => {
     const loadRarityData = async () => {
       try {
         const response = await fetch('/assets/BigPulp/all_nft_analysis.json');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         const rarityMap = new Map<number, number>();
         for (const [id, analysis] of Object.entries(data)) {

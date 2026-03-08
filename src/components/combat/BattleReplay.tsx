@@ -169,6 +169,7 @@ export function BattleReplay({ battleId }: BattleReplayProps) {
     (async () => {
       try {
         const res = await fetch(`/api/combat/battle?id=${battleId}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (data.error) {
           setError(data.error);
@@ -308,6 +309,7 @@ export function BattleReplay({ battleId }: BattleReplayProps) {
         </h3>
         <div className="flex items-center gap-2">
           <button
+            type="button"
             className={`btn btn-ghost text-xs ${mode === 'auto' ? 'text-accent' : ''}`}
             onClick={switchToAuto}
             disabled={isPlaying}
@@ -315,6 +317,7 @@ export function BattleReplay({ battleId }: BattleReplayProps) {
             Watch
           </button>
           <button
+            type="button"
             className={`btn btn-ghost text-xs ${mode === 'step' ? 'text-accent' : ''}`}
             onClick={switchToStep}
             disabled={isPlaying}

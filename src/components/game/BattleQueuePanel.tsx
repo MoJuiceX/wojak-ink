@@ -33,13 +33,13 @@ export function BattleQueuePanel({ onQueued, queuedNftIds = [] }: BattleQueuePan
     if (!player?.did) return;
     queueMicrotask(() => setLoading(true));
     fetch(`/api/game/collection?did=${player.did}`)
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then(data => {
         if (data.success && data.nfts) {
           setNfts(data.nfts.filter((n: OwnedNft & { collection: string }) => n.collection === 'phase2'));
         }
       })
-      .catch(() => {})
+      .catch((err) => console.warn('[BattleQueuePanel] Fetch error:', err))
       .finally(() => setLoading(false));
   }, [player?.did]);
 

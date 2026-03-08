@@ -31,11 +31,11 @@ export function MiniLeaderboard() {
 
   useEffect(() => {
     fetch('/api/game/leaderboard?limit=10')
-      .then(res => res.json())
+      .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
       .then(data => {
         if (data.success) setEntries(data.entries);
       })
-      .catch(() => {})
+      .catch((err) => console.warn('[MiniLeaderboard] Fetch error:', err))
       .finally(() => setLoading(false));
   }, []);
 
