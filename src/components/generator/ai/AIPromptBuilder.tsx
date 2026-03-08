@@ -239,7 +239,7 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
                 style={{ '--family-accent': accent } as React.CSSProperties}
                 onClick={() => handleOptionSelect(option)}
                 whileHover={prefersReducedMotion ? {} : { scale: 1.05, boxShadow: `0 0 12px ${accent}` }}
-                whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+                whileTap={prefersReducedMotion ? {} : { scale: 0.95, boxShadow: '0 0 12px rgba(255, 107, 0, 0.4)' }}
               >
                 {option.label}
               </motion.button>
