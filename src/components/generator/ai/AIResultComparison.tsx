@@ -1,4 +1,5 @@
-import { motion, useReducedMotion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useAIEnhance } from '@/contexts/AIEnhanceContext';
 
 interface AIResultComparisonProps {
@@ -17,6 +18,7 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
     balance,
   } = useAIEnhance();
   const prefersReducedMotion = useReducedMotion();
+  const [shimmerVisible, setShimmerVisible] = useState(true);
 
   if (!currentResult) return null;
 
@@ -65,12 +67,25 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
         {/* AI Result */}
         <div className="flex flex-col items-center">
           <p className="ai-result-label mb-2">AI Enhanced</p>
-          <img
-            src={resultImageSrc}
-            alt="AI Enhanced Wojak"
-            className="w-48 h-48 md:w-56 md:h-56 object-contain"
-            style={{ borderRadius: 'var(--radius-lg)' }}
-          />
+          <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 'var(--radius-lg)' }}>
+            <img
+              src={resultImageSrc}
+              alt="AI Enhanced Wojak"
+              className="w-48 h-48 md:w-56 md:h-56 object-contain"
+            />
+            <AnimatePresence>
+              {shimmerVisible && !prefersReducedMotion && (
+                <motion.div
+                  className="ai-shimmer"
+                  initial={{ opacity: 1 }}
+                  animate={{ opacity: 0 }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  onAnimationComplete={() => setShimmerVisible(false)}
+                  style={{ position: 'absolute', inset: 0 }}
+                />
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 // src/components/generator/ai/AICreditsShop.tsx
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { useAIEnhance } from '@/contexts/AIEnhanceContext';
@@ -8,6 +8,7 @@ import { AI_CREDIT_BUNDLES } from '@/types/aiEnhance';
 import { Sparkles } from 'lucide-react';
 
 const BASE_PRICE_PER_CREDIT = 0.08; // XCH — tier 1 single credit
+const loadConfetti = () => import('canvas-confetti').then(m => m.default);
 
 export function AICreditsShop() {
   const { isShopOpen, closeShop, balance, refetchBalance } = useAIEnhance();
@@ -18,6 +19,20 @@ export function AICreditsShop() {
   const [purchaseSuccess, setPurchaseSuccess] = useState<string | null>(null);
 
   const selectedBundle = AI_CREDIT_BUNDLES.find((b) => b.tier === selectedTier);
+
+  // Confetti burst on successful purchase
+  useEffect(() => {
+    if (purchaseSuccess && !prefersReducedMotion) {
+      loadConfetti().then(confetti => {
+        confetti({
+          particleCount: 80,
+          spread: 60,
+          origin: { y: 0.5 },
+          colors: ['#F97316', '#FFD700', '#FF6B00', '#EA580C'],
+        });
+      });
+    }
+  }, [purchaseSuccess, prefersReducedMotion]);
 
   const handlePurchase = async () => {
     if (!selectedBundle || isPurchasing) return;
