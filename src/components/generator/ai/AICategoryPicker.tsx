@@ -2,7 +2,8 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useAIEnhance } from '@/contexts/AIEnhanceContext';
-import { AI_CATEGORIES } from '@/types/aiEnhance';
+import { useGenerator } from '@/contexts/GeneratorContext';
+import { AI_CATEGORIES, AI_WIZARD_CATEGORIES } from '@/types/aiEnhance';
 import type { AICategory } from '@/types/aiEnhance';
 
 interface AICategoryPickerProps {
@@ -11,9 +12,12 @@ interface AICategoryPickerProps {
 
 export function AICategoryPicker({ currentImage }: AICategoryPickerProps) {
   const { selectCategory, enhancedCategories } = useAIEnhance();
+  const { isLayerDisabled, getDisabledReason } = useGenerator();
   const prefersReducedMotion = useReducedMotion();
 
-  const categories = Object.entries(AI_CATEGORIES) as [AICategory, typeof AI_CATEGORIES[AICategory]][];
+  const isHeadDisabled = isLayerDisabled('Head');
+
+  const categories = AI_WIZARD_CATEGORIES.map((key) => [key, AI_CATEGORIES[key]] as [AICategory, typeof AI_CATEGORIES[AICategory]]);
 
   return (
     <div className="flex flex-col gap-4 md:flex-row">
@@ -33,13 +37,16 @@ export function AICategoryPicker({ currentImage }: AICategoryPickerProps) {
       <div className="flex-1 grid grid-cols-2 gap-3">
         {categories.map(([key, config]) => {
           const isEnhanced = enhancedCategories.has(key);
+          const isDisabled = key === 'head' && isHeadDisabled;
           return (
             <motion.button
               key={key}
-              className={`ai-category-btn ${isEnhanced ? 'ai-category-btn--enhanced' : ''}`}
-              onClick={() => selectCategory(key)}
-              whileHover={prefersReducedMotion ? {} : { scale: 1.03 }}
-              whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
+              className={`ai-category-btn ${isEnhanced ? 'ai-category-btn--enhanced' : ''} ${isDisabled ? 'ai-category-btn--disabled' : ''}`}
+              onClick={() => !isDisabled && selectCategory(key)}
+              whileHover={prefersReducedMotion || isDisabled ? {} : { scale: 1.03 }}
+              whileTap={prefersReducedMotion || isDisabled ? {} : { scale: 0.97 }}
+              disabled={isDisabled}
+              title={isDisabled ? (getDisabledReason('Head') || 'Head disabled by suit') : undefined}
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xl ai-category-icon">{config.icon}</span>
@@ -47,9 +54,11 @@ export function AICategoryPicker({ currentImage }: AICategoryPickerProps) {
                 {isEnhanced && <span className="text-sm" style={{ color: 'var(--color-success)' }}>&#10003;</span>}
               </div>
               <p className="text-secondary text-xs">
-                {config.freedom === 'enhance'
-                  ? 'Enhance existing style'
-                  : 'Full creative freedom'}
+                {isDisabled
+                  ? 'Suit includes helmet'
+                  : config.freedom === 'enhance'
+                    ? 'Enhance existing style'
+                    : 'Full creative freedom'}
               </p>
             </motion.button>
           );

@@ -1,6 +1,6 @@
 import type { AICategory, AIStyleFamily, AICategoryPresets } from '@/types/aiEnhance';
 
-// --- Universal Enhance Families (shared across clothes, head, facewear) ---
+// --- Universal Enhance Families (shared across clothes and head) ---
 
 const UNIVERSAL_ENHANCE: AIStyleFamily[] = [
   {
@@ -257,55 +257,6 @@ const HEAD_ENHANCE: AIStyleFamily[] = [
   },
 ];
 
-// --- Facewear-Only Enhance Families ---
-
-const FACEWEAR_ENHANCE: AIStyleFamily[] = [
-  {
-    label: '🔍 Lens Effects',
-    options: [
-      { label: 'Mirror reflective', prompt: 'Make lenses fully mirror-reflective, chrome-like surface reflecting the environment, cop sunglasses' },
-      { label: 'Holographic shift', prompt: 'Apply holographic iridescent finish to lenses, rainbow color shift that changes with angle' },
-      { label: 'Gradient tint', prompt: 'Apply gradient tint to lenses, dark at top fading to clear at bottom, fashionable gradient shade' },
-      { label: 'Frosted glass', prompt: 'Make lenses frosted opaque, textured translucent glass surface, icy matte diffused look' },
-      { label: 'Cracked & shattered', prompt: 'Add crack lines and shatter marks across the lens surface, broken impact damage spider web cracks' },
-      { label: 'Night vision green glow', prompt: 'Make lenses glow bright green with night vision phosphor effect, military tactical green illumination' },
-    ],
-  },
-  {
-    label: '🖼️ Frame & Structure',
-    options: [
-      { label: 'Gold wire frame', prompt: 'Transform the frame into thin elegant gold wire, delicate metallic gold frame structure' },
-      { label: 'Bamboo wood frame', prompt: 'Transform the frame into natural bamboo wood, light brown wooden material with visible grain' },
-      { label: 'Bone & skull frame', prompt: 'Transform the frame into carved bone with small skull decorations, macabre skeletal gothic frame' },
-      { label: 'Neon LED frame', prompt: 'Add glowing neon LED light strips along the frame edges, bright colored light outline, rave party look' },
-      { label: 'Chain link frame', prompt: 'Transform the frame into interlocking metal chain links, heavy gauge chain, biker hip-hop style' },
-      { label: 'Crystal frame', prompt: 'Transform the frame into transparent crystal with faceted gem cuts, sparkling prismatic material' },
-    ],
-  },
-  {
-    label: '⛓️ Chains & Attachments',
-    options: [
-      { label: 'Hanging chain drops', prompt: 'Add delicate chains hanging down from the bottom edge, small chain link drops, gothic jewelry style' },
-      { label: 'Feather side attachment', prompt: 'Attach decorative feathers on one side, colorful plume or peacock feather accessory' },
-      { label: 'Dangling charms', prompt: 'Add small dangling charm pendants hanging from the frame, tiny metal charms and trinkets' },
-      { label: 'Pearl strand drape', prompt: 'Drape a strand of white pearls connecting across the frame, elegant pearl chain decoration' },
-      { label: 'Spike protrusions', prompt: 'Add sharp metal spike protrusions along the top edge of the frame, aggressive punk rock aesthetic' },
-      { label: 'Flower garland wrap', prompt: 'Wrap with small flower garland around the frame, tiny roses and daisies woven in vine, boho style' },
-    ],
-  },
-  {
-    label: '🎭 Mask Patterns',
-    options: [
-      { label: 'Day of the Dead sugar skull', prompt: 'Paint Day of the Dead sugar skull pattern on the surface, colorful Dia de los Muertos floral design' },
-      { label: 'Kintsugi gold repair', prompt: 'Add Japanese kintsugi gold repair lines, cracked surface mended with gold lacquer, wabi-sabi beauty' },
-      { label: 'Tribal carved relief', prompt: 'Carve deep tribal pattern reliefs into the surface, African or Polynesian mask carving style' },
-      { label: 'Geometric facets', prompt: 'Transform surface into geometric faceted planes, low-poly 3D angular faces, crystalline structure' },
-      { label: 'Camouflage painted', prompt: 'Paint military camouflage pattern on the surface, olive green and brown tactical war paint' },
-      { label: 'Henna mehndi design', prompt: 'Apply intricate henna mehndi pattern designs in brown, elaborate Indian bridal hand-art style' },
-    ],
-  },
-];
-
 // --- Create New Families ---
 
 const CLOTHES_CREATE: AIStyleFamily[] = [
@@ -534,108 +485,6 @@ const HEAD_CREATE: AIStyleFamily[] = [
   },
 ];
 
-const FACEWEAR_CREATE: AIStyleFamily[] = [
-  {
-    label: '🕶️ Glasses & Shades',
-    options: [
-      { label: 'Aviator gold', prompt: 'Classic aviator sunglasses with gold metal frame and gradient orange-tinted mirrored lenses, pilot style' },
-      { label: 'Cat-eye rhinestone', prompt: 'Cat-eye shaped glasses with jeweled rhinestone corners, retro feminine glamour, sparkly frame' },
-      { label: 'Oversized designer', prompt: 'Square oversized designer sunglasses with thick black frames, celebrity fashion, luxury brand look' },
-      { label: 'Heart-shaped pink', prompt: 'Heart-shaped sunglasses with bright pink frames and gradient lenses, cute retro love style' },
-      { label: 'Round Lennon', prompt: 'Round circular John Lennon style glasses with thin wire frame, small lenses, vintage hippie look' },
-      { label: 'Wrap-around sport', prompt: 'Gold-framed wrap-around sport sunglasses with yellow-tinted lens, athletic performance eyewear' },
-    ],
-  },
-  {
-    label: '🤖 Cyber & Tech',
-    options: [
-      { label: 'Cyberpunk visor', prompt: 'Futuristic LED visor across the eyes, glowing cyan holographic display, sleek black frame, sci-fi tech' },
-      { label: 'AR smart glasses', prompt: 'Augmented reality smart glasses with holographic blue data display floating in front of lens' },
-      { label: 'HUD display lens', prompt: 'Single eye heads-up display monocle lens with scrolling data readout, tactical computing interface' },
-      { label: 'Scanner eyepiece', prompt: 'Over-ear scanner device with flip-down red scanning lens over one eye, power level reader' },
-      { label: 'Bionic eye implant', prompt: 'Cybernetic bionic eye replacement with glowing red iris and visible mechanical components, cyborg' },
-      { label: 'Laser targeting reticle', prompt: 'Red laser dot targeting reticle projected over one eye, sniper scope aiming laser, Terminator look' },
-    ],
-  },
-  {
-    label: '⚙️ Goggles & Industrial',
-    options: [
-      { label: 'Steampunk brass goggles', prompt: 'Brass steampunk goggles with round copper-tinted lenses, riveted leather strap, Victorian industrial' },
-      { label: 'Welding goggles', prompt: 'Dark industrial welding goggles with flip-up green lenses, thick rubber seal, metalworker safety' },
-      { label: 'Gas mask', prompt: 'Industrial gas mask with round filter canisters on sides, dark rubber material, post-apocalyptic look' },
-      { label: 'Night vision tubes', prompt: 'Night vision goggles with dual green-glowing tubes, military tactical headgear, dark ops style' },
-      { label: 'Ski goggles mirrored', prompt: 'Ski goggles with wide mirrored reflective orange lens, elastic strap, winter mountain sport style' },
-      { label: 'Pilot flight goggles', prompt: 'Vintage leather pilot flight goggles with round clear lenses, aviator goggles pushed up on forehead' },
-    ],
-  },
-  {
-    label: '🎭 Masks & Theatrical',
-    options: [
-      { label: 'Phantom opera mask', prompt: 'White porcelain opera phantom half-mask covering right side of face, elegant theatrical style' },
-      { label: 'Butterfly masquerade', prompt: 'Ornate butterfly-shaped masquerade mask with gold filigree patterns, Venetian carnival style' },
-      { label: 'Venetian carnival', prompt: 'Elaborate full Venetian carnival mask with feathers, jewels, and gold leaf decoration, ornate' },
-      { label: 'Kabuki half-mask', prompt: 'Japanese kabuki theater half-mask with dramatic red and white painted expression, traditional' },
-      { label: 'Luchador mask', prompt: 'Colorful Mexican luchador wrestling mask with bold pattern, eye holes, full head coverage' },
-      { label: 'Samurai mempo', prompt: 'Japanese samurai mempo face guard mask with fierce expression, lacquered metal cheek and jaw armor' },
-    ],
-  },
-  {
-    label: '🎨 Face Paint & Markings',
-    options: [
-      { label: 'War paint streaks', prompt: 'Bold war paint streaks across the face in black and red, tribal warrior face markings, battle ready' },
-      { label: 'Skull face paint', prompt: 'Full skull face paint with black eye sockets, nose hole, and teeth outline, Day of the Dead skeleton' },
-      { label: 'Tribal markings', prompt: 'Traditional tribal face markings and tattoo patterns in dark ink, indigenous cultural face decoration' },
-      { label: 'Mime face', prompt: 'Classic mime white face paint with black eye outlines, red lips, and expressive drawn eyebrows' },
-      { label: 'Sports fan paint', prompt: 'Bold two-tone sports fan face paint divided down the middle, team colors, game day face' },
-      { label: 'Teardrop tattoo', prompt: 'Small black teardrop tattoo under one eye, prison gang tattoo style, single tear mark' },
-    ],
-  },
-  {
-    label: '🤡 Novelty & Fun',
-    options: [
-      { label: 'Clown nose', prompt: 'Round bright red clown nose sitting on the nose tip, shiny smooth rubber ball, circus clown' },
-      { label: 'Star-shaped shades', prompt: 'Star-shaped sunglasses with colorful glittery frames, fun party novelty eyewear, Elton John style' },
-      { label: 'Googly eyes', prompt: 'Large oversized googly eyes stuck over the real eyes, plastic dome with moving black pupils' },
-      { label: 'Nose & mustache disguise', prompt: 'Groucho Marx disguise glasses with attached fake nose, bushy mustache, and eyebrows' },
-      { label: '3D red-blue glasses', prompt: 'Retro 3D movie glasses with one red lens and one blue lens, white cardboard frame, cinema' },
-      { label: 'Fake arrow through head', prompt: 'Novelty fake arrow through the head headband prop, arrow appearing to pierce through skull, comedy' },
-    ],
-  },
-  {
-    label: '🔥 Supernatural',
-    options: [
-      { label: 'Laser beam eyes', prompt: 'Glowing bright red laser beams shooting from both eyes, intense energy glow, fiery red light' },
-      { label: 'Glowing demon eyes', prompt: 'Solid glowing red demon eyes with no pupils, hellfire red illumination, supernatural evil' },
-      { label: 'Cyborg red eye', prompt: 'One eye replaced with glowing red cybernetic eye, Terminator-style mechanical eye implant' },
-      { label: 'Crystal shard visor', prompt: 'Jagged crystal shards forming a visor across the eyes, transparent purple amethyst crystal formation' },
-      { label: 'Hollow ghost eyes', prompt: 'Empty hollow black eye sockets with faint ghostly white glow deep inside, undead specter eyes' },
-      { label: 'Third eye forehead', prompt: 'Mystical third eye opened on the forehead, vertical glowing eye with purple iris, enlightened' },
-    ],
-  },
-  {
-    label: '👑 Luxury & Elegant',
-    options: [
-      { label: 'Diamond monocle', prompt: 'Single round monocle with diamond-encrusted gold frame, thin gold chain, luxurious vintage style' },
-      { label: 'Gold spectacles', prompt: 'Round gold-rimmed spectacles with thin wire frames, small circular lenses, vintage academic look' },
-      { label: 'Rose-tinted round frames', prompt: 'Round sunglasses with pink rose-tinted lenses, thin gold wire frame, dreamy romantic aesthetic' },
-      { label: 'Crystal-studded cat-eye', prompt: 'Cat-eye sunglasses with crystal rhinestones studded along the frame, glamorous diva eyewear' },
-      { label: 'Platinum aviators', prompt: 'Platinum frame aviator sunglasses with gradient dark lenses, ultra-premium metallic finish' },
-      { label: 'Jeweled opera mask', prompt: 'Ornate jeweled opera eye mask encrusted with sapphires and gold filigree, aristocratic elegance' },
-    ],
-  },
-  {
-    label: '🩹 Medical & Horror',
-    options: [
-      { label: 'Surgical mask', prompt: 'Light blue disposable surgical face mask covering nose and mouth, medical hospital mask with ear loops' },
-      { label: 'Eye bandage wrapping', prompt: 'White medical bandage wrapped around the eyes, gauze eye covering, wounded patient blindfold' },
-      { label: 'Plague doctor beak', prompt: 'Long pointed plague doctor beak mask in dark brown leather, medieval pandemic bird-like mask' },
-      { label: 'Stitches across face', prompt: 'Thick black stitches sewn across the face like Frankenstein, surgical suture scars, horror' },
-      { label: 'Oxygen mask & tubes', prompt: 'Clear oxygen mask over nose and mouth with breathing tubes, hospital ICU medical equipment' },
-      { label: 'Cracked porcelain face', prompt: 'Cracked white porcelain doll face over the real face, broken ceramic mask with missing pieces, creepy' },
-    ],
-  },
-];
-
 const BACKGROUND_CREATE: AIStyleFamily[] = [
   {
     label: '🌆 City & Urban',
@@ -740,7 +589,7 @@ const BACKGROUND_CREATE: AIStyleFamily[] = [
 
 // --- Assemble the full catalog ---
 
-export const AI_PRESET_CATALOG: Record<AICategory, AICategoryPresets> = {
+export const AI_PRESET_CATALOG: Partial<Record<AICategory, AICategoryPresets>> = {
   clothes: {
     enhance: [...UNIVERSAL_ENHANCE, ...CLOTHES_ENHANCE],
     create_new: CLOTHES_CREATE,
@@ -748,10 +597,6 @@ export const AI_PRESET_CATALOG: Record<AICategory, AICategoryPresets> = {
   head: {
     enhance: [...UNIVERSAL_ENHANCE, ...HEAD_ENHANCE],
     create_new: HEAD_CREATE,
-  },
-  facewear: {
-    enhance: [...UNIVERSAL_ENHANCE, ...FACEWEAR_ENHANCE],
-    create_new: FACEWEAR_CREATE,
   },
   background: {
     create_new: BACKGROUND_CREATE,
@@ -765,6 +610,7 @@ export function getRandomPreset(
   mode: 'enhance' | 'create_new',
 ): { family: AIStyleFamily; option: { label: string; prompt: string } } | null {
   const presets = AI_PRESET_CATALOG[category];
+  if (!presets) return null;
   const families = mode === 'enhance' ? presets.enhance : presets.create_new;
   if (!families || families.length === 0) return null;
 

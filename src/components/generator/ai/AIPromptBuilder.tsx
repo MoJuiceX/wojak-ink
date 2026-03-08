@@ -12,10 +12,10 @@ import { AI_PRESET_CATALOG, getRandomPreset } from '@/config/aiEnhancePresets';
 
 type PromptSubStep = 'mode' | 'family' | 'option' | 'confirm';
 
-const CATEGORY_LAYER_KEYS: Record<AICategory, GeneratorLayerName[]> = {
+/** Layer keys for categories available in the AI wizard (facewear excluded). */
+const CATEGORY_LAYER_KEYS: Partial<Record<AICategory, GeneratorLayerName[]>> = {
   clothes: ['Clothes'],
   head: ['Head'],
-  facewear: ['Eyes', 'Mask'],
   background: ['Background'],
 };
 
@@ -61,7 +61,7 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
   // Determine if the user has a layer selected for this category
   const hasLayer = (() => {
     if (!selectedCategory) return false;
-    const keys = CATEGORY_LAYER_KEYS[selectedCategory];
+    const keys = CATEGORY_LAYER_KEYS[selectedCategory] ?? [];
     return keys.some((k) => !isSelectionPathEmpty(selectedLayers[k]));
   })();
 
@@ -85,7 +85,7 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
   // Get the layer display name for the enhance card
   const layerName = (() => {
     if (!selectedCategory) return '';
-    const keys = CATEGORY_LAYER_KEYS[selectedCategory];
+    const keys = CATEGORY_LAYER_KEYS[selectedCategory] ?? [];
     for (const k of keys) {
       const path = selectedLayers[k];
       if (!isSelectionPathEmpty(path)) return layerDisplayName(path);
@@ -97,6 +97,7 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
   const families = (() => {
     if (!selectedCategory || !selectedMode) return [];
     const presets = AI_PRESET_CATALOG[selectedCategory];
+    if (!presets) return [];
     return (selectedMode === 'enhance' ? presets.enhance : presets.create_new) ?? [];
   })();
 

@@ -33,6 +33,9 @@ export const AI_CATEGORIES: Record<AICategory, AICategoryConfig> = {
   background: { label: 'Background', icon: '🖼', freedom: 'free' },
 };
 
+/** Categories available in the AI wizard. Facewear excluded — too risky for AI edits. */
+export const AI_WIZARD_CATEGORIES: AICategory[] = ['clothes', 'head', 'background'];
+
 export interface AIEnhancement {
   id: number;
   r2Key: string;
