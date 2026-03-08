@@ -71,6 +71,10 @@ interface PrepareBody {
   selectedColors?: Record<string, string>;
   imageBase64?: string;
   mintType?: 'paid' | 'free';
+  /** Whether this Wojak was AI-enhanced (adds AI metadata attributes) */
+  aiEnhanced?: boolean;
+  /** AI edit details: [{ category: 'clothes', prompt: 'Add flame pattern' }, ...] */
+  aiAttributes?: Array<{ category: string; prompt: string }>;
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -337,6 +341,20 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         const bi = TRAIT_ORDER.indexOf(b.trait_type);
         return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
       });
+
+    // ── AI Enhancement attributes (only when AI-enhanced) ──
+    const aiEnhanced = body.aiEnhanced === true;
+    const aiAttributes = aiEnhanced && Array.isArray(body.aiAttributes) ? body.aiAttributes : [];
+    if (aiEnhanced && aiAttributes.length > 0) {
+      attributes.push({ trait_type: 'AI Enhanced', value: 'Yes' });
+      for (const attr of aiAttributes) {
+        if (attr.category && attr.prompt) {
+          const label = attr.category.charAt(0).toUpperCase() + attr.category.slice(1);
+          attributes.push({ trait_type: `AI ${label}`, value: attr.prompt });
+        }
+      }
+      attributes.push({ trait_type: 'AI Edits Count', value: String(aiAttributes.length) });
+    }
 
     const metadata = {
       format: 'CHIP-0007',

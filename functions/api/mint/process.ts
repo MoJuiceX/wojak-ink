@@ -121,6 +121,7 @@ interface MintJobRow {
   wallet_lock: string | null;
   not_before: string | null;
   combat_moves_json: string | null;
+  ai_metadata_json: string | null;
 }
 
 // ─── Step Updater ───
@@ -220,6 +221,29 @@ export async function processJob(
         ability: combatIdentity.ability,
         moves: combatMoveAssignment.valid ? combatMoveAssignment.moves : ['', '', '', ''],
       }));
+
+      // ── AI Enhancement attributes (only when AI-enhanced) ──
+      if (job.ai_metadata_json) {
+        try {
+          const aiMeta = JSON.parse(job.ai_metadata_json) as {
+            aiEnhanced?: boolean;
+            aiAttributes?: Array<{ category: string; prompt: string }>;
+          };
+          if (aiMeta.aiEnhanced && Array.isArray(aiMeta.aiAttributes)) {
+            attributes.push({ trait_type: 'AI Enhanced', value: 'Yes' });
+            for (const attr of aiMeta.aiAttributes) {
+              if (attr.category && attr.prompt) {
+                const label = attr.category.charAt(0).toUpperCase() + attr.category.slice(1);
+                attributes.push({ trait_type: `AI ${label}`, value: attr.prompt });
+              }
+            }
+            attributes.push({ trait_type: 'AI Edits Count', value: String(aiMeta.aiAttributes.length) });
+          }
+        } catch {
+          // Malformed AI metadata — skip silently, don't block the mint
+          console.warn(`[MintProcessor] Job ${jobId} has invalid ai_metadata_json, skipping AI attributes`);
+        }
+      }
 
       const customName = job.custom_name;
       const fullName = customName

@@ -60,6 +60,10 @@ interface SubmitBody {
   idempotencyKey?: string;
   customName?: string;
   // combatMoves removed — auto-assigned server-side in process.ts
+  /** Whether this Wojak was AI-enhanced (adds AI metadata attributes) */
+  aiEnhanced?: boolean;
+  /** AI edit details: [{ category: 'clothes', prompt: 'Add flame pattern' }, ...] */
+  aiAttributes?: Array<{ category: string; prompt: string }>;
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -117,6 +121,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const mintType = body.mintType === 'paid' ? 'paid' : 'free';
   const idempotencyKey = body.idempotencyKey;
   const customName = (body.customName || '').trim();
+  const aiEnhanced = body.aiEnhanced === true;
+  const aiAttributes = aiEnhanced && Array.isArray(body.aiAttributes) ? body.aiAttributes : [];
   if (!imageBase64 || typeof imageBase64 !== 'string') {
     return errorResponse('Missing imageBase64', 400);
   }
@@ -353,14 +359,16 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       }
 
       // Statement 1 (or 0 for paid): Create the job
+      const aiMetadataJson = aiEnhanced ? JSON.stringify({ aiEnhanced, aiAttributes }) : null;
       batchStmts.push(
         env.DB.prepare(
           `INSERT INTO mint_jobs (
             wallet_address, idempotency_key, layers_json, colors_json,
             image_base64_hash, mint_type, credit_cost, xch_price_mojos,
             surcharge_xch, highest_surcharge_trait,
-            step, wallet_lock, credit_spend_id, expires_at, custom_name
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queued', ?, NULL, ?, ?)`
+            step, wallet_lock, credit_spend_id, expires_at, custom_name,
+            ai_metadata_json
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queued', ?, NULL, ?, ?, ?)`
         ).bind(
           wallet, idempotencyKey,
           JSON.stringify(selectedLayers), JSON.stringify(selectedColors),
@@ -370,7 +378,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           surchargeStored, highestTrait,
           wallet, // wallet_lock = wallet_address (activates mutex)
           expiresAt,
-          customName || null
+          customName || null,
+          aiMetadataJson
         )
       );
 
