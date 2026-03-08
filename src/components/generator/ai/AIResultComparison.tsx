@@ -58,7 +58,7 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
             <img
               src={currentImage}
               alt="Original Wojak"
-              className="w-48 h-48 md:w-56 md:h-56 object-contain"
+              className="w-48 h-48 md:w-96 md:h-96 object-contain"
               style={{ borderRadius: 'var(--radius-lg)' }}
             />
           </div>
@@ -71,7 +71,7 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
             <img
               src={resultImageSrc}
               alt="AI Enhanced Wojak"
-              className="w-48 h-48 md:w-56 md:h-56 object-contain"
+              className="w-48 h-48 md:w-96 md:h-96 object-contain"
             />
             <AnimatePresence>
               {shimmerVisible && !prefersReducedMotion && (

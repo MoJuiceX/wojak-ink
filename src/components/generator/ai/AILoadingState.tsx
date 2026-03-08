@@ -43,7 +43,7 @@ export function AILoadingState({ currentImage }: AILoadingStateProps) {
             <img
               src={currentImage}
               alt="Original Wojak"
-              className="w-48 h-48 md:w-56 md:h-56 object-contain"
+              className="w-48 h-48 md:w-96 md:h-96 object-contain"
               style={{ borderRadius: 'var(--radius-lg)' }}
             />
           </div>
@@ -52,7 +52,7 @@ export function AILoadingState({ currentImage }: AILoadingStateProps) {
         {/* Shimmer placeholder */}
         <div className="flex flex-col items-center">
           <p className="ai-result-label mb-2">AI Enhanced</p>
-          <div className="ai-shimmer w-48 h-48 md:w-56 md:h-56" />
+          <div className="ai-shimmer w-48 h-48 md:w-96 md:h-96" />
         </div>
       </div>
 

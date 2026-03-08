@@ -96,7 +96,7 @@ export function AIEnhanceLightbox({ currentImage }: AIEnhanceLightboxProps) {
       isOpen={isLightboxOpen}
       onClose={closeLightbox}
       headerContent={header}
-      size="lg"
+      size="xl"
     >
       {/* Accent line */}
       <div className="ai-wizard-accent" />
