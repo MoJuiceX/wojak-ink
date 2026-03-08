@@ -14,7 +14,7 @@
 
 .nft-selection-modal {
   background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
-  border: 1px solid rgba(249, 115, 22, 0.2);
+  border: 1px solid rgba(255, 107, 0, 0.2);
   border-radius: 24px;
   max-width: 500px;
   width: 100%;
@@ -34,7 +34,7 @@
 }
 
 .nft-selection-modal .modal-header h2 {
-  color: white;
+  color: var(--color-text);
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0 0 4px 0;
@@ -62,7 +62,7 @@
 
 .nft-selection-modal .close-btn:hover {
   background: rgba(255, 255, 255, 0.2);
-  color: white;
+  color: var(--color-text);
 }
 
 /* Body */
@@ -89,7 +89,7 @@
 }
 
 .nft-selection-modal .loading-state svg {
-  color: #F97316;
+  color: var(--color-primary);
 }
 
 .nft-selection-modal .empty-icon {
@@ -98,7 +98,7 @@
 }
 
 .nft-selection-modal .empty-state h3 {
-  color: white;
+  color: var(--color-text);
   margin: 0 0 8px 0;
 }
 
@@ -108,7 +108,7 @@
 }
 
 .nft-selection-modal .get-nft-link {
-  color: #F97316;
+  color: var(--color-primary);
   text-decoration: none;
   font-weight: 600;
 }
@@ -142,12 +142,12 @@
 }
 
 .nft-selection-modal .nft-option:hover {
-  border-color: rgba(249, 115, 22, 0.5);
+  border-color: rgba(255, 107, 0, 0.5);
 }
 
 .nft-selection-modal .nft-option.selected {
-  border-color: #F97316;
-  box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 20px rgba(255, 107, 0, 0.4);
 }
 
 .nft-selection-modal .nft-id {
@@ -169,15 +169,15 @@
   right: 8px;
   width: 24px;
   height: 24px;
-  background: linear-gradient(135deg, #22C55E, #16A34A);
+  background: linear-gradient(135deg, var(--color-success), #16A34A);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--color-text);
   font-size: 12px;
   font-weight: bold;
-  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
+  box-shadow: 0 2px 8px var(--color-success-40);
 }
 
 /* Footer */
@@ -207,13 +207,13 @@
 .nft-selection-modal .confirm-btn {
   flex: 1;
   padding: 14px;
-  background: linear-gradient(135deg, #F97316, #EA580C);
+  background: var(--gradient-primary);
   border: none;
   border-radius: 12px;
-  color: white;
+  color: var(--color-text);
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+  box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
   transition: all 0.2s;
 }
 
@@ -225,7 +225,7 @@
 }
 
 .nft-selection-modal .confirm-btn:not(:disabled):hover {
-  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
 }
 
 /* Mobile responsiveness */

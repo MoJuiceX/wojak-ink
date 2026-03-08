@@ -168,6 +168,15 @@
     min-width: 0;
   }
 
+  /* Wrapper provides position:relative anchor for the AI overlay */
+  .generator-options-grid-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
   .generator-options-grid-container {
     flex: 1;
     min-width: 0;
@@ -267,6 +276,11 @@
     flex-direction: column;
     gap: 12px;
     min-height: 0;
+  }
+
+  /* Grid wrapper — relative for AI overlay positioning */
+  .generator-options-grid-wrapper {
+    position: relative;
   }
 
   /* Trait grid: no inner scroll; edge-to-edge on mobile (no side radius/border) */
@@ -372,9 +386,9 @@
 
 /* === TRAIT CARD SELECTED BORDER & BADGE COLORS (Theme-aware) === */
 :root {
-  --generator-selected-color: #F97316;
+  --generator-selected-color: var(--color-primary);
   --generator-selected-glow: var(--color-primary-50);
-  --generator-badge-color: #F97316;
+  --generator-badge-color: var(--color-primary);
   --generator-trait-card-bg: var(--color-surface);
   --generator-trait-card-border: rgba(255, 255, 255, 0.06);
 }
@@ -542,7 +556,7 @@
 
 .generator-action-btn.primary {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text);
   border-color: var(--color-primary);
 }
 
@@ -793,6 +807,58 @@
   box-shadow: 0 0 10px var(--color-primary);
 }
 
+/* === AI ENHANCED MODE === */
+
+/* Lock non-interactive sections (layer tabs) */
+.generator-ai-locked {
+  opacity: 0.15;
+  pointer-events: none;
+  filter: grayscale(0.6);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Options container gets relative positioning for the overlay */
+.generator-options--ai-mode {
+  position: relative;
+}
+
+/* Dim the underlying trait grid and details panel behind the overlay */
+.generator-options--ai-mode .generator-options-grid-container,
+.generator-options--ai-mode > .generator-details-panel,
+.generator-options--ai-mode > .generator-options-mobile-panel {
+  opacity: 0.08;
+  pointer-events: none;
+  filter: grayscale(0.8);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* AI overlay — covers the options area with centered content */
+.generator-ai-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+}
+
+.generator-ai-overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  padding: 2rem;
+}
+
+.generator-ai-overlay-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
 /* Reduced motion preference support */
 @media (prefers-reduced-motion: reduce) {
   .generator-option-item,
@@ -800,7 +866,8 @@
   .generator-action-btn,
   .generator-preview-canvas,
   .layer-image,
-  .mini-layer {
+  .mini-layer,
+  .generator-ai-locked {
     animation: none !important;
     transition-duration: 0.01ms !important;
   }

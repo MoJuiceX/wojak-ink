@@ -47,7 +47,7 @@
 .confirm-modal-title {
   font-size: 20px;
   font-weight: 700;
-  color: white;
+  color: var(--color-text);
   margin: 0 0 8px 0;
 }
 
@@ -86,12 +86,12 @@
 
 .confirm-modal-btn-secondary:hover {
   background: var(--color-white-15);
-  color: white;
+  color: var(--color-text);
 }
 
 .confirm-modal-btn-primary {
-  background: linear-gradient(135deg, #F97316, #EA580C);
-  color: white;
+  background: var(--gradient-primary);
+  color: var(--color-text);
   box-shadow: 0 4px 15px var(--color-primary-30);
 }
 

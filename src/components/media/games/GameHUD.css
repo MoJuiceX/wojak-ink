@@ -147,10 +147,10 @@
 }
 
 /* Lives stat - hearts */
-.hud-stat-lives-hearts {
+.hud-stat-lives .hud-stat-lives-hearts {
   display: flex;
   gap: 2px;
-  font-size: 18px !important;
+  font-size: 18px;
 }
 
 .hud-heart {
@@ -213,8 +213,8 @@
     margin-left: 0;
   }
 
-  .hud-stat-lives-hearts {
-    font-size: 14px !important;
+  .hud-stat-lives .hud-stat-lives-hearts {
+    font-size: 14px;
   }
 }
 

@@ -71,7 +71,7 @@
 
 .arcade-corner-btn:hover {
   background: var(--color-white-20);
-  color: white;
+  color: var(--color-text);
   transform: scale(1.1);
 }
 
@@ -163,7 +163,7 @@
   letter-spacing: 2px;
   border: none;
   border-radius: 10px;
-  color: white;
+  color: var(--color-text);
   cursor: pointer;
   transition: all 0.2s ease;
   pointer-events: auto;
@@ -331,7 +331,7 @@
   letter-spacing: 3px;
   border: none;
   border-radius: 50px;
-  color: white;
+  color: var(--color-text);
   cursor: pointer;
   transition: all 0.25s ease;
   position: relative;
@@ -537,7 +537,7 @@
   gap: 10px;
   font-size: 1.1rem;
   font-weight: 700;
-  color: white;
+  color: var(--color-text);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -558,7 +558,7 @@
 
 .leaderboard-overlay-close:hover {
   background: var(--color-white-10);
-  color: white;
+  color: var(--color-text);
 }
 
 .leaderboard-overlay-content {
@@ -618,7 +618,7 @@
 
 .leaderboard-name {
   font-size: 0.95rem;
-  color: white;
+  color: var(--color-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

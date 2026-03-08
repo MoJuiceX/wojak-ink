@@ -20,7 +20,7 @@
 .compare-stats-modal {
   background: linear-gradient(135deg, rgba(20, 20, 35, 0.98), rgba(30, 30, 50, 0.95));
   border-radius: 20px;
-  border: 1px solid rgba(249, 115, 22, 0.3);
+  border: 1px solid rgba(255, 107, 0, 0.3);
   width: 100%;
   max-width: 420px;
   max-height: 90vh;
@@ -42,7 +42,7 @@
   margin: 0;
   font-size: 18px;
   font-weight: 700;
-  color: white;
+  color: var(--color-text);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -61,7 +61,7 @@
 }
 
 .compare-header .close-button:hover {
-  color: white;
+  color: var(--color-text);
   background: rgba(255, 255, 255, 0.1);
 }
 
@@ -89,8 +89,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(249, 115, 22, 0.1));
-  border: 2px solid rgba(249, 115, 22, 0.4);
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.3), rgba(255, 107, 0, 0.1));
+  border: 2px solid rgba(255, 107, 0, 0.4);
 }
 
 .compare-avatar-wrapper.you {
@@ -100,7 +100,7 @@
 .compare-avatar-label {
   font-size: 14px;
   font-weight: 600;
-  color: #F97316;
+  color: var(--color-primary);
 }
 
 .compare-player .avatar {
@@ -112,7 +112,7 @@
 .compare-player-name {
   font-size: 14px;
   font-weight: 600;
-  color: white;
+  color: var(--color-text);
   max-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -139,7 +139,7 @@
 }
 
 .compare-loading svg {
-  color: #F97316;
+  color: var(--color-primary);
 }
 
 /* Stats Grid */
@@ -177,7 +177,7 @@
 .compare-value {
   font-size: 16px;
   font-weight: 600;
-  color: white;
+  color: var(--color-text);
 }
 
 .compare-cell.winner .compare-value {
@@ -236,7 +236,7 @@
 .score-number {
   font-size: 24px;
   font-weight: 700;
-  color: white;
+  color: var(--color-text);
 }
 
 .summary-score.winner .score-number {
@@ -261,11 +261,11 @@
 }
 
 .win-text {
-  color: #22C55E;
+  color: var(--color-success);
 }
 
 .lose-text {
-  color: #EF4444;
+  color: var(--color-error);
 }
 
 /* Message */

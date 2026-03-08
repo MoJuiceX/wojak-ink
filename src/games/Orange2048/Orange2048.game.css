@@ -167,7 +167,7 @@
 }
 
 .game2048-content .high-score {
-  color: var(--app-accent-color);
+  color: var(--color-primary);
   font-size: 16px;
   font-weight: 600;
   margin-top: 16px;
@@ -175,7 +175,7 @@
 
 .game2048-content .play-btn {
   margin-top: 24px;
-  --background: var(--app-accent-color);
+  --background: var(--color-primary);
   --border-radius: 24px;
   --padding-start: 32px;
   --padding-end: 32px;
@@ -198,19 +198,19 @@
 .game2048-content .score-value {
   font-size: 56px;
   font-weight: 800;
-  color: var(--app-accent-color);
+  color: var(--color-primary);
 }
 
 .game2048-content .new-record {
-  color: var(--app-accent-color);
+  color: var(--color-primary);
   font-size: 24px;
   font-weight: 800;
   animation: glow 1s ease-in-out infinite alternate;
 }
 
 @keyframes glow {
-  from { filter: drop-shadow(0 0 5px var(--app-accent-color)); }
-  to { filter: drop-shadow(0 0 15px var(--app-accent-color)); }
+  from { filter: drop-shadow(0 0 5px var(--color-primary)); }
+  to { filter: drop-shadow(0 0 15px var(--color-primary)); }
 }
 
 .game2048-content .high-score-display {
@@ -287,7 +287,7 @@
   margin: 0 0 16px 0;
   font-size: 22px;
   font-weight: 700;
-  color: var(--app-accent-color);
+  color: var(--color-primary);
 }
 
 .game2048-content .info-content {

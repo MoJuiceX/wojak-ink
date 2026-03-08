@@ -33,7 +33,7 @@
 .loading-bubble {
   border-radius: 50%;
   background: var(--color-border);
-  animation: pulse 1.5s ease-in-out infinite;
+  animation: bubblePulse 1.5s ease-in-out infinite;
 }
 
 .loading-bubble:nth-child(2) {
@@ -44,15 +44,9 @@
   animation-delay: 0.4s;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.05);
-  }
+@keyframes bubblePulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%      { opacity: 0.7; transform: scale(1.05); }
 }
 
 /* Bubble base styles */
@@ -94,7 +88,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  color: white;
+  color: var(--color-text);
   background: rgba(0, 0, 0, 0.7);
   padding: 2px 6px;
   border-radius: 4px;
@@ -231,7 +225,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: white;
+  color: var(--color-text);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.5);
   padding: 4px;
   width: 100%;

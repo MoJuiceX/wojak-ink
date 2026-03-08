@@ -31,7 +31,7 @@
 }
 
 .go-title {
-  color: white;
+  color: var(--color-text);
   font-size: 24px;
   font-weight: 700;
   margin: 0;
@@ -94,8 +94,8 @@
   display: block;
   font-size: 48px;
   font-weight: 800;
-  color: #F97316;
-  text-shadow: 0 0 30px rgba(249, 115, 22, 0.5);
+  color: var(--color-primary);
+  text-shadow: 0 0 30px rgba(255, 107, 0, 0.5);
   font-variant-numeric: tabular-nums;
 }
 
@@ -126,7 +126,7 @@
 .stat-value {
   font-size: 18px;
   font-weight: 600;
-  color: white;
+  color: var(--color-text);
 }
 
 .stat-label {
@@ -152,10 +152,10 @@
 .go-play-again {
   flex: 1;
   padding: 14px 20px;
-  background: linear-gradient(135deg, #F97316, #EA580C);
+  background: var(--gradient-primary);
   border: none;
   border-radius: 12px;
-  color: white;
+  color: var(--color-text);
   font-weight: 600;
   font-size: 16px;
   display: flex;
@@ -163,12 +163,12 @@
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.4);
+  box-shadow: 0 4px 20px rgba(255, 107, 0, 0.4);
   transition: box-shadow 0.2s;
 }
 
 .go-play-again:hover {
-  box-shadow: 0 6px 25px rgba(249, 115, 22, 0.5);
+  box-shadow: 0 6px 25px rgba(255, 107, 0, 0.5);
 }
 
 .go-exit {
@@ -208,7 +208,7 @@
 
 .go-share:hover {
   background: var(--color-white-10);
-  color: white;
+  color: var(--color-text);
 }
 
 /* Mobile */

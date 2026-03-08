@@ -10,7 +10,7 @@
   right: 0;
   background: linear-gradient(135deg, rgba(20, 20, 35, 0.98), rgba(30, 30, 50, 0.95));
   backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(249, 115, 22, 0.3);
+  border-top: 1px solid rgba(255, 107, 0, 0.3);
   padding: 14px 20px;
   z-index: 100;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
@@ -34,8 +34,8 @@
 .position-rank {
   font-size: 20px;
   font-weight: 700;
-  color: #F97316;
-  text-shadow: 0 0 10px rgba(249, 115, 22, 0.4);
+  color: var(--color-primary);
+  text-shadow: 0 0 10px rgba(255, 107, 0, 0.4);
 }
 
 .position-divider {
@@ -55,7 +55,7 @@
 }
 
 .position-rival-section:hover {
-  background: rgba(249, 115, 22, 0.1);
+  background: rgba(255, 107, 0, 0.1);
 }
 
 .rival-message {
@@ -72,7 +72,7 @@
 .rival-avatar-wrapper .avatar {
   width: 28px;
   height: 28px;
-  border: 2px solid rgba(249, 115, 22, 0.4);
+  border: 2px solid rgba(255, 107, 0, 0.4);
 }
 
 .position-champion {
@@ -93,9 +93,9 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(249, 115, 22, 0.5) 20%,
-    rgba(249, 115, 22, 0.8) 50%,
-    rgba(249, 115, 22, 0.5) 80%,
+    rgba(255, 107, 0, 0.5) 20%,
+    rgba(255, 107, 0, 0.8) 50%,
+    rgba(255, 107, 0, 0.5) 80%,
     transparent
   );
 }

@@ -35,7 +35,7 @@
 }
 
 .toast-success .toast-icon {
-  filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.6));
+  filter: drop-shadow(0 0 8px var(--color-success-60));
 }
 
 .toast-error .toast-icon {

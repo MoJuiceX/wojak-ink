@@ -28,7 +28,7 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--color-white-15);
-  color: white;
+  color: var(--color-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,7 +47,7 @@
 
 /* Title */
 .chrome-title {
-  color: white;
+  color: var(--color-text);
   font-weight: 600;
   font-size: 16px;
   text-shadow: 0 2px 4px var(--color-black-50);
@@ -95,7 +95,7 @@
 .score-value {
   font-size: 24px;
   font-weight: 700;
-  color: white;
+  color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
 

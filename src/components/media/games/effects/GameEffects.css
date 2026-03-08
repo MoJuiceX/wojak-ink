@@ -489,11 +489,11 @@
 }
 
 .combo-level-7 .combo-number {
-  color: #f97316;
+  color: var(--color-primary);
   font-size: 88px;
   text-shadow:
-    0 0 45px rgba(249, 115, 22, 1),
-    0 0 80px rgba(249, 115, 22, 0.7),
+    0 0 45px rgba(255, 107, 0, 1),
+    0 0 80px rgba(255, 107, 0, 0.7),
     0 4px 8px rgba(0, 0, 0, 0.4);
 }
 

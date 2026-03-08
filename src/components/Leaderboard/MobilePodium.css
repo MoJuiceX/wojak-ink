@@ -221,7 +221,7 @@
 .runner-score {
   font-size: 16px;
   font-weight: 700;
-  color: #F97316;
+  color: var(--color-primary);
 }
 
 /* === RESPONSIVE: Very small screens === */

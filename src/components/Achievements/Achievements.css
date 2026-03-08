@@ -29,7 +29,7 @@
 
 .unclaimed-badge {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text);
   font-size: 0.75rem;
   padding: 4px 8px;
   border-radius: 12px;
@@ -65,7 +65,7 @@
 .achievements-tabs .tab-button.active {
   background: var(--color-primary);
   border-color: var(--color-primary);
-  color: white;
+  color: var(--color-text);
 }
 
 /* ============ Achievement Grid ============ */
@@ -121,7 +121,7 @@
   height: 18px;
   border-radius: 50%;
   background: var(--color-success);
-  color: white;
+  color: var(--color-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -196,7 +196,7 @@
   border-radius: 8px;
   border: none;
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text);
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -309,8 +309,8 @@
   padding: 14px;
   border-radius: 12px;
   border: none;
-  background: linear-gradient(135deg, #F97316, #EA580C);
-  color: white;
+  background: var(--gradient-primary);
+  color: var(--color-text);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -346,7 +346,7 @@
 
 .progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #F97316, #EA580C);
+  background: linear-gradient(90deg, var(--color-primary), #EA580C);
   border-radius: 3px;
   transition: width 0.5s ease;
 }
@@ -369,8 +369,8 @@
 }
 
 .tab-badge.highlight {
-  background: linear-gradient(135deg, #F97316, #EA580C);
-  color: white;
+  background: var(--gradient-primary);
+  color: var(--color-text);
 }
 
 .achievements-lightbox-grid {

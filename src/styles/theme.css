@@ -16,6 +16,9 @@
   --color-primary: #ff6b00;
   --color-primary-hover: #ff8533;
   --color-primary-muted: rgba(255, 107, 0, 0.15);
+  --gradient-primary: linear-gradient(135deg, var(--color-primary), #EA580C);
+  --glow-primary-sm: 0 0 10px rgba(255, 107, 0, 0.3);
+  --glow-primary-md: 0 0 20px rgba(255, 107, 0, 0.4);
 
   /* Backgrounds */
   --color-bg: #0a0a0f;
@@ -70,20 +73,27 @@
   /* Brand glow (orange ambient) */
   --color-brand-glow: rgba(255, 107, 0, 0.15);
 
+  /* RGB triplet for use in rgba() interpolation */
+  --color-primary-rgb: 255, 107, 0;
+
+  /* Tang opacity variants (for game UI system) */
+  --color-tang-500-10: rgba(255, 107, 0, 0.1);
+  --color-tang-500-30: rgba(255, 107, 0, 0.3);
+
   /* Rgba alpha tokens — replaces repeated inline rgba() values */
-  --color-primary-5: rgba(249, 115, 22, 0.05);
-  --color-primary-8: rgba(249, 115, 22, 0.08);
-  --color-primary-10: rgba(249, 115, 22, 0.1);
-  --color-primary-15: rgba(249, 115, 22, 0.15);
-  --color-primary-20: rgba(249, 115, 22, 0.2);
-  --color-primary-25: rgba(249, 115, 22, 0.25);
-  --color-primary-30: rgba(249, 115, 22, 0.3);
-  --color-primary-40: rgba(249, 115, 22, 0.4);
-  --color-primary-50: rgba(249, 115, 22, 0.5);
-  --color-primary-60: rgba(249, 115, 22, 0.6);
-  --color-primary-70: rgba(249, 115, 22, 0.7);
-  --color-primary-80: rgba(249, 115, 22, 0.8);
-  --color-primary-90: rgba(249, 115, 22, 0.9);
+  --color-primary-5: rgba(255, 107, 0, 0.05);
+  --color-primary-8: rgba(255, 107, 0, 0.08);
+  --color-primary-10: rgba(255, 107, 0, 0.1);
+  --color-primary-15: rgba(255, 107, 0, 0.15);
+  --color-primary-20: rgba(255, 107, 0, 0.2);
+  --color-primary-25: rgba(255, 107, 0, 0.25);
+  --color-primary-30: rgba(255, 107, 0, 0.3);
+  --color-primary-40: rgba(255, 107, 0, 0.4);
+  --color-primary-50: rgba(255, 107, 0, 0.5);
+  --color-primary-60: rgba(255, 107, 0, 0.6);
+  --color-primary-70: rgba(255, 107, 0, 0.7);
+  --color-primary-80: rgba(255, 107, 0, 0.8);
+  --color-primary-90: rgba(255, 107, 0, 0.9);
   --color-error-10: rgba(239, 68, 68, 0.1);
   --color-error-12: rgba(239, 68, 68, 0.12);
   --color-error-15: rgba(239, 68, 68, 0.15);
@@ -98,6 +108,10 @@
   --color-success-30: rgba(34, 197, 94, 0.3);
   --color-success-40: rgba(34, 197, 94, 0.4);
   --color-success-50: rgba(34, 197, 94, 0.5);
+  --color-success-90: rgba(34, 197, 94, 0.9);
+  --color-cyan-15: rgba(0, 212, 255, 0.15);
+  --color-cyan-20: rgba(0, 212, 255, 0.2);
+  --color-cyan-30: rgba(0, 212, 255, 0.3);
   --color-warning-5: rgba(251, 191, 36, 0.05);
   --color-warning-6: rgba(251, 191, 36, 0.06);
   --color-warning-10: rgba(251, 191, 36, 0.1);
@@ -214,7 +228,7 @@
   --color-black-3: rgba(0, 0, 0, 0.03);
   --color-black-25: rgba(0, 0, 0, 0.25);
   --color-primary-6: rgba(255, 150, 80, 0.06);
-  --color-primary-12: rgba(249, 115, 22, 0.12);
+  --color-primary-12: rgba(255, 107, 0, 0.12);
   --color-success-6: rgba(80, 200, 120, 0.06);
   --color-surface-dark-80: rgba(30, 30, 30, 0.8);
 
@@ -554,6 +568,24 @@ body {
   border: 1px solid var(--color-border);
 }
 
+/* Error alert banner — left-bordered card for error messages */
+.card-error {
+  border-left: 4px solid var(--color-error);
+  background: var(--color-error-10);
+}
+
+/* Callout card — primary accent border-left for informational highlights */
+.card-callout {
+  border-left: 3px solid var(--color-primary);
+}
+
+/* Section label — uppercase muted heading for content sections */
+.section-label {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
 /* Animated rainbow border for selected color swatch.
    The animation runs on the parent .generator-panel-section so --rainbow-angle
    keeps rotating continuously even when the user changes swatch selection.
@@ -619,7 +651,7 @@ body {
 }
 
 .generator-trait-card--selected {
-  border: 2px solid var(--generator-selected-color, #F97316);
+  border: 2px solid var(--generator-selected-color, var(--color-primary));
 }
 
 .generator-trait-card--disabled {
@@ -633,7 +665,7 @@ body {
 }
 
 .generator-trait-card__check-badge {
-  background: var(--generator-badge-color, #F97316);
+  background: var(--generator-badge-color, var(--color-primary));
 }
 
 /* ── Trait Sort Controls ────────────────────────────────────────────────── */
@@ -784,7 +816,7 @@ body {
 }
 
 .generator-layer-tab--active {
-  color: white;
+  color: var(--color-text);
 }
 
 .generator-layer-tab--blocked {
@@ -810,7 +842,7 @@ body {
 /* ── Action Bar Mint Button — filled orange CTA, distinct from icon buttons ──── */
 .action-bar-mint-btn {
   background: linear-gradient(135deg, #ff6b00, #ff8533);
-  color: white;
+  color: var(--color-text);
   border: 1px solid rgba(255, 149, 0, 0.4);
   box-shadow: 0 0 20px rgba(255, 107, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.3);
 }
@@ -851,9 +883,9 @@ body {
 }
 
 .action-btn--active {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.25), var(--color-primary-10));
-  color: white;
-  border-color: rgba(249, 115, 22, 0.6);
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.25), var(--color-primary-10));
+  color: var(--color-text);
+  border-color: rgba(255, 107, 0, 0.6);
   box-shadow: 0 0 20px var(--color-primary-30), inset 0 0 15px var(--color-primary-10);
 }
 
@@ -870,7 +902,7 @@ body {
 
 .action-btn-badge {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text);
   box-shadow: 0 0 8px var(--color-primary-50);
 }
 
@@ -890,7 +922,7 @@ body {
 
 .action-menu-item-badge {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text);
 }
 
 /* ── Mouth Trait Cards — shared between ImageCard and G2MouthCard ──── */
@@ -914,7 +946,7 @@ body {
 
 .trait-card-badge {
   background: var(--generator-badge-color);
-  color: white;
+  color: var(--color-text);
 }
 
 .trait-card-checkmark {
@@ -1178,7 +1210,6 @@ body {
 }
 
 .fight-club-tab.active {
-  color: var(--color-text);
   background: var(--color-primary);
   color: var(--color-text-inverse);
 }
@@ -1510,10 +1541,10 @@ body {
   transform: rotateY(0deg);
 }
 
-.top-ten-card-back {
+.top-ten-card.top-ten-card-back {
   transform: rotateY(180deg);
-  justify-content: center !important;
-  gap: 10px !important;
+  justify-content: center;
+  gap: 10px;
 }
 
 .top-ten-card-container.flipped .top-ten-card-front {
@@ -2242,25 +2273,7 @@ body {
 }
 
 /* Combat type badges */
-.badge-fire {
-  background: var(--color-error-15);
-  color: #ef4444;
-}
-
-.badge-water {
-  background: rgba(96, 165, 250, 0.15);
-  color: #60a5fa;
-}
-
-.badge-grass {
-  background: var(--color-success-15);
-  color: #22c55e;
-}
-
-.badge-electric {
-  background: rgba(251, 191, 36, 0.15);
-  color: #fbbf24;
-}
+/* .badge-fire, .badge-water, .badge-grass, .badge-electric — defined below with combat-style colors */
 
 .badge-psychic {
   background: rgba(168, 85, 247, 0.15);
@@ -3158,11 +3171,6 @@ body {
   border-width: 3px;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
 
 
 
@@ -3209,7 +3217,7 @@ body {
   height: 32px;
   border-radius: var(--radius-full);
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3570,6 +3578,9 @@ body {
 .ai-wizard-header-left {
   flex: 0 0 auto;
   min-width: 4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .ai-wizard-header-center {
@@ -3583,8 +3594,8 @@ body {
 
 .ai-wizard-header-right {
   flex: 0 0 auto;
-  min-width: 4rem;
   display: flex;
+  align-items: center;
   justify-content: flex-end;
 }
 
@@ -3634,7 +3645,7 @@ body {
   display: block;
 }
 
-/* --- AI Confirm Card --- */
+/* --- AI Confirm Card (uses --family-bg for gradient) --- */
 
 .ai-confirm-card {
   display: flex;
@@ -3642,7 +3653,7 @@ body {
   align-items: center;
   gap: 12px;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--family-bg, rgba(255, 255, 255, 0.03));
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
 }
@@ -3674,7 +3685,7 @@ body {
 .ai-wizard-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: white;
+  color: var(--color-text);
   margin: 0;
   letter-spacing: -0.01em;
   white-space: nowrap;
@@ -3696,7 +3707,7 @@ body {
 }
 
 .ai-wizard-back:hover {
-  color: white;
+  color: var(--color-text);
   background: var(--color-white-5);
 }
 
@@ -3811,8 +3822,8 @@ body {
 }
 
 .ai-preset-btn:hover {
-  border-color: var(--color-primary);
-  background: rgba(255, 107, 0, 0.08);
+  border-color: var(--family-accent, var(--color-primary));
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .ai-shimmer {
@@ -3861,6 +3872,123 @@ body {
 .ai-credits-badge--empty {
   opacity: 0.6;
   animation: pulse 2s ease-in-out infinite;
+}
+
+/* --- AI Prompt Builder Layout --- */
+
+/* Side-by-side layout: wojak preview on left, content on right */
+.ai-prompt-layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.ai-prompt-preview {
+  flex-shrink: 0;
+  width: 220px;
+}
+
+.ai-prompt-preview-img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+.ai-prompt-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* On small screens, stack vertically */
+@media (max-width: 640px) {
+  .ai-prompt-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+  .ai-prompt-preview {
+    width: 160px;
+  }
+}
+
+/* --- AI Family Card (visual style cards with gradient backgrounds) --- */
+
+.ai-family-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 1.25rem 0.75rem;
+  background: var(--family-bg, rgba(18, 18, 26, 0.6));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  min-height: 100px;
+}
+
+.ai-family-card:hover {
+  border-color: var(--family-accent, var(--color-primary));
+  box-shadow: 0 0 20px var(--family-accent, rgba(255, 107, 0, 0.15));
+}
+
+.ai-family-card--disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+}
+
+.ai-family-card--disabled:hover {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+}
+
+.ai-family-emoji {
+  font-size: 2.25rem;
+  line-height: 1;
+  display: block;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+}
+
+.ai-family-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.ai-family-desc {
+  font-size: 0.6875rem;
+  color: var(--color-text-secondary);
+}
+
+/* --- AI Option Header (family label bar above option pills) --- */
+
+.ai-option-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  background: var(--family-bg, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  margin-bottom: 0.25rem;
+}
+
+.ai-option-header-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.ai-option-header-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text);
 }
 
 /* .ai-enhanced-banner removed — replaced by generator-ai-overlay in Generator.css */
@@ -3946,7 +4074,7 @@ body {
 .ai-shop-bundle-credits {
   font-size: 1.25rem;
   font-weight: 800;
-  color: white;
+  color: var(--color-text);
   min-width: 1.75rem;
   text-align: right;
   letter-spacing: -0.02em;
@@ -3969,7 +4097,7 @@ body {
 .ai-shop-bundle-price {
   font-size: 0.9375rem;
   font-weight: 700;
-  color: white;
+  color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
 
@@ -4541,7 +4669,7 @@ body {
 }
 
 .trait-label-text {
-  color: white;
+  color: var(--color-text);
   font-size: 11px;
   font-weight: 500;
   white-space: nowrap;
@@ -5062,12 +5190,12 @@ body {
 }
 
 .vote-pass-strip.is-complete {
-  border-color: rgba(34,197,94,0.2);
+  border-color: rgba(34, 197, 94, 0.2);
 }
 
 .vote-pass-strip.is-complete .vote-pass-strip-fill {
-  background: linear-gradient(90deg, rgba(34,197,94,0.8), rgba(74,222,128,0.95));
-  box-shadow: 0 0 8px rgba(34,197,94,0.22);
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.8), rgba(74, 222, 128, 0.95));
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.22);
 }
 
 /* ── Vote Buttons ── */
@@ -6535,10 +6663,7 @@ body {
   animation: fadeIn 0.2s ease;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+/* @keyframes fadeIn is defined in animations.css */
 
 .did-collection-modal {
   width: 100%;
@@ -6837,11 +6962,7 @@ body {
 }
 
 /* Farmer cards: ~3 per row on desktop */
-.did-nft-card {
-  flex: 1 1 130px;
-  min-width: 100px;
-  max-width: 200px;
-}
+/* NFT cards: ~3 per row (flex sizing here, main styles below) */
 
 /* Wojak cards: ~2 per row (slightly larger) */
 .did-collection-column:last-child .did-nft-card {
@@ -6919,6 +7040,9 @@ body {
 
 /* NFT Cards */
 .did-nft-card {
+  flex: 1 1 130px;
+  min-width: 100px;
+  max-width: 200px;
   position: relative;
   aspect-ratio: 1 / 1;
   text-decoration: none;
@@ -7341,8 +7465,8 @@ body {
 /* ── Your Position Card ── */
 
 .your-position-card {
-  background: rgba(var(--color-primary-rgb, 255, 165, 0), 0.06);
-  border: 1px solid rgba(var(--color-primary-rgb, 255, 165, 0), 0.2);
+  background: rgba(var(--color-primary-rgb, 255, 107, 0), 0.06);
+  border: 1px solid rgba(var(--color-primary-rgb, 255, 107, 0), 0.2);
   border-radius: var(--radius-lg);
   padding: 12px 16px;
   display: flex;
@@ -8371,7 +8495,7 @@ body {
 }
 
 .damage-super {
-  color: #f97316;
+  color: var(--color-primary);
   font-size: 2.2rem;
 }
 
@@ -8457,20 +8581,10 @@ body {
 
 /* ── 6. Effectiveness Callouts ────────────────────────────────────────────── */
 
-.effectiveness-callout {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  font-weight: 700;
-  pointer-events: none;
-  z-index: 25;
-  white-space: nowrap;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
-}
+/* .effectiveness-callout — merged into single definition below (search: "effectiveness-callout") */
 
 .effectiveness-super {
-  color: #f97316;
+  color: var(--color-primary);
   font-size: 1.6rem;
   animation: effectPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
@@ -9011,6 +9125,8 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  white-space: nowrap;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
   pointer-events: none;
   animation: effectivenessPopIn 0.3s ease-out, effectivenessFadeOut 1.5s ease-out 0.3s forwards;
 }
@@ -9417,7 +9533,7 @@ body {
 
 .battle-mode-option.active {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text);
   box-shadow: 0 2px 8px rgba(255, 107, 0, 0.3);
 }
 

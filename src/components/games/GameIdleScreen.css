@@ -3,7 +3,7 @@
 .idle-screen {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 30%, rgba(249, 115, 22, 0.2), transparent 60%),
+  background: radial-gradient(circle at 50% 30%, rgba(255, 107, 0, 0.2), transparent 60%),
               #0D0D0D;
   display: flex;
   align-items: center;
@@ -63,8 +63,8 @@
 .idle-title {
   font-size: 36px;
   font-weight: 800;
-  color: #F97316;
-  text-shadow: 0 0 30px rgba(249, 115, 22, 0.5);
+  color: var(--color-primary);
+  text-shadow: 0 0 30px rgba(255, 107, 0, 0.5);
   margin: 0 0 8px 0;
 }
 
@@ -113,10 +113,10 @@
 
 .start-btn {
   padding: 16px 48px;
-  background: linear-gradient(135deg, #F97316, #EA580C);
+  background: var(--gradient-primary);
   border: none;
   border-radius: 30px;
-  color: white;
+  color: var(--color-text);
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 2px;
@@ -159,6 +159,6 @@
   }
 
   .start-btn {
-    box-shadow: 0 0 20px rgba(249, 115, 22, 0.4) !important;
+    box-shadow: 0 0 20px rgba(255, 107, 0, 0.4) !important;
   }
 }

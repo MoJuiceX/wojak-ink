@@ -92,7 +92,7 @@
   display: block;
   font-size: 1rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--color-text);
   margin-top: 4px;
   text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
 }

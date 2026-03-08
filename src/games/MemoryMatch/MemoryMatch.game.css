@@ -878,7 +878,7 @@
 
 /* Score saved confirmation text */
 .memory-container .game-over-submitted {
-  color: #8b5cf6 !important;
+  color: #8b5cf6;
   font-size: 14px;
   font-weight: 600;
   text-align: center;
@@ -1104,9 +1104,9 @@
   }
 
   /* Horizontal stats bar at top on mobile */
-  .stats-panel {
+  .memory-container .stats-panel {
     width: 100%;
-    height: auto !important;
+    height: auto;
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
@@ -1137,9 +1137,9 @@
   }
 
   /* Full-width lightbox on mobile with dynamic card sizing */
-  .lightbox-wrapper {
-    width: 100% !important;
-    height: auto !important;
+  .memory-container .lightbox-wrapper {
+    width: 100%;
+    height: auto;
     min-height: 0;
     padding: 8px;
     border-radius: 12px;

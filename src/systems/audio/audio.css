@@ -156,7 +156,7 @@
   border-radius: 50%;
   background: var(--color-white-10);
   border: 1px solid var(--color-white-15);
-  color: #fff;
+  color: var(--color-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -201,7 +201,7 @@
 }
 
 .mute-toggle:hover {
-  color: #fff;
+  color: var(--color-text);
 }
 
 .mute-toggle:active {

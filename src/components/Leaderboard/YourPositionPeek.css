@@ -10,7 +10,7 @@
   right: 0;
   background: linear-gradient(135deg, rgba(20, 20, 35, 0.98), rgba(30, 30, 50, 0.95));
   backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(249, 115, 22, 0.3);
+  border-top: 1px solid rgba(255, 107, 0, 0.3);
   z-index: 100;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
   overflow: hidden;
@@ -27,9 +27,9 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(249, 115, 22, 0.5) 20%,
-    rgba(249, 115, 22, 0.8) 50%,
-    rgba(249, 115, 22, 0.5) 80%,
+    rgba(255, 107, 0, 0.5) 20%,
+    rgba(255, 107, 0, 0.8) 50%,
+    rgba(255, 107, 0, 0.5) 80%,
     transparent
   );
 }
@@ -45,7 +45,7 @@
 }
 
 .peek-collapsed:active {
-  background: rgba(249, 115, 22, 0.1);
+  background: rgba(255, 107, 0, 0.1);
 }
 
 .peek-left {
@@ -59,7 +59,7 @@
 .peek-rank {
   font-size: 16px;
   font-weight: 700;
-  color: #F97316;
+  color: var(--color-primary);
   flex-shrink: 0;
 }
 
@@ -109,7 +109,7 @@
 .peek-value {
   font-size: 16px;
   font-weight: 600;
-  color: white;
+  color: var(--color-text);
 }
 
 /* Rival section */
@@ -129,13 +129,13 @@
 }
 
 .peek-rival-header:active {
-  background: rgba(249, 115, 22, 0.15);
+  background: rgba(255, 107, 0, 0.15);
 }
 
 .peek-rival-header .avatar {
   width: 36px;
   height: 36px;
-  border: 2px solid rgba(249, 115, 22, 0.4);
+  border: 2px solid rgba(255, 107, 0, 0.4);
 }
 
 .peek-rival-info {
@@ -147,7 +147,7 @@
 .peek-rival-name {
   font-size: 14px;
   font-weight: 600;
-  color: white;
+  color: var(--color-text);
 }
 
 .peek-rival-score {
@@ -160,9 +160,9 @@
   color: rgba(255, 255, 255, 0.9);
   line-height: 1.4;
   padding: 10px;
-  background: rgba(249, 115, 22, 0.1);
+  background: rgba(255, 107, 0, 0.1);
   border-radius: 8px;
-  border-left: 3px solid #F97316;
+  border-left: 3px solid var(--color-primary);
 }
 
 /* Champion state */

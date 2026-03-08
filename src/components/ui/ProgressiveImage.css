@@ -38,7 +38,7 @@
   position: absolute;
   inset: 0;
   z-index: 3;
-  color: white;
+  color: var(--color-text);
   font-size: 0.875rem;
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }

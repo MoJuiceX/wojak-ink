@@ -215,7 +215,7 @@
 
 .arcade-frame-btn:hover {
   background: rgba(60, 60, 60, 0.9);
-  color: white;
+  color: var(--color-text);
   transform: translateX(-50%) scale(1.1);
   border-color: rgba(255, 255, 255, 0.5);
   box-shadow:

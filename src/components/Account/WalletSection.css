@@ -94,7 +94,7 @@
 
 .dot--success {
   background: var(--color-success);
-  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+  box-shadow: 0 0 6px var(--color-success-50);
 }
 
 .dot--warning {

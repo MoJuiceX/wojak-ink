@@ -107,7 +107,7 @@
 
 .inline-error-retry {
   background: #dc2626;
-  color: white;
+  color: var(--color-text);
 }
 
 .inline-error-retry:hover:not(:disabled) {
@@ -122,7 +122,7 @@
 
 .inline-error-fallback {
   background: #7f1d1d;
-  color: white;
+  color: var(--color-text);
 }
 
 .inline-error-fallback:hover {

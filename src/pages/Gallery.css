@@ -362,7 +362,7 @@
 .base-name {
   font-size: 12px;
   font-weight: 600;
-  color: white;
+  color: var(--color-text);
 }
 
 /* Explorer Modal */
@@ -451,7 +451,7 @@
   justify-content: center;
   background: var(--color-black-50);
   border-radius: 50%;
-  color: white;
+  color: var(--color-text);
   animation: swipe-hint-pulse 0.8s ease-in-out infinite;
 }
 
@@ -810,7 +810,7 @@
 
 .filter-pill.active {
   background: var(--ion-color-primary);
-  color: white;
+  color: var(--color-text);
 }
 
 .filter-pill:active {

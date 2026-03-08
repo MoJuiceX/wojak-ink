@@ -367,7 +367,7 @@
 
 .sign-in-button:hover {
   transform: scale(1.02);
-  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.3);
+  box-shadow: 0 4px 20px rgba(255, 107, 0, 0.3);
 }
 
 .sign-in-button:active {

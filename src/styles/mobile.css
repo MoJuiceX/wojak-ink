@@ -31,7 +31,7 @@ a,
 
 /* Custom tap highlight color - orange theme */
 * {
-  -webkit-tap-highlight-color: rgba(249, 115, 22, 0.15);
+  -webkit-tap-highlight-color: rgba(255, 107, 0, 0.15);
 }
 
 /* Remove default tap highlight and add custom active state */
@@ -45,7 +45,7 @@ a,
 button:active,
 a:active,
 [role="button"]:active {
-  background-color: rgba(249, 115, 22, 0.1);
+  background-color: rgba(255, 107, 0, 0.1);
 }
 
 /* Quick scale bounce on tap */
@@ -277,23 +277,19 @@ textarea:focus {
   align-items: center;
   justify-content: center;
   padding: 16px;
-  color: #F97316;
+  color: var(--color-primary);
 }
 
 .pull-indicator .spinner {
   width: 24px;
   height: 24px;
-  border: 2px solid rgba(249, 115, 22, 0.2);
-  border-top-color: #F97316;
+  border: 2px solid rgba(255, 107, 0, 0.2);
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* @keyframes spin is defined in theme.css */
 
 /* ----------------------------------------
    11. REDUCED MOTION

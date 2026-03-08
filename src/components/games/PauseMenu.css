@@ -30,7 +30,7 @@
 }
 
 .pause-header h2 {
-  color: white;
+  color: var(--color-text);
   font-size: 28px;
   font-weight: 700;
   margin: 0 0 4px 0;
@@ -62,19 +62,19 @@
 }
 
 .pause-btn.resume {
-  background: linear-gradient(135deg, #F97316, #EA580C);
-  color: white;
-  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.4);
+  background: var(--gradient-primary);
+  color: var(--color-text);
+  box-shadow: 0 4px 20px rgba(255, 107, 0, 0.4);
 }
 
 .pause-btn.resume:hover {
-  box-shadow: 0 6px 25px rgba(249, 115, 22, 0.5);
+  box-shadow: 0 6px 25px rgba(255, 107, 0, 0.5);
 }
 
 .pause-btn.restart {
   background: var(--color-white-10);
   border: 1px solid var(--color-white-20);
-  color: white;
+  color: var(--color-text);
 }
 
 .pause-btn.restart:hover {
@@ -84,7 +84,7 @@
 .pause-btn.exit {
   background: var(--color-error-10);
   border: 1px solid var(--color-error-30);
-  color: #EF4444;
+  color: var(--color-error);
 }
 
 .pause-btn.exit:hover {

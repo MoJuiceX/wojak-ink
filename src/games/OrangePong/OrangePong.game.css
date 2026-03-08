@@ -854,7 +854,7 @@
 @media (max-width: 768px) {
   /* Allow content to be visible on mobile */
   .pong-container {
-    overflow: visible !important;
+    overflow: visible;
   }
 
   /* Stack vertically on mobile */
@@ -862,14 +862,14 @@
     flex-direction: column;
     padding: 8px;
     gap: 8px;
-    height: auto !important;
+    height: auto;
     min-height: 100%;
   }
 
   /* Horizontal stats bar at top on mobile */
   .pong-container .stats-panel {
     width: 100%;
-    height: auto !important;
+    height: auto;
     min-width: 0;
     flex-direction: row;
     justify-content: space-around;
@@ -903,24 +903,23 @@
 
   /* Full-width game area on mobile */
   .pong-container .lightbox-wrapper {
-    width: 100% !important;
-    height: auto !important;
+    width: 100%;
+    height: auto;
     max-width: 100%;
     border-radius: 12px;
-    border-left: 2px solid rgba(255, 235, 59, 0.4);
     border: 1px solid rgba(255, 235, 59, 0.3);
-    overflow: visible !important; /* Allow paddles to be visible */
+    overflow: visible; /* Allow paddles to be visible */
   }
 
   .pong-container .pong-area,
   .pong-container .lightbox-wrapper .pong-area {
     width: 100%;
-    height: 60vw !important; /* Maintain aspect ratio - taller for better gameplay */
+    height: 60vw; /* Maintain aspect ratio - taller for better gameplay */
     max-height: 450px;
     min-height: 220px;
     position: relative;
-    overflow: visible !important; /* Ensure paddles aren't clipped */
-    touch-action: none !important; /* Enable touch controls for paddle */
+    overflow: visible; /* Ensure paddles aren't clipped */
+    touch-action: none; /* Enable touch controls for paddle */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
@@ -928,16 +927,16 @@
 
   /* Adjust paddle size for mobile */
   .pong-container .paddle {
-    width: 10px !important;
-    height: 60px !important;
+    width: 10px;
+    height: 60px;
   }
 
   .pong-container .ai-paddle {
-    left: 10px !important;
+    left: 10px;
   }
 
   .pong-container .player-paddle {
-    right: 10px !important;
+    right: 10px;
   }
 
   /* Ensure paddles stay within game area */
@@ -965,20 +964,20 @@
   }
 
   .pong-container .pong-area {
-    height: 65vw !important;
+    height: 65vw;
     max-height: 400px;
   }
 
   .pong-container .paddle {
-    width: 8px !important;
-    height: 50px !important;
+    width: 8px;
+    height: 50px;
   }
 
   .pong-container .ai-paddle {
-    left: 8px !important;
+    left: 8px;
   }
 
   .pong-container .player-paddle {
-    right: 8px !important;
+    right: 8px;
   }
 }

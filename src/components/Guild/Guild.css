@@ -52,16 +52,16 @@
 }
 
 .guild-btn.primary {
-  background: linear-gradient(135deg, #F97316, #EA580C);
+  background: var(--gradient-primary);
   border: none;
-  color: white;
+  color: var(--color-text);
   box-shadow: 0 4px 20px var(--color-primary-30);
 }
 
 .guild-btn.secondary {
   background: transparent;
   border: 2px solid var(--color-primary-40);
-  color: #F97316;
+  color: var(--color-primary);
 }
 
 /* Guild Benefits Section */
@@ -356,7 +356,7 @@
 
 .guild-tabs ion-segment-button {
   --color: var(--color-text-secondary);
-  --color-checked: #fff;
+  --color-checked: var(--color-text);
   --indicator-color: var(--color-primary-80);
 }
 
@@ -1083,9 +1083,4 @@
   }
 }
 
-/* Desktop: Show coming soon badge */
-@media (min-width: 768px) {
-  .coming-soon-badge-desktop {
-    display: block !important;
-  }
-}
+/* Desktop: Show coming soon badge — visibility handled by Tailwind hidden md:block */

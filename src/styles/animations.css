@@ -194,10 +194,10 @@
 
 @keyframes glowPulse {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+    box-shadow: 0 0 20px rgba(255, 107, 0, 0.4);
   }
   50% {
-    box-shadow: 0 0 40px rgba(249, 115, 22, 0.6), 0 0 60px rgba(249, 115, 22, 0.3);
+    box-shadow: 0 0 40px rgba(255, 107, 0, 0.6), 0 0 60px rgba(255, 107, 0, 0.3);
   }
 }
 
@@ -212,10 +212,10 @@
 
 @keyframes borderGlow {
   0%, 100% {
-    border-color: rgba(249, 115, 22, 0.3);
+    border-color: rgba(255, 107, 0, 0.3);
   }
   50% {
-    border-color: rgba(249, 115, 22, 0.6);
+    border-color: rgba(255, 107, 0, 0.6);
   }
 }
 

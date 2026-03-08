@@ -73,7 +73,7 @@
 }
 
 .game-sidebar-header svg {
-  color: #F97316;
+  color: var(--color-primary);
 }
 
 .game-sidebar-list {
@@ -215,8 +215,8 @@
 }
 
 .filter-count {
-  background: rgba(249, 115, 22, 0.25);
-  color: #F97316;
+  background: rgba(255, 107, 0, 0.25);
+  color: var(--color-primary);
   font-size: 10px;
   font-weight: 600;
   padding: 1px 5px;
@@ -271,8 +271,8 @@
 }
 
 .option-count {
-  background: rgba(249, 115, 22, 0.2);
-  color: #F97316;
+  background: rgba(255, 107, 0, 0.2);
+  color: var(--color-primary);
   font-size: 10px;
   font-weight: 600;
   padding: 2px 5px;
@@ -437,8 +437,8 @@
   }
 
   .filter-bar-left .time-filter.active {
-    background: rgba(249, 115, 22, 0.2);
-    color: #F97316;
+    background: rgba(255, 107, 0, 0.2);
+    color: var(--color-primary);
   }
 
   /* Remove the sliding indicator on mobile - use background change instead */
@@ -498,7 +498,7 @@
   margin: 0 12px;
   font-size: 14px;
   opacity: 0.5;
-  -webkit-text-fill-color: #F97316;
+  -webkit-text-fill-color: var(--color-primary);
 }
 
 .leaderboard-subtitle {
@@ -520,7 +520,7 @@
 }
 
 .nft-status-badge.holder {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(249, 115, 22, 0.2));
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 107, 0, 0.2));
   color: #FFD700;
   border: 1px solid rgba(255, 215, 0, 0.3);
 }
@@ -555,7 +555,7 @@
   justify-content: space-between;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: white;
+  color: var(--color-text);
 }
 
 .game-selector-button:hover {
@@ -585,7 +585,7 @@
 }
 
 .dropdown-arrow {
-  color: #F97316;
+  color: var(--color-primary);
   transition: transform 0.3s;
 }
 
@@ -616,7 +616,7 @@
   width: 100%;
   background: transparent;
   border: none;
-  color: white;
+  color: var(--color-text);
   text-align: left;
   font-size: 14px;
 }
@@ -667,7 +667,7 @@
   height: 8px;
   margin-right: 8px;
   border-radius: 50%;
-  background: #F97316;
+  background: var(--color-primary);
   animation: leaderboardPulse 1s ease-in-out infinite;
 }
 
@@ -747,7 +747,7 @@
 }
 
 .time-filter.active {
-  color: white;
+  color: var(--color-text);
 }
 
 .time-filter:hover:not(.active) {
@@ -782,8 +782,8 @@
 }
 
 .loading-trophy {
-  color: #F97316;
-  filter: drop-shadow(0 0 20px rgba(249, 115, 22, 0.5));
+  color: var(--color-primary);
+  filter: drop-shadow(0 0 20px rgba(255, 107, 0, 0.5));
 }
 
 .leaderboard-loading p {
@@ -824,7 +824,7 @@
   padding: 50px 20px;
   background: radial-gradient(
     ellipse at center,
-    rgba(249, 115, 22, 0.1) 0%,
+    rgba(255, 107, 0, 0.1) 0%,
     transparent 60%
   );
   border-radius: 20px;
@@ -865,7 +865,7 @@
 .empty-title {
   font-size: 22px;
   font-weight: 700;
-  color: white;
+  color: var(--color-text);
   margin: 0 0 8px 0;
 }
 
@@ -883,16 +883,16 @@
   background: linear-gradient(135deg, #F97316, #EA580C);
   border: none;
   border-radius: 12px;
-  color: white;
+  color: var(--color-text);
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
-  box-shadow: 0 0 25px rgba(249, 115, 22, 0.4);
+  box-shadow: 0 0 25px rgba(255, 107, 0, 0.4);
   transition: box-shadow 0.3s;
 }
 
 .play-now-btn:hover {
-  box-shadow: 0 0 35px rgba(249, 115, 22, 0.6);
+  box-shadow: 0 0 35px rgba(255, 107, 0, 0.6);
 }
 
 /* ===== PODIUM ===== */
@@ -971,11 +971,8 @@
   background: 
     linear-gradient(180deg, rgba(255, 215, 0, 0.12) 0%, rgba(255, 180, 0, 0.06) 50%, transparent 100%),
     linear-gradient(135deg, rgba(30, 30, 40, 0.95) 0%, rgba(20, 20, 30, 0.98) 100%);
-  border: 1.5px solid;
-  border-image: linear-gradient(180deg, rgba(255, 215, 0, 0.6) 0%, rgba(255, 180, 0, 0.2) 100%) 1;
+  border: 1.5px solid rgba(255, 215, 0, 0.4);
   border-radius: 20px;
-  border-image: none;
-  border-color: rgba(255, 215, 0, 0.4);
   /* Transform handled by Framer Motion to avoid conflicts */
   box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.4),
@@ -1041,7 +1038,7 @@
 
 /* Current user highlight */
 .podium-card.is-current-user {
-  border-color: rgba(249, 115, 22, 0.5) !important;
+  border-color: rgba(255, 107, 0, 0.5) !important;
 }
 
 .podium-card.is-current-user::after {
@@ -1049,7 +1046,7 @@
   position: absolute;
   inset: -2px;
   border-radius: 22px;
-  border: 2px solid rgba(249, 115, 22, 0.4);
+  border: 2px solid rgba(255, 107, 0, 0.4);
   pointer-events: none;
   animation: userPulse 2s ease-in-out infinite;
 }
@@ -1060,7 +1057,7 @@
 }
 
 .podium-card.is-current-user {
-  box-shadow: 0 0 25px rgba(249, 115, 22, 0.5);
+  box-shadow: 0 0 25px rgba(255, 107, 0, 0.5);
 }
 
 .podium-rank {
@@ -1098,7 +1095,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 2px 4px rgba(249, 115, 22, 0.3));
+  filter: drop-shadow(0 2px 4px rgba(255, 107, 0, 0.3));
 }
 
 /* First place gets extra large score */
@@ -1140,7 +1137,7 @@
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.11);
   background:
-    radial-gradient(circle at 50% 35%, rgba(249, 115, 22, 0.09), transparent 62%),
+    radial-gradient(circle at 50% 35%, rgba(255, 107, 0, 0.09), transparent 62%),
     rgba(255, 255, 255, 0.02);
   padding: 12px 14px;
   margin-bottom: 8px;
@@ -1198,8 +1195,8 @@
 }
 
 .leaderboard-row.is-current-user {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(249, 115, 22, 0.05));
-  border-color: rgba(249, 115, 22, 0.3);
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.15), rgba(255, 107, 0, 0.05));
+  border-color: rgba(255, 107, 0, 0.3);
 }
 
 .leaderboard-row.highlighted {
@@ -1208,10 +1205,10 @@
 
 @keyframes highlightPulse {
   0%, 100% {
-    box-shadow: 0 0 10px rgba(249, 115, 22, 0.3);
+    box-shadow: 0 0 10px rgba(255, 107, 0, 0.3);
   }
   50% {
-    box-shadow: 0 0 20px rgba(249, 115, 22, 0.5);
+    box-shadow: 0 0 20px rgba(255, 107, 0, 0.5);
   }
 }
 
@@ -1275,12 +1272,12 @@
 
 .row-score {
   font-weight: 700;
-  color: #F97316;
+  color: var(--color-primary);
   font-size: 1rem;
   min-width: 60px;
   font-variant-numeric: tabular-nums;
   text-align: right;
-  text-shadow: 0 0 10px rgba(249, 115, 22, 0.4);
+  text-shadow: 0 0 10px rgba(255, 107, 0, 0.4);
 }
 
 /* ===== USER POSITION FOOTER ===== */
@@ -1299,8 +1296,8 @@
 
 /* ===== NFT GATE PROMPT ===== */
 .nft-gate-prompt {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(249, 115, 22, 0.05));
-  border: 1px solid rgba(249, 115, 22, 0.3);
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.15), rgba(255, 107, 0, 0.05));
+  border: 1px solid rgba(255, 107, 0, 0.3);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
@@ -1364,7 +1361,7 @@
 }
 
 .get-nft-link {
-  color: rgba(249, 115, 22, 0.8);
+  color: rgba(255, 107, 0, 0.8);
   text-decoration: none;
   font-size: 0.85rem;
   transition: color 0.2s;
@@ -1424,8 +1421,8 @@
   }
 
   .mobile-loading .loading-trophy {
-    color: #F97316;
-    filter: drop-shadow(0 0 15px rgba(249, 115, 22, 0.4));
+    color: var(--color-primary);
+    filter: drop-shadow(0 0 15px rgba(255, 107, 0, 0.4));
   }
 
   /* === Mobile Empty State === */
@@ -1636,7 +1633,7 @@
 .filter-tab.active {
   background: var(--color-primary, #F97316);
   border-color: var(--color-primary, #F97316);
-  color: white;
+  color: var(--color-text);
 }
 
 .filter-badge {
@@ -1648,7 +1645,7 @@
 
 /* Friend indicator in leaderboard row */
 .leaderboard-row.is-friend {
-  background: rgba(249, 115, 22, 0.05);
+  background: rgba(255, 107, 0, 0.05);
   border-left: 2px solid var(--color-primary, #F97316);
 }
 

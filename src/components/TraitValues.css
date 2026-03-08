@@ -51,7 +51,7 @@
 
 .retry-btn {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text);
   border: none;
   padding: 10px 24px;
   border-radius: 8px;
@@ -253,10 +253,10 @@
   font-size: 11px;
 }
 
-.trait-table .no-results {
+.trait-table td.no-results {
   text-align: center;
   color: var(--color-text-muted);
-  padding: 40px 20px !important;
+  padding: 40px 20px;
 }
 
 /* Hide on mobile */
@@ -276,18 +276,18 @@
   }
 }
 
-/* Detail row */
-.detail-row {
-  background: rgba(255, 165, 0, 0.05) !important;
-  cursor: default !important;
+/* Detail row — higher specificity to override alternating row colors and cell padding */
+.trait-table .detail-row {
+  background: rgba(255, 165, 0, 0.05);
+  cursor: default;
 }
 
-.detail-row:hover {
-  background: rgba(255, 165, 0, 0.05) !important;
+.trait-table .detail-row:hover {
+  background: rgba(255, 165, 0, 0.05);
 }
 
-.detail-row td {
-  padding: 0 !important;
+.trait-table .detail-row td {
+  padding: 0;
 }
 
 .trait-detail {
@@ -353,8 +353,8 @@
 }
 
 .sort-toggle.active {
-  background: var(--app-accent-color, #ff9500);
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-text);
 }
 
 .recent-sales ion-spinner {
@@ -449,17 +449,17 @@
 
 .sale-badge.min {
   background: #22c55e;
-  color: white;
+  color: var(--color-text);
 }
 
 .sale-badge.max {
   background: #ef4444;
-  color: white;
+  color: var(--color-text);
 }
 
 .sale-badge.last {
   background: #3b82f6;
-  color: white;
+  color: var(--color-text);
   font-size: 9px;
 }
 
@@ -501,6 +501,6 @@
 .sale-info .sale-rank {
   font-size: 8px;
   font-weight: 600;
-  color: var(--app-accent-color, #ff9500);
+  color: var(--color-primary);
   margin-top: 1px;
 }

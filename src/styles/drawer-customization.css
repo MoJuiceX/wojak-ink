@@ -258,14 +258,14 @@
 .drawer-bg-pattern-grid {
   background-color: #0a0a0a;
   background-image:
-    linear-gradient(rgba(249, 115, 22, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(249, 115, 22, 0.1) 1px, transparent 1px);
+    linear-gradient(rgba(255, 107, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 107, 0, 0.1) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 
 .drawer-bg-pattern-dots {
   background-color: #0a0a0a;
-  background-image: radial-gradient(rgba(249, 115, 22, 0.2) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(255, 107, 0, 0.2) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
@@ -275,8 +275,8 @@
     45deg,
     transparent,
     transparent 10px,
-    rgba(249, 115, 22, 0.05) 10px,
-    rgba(249, 115, 22, 0.05) 20px
+    rgba(255, 107, 0, 0.05) 10px,
+    rgba(255, 107, 0, 0.05) 20px
   );
 }
 
@@ -288,10 +288,10 @@
 .drawer-bg-pattern-circuit {
   background-color: #0a0a0a;
   background-image:
-    linear-gradient(rgba(249, 115, 22, 0.1) 2px, transparent 2px),
-    linear-gradient(90deg, rgba(249, 115, 22, 0.1) 2px, transparent 2px),
-    linear-gradient(rgba(249, 115, 22, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(249, 115, 22, 0.05) 1px, transparent 1px);
+    linear-gradient(rgba(255, 107, 0, 0.1) 2px, transparent 2px),
+    linear-gradient(90deg, rgba(255, 107, 0, 0.1) 2px, transparent 2px),
+    linear-gradient(rgba(255, 107, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 107, 0, 0.05) 1px, transparent 1px);
   background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
 }
 
@@ -299,7 +299,7 @@
   background-color: #0a0a0a;
   background-image:
     radial-gradient(white 1px, transparent 1px),
-    radial-gradient(rgba(249, 115, 22, 0.8) 1px, transparent 1px);
+    radial-gradient(rgba(255, 107, 0, 0.8) 1px, transparent 1px);
   background-size: 100px 100px, 50px 50px;
   background-position: 0 0, 25px 25px;
 }
@@ -440,7 +440,7 @@
   background: linear-gradient(
     to bottom,
     transparent,
-    rgba(34, 197, 94, 0.2),
+    var(--color-success-20),
     rgba(59, 130, 246, 0.2),
     rgba(168, 85, 247, 0.2),
     transparent
@@ -484,7 +484,7 @@
     circle,
     transparent 30%,
     rgba(124, 58, 237, 0.3) 50%,
-    rgba(249, 115, 22, 0.2) 70%,
+    rgba(255, 107, 0, 0.2) 70%,
     transparent 100%
   );
   transform: translate(-50%, -50%);
@@ -518,7 +518,7 @@
   background: radial-gradient(
     circle,
     rgba(255, 200, 100, 0.5) 0%,
-    rgba(249, 115, 22, 0.3) 30%,
+    rgba(255, 107, 0, 0.3) 30%,
     rgba(255, 50, 0, 0.2) 60%,
     transparent 100%
   );
@@ -566,16 +566,16 @@
    ===================================================== */
 
 .avatar-glow-soft {
-  filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.3));
+  filter: drop-shadow(0 0 10px rgba(255, 107, 0, 0.3));
 }
 
 .avatar-glow-medium {
-  filter: drop-shadow(0 0 15px rgba(249, 115, 22, 0.5));
+  filter: drop-shadow(0 0 15px rgba(255, 107, 0, 0.5));
 }
 
 .avatar-glow-strong {
-  filter: drop-shadow(0 0 20px rgba(249, 115, 22, 0.7))
-          drop-shadow(0 0 30px rgba(249, 115, 22, 0.4));
+  filter: drop-shadow(0 0 20px rgba(255, 107, 0, 0.7))
+          drop-shadow(0 0 30px rgba(255, 107, 0, 0.4));
 }
 
 .avatar-glow-pulsing {
@@ -584,11 +584,11 @@
 
 @keyframes avatar-pulse {
   0%, 100% {
-    filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.3));
+    filter: drop-shadow(0 0 10px rgba(255, 107, 0, 0.3));
   }
   50% {
-    filter: drop-shadow(0 0 25px rgba(249, 115, 22, 0.7))
-            drop-shadow(0 0 40px rgba(249, 115, 22, 0.4));
+    filter: drop-shadow(0 0 25px rgba(255, 107, 0, 0.7))
+            drop-shadow(0 0 40px rgba(255, 107, 0, 0.4));
   }
 }
 
@@ -667,7 +667,7 @@
 
 .card-fancy {
   background: linear-gradient(135deg, rgba(40, 30, 20, 0.9), rgba(20, 15, 10, 0.9));
-  border: 2px solid rgba(249, 115, 22, 0.3);
+  border: 2px solid rgba(255, 107, 0, 0.3);
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
@@ -677,8 +677,8 @@
   border: 2px solid #F97316;
   border-radius: 8px;
   box-shadow:
-    0 0 10px rgba(249, 115, 22, 0.5),
-    inset 0 0 10px rgba(249, 115, 22, 0.1);
+    0 0 10px rgba(255, 107, 0, 0.5),
+    inset 0 0 10px rgba(255, 107, 0, 0.1);
 }
 
 .card-glass {
@@ -820,8 +820,8 @@
 
 .visitor-styled {
   padding: 8px 16px;
-  background: rgba(249, 115, 22, 0.1);
-  border: 1px solid rgba(249, 115, 22, 0.3);
+  background: rgba(255, 107, 0, 0.1);
+  border: 1px solid rgba(255, 107, 0, 0.3);
   border-radius: 20px;
   font-size: 0.85rem;
   color: #F97316;
@@ -829,8 +829,8 @@
 
 .visitor-animated {
   padding: 8px 16px;
-  background: linear-gradient(90deg, rgba(249, 115, 22, 0.2), rgba(249, 115, 22, 0.1));
-  border: 1px solid rgba(249, 115, 22, 0.3);
+  background: linear-gradient(90deg, rgba(255, 107, 0, 0.2), rgba(255, 107, 0, 0.1));
+  border: 1px solid rgba(255, 107, 0, 0.3);
   border-radius: 20px;
   font-size: 0.85rem;
   color: #F97316;
@@ -839,10 +839,10 @@
 
 @keyframes visitor-glow {
   0%, 100% {
-    box-shadow: 0 0 5px rgba(249, 115, 22, 0.3);
+    box-shadow: 0 0 5px rgba(255, 107, 0, 0.3);
   }
   50% {
-    box-shadow: 0 0 15px rgba(249, 115, 22, 0.5);
+    box-shadow: 0 0 15px rgba(255, 107, 0, 0.5);
   }
 }
 
@@ -874,8 +874,8 @@
 }
 
 .stats-fancy .stat-card {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), transparent);
-  border: 1px solid rgba(249, 115, 22, 0.3);
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.1), transparent);
+  border: 1px solid rgba(255, 107, 0, 0.3);
 }
 
 .stats-hidden {
@@ -1026,7 +1026,7 @@
 
 .dialogue-elegant {
   background: linear-gradient(135deg, rgba(40, 30, 20, 0.95), rgba(20, 15, 10, 0.95));
-  border: 2px solid rgba(249, 115, 22, 0.5);
+  border: 2px solid rgba(255, 107, 0, 0.5);
   border-radius: 16px;
   padding: 16px 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);

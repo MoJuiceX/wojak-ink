@@ -14,7 +14,7 @@
 
 .success-modal {
   background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
-  border: 1px solid rgba(249, 115, 22, 0.3);
+  border: 1px solid rgba(255, 107, 0, 0.3);
   border-radius: 28px;
   padding: 40px 32px;
   max-width: 400px;
@@ -33,7 +33,7 @@
   transform: translateX(-50%);
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(249, 115, 22, 0.2), transparent 70%);
+  background: radial-gradient(circle, rgba(255, 107, 0, 0.2), transparent 70%);
   pointer-events: none;
 }
 
@@ -49,10 +49,10 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 4px solid #F97316;
+  border: 4px solid var(--color-primary);
   box-shadow:
-    0 0 30px rgba(249, 115, 22, 0.5),
-    inset 0 0 20px rgba(249, 115, 22, 0.2);
+    0 0 30px rgba(255, 107, 0, 0.5),
+    inset 0 0 20px rgba(255, 107, 0, 0.2);
   position: relative;
   z-index: 2;
 }
@@ -61,7 +61,7 @@
   position: absolute;
   inset: -8px;
   border-radius: 50%;
-  background: conic-gradient(from 0deg, #F97316, #FFD700, #F97316);
+  background: conic-gradient(from 0deg, var(--color-primary), #FFD700, var(--color-primary));
   animation: spinGlow 3s linear infinite;
   z-index: 1;
 }
@@ -76,22 +76,22 @@
   right: 0;
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, #22C55E, #16A34A);
+  background: linear-gradient(135deg, var(--color-success), #16A34A);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--color-text);
   font-size: 16px;
   font-weight: bold;
   border: 3px solid #0f0f1a;
-  box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
+  box-shadow: 0 0 15px var(--color-success-50);
   z-index: 3;
 }
 
 /* Title */
 .success-modal h2 {
-  color: white;
+  color: var(--color-text);
   font-size: 1.75rem;
   font-weight: 800;
   margin: 0 0 8px 0;
@@ -107,17 +107,16 @@
 }
 
 .success-subtitle strong {
-  color: #F97316;
+  color: var(--color-primary);
 }
 
 /* Unlocked features */
 .unlocked-features {
   list-style: none;
-  padding: 0;
   margin: 0 0 32px 0;
   text-align: left;
-  background: rgba(249, 115, 22, 0.08);
-  border: 1px solid rgba(249, 115, 22, 0.15);
+  background: rgba(255, 107, 0, 0.08);
+  border: 1px solid rgba(255, 107, 0, 0.15);
   border-radius: 16px;
   padding: 16px 20px;
   position: relative;
@@ -150,20 +149,20 @@
 .lets-go-btn {
   width: 100%;
   padding: 16px 32px;
-  background: linear-gradient(135deg, #F97316, #EA580C);
+  background: var(--gradient-primary);
   border: none;
   border-radius: 14px;
-  color: white;
+  color: var(--color-text);
   font-size: 1.1rem;
   font-weight: 700;
   cursor: pointer;
   position: relative;
-  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.4);
+  box-shadow: 0 4px 20px rgba(255, 107, 0, 0.4);
   transition: box-shadow 0.2s ease;
 }
 
 .lets-go-btn:hover {
-  box-shadow: 0 6px 30px rgba(249, 115, 22, 0.5);
+  box-shadow: 0 6px 30px rgba(255, 107, 0, 0.5);
 }
 
 /* Mobile responsiveness */

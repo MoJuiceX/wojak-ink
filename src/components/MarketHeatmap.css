@@ -1,4 +1,21 @@
+/* Define heatmap custom properties using theme variables */
 .market-heatmap {
+  --heatmap-card-bg: var(--color-surface);
+  --heatmap-card-shadow: var(--shadow-card);
+  --heatmap-card-border: var(--color-border);
+  --heatmap-text: var(--color-text);
+  --heatmap-text-muted: var(--color-text-muted);
+  --heatmap-btn-bg: var(--color-surface);
+  --heatmap-btn-border: var(--color-border);
+  --heatmap-btn-text: var(--color-text-secondary);
+  --heatmap-btn-active-bg: var(--color-primary);
+  --heatmap-btn-active-text: var(--color-text);
+  --heatmap-btn-active-shadow: var(--glow-primary);
+  --heatmap-divider: var(--color-border);
+  --heatmap-grid-bg: rgba(0, 0, 0, 0.2);
+  --heatmap-highlight-ring: var(--color-primary);
+  --heatmap-legend-bg: var(--color-surface);
+  --heatmap-cell-text: var(--color-text);
   padding: 16px;
 }
 
@@ -269,7 +286,7 @@
 }
 
 .nft-rank {
-  color: var(--app-accent-color) !important;
+  color: var(--color-primary);
   font-weight: 600;
 }
 
@@ -289,7 +306,7 @@
 .price-multiple {
   display: block;
   font-size: 11px;
-  color: var(--app-accent-color);
+  color: var(--color-primary);
 }
 
 /* Responsive - smaller screens get even more compact */
@@ -471,7 +488,7 @@
 .combo-legend-title {
   font-size: 11px;
   font-weight: 700;
-  color: var(--app-accent-color, #ff9500);
+  color: var(--color-primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 10px;
