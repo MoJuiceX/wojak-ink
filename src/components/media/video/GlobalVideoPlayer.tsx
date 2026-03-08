@@ -502,8 +502,8 @@ export function GlobalVideoPlayer() {
                   <motion.div
                     className="w-14 h-14 rounded-full flex items-center justify-center pointer-events-auto cursor-pointer"
                     style={{
-                      background: 'rgba(249, 115, 22, 0.9)',
-                      boxShadow: '0 0 30px rgba(249, 115, 22, 0.6)',
+                      background: 'rgba(255, 107, 0, 0.9)',
+                      boxShadow: '0 0 30px rgba(255, 107, 0, 0.6)',
                     }}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}

@@ -73,7 +73,7 @@ export function DesktopCharacterCard({
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         border: isHovered
-          ? '1px solid rgba(249, 115, 22, 0.6)'
+          ? '1px solid rgba(255, 107, 0, 0.6)'
           : '1px solid var(--color-primary-20)',
         borderRadius: card.borderRadius,
         // Glow effect on hover

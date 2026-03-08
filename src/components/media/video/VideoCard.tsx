@@ -21,6 +21,7 @@ export const VideoCard = memo(function VideoCard({ video, onClick }: VideoCardPr
 
   return (
     <motion.button
+      type="button"
       className="group flex flex-col text-left overflow-hidden w-full h-full"
       style={{
         borderRadius: '16px',
@@ -78,14 +79,14 @@ export const VideoCard = memo(function VideoCard({ video, onClick }: VideoCardPr
               width: 64,
               height: 64,
               borderRadius: '50%',
-              background: 'rgba(249, 115, 22, 0.9)',
+              background: 'rgba(255, 107, 0, 0.9)',
             }}
             initial={{ scale: 0.8 }}
             animate={prefersReducedMotion ? undefined : {
               scale: isHovered ? 1 : 0.8,
               boxShadow: isHovered
-                ? '0 0 30px rgba(249, 115, 22, 0.6)'
-                : '0 0 0px rgba(249, 115, 22, 0)',
+                ? '0 0 30px rgba(255, 107, 0, 0.6)'
+                : '0 0 0px rgba(255, 107, 0, 0)',
             }}
             transition={{ duration: 0.3 }}
           >

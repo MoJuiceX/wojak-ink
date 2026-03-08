@@ -216,7 +216,7 @@ export const NavItem = memo(function NavItem({
         paddingLeft: 12,
         paddingRight: 12,
         background: featured
-          ? 'linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(249, 115, 22, 0.05) 100%)'
+          ? 'linear-gradient(135deg, rgba(255, 107, 0, 0.15) 0%, rgba(255, 107, 0, 0.05) 100%)'
           : isActive
             ? 'var(--color-surface)'
             : 'transparent',
@@ -281,7 +281,7 @@ export const NavItem = memo(function NavItem({
           width: 24,
           height: 24,
           // Icon glow when active or featured
-          filter: (isActive || featured) ? 'drop-shadow(0 0 8px rgba(249, 115, 22, 0.6))' : 'none',
+          filter: (isActive || featured) ? 'drop-shadow(0 0 8px rgba(255, 107, 0, 0.6))' : 'none',
         }}
         animate={
           featured && !prefersReducedMotion

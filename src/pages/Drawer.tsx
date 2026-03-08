@@ -26,6 +26,16 @@ interface InventoryItem {
   acquired_at: string;
 }
 
+/** Common shape for items rendered in the drawer grid */
+interface DrawerDisplayItem {
+  id: string;
+  name: string;
+  category: string;
+  rarity: string;
+  css_class?: string | null;
+  emoji?: string | null;
+}
+
 interface DrawerCustomization {
   font_color: string;
   font_style: string;
@@ -283,7 +293,7 @@ export default function Drawer() {
     { id: 'bigpulp', label: 'BigPulp', count: data.bigpulpItems.hats.length + data.bigpulpItems.accessories.length, icon: Zap },
   ];
 
-  const getFilteredItems = () => {
+  const getFilteredItems = (): DrawerDisplayItem[] => {
     switch (activeTab) {
       case 'emojis': return data.ownedEmojis.map((e, i) => ({ id: `emoji-${i}`, name: e, emoji: e, rarity: 'common', category: 'emoji' }));
       case 'frames': return data.frames;
@@ -311,6 +321,7 @@ export default function Drawer() {
         </Link>
         <h1>Achievement Drawer</h1>
         <motion.button
+          type="button"
           onClick={handleShare}
           className="share-button"
           whileHover={{ scale: 1.05 }}
@@ -454,8 +465,7 @@ export default function Drawer() {
             >
               <AnimatePresence mode="popLayout">
                 {getFilteredItems().map(
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  (item: any, index: number) => (
+                  (item, index) => (
                   <motion.div
                     key={item.id}
                     className={`collection-card collection-item ${cardStyleClass} ${RARITY_GRADIENTS[item.rarity] || ''}`}
@@ -509,7 +519,7 @@ export default function Drawer() {
         .drawer-bg-overlay {
           position: fixed;
           inset: 0;
-          background: radial-gradient(ellipse at 50% 0%, rgba(249, 115, 22, 0.08) 0%, transparent 60%);
+          background: radial-gradient(ellipse at 50% 0%, rgba(255, 107, 0, 0.08) 0%, transparent 60%);
           pointer-events: none;
           z-index: 0;
         }

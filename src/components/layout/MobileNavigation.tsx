@@ -84,7 +84,7 @@ export function MobileNavigation({ visible = true }: MobileNavigationProps) {
           background: 'rgba(10, 10, 10, 0.95)',
           backdropFilter: 'blur(12px) saturate(180%)',
           WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-          borderTop: '1px solid rgba(249, 115, 22, 0.15)',
+          borderTop: '1px solid rgba(255, 107, 0, 0.15)',
         }}
         initial={{ y: 100 }}
         animate={{ y: isHiddenByScroll ? '100%' : 0 }}
@@ -101,7 +101,7 @@ export function MobileNavigation({ visible = true }: MobileNavigationProps) {
             left: '20%',
             right: '20%',
             height: '1px',
-            background: 'linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.25), transparent)',
+            background: 'linear-gradient(90deg, transparent, rgba(255, 107, 0, 0.25), transparent)',
             pointerEvents: 'none',
           }}
         />

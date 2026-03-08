@@ -487,7 +487,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
           {/* Header */}
           <header className="editor-header">
             <h2 id="drawer-editor-title">Customize Profile Card</h2>
-            <button className="close-btn" onClick={onClose} aria-label="Close">
+            <button type="button" className="close-btn" onClick={onClose} aria-label="Close">
               <X size={24} />
             </button>
           </header>
@@ -565,6 +565,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
 
                               return (
                                 <motion.button
+                                  type="button"
                                   key={item.id}
                                   className={`item-btn ${owned ? 'owned' : ''} ${selected ? 'selected' : ''} ${!owned && !affordable ? 'unaffordable' : ''}`}
                                   whileHover={{ scale: 1.02 }}
@@ -843,7 +844,7 @@ export function DrawerEditor({ isOpen, onClose }: DrawerEditorProps) {
         }
 
         .item-btn.selected {
-          background: rgba(249, 115, 22, 0.12);
+          background: rgba(255, 107, 0, 0.12);
           border-color: var(--color-primary-40);
         }
 
