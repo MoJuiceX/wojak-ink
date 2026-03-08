@@ -3553,6 +3553,18 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-wizard-header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 107, 0, 0.08) 50%, transparent 100%);
+  background-size: 50% 100%;
+  animation: ai-header-shimmer 1.2s ease-out forwards;
+  pointer-events: none;
 }
 
 .ai-wizard-header-left {
@@ -3656,8 +3668,10 @@ body {
 }
 
 .ai-category-btn {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: rgba(18, 18, 26, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
   padding: 1rem;
   cursor: pointer;
@@ -3672,6 +3686,24 @@ body {
 
 .ai-category-btn--enhanced {
   border-color: var(--color-success);
+}
+
+.ai-category-icon {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.ai-category-text {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.ai-category-btn:hover .ai-category-icon {
+  transform: translate(-2px, -2px);
+}
+
+.ai-category-btn:hover .ai-category-text {
+  transform: translate(1px, 1px);
 }
 
 .ai-preset-btn {
@@ -3706,6 +3738,16 @@ body {
   100% { background-position: -200% 0; }
 }
 
+@keyframes ai-header-shimmer {
+  0% { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes ai-bundle-glow {
+  0%, 100% { box-shadow: 0 0 0 1px var(--color-primary), 0 0 12px rgba(255, 107, 0, 0.08); }
+  50% { box-shadow: 0 0 0 1px var(--color-primary), 0 0 20px rgba(255, 107, 0, 0.15); }
+}
+
 .ai-credits-badge {
   background: rgba(255, 107, 0, 0.15);
   color: var(--color-primary);
@@ -3720,6 +3762,11 @@ body {
 
 .ai-credits-badge:hover {
   background: rgba(255, 107, 0, 0.25);
+}
+
+.ai-credits-badge--empty {
+  opacity: 0.6;
+  animation: pulse 2s ease-in-out infinite;
 }
 
 .ai-enhanced-banner {
@@ -3749,9 +3796,12 @@ body {
 .ai-shop-balance-count {
   font-size: 1.5rem;
   font-weight: 800;
-  color: white;
   letter-spacing: -0.02em;
   line-height: 1;
+  background: linear-gradient(135deg, var(--color-primary), #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .ai-shop-balance-label {
@@ -3786,14 +3836,16 @@ body {
 }
 
 .ai-shop-bundle:hover {
-  border-color: var(--color-white-15);
+  border-color: rgba(255, 107, 0, 0.2);
   background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 0 20px rgba(255, 107, 0, 0.08);
 }
 
 .ai-shop-bundle--selected {
   border-color: var(--color-primary);
   background: rgba(255, 107, 0, 0.04);
   box-shadow: 0 0 0 1px var(--color-primary), 0 0 12px rgba(255, 107, 0, 0.08);
+  animation: ai-bundle-glow 2s ease-in-out infinite;
 }
 
 .ai-shop-bundle-left {
