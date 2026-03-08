@@ -19,6 +19,7 @@ import {
   Info,
   MoreHorizontal,
   Tag,
+  Wand2,
 } from 'lucide-react';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { useMint } from '@/contexts/MintContext';
@@ -31,6 +32,10 @@ import { useMetadataAttributes } from './MetadataPreview';
 import { MintFlowModal } from './MintFlowModal';
 import { GeneratorInfo } from './GeneratorInfo';
 import { PricingLightbox } from './PricingLightbox';
+import { useAIEnhance } from '@/contexts/AIEnhanceContext';
+import { AIEnhanceLightbox } from './ai/AIEnhanceLightbox';
+import { AICreationsGallery } from './ai/AICreationsGallery';
+import { AICreditsShop } from './ai/AICreditsShop';
 
 interface ActionBarProps {
   className?: string;
@@ -137,6 +142,9 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const [showOverflowMenu, setShowOverflowMenu] = useState(false);
   const overflowMenuRef = useRef<HTMLDivElement>(null);
   const lastRandomizeRef = useRef<number>(0);
+  const { openLightbox, isAIEnhancedMode, openShop, creations } = useAIEnhance();
+  const [showCreationsGallery, setShowCreationsGallery] = useState(false);
+  const [canvasImageBase64, setCanvasImageBase64] = useState<string | null>(null);
 
   // First-visit: auto-open How It Works modal
   useEffect(() => {
@@ -212,6 +220,28 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       console.error('[ActionBar] Failed to prepare mint:', err);
     }
   }, [isWalletConnected, canExport, has7Traits, selectedLayers, selectedColors, hasFreeMintsAvailable, mintType, connect, prepareMint, g2Selections]);
+
+  const handleEnhanceClick = useCallback(async () => {
+    if (!canExport) return;
+    try {
+      const blob = await exportImage(selectedLayers, {
+        format: 'png',
+        includeBackground: true,
+        size: { preset: '1024' },
+      }, g2Selections, selectedColors);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        // Strip the data:image/png;base64, prefix
+        const base64 = dataUrl.split(',')[1];
+        setCanvasImageBase64(base64);
+        openLightbox();
+      };
+      reader.readAsDataURL(blob);
+    } catch (err) {
+      console.error('[ActionBar] Failed to capture canvas for AI enhance:', err);
+    }
+  }, [canExport, selectedLayers, g2Selections, selectedColors, openLightbox]);
 
   const basePath = selectedLayers.Base;
   const hasSelection = !isSelectionPathEmpty(basePath);
@@ -422,6 +452,16 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         </AnimatePresence>
       </div>
 
+      {/* Enhance with AI */}
+      <ActionBarTooltip content="Enhance with AI">
+        <ActionButton
+          onClick={handleEnhanceClick}
+          disabled={!hasSelection}
+          icon={<Wand2 size={18} />}
+          label="Enhance with AI"
+        />
+      </ActionBarTooltip>
+
       {/* How It Works — visible on all screens */}
       <ActionBarTooltip content="How It Works">
         <ActionButton
@@ -503,6 +543,24 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               >
                 <Tag size={16} className="text-accent" />
                 <span>Prices</span>
+              </button>
+
+              {/* My AI Creations */}
+              <button
+                type="button"
+                className="action-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-primary"
+                onClick={() => {
+                  setShowOverflowMenu(false);
+                  setShowCreationsGallery(true);
+                }}
+              >
+                <Wand2 size={16} className="text-accent" />
+                <span>AI Creations</span>
+                {creations.length > 0 && (
+                  <span className="action-menu-item-badge ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full">
+                    {creations.length}
+                  </span>
+                )}
               </button>
 
               {/* Metadata toggle — desktop only */}
@@ -630,6 +688,18 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         isOpen={showPricing}
         onClose={() => setShowPricing(false)}
       />
+
+      {/* AI Enhance Lightbox */}
+      <AIEnhanceLightbox currentImage={canvasImageBase64} />
+
+      {/* AI Creations Gallery */}
+      <AICreationsGallery
+        isOpen={showCreationsGallery}
+        onClose={() => setShowCreationsGallery(false)}
+      />
+
+      {/* AI Credits Shop */}
+      <AICreditsShop />
     </div>
   );
 }
