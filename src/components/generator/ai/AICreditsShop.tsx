@@ -6,19 +6,35 @@ import { Lightbox } from '@/components/ui/Lightbox';
 import { useAIEnhance } from '@/contexts/AIEnhanceContext';
 import { AI_CREDIT_BUNDLES } from '@/types/aiEnhance';
 import { Sparkles } from 'lucide-react';
+import { useSageWallet } from '@/sage-wallet';
 
-const BASE_PRICE_PER_CREDIT = 0.08; // XCH — tier 1 single credit
+const BASE_PRICE_PER_CREDIT = 0.10; // XCH — tier 1 single credit
 const loadConfetti = () => import('canvas-confetti').then(m => m.default);
+
+type PurchaseState = 'idle' | 'buying' | 'sending' | 'confirming' | 'success' | 'error';
 
 export function AICreditsShop() {
   const { isShopOpen, closeShop, balance, refetchBalance } = useAIEnhance();
+  const { address, status, sendXCH } = useSageWallet();
+  const isConnected = status === 'connected';
   const prefersReducedMotion = useReducedMotion();
-  const [selectedTier, setSelectedTier] = useState('15');
-  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [selectedTier, setSelectedTier] = useState('25');
+  const [purchaseState, setPurchaseState] = useState<PurchaseState>('idle');
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const [purchaseSuccess, setPurchaseSuccess] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const selectedBundle = AI_CREDIT_BUNDLES.find((b) => b.tier === selectedTier);
+  const isPurchasing = purchaseState !== 'idle' && purchaseState !== 'success' && purchaseState !== 'error';
+
+  // Reset state and close shop
+  const handleClose = () => {
+    setPurchaseState('idle');
+    setPurchaseError(null);
+    setPurchaseSuccess(null);
+    setStatusMessage(null);
+    closeShop();
+  };
 
   // Confetti burst on successful purchase
   useEffect(() => {
@@ -36,16 +52,19 @@ export function AICreditsShop() {
 
   const handlePurchase = async () => {
     if (!selectedBundle || isPurchasing) return;
-    setIsPurchasing(true);
     setPurchaseError(null);
     setPurchaseSuccess(null);
 
     try {
+      // Step 1: Create purchase intent
+      setPurchaseState('buying');
+      setStatusMessage('Preparing purchase...');
+
       const res = await fetch('/api/ai/credits/buy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          walletAddress: 'TODO_WALLET',
+          walletAddress: address,
           tier: selectedBundle.tier,
         }),
       });
@@ -54,36 +73,76 @@ export function AICreditsShop() {
 
       if (!res.ok) {
         setPurchaseError(data.error || 'Purchase failed. Try again.');
+        setPurchaseState('error');
+        setStatusMessage(null);
         return;
       }
+
+      // Step 2: Send XCH via wallet
+      setPurchaseState('sending');
+      setStatusMessage('Approve the transaction in your wallet...');
+
+      // sendXCH takes XCH (not mojos), so convert from mojo string
+      const amountXch = Number(data.amountMojos) / 1_000_000_000_000;
+      await sendXCH(data.treasuryAddress, amountXch);
+
+      // Step 3: Confirm on-chain
+      setPurchaseState('confirming');
+      setStatusMessage('Verifying transaction on-chain...');
 
       const confirmRes = await fetch('/api/ai/credits/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           purchaseId: data.purchaseId,
-          walletAddress: 'TODO_WALLET',
+          walletAddress: address,
         }),
       });
 
       if (confirmRes.ok) {
         const confirmData = await confirmRes.json();
         setPurchaseSuccess(`Added ${confirmData.creditsAdded} credits!`);
+        setPurchaseState('success');
+        setStatusMessage(null);
         await refetchBalance();
       } else {
         setPurchaseError('Confirmation failed. Contact support.');
+        setPurchaseState('error');
+        setStatusMessage(null);
       }
-    } catch {
-      setPurchaseError('Network error. Check your connection.');
-    } finally {
-      setIsPurchasing(false);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : String(err);
+
+      if (/rejected|denied/i.test(message)) {
+        setPurchaseError('Transaction cancelled.');
+      } else {
+        setPurchaseError(message || 'Network error. Check your connection.');
+      }
+      setPurchaseState('error');
+      setStatusMessage(null);
+    }
+  };
+
+  const getBuyButtonText = () => {
+    switch (purchaseState) {
+      case 'buying':
+        return 'Preparing...';
+      case 'sending':
+        return 'Waiting for wallet...';
+      case 'confirming':
+        return 'Verifying on-chain...';
+      case 'success':
+        return 'Done!';
+      default:
+        return `Buy ${selectedBundle?.credits ?? 0} credits \u2014 ${selectedBundle?.priceXch ?? 0} XCH`;
     }
   };
 
   return (
     <Lightbox
       isOpen={isShopOpen}
-      onClose={closeShop}
+      onClose={handleClose}
       title="AI Credits"
       size="md"
     >
@@ -102,6 +161,13 @@ export function AICreditsShop() {
           </span>
         </div>
 
+        {/* Wallet not connected warning */}
+        {!isConnected && (
+          <p className="text-sm text-center text-secondary">
+            Connect your wallet to purchase credits
+          </p>
+        )}
+
         {/* Bundle list */}
         <div className="flex flex-col gap-2">
           {AI_CREDIT_BUNDLES.map((bundle) => {
@@ -118,6 +184,7 @@ export function AICreditsShop() {
                 key={bundle.tier}
                 className={`ai-shop-bundle ${isSelected ? 'ai-shop-bundle--selected' : ''}`}
                 onClick={() => setSelectedTier(bundle.tier)}
+                disabled={isPurchasing}
                 whileHover={prefersReducedMotion ? {} : { scale: 1.01 }}
                 whileTap={prefersReducedMotion ? {} : { scale: 0.99 }}
               >
@@ -162,6 +229,13 @@ export function AICreditsShop() {
           })}
         </div>
 
+        {/* Status message */}
+        {statusMessage && (
+          <p className="text-sm text-center text-secondary">
+            {statusMessage}
+          </p>
+        )}
+
         {/* Error / Success */}
         {purchaseError && (
           <p className="text-sm text-center text-error">
@@ -178,14 +252,12 @@ export function AICreditsShop() {
         <motion.button
           type="button"
           className="btn btn-primary w-full"
-          onClick={handlePurchase}
-          disabled={isPurchasing || !selectedBundle}
+          onClick={purchaseState === 'success' ? handleClose : handlePurchase}
+          disabled={(isPurchasing || !selectedBundle || !isConnected) && purchaseState !== 'success'}
           whileHover={!isPurchasing && !prefersReducedMotion ? { scale: 1.02 } : {}}
           whileTap={!isPurchasing && !prefersReducedMotion ? { scale: 0.98 } : {}}
         >
-          {isPurchasing
-            ? 'Processing...'
-            : `Buy ${selectedBundle?.credits ?? 0} credits \u2014 ${selectedBundle?.priceXch ?? 0} XCH`}
+          {getBuyButtonText()}
         </motion.button>
 
         {/* Disclaimer */}

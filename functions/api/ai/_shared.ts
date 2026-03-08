@@ -32,11 +32,10 @@ export interface AICreditBundle {
 }
 
 export const AI_CREDIT_BUNDLES: readonly AICreditBundle[] = [
-  { tier: '1',  credits: 1,  priceXch: 0.08, mojos: 80000000000n },
-  { tier: '5',  credits: 5,  priceXch: 0.35, mojos: 350000000000n },
-  { tier: '15', credits: 15, priceXch: 0.90, mojos: 900000000000n },
-  { tier: '30', credits: 30, priceXch: 1.50, mojos: 1500000000000n },
-  { tier: '50', credits: 50, priceXch: 2.00, mojos: 2000000000000n },
+  { tier: '1',  credits: 1,  priceXch: 0.10, mojos: 100_000_000_000n },
+  { tier: '10', credits: 10, priceXch: 0.80, mojos: 800_000_000_000n },
+  { tier: '25', credits: 25, priceXch: 1.50, mojos: 1_500_000_000_000n },
+  { tier: '50', credits: 50, priceXch: 2.40, mojos: 2_400_000_000_000n },
 ] as const;
 
 // --- Category Config ---

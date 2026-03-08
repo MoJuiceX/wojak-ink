@@ -67,11 +67,10 @@ export interface AICreditBundle {
 }
 
 export const AI_CREDIT_BUNDLES: AICreditBundle[] = [
-  { tier: '1',  credits: 1,  priceXch: 0.08, discount: '' },
-  { tier: '5',  credits: 5,  priceXch: 0.35, discount: '12.5% off' },
-  { tier: '15', credits: 15, priceXch: 0.90, discount: '25% off', badge: 'POPULAR' },
-  { tier: '30', credits: 30, priceXch: 1.50, discount: '37.5% off' },
-  { tier: '50', credits: 50, priceXch: 2.00, discount: '50% off', badge: 'BEST VALUE' },
+  { tier: '1',  credits: 1,  priceXch: 0.10, discount: '' },
+  { tier: '10', credits: 10, priceXch: 0.80, discount: '20% off' },
+  { tier: '25', credits: 25, priceXch: 1.50, discount: '40% off', badge: 'POPULAR' },
+  { tier: '50', credits: 50, priceXch: 2.40, discount: '52% off', badge: 'BEST VALUE' },
 ];
 
 export type AIWizardStep = 'category' | 'prompt' | 'loading' | 'result';
