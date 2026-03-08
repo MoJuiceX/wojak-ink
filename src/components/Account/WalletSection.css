@@ -15,10 +15,10 @@
   gap: 0.875rem;
   background: linear-gradient(
     135deg,
-    rgba(249, 115, 22, 0.06) 0%,
+    rgba(255, 107, 0, 0.06) 0%,
     rgba(234, 88, 12, 0.03) 100%
   );
-  border-color: rgba(249, 115, 22, 0.25);
+  border-color: rgba(255, 107, 0, 0.25);
 }
 
 .wallet-compact__content {
@@ -48,19 +48,19 @@
   width: 100%;
   padding: 0.75rem 1rem;
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text);
   border: none;
   border-radius: var(--radius-md);
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.25);
+  box-shadow: 0 2px 8px rgba(255, 107, 0, 0.25);
 }
 
 .wallet-compact__connect-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.35);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.35);
 }
 
 .wallet-compact__connect-btn:active {
@@ -150,7 +150,7 @@
 .wallet-compact__icon-btn:hover:not(:disabled) {
   border-color: var(--color-primary);
   color: var(--color-primary);
-  background: rgba(249, 115, 22, 0.1);
+  background: rgba(255, 107, 0, 0.1);
 }
 
 .wallet-compact__icon-btn:disabled {
@@ -161,17 +161,14 @@
 .wallet-compact__icon-btn--danger:hover:not(:disabled) {
   border-color: var(--color-error);
   color: var(--color-error);
-  background: rgba(239, 68, 68, 0.1);
+  background: var(--color-error-10);
 }
 
 .wallet-compact__icon-btn .spin {
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+/* @keyframes spin is defined in theme.css */
 
 /* Error message */
 .wallet-compact__error {
@@ -180,7 +177,7 @@
   gap: 0.375rem;
   width: 100%;
   padding: 0.5rem 0.75rem;
-  background: rgba(239, 68, 68, 0.1);
+  background: var(--color-error-10);
   border-radius: 6px;
   color: var(--color-error);
   font-size: 0.8rem;

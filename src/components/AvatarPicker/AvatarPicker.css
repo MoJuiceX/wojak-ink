@@ -131,8 +131,8 @@
   gap: 8px;
   margin: 0 20px 12px;
   padding: 10px 14px;
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: var(--color-error-15);
+  border: 1px solid var(--color-error-30);
   border-radius: 8px;
   color: #f87171;
   font-size: 0.875rem;
@@ -278,10 +278,7 @@
   display: block;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+/* @keyframes spin is defined in theme.css */
 
 .mint-link {
   display: inline-block;
@@ -301,7 +298,7 @@
   border-radius: 8px;
   border: none;
   background: #ff8c32;
-  color: white;
+  color: var(--color-text);
   cursor: pointer;
   font-weight: 500;
 }

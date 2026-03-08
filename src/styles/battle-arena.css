@@ -54,7 +54,7 @@
   height: 380px;
   background:
     radial-gradient(ellipse 120% 80% at 25% 90%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-    radial-gradient(ellipse 120% 80% at 75% 10%, rgba(239, 68, 68, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 120% 80% at 75% 10%, var(--color-error-12) 0%, transparent 50%),
     linear-gradient(180deg, #0c1929 0%, #162032 40%, #1a2744 100%);
   border-radius: 16px;
   border: 2px solid #334155;
@@ -451,7 +451,7 @@
 
 @keyframes warningFlash {
   0%, 100% { box-shadow: inset 0 0 20px rgba(239, 68, 68, 0); }
-  50% { box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.2); }
+  50% { box-shadow: inset 0 0 20px var(--color-error-20); }
 }
 
 /* Counter-flip opponent HP container so text reads correctly */
@@ -503,7 +503,7 @@
   letter-spacing: 1px;
   clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
   box-shadow: 0 0 10px currentColor;
-  color: white;
+  color: var(--color-text);
   border: 1px solid rgba(255, 255, 255, 0.25);
   flex-shrink: 0;
 }
@@ -557,7 +557,7 @@
   background: linear-gradient(180deg, #5eead4 0%, #22c55e 40%, #16a34a 100%);
   transition: width 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) 0.3s, background 0.3s;
   box-shadow:
-    0 0 12px rgba(34, 197, 94, 0.5),
+    0 0 12px var(--color-success-50),
     0 0 0 1px rgba(34, 197, 94, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   border-radius: 3px;
@@ -589,13 +589,13 @@
 /* Low HP state */
 .hp-bar.low {
   background: linear-gradient(180deg, #fcd34d 0%, #f97316 40%, #ea580c 100%);
-  box-shadow: 0 0 15px rgba(249, 115, 22, 0.5);
+  box-shadow: 0 0 15px rgba(255, 107, 0, 0.5);
 }
 
 /* Critical HP state */
 .hp-bar.critical {
   background: linear-gradient(180deg, #fca5a5 0%, #ef4444 40%, #dc2626 100%);
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+  box-shadow: 0 0 20px var(--color-error-60);
   animation: criticalPulse 0.4s ease-in-out infinite;
 }
 
@@ -642,7 +642,7 @@
 .status-indicator.burn {
   background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
   color: #fff;
-  box-shadow: 0 0 8px rgba(249, 115, 22, 0.5);
+  box-shadow: 0 0 8px rgba(255, 107, 0, 0.5);
 }
 
 .status-indicator.poison {
@@ -1106,8 +1106,8 @@
 }
 
 .feed-fighter-avatar.winner {
-  border-color: #22c55e;
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+  border-color: var(--color-success);
+  box-shadow: 0 0 10px var(--color-success-40);
 }
 
 .feed-fighter-avatar.loser {
@@ -1136,11 +1136,11 @@
 }
 
 .feed-fighter-score.positive {
-  color: #22c55e;
+  color: var(--color-success);
 }
 
 .feed-fighter-score.negative {
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 /* VS badge in feed */
@@ -1399,14 +1399,14 @@
 }
 
 .turn-entry.turn-super-effective {
-  background: rgba(34, 197, 94, 0.1);
-  border-left-color: #22c55e;
+  background: var(--color-success-10);
+  border-left-color: var(--color-success);
   color: #86efac;
 }
 
 .turn-entry.turn-not-effective {
-  background: rgba(239, 68, 68, 0.1);
-  border-left-color: #ef4444;
+  background: var(--color-error-10);
+  border-left-color: var(--color-error);
   color: #fca5a5;
 }
 

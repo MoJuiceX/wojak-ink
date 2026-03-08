@@ -301,11 +301,11 @@
 @keyframes limitedPulse {
   0%, 100% {
     opacity: 1;
-    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 10px var(--color-error-50);
   }
   50% {
     opacity: 0.8;
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+    box-shadow: 0 0 20px var(--color-error-80);
   }
 }
 
@@ -393,7 +393,7 @@
 }
 
 .price.free {
-  color: #22c55e;
+  color: var(--color-success);
   font-weight: 700;
 }
 
@@ -408,7 +408,7 @@
 }
 
 .buy-button:hover:not([disabled]) {
-  --box-shadow: 0 0 20px rgba(249, 115, 22, 0.5);
+  --box-shadow: 0 0 20px rgba(255, 107, 0, 0.5);
 }
 
 .buy-button[disabled] {
@@ -419,7 +419,7 @@
 }
 
 .owned-badge {
-  color: #22c55e;
+  color: var(--color-success);
   font-weight: 700;
   font-size: 0.9rem;
   padding: 10px 0;
@@ -610,7 +610,7 @@
 }
 
 .buy-button:hover:not([disabled]) {
-  box-shadow: 0 0 20px rgba(249, 115, 22, 0.5);
+  box-shadow: 0 0 20px rgba(255, 107, 0, 0.5);
   transform: translateY(-2px);
 }
 
@@ -656,12 +656,12 @@
   50% {
     background: linear-gradient(135deg, #fb923c, #f97316);
     transform: rotateX(-20deg) scale(1.1);
-    box-shadow: 0 0 24px rgba(249, 115, 22, 0.6);
+    box-shadow: 0 0 24px rgba(255, 107, 0, 0.6);
     opacity: 1;
   }
   70% {
     transform: rotateX(8deg) scale(0.97);
-    box-shadow: 0 0 14px rgba(249, 115, 22, 0.4);
+    box-shadow: 0 0 14px rgba(255, 107, 0, 0.4);
   }
   85% {
     transform: rotateX(-3deg) scale(1.02);
@@ -724,10 +724,7 @@
   animation: fadeIn 0.2s ease;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+/* @keyframes fadeIn is defined in animations.css */
 
 .preview-content {
   background: var(--color-bg);
@@ -886,22 +883,22 @@
 .title-preview.legendary .title-text,
 .title-preview.premium .title-text {
   text-shadow:
-    0 0 10px rgba(249, 115, 22, 0.5),
-    0 0 20px rgba(249, 115, 22, 0.3);
+    0 0 10px rgba(255, 107, 0, 0.5),
+    0 0 20px rgba(255, 107, 0, 0.3);
   animation: title-glow 2s ease-in-out infinite;
 }
 
 @keyframes title-glow {
   0%, 100% {
     text-shadow:
-      0 0 10px rgba(249, 115, 22, 0.5),
-      0 0 20px rgba(249, 115, 22, 0.3);
+      0 0 10px rgba(255, 107, 0, 0.5),
+      0 0 20px rgba(255, 107, 0, 0.3);
   }
   50% {
     text-shadow:
-      0 0 15px rgba(249, 115, 22, 0.7),
-      0 0 30px rgba(249, 115, 22, 0.5),
-      0 0 40px rgba(249, 115, 22, 0.3);
+      0 0 15px rgba(255, 107, 0, 0.7),
+      0 0 30px rgba(255, 107, 0, 0.5),
+      0 0 40px rgba(255, 107, 0, 0.3);
   }
 }
 
@@ -1100,7 +1097,7 @@
   }
   
   .purchase-message.error {
-    background: rgba(239, 68, 68, 0.1);
+    background: var(--color-error-10);
     border: none;
     color: rgba(239, 68, 68, 0.9);
   }
@@ -1138,8 +1135,8 @@
   }
   
   .category-tab.active {
-    background: linear-gradient(135deg, rgba(249, 115, 22, 0.25), rgba(234, 88, 12, 0.2));
-    border-color: rgba(249, 115, 22, 0.4);
+    background: linear-gradient(135deg, rgba(255, 107, 0, 0.25), rgba(234, 88, 12, 0.2));
+    border-color: rgba(255, 107, 0, 0.4);
     color: #fff;
   }
   
@@ -1244,16 +1241,16 @@
     line-height: 1;
     transition: transform 0.3s ease, filter 0.3s ease;
     /* Clean - no backgrounds or borders */
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
+    background: none;
+    border: none;
+    box-shadow: none;
     /* Subtle glow using text-shadow/filter */
-    filter: drop-shadow(0 0 40px rgba(249, 115, 22, 0.2));
+    filter: drop-shadow(0 0 40px rgba(255, 107, 0, 0.2));
   }
 
   .carousel-slide.active .carousel-preview .preview-emoji {
     transform: scale(1.08);
-    filter: drop-shadow(0 0 50px rgba(249, 115, 22, 0.35));
+    filter: drop-shadow(0 0 50px rgba(255, 107, 0, 0.35));
   }
 
   /* Tier-specific glow colors - Basic (green) */
@@ -1334,7 +1331,7 @@
   .carousel-btn.buy {
     background: linear-gradient(135deg, #F97316, #EA580C);
     color: #fff;
-    box-shadow: 0 8px 24px rgba(249, 115, 22, 0.35);
+    box-shadow: 0 8px 24px rgba(255, 107, 0, 0.35);
   }
 
   .carousel-btn.buy:active {
@@ -1353,8 +1350,8 @@
   }
 
   .carousel-btn.buy.signin-required {
-    background: linear-gradient(135deg, rgba(249, 115, 22, 0.4), rgba(234, 88, 12, 0.3));
-    border: 1px dashed rgba(249, 115, 22, 0.5);
+    background: linear-gradient(135deg, rgba(255, 107, 0, 0.4), rgba(234, 88, 12, 0.3));
+    border: 1px dashed rgba(255, 107, 0, 0.5);
     box-shadow: none;
   }
 

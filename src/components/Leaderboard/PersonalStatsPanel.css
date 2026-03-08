@@ -43,7 +43,7 @@
 }
 
 .stats-header svg {
-  color: #F97316;
+  color: var(--color-primary);
 }
 
 /* Login Prompt */
@@ -59,7 +59,7 @@
   display: flex;
   justify-content: center;
   padding: 30px;
-  color: #F97316;
+  color: var(--color-primary);
 }
 
 /* Error */
@@ -95,17 +95,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(249, 115, 22, 0.15);
-  color: #F97316;
+  background: rgba(255, 107, 0, 0.15);
+  color: var(--color-primary);
   flex-shrink: 0;
 }
 
 .stat-card.stat-streak .stat-icon {
-  background: rgba(239, 68, 68, 0.15);
+  background: var(--color-error-15);
 }
 
 .stat-card.stat-streak .flame-icon {
-  color: #EF4444;
+  color: var(--color-error);
 }
 
 .stat-card.stat-rank .stat-icon {
@@ -124,7 +124,7 @@
 .stat-value {
   font-size: 22px;
   font-weight: 700;
-  color: white;
+  color: var(--color-text);
   line-height: 1;
 }
 
@@ -141,7 +141,7 @@
   top: 8px;
   right: 10px;
   font-size: 10px;
-  color: #EF4444;
+  color: var(--color-error);
   font-weight: 500;
   opacity: 0.8;
 }
@@ -195,7 +195,7 @@
 }
 
 .stat-row .heart-icon {
-  color: #EF4444;
+  color: var(--color-error);
 }
 
 .stat-row-emoji {
@@ -209,7 +209,7 @@
 }
 
 .stat-row-value {
-  color: white;
+  color: var(--color-text);
   font-weight: 500;
 }
 

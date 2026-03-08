@@ -52,7 +52,7 @@
 
 .tab-badge {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text);
   font-size: 0.75rem;
   padding: 2px 6px;
   border-radius: 10px;
@@ -115,13 +115,13 @@
 }
 
 .action-button.remove-friend:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: var(--color-error-10);
+  color: var(--color-error);
 }
 
 .action-button.compare-stats:hover {
-  background: rgba(249, 115, 22, 0.15);
-  color: #F97316;
+  background: rgba(255, 107, 0, 0.15);
+  color: var(--color-primary);
 }
 
 /* ============ User Browser ============ */
@@ -200,7 +200,7 @@
   border-radius: 6px;
   border: none;
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text);
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
@@ -264,7 +264,4 @@
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+/* @keyframes spin is defined in theme.css */

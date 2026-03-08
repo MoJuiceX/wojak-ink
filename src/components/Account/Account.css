@@ -137,7 +137,7 @@
   transform: translateX(-50%);
   padding: 8px 12px;
   background: var(--color-black-90);
-  color: white;
+  color: var(--color-text);
   font-size: 0.75rem;
   font-weight: 500;
   border-radius: 8px;
@@ -255,7 +255,7 @@
   gap: 0.5rem;
   padding: 0.625rem 1rem;
   background: linear-gradient(135deg, #f97316, #ea580c);
-  color: white;
+  color: var(--color-text);
   border: none;
   border-radius: 10px;
   font-size: 0.85rem;
@@ -362,7 +362,7 @@
 }
 
 .wallet-disconnect-btn:hover {
-  color: #ef4444;
+  color: var(--color-error);
   background: var(--color-error-10);
 }
 
@@ -376,7 +376,7 @@
   border: 1px solid var(--color-error-20);
   border-radius: 8px;
   font-size: 0.75rem;
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 /* Desktop: wallet moves to side */
@@ -426,7 +426,7 @@
   height: 28px;
   border-radius: 50%;
   background: var(--color-primary);
-  color: white;
+  color: var(--color-text);
   border: 2px solid var(--color-surface);
   display: flex;
   align-items: center;
@@ -815,7 +815,7 @@
   bottom: 2px;
   right: 2px;
   background: rgba(0, 0, 0, 0.75);
-  color: white;
+  color: var(--color-text);
   font-size: 0.5rem;
   padding: 1px 3px;
   border-radius: 2px;
@@ -916,7 +916,7 @@
   bottom: 2px;
   right: 2px;
   background: rgba(0, 0, 0, 0.7);
-  color: white;
+  color: var(--color-text);
   font-size: 0.5rem;
   padding: 2px 4px;
   border-radius: 3px;
@@ -1010,7 +1010,7 @@
 }
 
 .quick-action-btn:focus-visible {
-  outline: 2px solid rgba(249, 115, 22, 0.5);
+  outline: 2px solid rgba(255, 107, 0, 0.5);
   outline-offset: 2px;
 }
 
@@ -1127,7 +1127,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--color-text);
 }
 
 /* ============ Recent Activity ============ */
@@ -1220,7 +1220,7 @@
 .signin-button {
   padding: 0.75rem 2rem;
   background: linear-gradient(135deg, #F97316, #EA580C);
-  color: white;
+  color: var(--color-text);
   border: none;
   border-radius: 10px;
   font-weight: 600;
@@ -1271,10 +1271,10 @@
 
 /* Premium Settings Button */
 .action-button.action-settings {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.95), rgba(234, 88, 12, 0.95));
-  color: white;
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.95), rgba(234, 88, 12, 0.95));
+  color: var(--color-text);
   border: 1px solid var(--color-white-15);
-  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.35);
+  box-shadow: 0 4px 16px rgba(255, 107, 0, 0.35);
   font-weight: 600;
   letter-spacing: 0.02em;
   text-shadow: 0 1px 2px var(--color-black-20);
@@ -1283,7 +1283,7 @@
 .action-button.action-settings:hover {
   transform: translateY(-3px);
   box-shadow: 
-    0 8px 24px rgba(249, 115, 22, 0.45),
+    0 8px 24px rgba(255, 107, 0, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.25),
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 }
@@ -1309,11 +1309,11 @@
 .action-signout:hover {
   background: var(--color-error-12);
   border-color: var(--color-error-40);
-  color: #ef4444;
+  color: var(--color-error);
   transform: translateY(-2px);
   box-shadow: 
     inset 0 1px 0 var(--color-white-5),
-    0 4px 12px rgba(239, 68, 68, 0.15);
+    0 4px 12px var(--color-error-15);
 }
 
 .action-signout:active {
@@ -1338,10 +1338,7 @@
   color: var(--color-primary);
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+/* @keyframes spin is defined in theme.css */
 
 .profile-loading p,
 .profile-error p {
@@ -1439,14 +1436,14 @@
 
 .customize-drawer-btn {
   background: linear-gradient(135deg, #f97316, #ea580c);
-  color: white;
+  color: var(--color-text);
   border: none;
   box-shadow: 0 2px 8px var(--color-primary-25);
 }
 
 .customize-drawer-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.35);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.35);
 }
 
 .view-drawer-btn {
@@ -1684,7 +1681,7 @@
 
 .account-widget .widget-btn.primary {
   background: linear-gradient(135deg, #f97316, #ea580c);
-  color: white;
+  color: var(--color-text);
   border: none;
   box-shadow: 
     0 2px 8px var(--color-primary-25),
@@ -1701,7 +1698,7 @@
 .account-widget .widget-btn.primary:active {
   transform: translateY(0);
   box-shadow: 
-    0 1px 4px rgba(249, 115, 22, 0.2),
+    0 1px 4px rgba(255, 107, 0, 0.2),
     inset 0 1px 0 var(--color-white-10);
 }
 
@@ -1959,10 +1956,7 @@
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+/* @keyframes spin is defined in theme.css */
 
 /* Skeleton loading animation */
 .skeleton {
