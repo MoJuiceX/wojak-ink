@@ -370,6 +370,31 @@ async function processEvents(env: Env): Promise<{ processed: number; inserted: n
         }
         console.error('[CreditTracker] Batch insert error:', e);
       }
+
+      // Grant AI credits for Farmer Plot trades (1 per 1.0 XCH)
+      for (const r of batch) {
+        const aiCredits = Math.floor(r.price_xch);
+        if (aiCredits > 0) {
+          try {
+            await env.DB.prepare(
+              `INSERT OR IGNORE INTO ai_credit_events
+                (wallet_address, event_id, event_type, credits_earned, source_ref, metadata, event_timestamp)
+               VALUES (?, ?, 'farmer_plot_trade', ?, ?, ?, ?)`
+            ).bind(
+              r.wallet,
+              `farmer_plot_${r.event_id}`,
+              aiCredits,
+              r.nft_id,
+              JSON.stringify({ priceXch: r.price_xch, collection: 'farmer_plot' }),
+              r.timestamp
+            ).run();
+          } catch (e) {
+            if (!String(e).includes('UNIQUE')) {
+              console.error('[CreditTracker] AI credit insert error:', e);
+            }
+          }
+        }
+      }
     }
 
     if (data.next && data.next !== cursor) {
