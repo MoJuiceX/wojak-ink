@@ -103,8 +103,14 @@ function extractPriceBinConfig(data: HeatMapCell[][]): CachedHeatmapData['priceB
  * Returns null if no cache, expired, or schema mismatch
  */
 export function loadHeatmapFromCache(): CachedHeatmapData | null {
+  const rawCached = safeStorage.getItem(CACHE_KEY);
+  if (rawCached === null) return null;
+
   const cached = safeStorage.getJSON<CachedHeatmapData | null>(CACHE_KEY, null);
-  if (!cached) return null;
+  if (!cached) {
+    clearHeatmapCache();
+    return null;
+  }
 
   // Check schema version
   if (cached.version !== CACHE_VERSION) {
