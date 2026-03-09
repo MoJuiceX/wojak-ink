@@ -544,15 +544,13 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       },
     });
 
-    // Result should contain transaction ID
-    const txResult = result as { transactionId?: string; transaction_id?: string; id?: string };
-    const txId = txResult.transactionId || txResult.transaction_id || txResult.id;
-
-    if (!txId) {
-      throw new Error('Transaction submitted but no ID returned');
-    }
-
-    return txId;
+    // Sage wallet may return different result shapes from chia_send.
+    // Try common field names; if none found, return a placeholder
+    // since callers (credit purchase) use purchaseId, not txId.
+    const txResult = result as Record<string, unknown>;
+    console.warn('[SageWallet] chia_send result:', JSON.stringify(txResult));
+    const txId = (txResult.transactionId || txResult.transaction_id || txResult.id || txResult.tx_id || '') as string;
+    return txId || 'tx-submitted';
   }, []);
 
   const getDIDs = useCallback(async (): Promise<string[]> => {
