@@ -3,34 +3,8 @@
 // Lightweight single-check endpoint. The CLIENT handles polling because
 // Cloudflare Workers have a ~30s wall-clock timeout which kills long
 // server-side polling loops. Each call checks Spacescan once and returns.
-import { jsonResponse, errorResponse, optionsResponse, getAICreditBalance, requireAuth } from '../_shared';
+import { jsonResponse, errorResponse, optionsResponse, requireAuth, getAddressBalance, expireAndReleasePurchase } from '../_shared';
 import type { AIEnv } from '../_shared';
-
-/**
- * Check the balance of a specific payment address via Spacescan.
- * Each purchase has its own dedicated address, so any balance > 0
- * means the user paid.
- */
-async function getAddressBalance(address: string, apiKey?: string): Promise<number | null> {
-  try {
-    const url = `https://api.spacescan.io/address/xch-balance/${address}`;
-    const headers: Record<string, string> = {
-      'Accept': 'application/json',
-      'User-Agent': 'wojak.ink/1.0',
-    };
-    if (apiKey) {
-      headers['x-api-key'] = apiKey;
-    }
-    const res = await fetch(url, { headers });
-    if (!res.ok) return null;
-
-    const data = await res.json() as { status?: string; mojo?: number };
-    if (data.status !== 'success' || typeof data.mojo !== 'number') return null;
-    return data.mojo;
-  } catch {
-    return null;
-  }
-}
 
 export const onRequest: PagesFunction<AIEnv> = async (context) => {
   const { request, env } = context;
@@ -76,24 +50,14 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     return errorResponse('Purchase not found', 404);
   }
   if (row.status === 'confirmed') {
-    const balance = await getAICreditBalance(env.DB, walletAddress);
-    return jsonResponse({ alreadyConfirmed: true, creditsAdded: row.credits_purchased, balance });
+    return jsonResponse({ alreadyConfirmed: true, creditsAdded: row.credits_purchased });
   }
   if (row.status !== 'pending') {
     return errorResponse(`Purchase is ${row.status}`, 400);
   }
 
   if (new Date(row.expires_at) < new Date()) {
-    await env.DB
-      .prepare(`UPDATE ai_credit_purchases SET status = 'expired' WHERE id = ?`)
-      .bind(purchaseId)
-      .run();
-    if (row.payment_address) {
-      await env.DB
-        .prepare(`UPDATE ai_payment_addresses SET purchase_id = NULL WHERE address = ?`)
-        .bind(row.payment_address)
-        .run();
-    }
+    await expireAndReleasePurchase(env.DB, row.id, row.payment_address);
     return errorResponse('Purchase expired. Please start a new purchase.', 410);
   }
 
@@ -106,8 +70,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   }
 
   // Single check — no polling loop. Client handles retry timing.
-  const apiKey = (env as Record<string, unknown>).SPACESCAN_API_KEY as string | undefined;
-  const addrBalance = await getAddressBalance(row.payment_address, apiKey);
+  const addrBalance = await getAddressBalance(row.payment_address, env.SPACESCAN_API_KEY);
 
   if (addrBalance === null || addrBalance < row.xch_paid_mojos) {
     return jsonResponse({
@@ -126,11 +89,8 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     .bind(purchaseId)
     .run();
 
-  const balance = await getAICreditBalance(env.DB, walletAddress);
-
   return jsonResponse({
     confirmed: true,
     creditsAdded: row.credits_purchased,
-    balance,
   });
 };

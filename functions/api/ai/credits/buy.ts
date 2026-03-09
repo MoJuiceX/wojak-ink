@@ -1,5 +1,5 @@
 // functions/api/ai/credits/buy.ts
-import { jsonResponse, errorResponse, optionsResponse, AI_CREDIT_BUNDLES, requireAuth } from '../_shared';
+import { jsonResponse, errorResponse, optionsResponse, AI_CREDIT_BUNDLES, requireAuth, expireAndReleasePurchase } from '../_shared';
 import type { AIEnv } from '../_shared';
 
 const PURCHASE_EXPIRY_MINUTES = 30;
@@ -31,30 +31,26 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     );
   }
 
-  // Expire stale pending purchases for this wallet and release their addresses
-  const staleRows = await env.DB
+  // Batch-expire stale pending purchases and release their addresses in two queries
+  // instead of N+1 individual updates.
+  await env.DB
     .prepare(
-      `SELECT id, payment_address FROM ai_credit_purchases
+      `UPDATE ai_credit_purchases SET status = 'expired'
        WHERE wallet_address = ? AND status = 'pending' AND expires_at < datetime('now')`
     )
     .bind(walletAddress)
-    .all<{ id: number; payment_address: string | null }>();
+    .run();
 
-  if (staleRows.results?.length) {
-    for (const stale of staleRows.results) {
-      await env.DB
-        .prepare(`UPDATE ai_credit_purchases SET status = 'expired' WHERE id = ?`)
-        .bind(stale.id)
-        .run();
-      // Release the address back to the pool
-      if (stale.payment_address) {
-        await env.DB
-          .prepare(`UPDATE ai_payment_addresses SET purchase_id = NULL WHERE address = ?`)
-          .bind(stale.payment_address)
-          .run();
-      }
-    }
-  }
+  await env.DB
+    .prepare(
+      `UPDATE ai_payment_addresses SET purchase_id = NULL
+       WHERE purchase_id IN (
+         SELECT id FROM ai_credit_purchases
+         WHERE wallet_address = ? AND status = 'expired'
+       )`
+    )
+    .bind(walletAddress)
+    .run();
 
   // Check for existing pending purchase — return it so user can retry payment
   const existing = await env.DB
@@ -69,23 +65,19 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   if (existing) {
     // If user switched tiers, expire the old pending purchase and release its address
     if (existing.bundle_tier !== bundle.tier) {
-      await env.DB
-        .prepare(`UPDATE ai_credit_purchases SET status = 'expired' WHERE id = ?`)
-        .bind(existing.id)
-        .run();
-      if (existing.payment_address) {
-        await env.DB
-          .prepare(`UPDATE ai_payment_addresses SET purchase_id = NULL WHERE address = ?`)
-          .bind(existing.payment_address)
-          .run();
-      }
+      await expireAndReleasePurchase(env.DB, existing.id, existing.payment_address);
     } else {
+      if (!existing.payment_address) {
+        // Address was lost — force a fresh purchase
+        await expireAndReleasePurchase(env.DB, existing.id, null);
+        return errorResponse('Payment address unavailable. Please start a new purchase.', 410);
+      }
       return jsonResponse({
         pending: true,
         purchaseId: existing.id,
         tier: existing.bundle_tier,
         amountMojos: String(existing.xch_paid_mojos),
-        treasuryAddress: existing.payment_address || '',
+        treasuryAddress: existing.payment_address,
         expiresAt: existing.expires_at,
       });
     }

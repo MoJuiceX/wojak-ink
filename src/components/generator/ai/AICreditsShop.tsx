@@ -52,6 +52,7 @@ export function AICreditsShop() {
           setPurchaseSuccess(`+${data.creditsAdded} AI credit${data.creditsAdded !== 1 ? 's' : ''} added!`);
           setPurchaseState('success');
           await refetchBalance();
+          if (cancelled) return;
         }
       } catch {
         // Silent — this is a best-effort background check
@@ -164,7 +165,7 @@ export function AICreditsShop() {
           const confirmData = await confirmRes.json();
 
           if (confirmData.confirmed || confirmData.alreadyConfirmed) {
-            const added = confirmData.creditsAdded ?? selectedBundle?.credits ?? '';
+            const added = confirmData.creditsAdded ?? selectedBundle?.credits ?? 0;
             setPurchaseSuccess(`+${added} AI credit${added !== 1 ? 's' : ''} added!`);
             setPurchaseState('success');
             setStatusMessage(null);
@@ -179,7 +180,7 @@ export function AICreditsShop() {
       }
 
       if (!confirmed) {
-        const credits = selectedBundle?.credits ?? '';
+        const credits = selectedBundle?.credits ?? 0;
         setPurchaseSuccess(`Payment sent! Your ${credits} credit${credits !== 1 ? 's' : ''} will appear shortly. Refresh the page to check.`);
         setPurchaseState('success');
         setStatusMessage(null);

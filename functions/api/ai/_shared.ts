@@ -113,6 +113,49 @@ export interface AIEnv {
   DB: D1Database;
   REVE_API_KEY?: string;
   AI_EDITS_BUCKET?: R2Bucket;
+  SPACESCAN_API_KEY?: string;
+}
+
+// --- Spacescan Helpers ---
+
+/**
+ * Check the on-chain mojo balance of a Chia address via Spacescan.
+ * Returns mojos as a number, or null if the address has no balance or the
+ * request fails. Each purchase has its own dedicated address so any balance
+ * on that address is proof of payment.
+ */
+export async function getAddressBalance(address: string, apiKey?: string): Promise<number | null> {
+  try {
+    const url = `https://api.spacescan.io/address/xch-balance/${address}`;
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+      'User-Agent': 'wojak.ink/1.0',
+    };
+    if (apiKey) headers['x-api-key'] = apiKey;
+    const res = await fetch(url, { headers });
+    if (!res.ok) return null;
+    const data = await res.json() as { status?: string; mojo?: number };
+    if (data.status !== 'success' || typeof data.mojo !== 'number') return null;
+    return data.mojo;
+  } catch {
+    return null;
+  }
+}
+
+// --- Purchase Helpers ---
+
+/**
+ * Mark a purchase as expired and release its payment address back to the pool.
+ */
+export async function expireAndReleasePurchase(
+  db: D1Database,
+  purchaseId: number,
+  paymentAddress: string | null,
+): Promise<void> {
+  await db.prepare(`UPDATE ai_credit_purchases SET status = 'expired' WHERE id = ?`).bind(purchaseId).run();
+  if (paymentAddress) {
+    await db.prepare(`UPDATE ai_payment_addresses SET purchase_id = NULL WHERE address = ?`).bind(paymentAddress).run();
+  }
 }
 
 // --- Balance Query ---

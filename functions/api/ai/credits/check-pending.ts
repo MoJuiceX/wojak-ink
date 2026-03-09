@@ -5,29 +5,8 @@
 // and auto-confirms if paid. Returns the result so the client can update
 // the balance without the user having to do anything.
 
-import { jsonResponse, errorResponse, optionsResponse, getAICreditBalance, requireAuth } from '../_shared';
+import { jsonResponse, errorResponse, optionsResponse, requireAuth, getAddressBalance, expireAndReleasePurchase } from '../_shared';
 import type { AIEnv } from '../_shared';
-
-async function getAddressBalance(address: string, apiKey?: string): Promise<number | null> {
-  try {
-    const url = `https://api.spacescan.io/address/xch-balance/${address}`;
-    const headers: Record<string, string> = {
-      'Accept': 'application/json',
-      'User-Agent': 'wojak.ink/1.0',
-    };
-    if (apiKey) {
-      headers['x-api-key'] = apiKey;
-    }
-    const res = await fetch(url, { headers });
-    if (!res.ok) return null;
-
-    const data = await res.json() as { status?: string; mojo?: number };
-    if (data.status !== 'success' || typeof data.mojo !== 'number') return null;
-    return data.mojo;
-  } catch {
-    return null;
-  }
-}
 
 export const onRequest: PagesFunction<AIEnv> = async (context) => {
   const { request, env } = context;
@@ -62,16 +41,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
 
   // Expire if past deadline
   if (new Date(row.expires_at) < new Date()) {
-    await env.DB
-      .prepare(`UPDATE ai_credit_purchases SET status = 'expired' WHERE id = ?`)
-      .bind(row.id)
-      .run();
-    if (row.payment_address) {
-      await env.DB
-        .prepare(`UPDATE ai_payment_addresses SET purchase_id = NULL WHERE address = ?`)
-        .bind(row.payment_address)
-        .run();
-    }
+    await expireAndReleasePurchase(env.DB, row.id, row.payment_address);
     return jsonResponse({ hasPending: false });
   }
 
@@ -81,8 +51,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   }
 
   // Check on-chain balance
-  const apiKey = (env as Record<string, unknown>).SPACESCAN_API_KEY as string | undefined;
-  const addrBalance = await getAddressBalance(row.payment_address, apiKey);
+  const addrBalance = await getAddressBalance(row.payment_address, env.SPACESCAN_API_KEY);
 
   if (addrBalance === null || addrBalance < row.xch_paid_mojos) {
     return jsonResponse({ hasPending: true, purchaseId: row.id, confirmed: false });
@@ -97,13 +66,10 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     .bind(row.id)
     .run();
 
-  const balance = await getAICreditBalance(env.DB, walletAddress);
-
   return jsonResponse({
     hasPending: true,
     purchaseId: row.id,
     confirmed: true,
     creditsAdded: row.credits_purchased,
-    balance,
   });
 };
