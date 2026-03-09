@@ -1,3 +1,5 @@
+import { bls12_381 } from '@noble/curves/bls12-381';
+
 /**
  * AI Enhance shared constants, types, and utilities.
  * Mirrors the pattern from functions/api/mint/_shared.ts.
@@ -119,4 +121,117 @@ export async function getAICreditBalance(db: D1Database, wallet: string): Promis
     .bind(wallet, wallet, wallet)
     .first<{ balance: number }>();
   return result?.balance ?? 0;
+}
+
+// --- BLS Signature Verification (CHIP-0002) ---
+
+function hexToBytes(hex: string): Uint8Array {
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+  }
+  return bytes;
+}
+
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Compute the CHIP-0002 message hash for Chia signed messages.
+ * Signs the CLVM tree hash of ("Chia Signed Message" . <raw_message>).
+ */
+async function chiaMessageHash(message: string): Promise<Uint8Array> {
+  const encoder = new TextEncoder();
+
+  async function atomHash(data: Uint8Array): Promise<Uint8Array> {
+    const buf = new Uint8Array(1 + data.length);
+    buf[0] = 0x01;
+    buf.set(data, 1);
+    return new Uint8Array(await crypto.subtle.digest('SHA-256', buf));
+  }
+
+  async function pairHash(left: Uint8Array, right: Uint8Array): Promise<Uint8Array> {
+    const buf = new Uint8Array(1 + 32 + 32);
+    buf[0] = 0x02;
+    buf.set(left, 1);
+    buf.set(right, 33);
+    return new Uint8Array(await crypto.subtle.digest('SHA-256', buf));
+  }
+
+  const prefixHash = await atomHash(encoder.encode('Chia Signed Message'));
+  const messageHash = await atomHash(encoder.encode(message));
+  return pairHash(prefixHash, messageHash);
+}
+
+/**
+ * Verify a Chia BLS12-381 signature (CHIP-0002 standard).
+ * Returns true if the signature is valid for the given message and public key.
+ */
+export async function verifyChiaSignature(
+  message: string,
+  signatureHex: string,
+  pubkeyHex: string,
+): Promise<boolean> {
+  try {
+    const msgHash = await chiaMessageHash(message);
+    const signature = hexToBytes(signatureHex);
+    const pubkey = hexToBytes(pubkeyHex);
+    return bls12_381.verify(signature, msgHash, pubkey);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Generate a crypto-random hex nonce.
+ */
+export function generateNonce(bytes = 32): string {
+  const arr = new Uint8Array(bytes);
+  crypto.getRandomValues(arr);
+  return bytesToHex(arr);
+}
+
+/**
+ * Generate a crypto-random session token.
+ */
+export function generateSessionToken(): string {
+  return generateNonce(64);
+}
+
+// --- Session Auth Middleware ---
+
+export interface AuthSession {
+  walletAddress: string;
+  sessionId: number;
+}
+
+/**
+ * Extract and validate session token from Authorization header.
+ * Returns the authenticated wallet address or an error response.
+ */
+export async function requireAuth(request: Request, db: D1Database): Promise<AuthSession | Response> {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return errorResponse('Authentication required. Connect your wallet.', 401);
+  }
+
+  const token = authHeader.slice(7);
+  if (!token || token.length < 64) {
+    return errorResponse('Invalid session token.', 401);
+  }
+
+  const session = await db
+    .prepare(
+      `SELECT id, wallet_address FROM ai_auth_sessions
+       WHERE session_token = ? AND expires_at > datetime('now')`
+    )
+    .bind(token)
+    .first<{ id: number; wallet_address: string }>();
+
+  if (!session) {
+    return errorResponse('Session expired. Please reconnect your wallet.', 401);
+  }
+
+  return { walletAddress: session.wallet_address, sessionId: session.id };
 }
