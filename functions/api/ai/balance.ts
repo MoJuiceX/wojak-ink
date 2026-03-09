@@ -22,6 +22,11 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
       .bind(wallet, 'confirmed')
       .first<{ total: number }>();
 
+    const earnedResult = await env.DB
+      .prepare('SELECT COALESCE(SUM(credits_earned), 0) as total FROM ai_credit_events WHERE wallet_address = ?')
+      .bind(wallet)
+      .first<{ total: number }>();
+
     const usedResult = await env.DB
       .prepare('SELECT COALESCE(SUM(credits_spent), 0) as total FROM ai_credit_usage WHERE wallet_address = ?')
       .bind(wallet)
@@ -30,6 +35,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     return jsonResponse({
       balance,
       creditsPurchased: purchasedResult?.total ?? 0,
+      creditsEarned: earnedResult?.total ?? 0,
       creditsUsed: usedResult?.total ?? 0,
     });
   } catch (err) {

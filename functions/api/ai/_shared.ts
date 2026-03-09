@@ -111,11 +111,12 @@ export async function getAICreditBalance(db: D1Database, wallet: string): Promis
   const result = await db
     .prepare(
       `SELECT
-        COALESCE((SELECT SUM(credits_purchased) FROM ai_credit_purchases WHERE wallet_address = ? AND status = 'confirmed'), 0) -
+        COALESCE((SELECT SUM(credits_purchased) FROM ai_credit_purchases WHERE wallet_address = ? AND status = 'confirmed'), 0) +
+        COALESCE((SELECT SUM(credits_earned) FROM ai_credit_events WHERE wallet_address = ?), 0) -
         COALESCE((SELECT SUM(credits_spent) FROM ai_credit_usage WHERE wallet_address = ?), 0)
         AS balance`
     )
-    .bind(wallet, wallet)
+    .bind(wallet, wallet, wallet)
     .first<{ balance: number }>();
   return result?.balance ?? 0;
 }
