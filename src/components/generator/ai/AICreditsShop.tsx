@@ -14,8 +14,8 @@ const loadConfetti = () => import('canvas-confetti').then(m => m.default);
 type PurchaseState = 'idle' | 'buying' | 'sending' | 'confirming' | 'success' | 'error';
 
 export function AICreditsShop() {
-  const { isShopOpen, closeShop, balance, refetchBalance } = useAIEnhance();
-  const { address, status, sendXCH } = useSageWallet();
+  const { isShopOpen, closeShop, balance, refetchBalance, sessionToken } = useAIEnhance();
+  const { status, sendXCH } = useSageWallet();
   const isConnected = status === 'connected';
   const prefersReducedMotion = useReducedMotion();
   const [selectedTier, setSelectedTier] = useState('25');
@@ -62,9 +62,11 @@ export function AICreditsShop() {
 
       const res = await fetch('/api/ai/credits/buy', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+        },
         body: JSON.stringify({
-          walletAddress: address,
           tier: selectedBundle.tier,
         }),
       });
@@ -92,10 +94,12 @@ export function AICreditsShop() {
 
       const confirmRes = await fetch('/api/ai/credits/confirm', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+        },
         body: JSON.stringify({
           purchaseId: data.purchaseId,
-          walletAddress: address,
         }),
       });
 
@@ -269,13 +273,13 @@ export function AICreditsShop() {
             <div className="ai-shop-earn-method">
               <span className="ai-shop-earn-icon">🎨</span>
               <span className="ai-shop-earn-text">
-                Mint a Wojak <span className="text-accent">= +1 credit</span>
+                Mint a Your Wojak <span className="text-accent">= +1 credit</span>
               </span>
             </div>
             <div className="ai-shop-earn-method">
               <span className="ai-shop-earn-icon">🌾</span>
               <span className="ai-shop-earn-text">
-                Trade Farmer Plots <span className="text-accent">= +1 credit per XCH</span>
+                Buy a Wojak Farmers Plot <span className="text-accent">= +1 credit per XCH</span>
               </span>
             </div>
           </div>

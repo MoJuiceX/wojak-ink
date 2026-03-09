@@ -64,12 +64,18 @@ export interface AIEnhanceContextValue {
   isShopOpen: boolean;
   openShop: () => void;
   closeShop: () => void;
+
+  // Auth
+  sessionToken: string | null;
+  isAuthenticating: boolean;
+  isAuthenticated: boolean;
+  authenticate: () => Promise<void>;
 }
 
 const AIEnhanceContext = createContext<AIEnhanceContextValue | null>(null);
 
 export function AIEnhanceProvider({ children }: { children: ReactNode }) {
-  const { address } = useSageWallet();
+  const { address, signMessage } = useSageWallet();
 
   // Balance
   const [balance, setBalance] = useState(0);
@@ -104,14 +110,77 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   // Shop
   const [isShopOpen, setIsShopOpen] = useState(false);
 
+  // Auth
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const isAuthenticated = sessionToken !== null;
+
   const isAIEnhancedMode = enhancedImage !== null;
+
+  const authHeaders = useCallback((): Record<string, string> => {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (sessionToken) {
+      headers['Authorization'] = `Bearer ${sessionToken}`;
+    }
+    return headers;
+  }, [sessionToken]);
+
+  const authenticate = useCallback(async () => {
+    if (!address) return;
+    setIsAuthenticating(true);
+    try {
+      // Step 1: Request challenge nonce
+      const challengeRes = await fetch('/api/ai/auth/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ walletAddress: address }),
+      });
+      if (!challengeRes.ok) throw new Error('Challenge request failed');
+      const { nonce } = await challengeRes.json();
+
+      // Step 2: Sign with Sage Wallet
+      const { signature, publicKey } = await signMessage(nonce);
+
+      // Step 3: Verify and get session token
+      const verifyRes = await fetch('/api/ai/auth/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          walletAddress: address,
+          nonce,
+          signature,
+          publicKey,
+        }),
+      });
+      if (!verifyRes.ok) throw new Error('Verification failed');
+      const { sessionToken: token } = await verifyRes.json();
+
+      setSessionToken(token);
+    } catch (err) {
+      console.error('[AI Auth] Authentication failed:', err);
+      setSessionToken(null);
+    } finally {
+      setIsAuthenticating(false);
+    }
+  }, [address, signMessage]);
+
+  // Auto-authenticate when wallet connects
+  useEffect(() => {
+    if (address && !sessionToken && !isAuthenticating) {
+      authenticate();
+    }
+    if (!address) {
+      setSessionToken(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address]);
 
   // --- Fetch balance ---
   const refetchBalance = useCallback(async () => {
-    if (!address) return;
+    if (!address || !sessionToken) return;
     setIsLoadingBalance(true);
     try {
-      const res = await fetch(`/api/ai/balance?wallet=${encodeURIComponent(address)}`);
+      const res = await fetch('/api/ai/balance', { headers: authHeaders() });
       if (res.ok) {
         const data = await res.json();
         setBalance(data.balance ?? 0);
@@ -121,11 +190,13 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoadingBalance(false);
     }
-  }, [address]);
+  }, [address, sessionToken, authHeaders]);
 
   useEffect(() => {
-    refetchBalance();
-  }, [refetchBalance]);
+    if (sessionToken) {
+      refetchBalance();
+    }
+  }, [sessionToken, refetchBalance]);
 
   // --- Lightbox ---
   const openLightbox = useCallback(() => {
@@ -184,7 +255,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     parentId?: string,
     layersJson?: string,
   ): Promise<AIEnhanceResult | null> => {
-    if (!address) return null;
+    if (!address || !sessionToken) return null;
     setIsEnhancing(true);
     setEnhanceError(null);
     setWizardStep('loading');
@@ -192,9 +263,8 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     try {
       const res = await fetch('/api/ai/enhance', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
-          walletAddress: address,
           imageBase64: imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64,
           category,
           prompt,
@@ -225,7 +295,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsEnhancing(false);
     }
-  }, [address, selectedMode]);
+  }, [address, sessionToken, selectedMode, authHeaders]);
 
   // --- Accept result ---
   const acceptResult = useCallback(() => {
@@ -250,10 +320,10 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
 
   // --- Fetch creations ---
   const fetchCreations = useCallback(async () => {
-    if (!address) return;
+    if (!address || !sessionToken) return;
     setIsLoadingCreations(true);
     try {
-      const res = await fetch(`/api/ai/creations?wallet=${encodeURIComponent(address)}`);
+      const res = await fetch('/api/ai/creations', { headers: authHeaders() });
       if (res.ok) {
         const data = await res.json();
         setCreations(data.creations ?? []);
@@ -263,7 +333,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoadingCreations(false);
     }
-  }, [address]);
+  }, [address, sessionToken, authHeaders]);
 
   // --- Load gallery creation for further enhancement ---
   const loadImageForEnhancing = useCallback((imageDataUrl: string) => {
@@ -320,6 +390,10 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     isShopOpen,
     openShop,
     closeShop,
+    sessionToken,
+    isAuthenticating,
+    isAuthenticated,
+    authenticate,
   };
 
   return <AIEnhanceContext.Provider value={value}>{children}</AIEnhanceContext.Provider>;
