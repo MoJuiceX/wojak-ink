@@ -140,6 +140,10 @@ function bytesToHex(bytes: Uint8Array): string {
 /**
  * Compute the CHIP-0002 message hash for Chia signed messages.
  * Signs the CLVM tree hash of ("Chia Signed Message" . <raw_message>).
+ *
+ * IMPORTANT: Sage wallet hex-decodes the message before computing the tree hash
+ * when the message is a valid hex string. Our nonces are always hex strings,
+ * so we hex-decode the message bytes for the CLVM atom hash.
  */
 async function chiaMessageHash(message: string): Promise<Uint8Array> {
   const encoder = new TextEncoder();
@@ -159,8 +163,13 @@ async function chiaMessageHash(message: string): Promise<Uint8Array> {
     return new Uint8Array(await crypto.subtle.digest('SHA-256', buf));
   }
 
+  // Sage wallet hex-decodes hex messages before signing.
+  // Detect hex strings and decode to raw bytes.
+  const isHex = /^[0-9a-fA-F]+$/.test(message) && message.length % 2 === 0;
+  const messageBytes = isHex ? hexToBytes(message) : encoder.encode(message);
+
   const prefixHash = await atomHash(encoder.encode('Chia Signed Message'));
-  const messageHash = await atomHash(encoder.encode(message));
+  const messageHash = await atomHash(messageBytes);
   return pairHash(prefixHash, messageHash);
 }
 
