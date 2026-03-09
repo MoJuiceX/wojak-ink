@@ -662,6 +662,25 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
 
   await env.DB.batch(batchStmts);
 
+  // Grant 1 AI credit for paid mints
+  if (job.mint_type === 'paid' && job.mint_number) {
+    try {
+      await env.DB.prepare(
+        `INSERT OR IGNORE INTO ai_credit_events
+          (wallet_address, event_id, event_type, credits_earned, source_ref, metadata, event_timestamp)
+         VALUES (?, ?, 'mint_reward', 1, ?, ?, datetime('now'))`
+      ).bind(
+        job.wallet_address,
+        `mint_reward_${job.mint_number}`,
+        String(job.mint_number),
+        JSON.stringify({ mintType: 'paid', priceXch: job.xch_price_mojos ? Number(job.xch_price_mojos) / 1_000_000_000_000 : null })
+      ).run();
+    } catch (e) {
+      // Non-critical — log but don't fail the mint
+      console.error('[AI Credit] Failed to grant mint reward:', e);
+    }
+  }
+
   // Get the phase2_mint_id for cross-reference
   const mintRow = await env.DB.prepare(
     'SELECT id FROM phase2_mints WHERE mint_number = ? ORDER BY id DESC LIMIT 1'
