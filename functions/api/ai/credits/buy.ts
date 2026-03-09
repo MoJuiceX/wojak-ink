@@ -5,6 +5,31 @@ import type { AIEnv } from '../_shared';
 const PURCHASE_EXPIRY_MINUTES = 30;
 const TREASURY_ADDRESS = 'xch13afmxv0xpyz03t3jfdmcrtv5ecwe5n52977vxd3z2x995f9quunsre5vkd';
 
+/**
+ * Snapshot the current treasury balance (mojos) from Spacescan.
+ * Used later by confirm.ts to detect balance increase.
+ */
+async function getTreasurySnapshot(apiKey?: string): Promise<number | null> {
+  try {
+    const url = `https://api.spacescan.io/address/xch-balance/${TREASURY_ADDRESS}`;
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+      'User-Agent': 'wojak.ink/1.0',
+    };
+    if (apiKey) {
+      headers['x-api-key'] = apiKey;
+    }
+    const res = await fetch(url, { headers });
+    if (!res.ok) return null;
+
+    const data = await res.json() as { status?: string; mojo?: number };
+    if (data.status !== 'success' || typeof data.mojo !== 'number') return null;
+    return data.mojo;
+  } catch {
+    return null;
+  }
+}
+
 export const onRequest: PagesFunction<AIEnv> = async (context) => {
   const { request, env } = context;
 
@@ -78,13 +103,17 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
 
   const expiresAt = new Date(Date.now() + PURCHASE_EXPIRY_MINUTES * 60 * 1000).toISOString();
 
+  // Snapshot treasury balance BEFORE user pays — confirm.ts compares with this
+  const apiKey = (env as Record<string, unknown>).SPACESCAN_API_KEY as string | undefined;
+  const snapshot = await getTreasurySnapshot(apiKey);
+
   const result = await env.DB
     .prepare(
       `INSERT INTO ai_credit_purchases
-        (wallet_address, credits_purchased, xch_paid_mojos, bundle_tier, status, expires_at)
-       VALUES (?, ?, ?, ?, 'pending', ?)`
+        (wallet_address, credits_purchased, xch_paid_mojos, bundle_tier, status, expires_at, treasury_mojo_snapshot)
+       VALUES (?, ?, ?, ?, 'pending', ?, ?)`
     )
-    .bind(walletAddress, bundle.credits, uniqueMojos, bundle.tier, expiresAt)
+    .bind(walletAddress, bundle.credits, uniqueMojos, bundle.tier, expiresAt, snapshot)
     .run();
 
   return jsonResponse({
