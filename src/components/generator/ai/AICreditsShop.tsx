@@ -27,6 +27,40 @@ export function AICreditsShop() {
   const selectedBundle = AI_CREDIT_BUNDLES.find((b) => b.tier === selectedTier);
   const isPurchasing = purchaseState !== 'idle' && purchaseState !== 'success' && purchaseState !== 'error';
 
+  // On shop open, check for any pending purchase that may have been paid
+  // while the user was away (e.g. closed browser during confirmation).
+  useEffect(() => {
+    if (!isShopOpen || !sessionToken) return;
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch('/api/ai/credits/check-pending', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionToken}`,
+          },
+        });
+        if (!res.ok || cancelled) return;
+
+        const data = await res.json();
+        if (cancelled) return;
+
+        if (data.confirmed && data.creditsAdded) {
+          setPurchaseSuccess(`+${data.creditsAdded} AI credit${data.creditsAdded !== 1 ? 's' : ''} added!`);
+          setPurchaseState('success');
+          await refetchBalance();
+        }
+      } catch {
+        // Silent — this is a best-effort background check
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [isShopOpen, sessionToken, refetchBalance]);
+
   // Reset state and close shop
   const handleClose = () => {
     setPurchaseState('idle');
@@ -306,12 +340,6 @@ export function AICreditsShop() {
             <span>or earn for free</span>
           </div>
           <div className="ai-shop-earn-methods">
-            <div className="ai-shop-earn-method">
-              <span className="ai-shop-earn-icon">🎨</span>
-              <span className="ai-shop-earn-text">
-                Mint a Your Wojak <span className="text-accent">= +1 credit</span>
-              </span>
-            </div>
             <div className="ai-shop-earn-method">
               <span className="ai-shop-earn-icon">🌾</span>
               <span className="ai-shop-earn-text">
