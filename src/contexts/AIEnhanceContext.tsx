@@ -126,7 +126,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   }, [sessionToken]);
 
   const authenticate = useCallback(async () => {
-    if (!address) return;
+    if (!address || !signMessage) return;
     setIsAuthenticating(true);
     try {
       // Step 1: Request challenge nonce
@@ -164,6 +164,16 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     }
   }, [address, signMessage]);
 
+  // Re-authenticate on 401 (expired session)
+  const handleAuthError = useCallback(async (res: Response): Promise<boolean> => {
+    if (res.status === 401) {
+      setSessionToken(null);
+      await authenticate();
+      return true; // Caller should retry
+    }
+    return false;
+  }, [authenticate]);
+
   // Auto-authenticate when wallet connects
   useEffect(() => {
     if (address && !sessionToken && !isAuthenticating) {
@@ -181,16 +191,18 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     setIsLoadingBalance(true);
     try {
       const res = await fetch('/api/ai/balance', { headers: authHeaders() });
-      if (res.ok) {
-        const data = await res.json();
-        setBalance(data.balance ?? 0);
+      if (!res.ok) {
+        if (await handleAuthError(res)) return;
+        return;
       }
+      const data = await res.json();
+      setBalance(data.balance ?? 0);
     } catch (err) {
       console.error('Failed to fetch AI balance:', err);
     } finally {
       setIsLoadingBalance(false);
     }
-  }, [address, sessionToken, authHeaders]);
+  }, [address, sessionToken, authHeaders, handleAuthError]);
 
   useEffect(() => {
     if (sessionToken) {
@@ -277,7 +289,12 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
 
       if (!res.ok) {
-        setEnhanceError(data.error || 'Enhancement failed. Try again.');
+        if (res.status === 401) {
+          await handleAuthError(res);
+          setEnhanceError('Session expired. Please try again.');
+        } else {
+          setEnhanceError(data.error || 'Enhancement failed. Try again.');
+        }
         setWizardStep('prompt');
         return null;
       }
@@ -295,7 +312,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsEnhancing(false);
     }
-  }, [address, sessionToken, selectedMode, authHeaders]);
+  }, [address, sessionToken, selectedMode, authHeaders, handleAuthError]);
 
   // --- Accept result ---
   const acceptResult = useCallback(() => {
@@ -324,16 +341,18 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     setIsLoadingCreations(true);
     try {
       const res = await fetch('/api/ai/creations', { headers: authHeaders() });
-      if (res.ok) {
-        const data = await res.json();
-        setCreations(data.creations ?? []);
+      if (!res.ok) {
+        if (await handleAuthError(res)) return;
+        return;
       }
+      const data = await res.json();
+      setCreations(data.creations ?? []);
     } catch (err) {
       console.error('Failed to fetch AI creations:', err);
     } finally {
       setIsLoadingCreations(false);
     }
-  }, [address, sessionToken, authHeaders]);
+  }, [address, sessionToken, authHeaders, handleAuthError]);
 
   // --- Load gallery creation for further enhancement ---
   const loadImageForEnhancing = useCallback((imageDataUrl: string) => {

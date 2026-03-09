@@ -39,22 +39,18 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     return errorResponse('Missing or invalid publicKey', 400);
   }
 
-  // Look up the pending challenge
+  // Look up the pending challenge (include expiry check in SQL for consistency)
   const row = await env.DB
     .prepare(
-      `SELECT id, nonce, nonce_expires_at FROM ai_auth_sessions
-       WHERE wallet_address = ? AND nonce = ? AND session_token IS NULL`
+      `SELECT id, nonce FROM ai_auth_sessions
+       WHERE wallet_address = ? AND nonce = ? AND session_token IS NULL
+       AND nonce_expires_at > datetime('now')`
     )
     .bind(walletAddress, nonce)
-    .first<{ id: number; nonce: string; nonce_expires_at: string }>();
+    .first<{ id: number; nonce: string }>();
 
   if (!row) {
     return errorResponse('Invalid or expired nonce. Request a new challenge.', 400);
-  }
-
-  if (new Date(row.nonce_expires_at) < new Date()) {
-    await env.DB.prepare(`DELETE FROM ai_auth_sessions WHERE id = ?`).bind(row.id).run();
-    return errorResponse('Nonce expired. Request a new challenge.', 410);
   }
 
   // Verify BLS signature (CHIP-0002)

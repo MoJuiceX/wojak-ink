@@ -23,13 +23,12 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     return errorResponse('Missing or invalid walletAddress', 400);
   }
 
-  // Clean up expired sessions for this wallet
+  // Global cleanup: remove all expired sessions and stale nonces (prevents table bloat from DoS)
   await env.DB
-    .prepare(`DELETE FROM ai_auth_sessions WHERE wallet_address = ? AND expires_at < datetime('now')`)
-    .bind(walletAddress)
+    .prepare(`DELETE FROM ai_auth_sessions WHERE expires_at < datetime('now')`)
     .run();
 
-  // Also clean up stale nonces (uncompleted challenges)
+  // Also clean up stale nonces for this wallet specifically (uncompleted challenges)
   await env.DB
     .prepare(
       `DELETE FROM ai_auth_sessions

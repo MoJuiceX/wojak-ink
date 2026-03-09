@@ -165,8 +165,9 @@ async function chiaMessageHash(message: string): Promise<Uint8Array> {
 }
 
 /**
- * Verify a Chia BLS12-381 signature (CHIP-0002 standard).
- * Returns true if the signature is valid for the given message and public key.
+ * Verify a Chia BLS12-381 signature (CHIP-0002 / AugSchemeMPL).
+ * AugSchemeMPL prepends the public key to the message before hash-to-curve,
+ * and uses the AUG domain separation tag.
  */
 export async function verifyChiaSignature(
   message: string,
@@ -177,7 +178,13 @@ export async function verifyChiaSignature(
     const msgHash = await chiaMessageHash(message);
     const signature = hexToBytes(signatureHex);
     const pubkey = hexToBytes(pubkeyHex);
-    return bls12_381.verify(signature, msgHash, pubkey);
+    // AugSchemeMPL: prepend public key bytes to message before hash-to-curve
+    const augMsg = new Uint8Array(pubkey.length + msgHash.length);
+    augMsg.set(pubkey, 0);
+    augMsg.set(msgHash, pubkey.length);
+    return bls12_381.verify(signature, augMsg, pubkey, {
+      DST: 'BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_AUG_',
+    });
   } catch {
     return false;
   }
