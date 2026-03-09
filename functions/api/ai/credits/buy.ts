@@ -1,5 +1,5 @@
 // functions/api/ai/credits/buy.ts
-import { jsonResponse, errorResponse, optionsResponse, AI_CREDIT_BUNDLES } from '../_shared';
+import { jsonResponse, errorResponse, optionsResponse, AI_CREDIT_BUNDLES, requireAuth } from '../_shared';
 import type { AIEnv } from '../_shared';
 
 const PURCHASE_EXPIRY_MINUTES = 30;
@@ -11,18 +11,18 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   if (request.method === 'OPTIONS') return optionsResponse();
   if (request.method !== 'POST') return errorResponse('Method not allowed', 405);
 
-  let body: { walletAddress?: string; tier?: string };
+  const auth = await requireAuth(request, env.DB);
+  if (auth instanceof Response) return auth;
+  const walletAddress = auth.walletAddress;
+
+  let body: { tier?: string };
   try {
     body = await request.json();
   } catch {
     return errorResponse('Invalid JSON', 400);
   }
 
-  const { walletAddress, tier } = body;
-
-  if (!walletAddress || walletAddress.length < 10) {
-    return errorResponse('Missing or invalid walletAddress', 400);
-  }
+  const { tier } = body;
 
   const bundle = AI_CREDIT_BUNDLES.find((b) => b.tier === tier);
   if (!bundle) {

@@ -1,4 +1,4 @@
-import { jsonResponse, errorResponse, optionsResponse } from './_shared';
+import { jsonResponse, errorResponse, optionsResponse, requireAuth } from './_shared';
 import type { AIEnv } from './_shared';
 
 export const onRequest: PagesFunction<AIEnv> = async (context) => {
@@ -7,13 +7,12 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   if (request.method === 'OPTIONS') return optionsResponse();
   if (request.method !== 'GET') return errorResponse('Method not allowed', 405);
 
-  const url = new URL(request.url);
-  const wallet = url.searchParams.get('wallet');
-  const limit = Math.min(Number(url.searchParams.get('limit')) || 50, 100);
+  const auth = await requireAuth(request, env.DB);
+  if (auth instanceof Response) return auth;
+  const wallet = auth.walletAddress;
 
-  if (!wallet || wallet.length < 10) {
-    return errorResponse('Missing or invalid wallet parameter', 400);
-  }
+  const url = new URL(request.url);
+  const limit = Math.min(Number(url.searchParams.get('limit')) || 50, 100);
 
   try {
     const rows = await env.DB
@@ -27,7 +26,6 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
       .bind(wallet, limit)
       .all();
 
-    // Map snake_case DB columns to camelCase for the frontend
     const creations = (rows.results ?? []).map((row: Record<string, unknown>) => ({
       id: row.id,
       r2Key: row.r2_key,
@@ -37,10 +35,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
       createdAt: row.created_at,
     }));
 
-    return jsonResponse({
-      creations,
-      total: creations.length,
-    });
+    return jsonResponse({ creations, total: creations.length });
   } catch (err) {
     console.error('AI creations error:', err);
     return errorResponse('Internal error', 500);

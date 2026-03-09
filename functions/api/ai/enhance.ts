@@ -5,6 +5,7 @@ import {
   getAICreditBalance,
   buildConstrainedPrompt,
   AI_CATEGORIES,
+  requireAuth,
 } from './_shared';
 import type { AIEnv, AICategory, AIMode } from './_shared';
 
@@ -17,9 +18,11 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   if (request.method === 'OPTIONS') return optionsResponse();
   if (request.method !== 'POST') return errorResponse('Method not allowed', 405);
 
+  const auth = await requireAuth(request, env.DB);
+  if (auth instanceof Response) return auth;
+
   // --- Parse body ---
   let body: {
-    walletAddress?: string;
     imageBase64?: string;
     category?: string;
     prompt?: string;
@@ -33,12 +36,10 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     return errorResponse('Invalid JSON', 400);
   }
 
-  const { walletAddress, imageBase64, category, prompt, mode, parentEnhancementId, baseLayersJson } = body;
+  const { imageBase64, category, prompt, mode, parentEnhancementId, baseLayersJson } = body;
 
   // --- Validate ---
-  if (!walletAddress || walletAddress.length < 10) {
-    return errorResponse('Missing or invalid walletAddress', 400);
-  }
+  const walletAddress = auth.walletAddress;
   if (!imageBase64 || imageBase64.length < 100) {
     return errorResponse('Missing or invalid imageBase64', 400);
   }

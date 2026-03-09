@@ -1,5 +1,5 @@
 // functions/api/ai/credits/confirm.ts
-import { jsonResponse, errorResponse, optionsResponse, getAICreditBalance } from '../_shared';
+import { jsonResponse, errorResponse, optionsResponse, getAICreditBalance, requireAuth } from '../_shared';
 import type { AIEnv } from '../_shared';
 
 const TREASURY_PUZZLE_HASH = '8f53b331e60904f8ae324b7781ad94ce1d9a4e8a2fbcc33622518a5a24a0e727';
@@ -45,17 +45,21 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   if (request.method === 'OPTIONS') return optionsResponse();
   if (request.method !== 'POST') return errorResponse('Method not allowed', 405);
 
-  let body: { purchaseId?: number; walletAddress?: string };
+  const auth = await requireAuth(request, env.DB);
+  if (auth instanceof Response) return auth;
+  const walletAddress = auth.walletAddress;
+
+  let body: { purchaseId?: number };
   try {
     body = await request.json();
   } catch {
     return errorResponse('Invalid JSON', 400);
   }
 
-  const { purchaseId, walletAddress } = body;
+  const { purchaseId } = body;
 
-  if (!purchaseId || !walletAddress) {
-    return errorResponse('Missing purchaseId or walletAddress', 400);
+  if (!purchaseId) {
+    return errorResponse('Missing purchaseId', 400);
   }
 
   const row = await env.DB

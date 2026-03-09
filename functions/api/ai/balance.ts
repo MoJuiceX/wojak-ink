@@ -1,4 +1,4 @@
-import { jsonResponse, errorResponse, optionsResponse, getAICreditBalance } from './_shared';
+import { jsonResponse, errorResponse, optionsResponse, getAICreditBalance, requireAuth } from './_shared';
 import type { AIEnv } from './_shared';
 
 export const onRequest: PagesFunction<AIEnv> = async (context) => {
@@ -7,12 +7,9 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   if (request.method === 'OPTIONS') return optionsResponse();
   if (request.method !== 'GET') return errorResponse('Method not allowed', 405);
 
-  const url = new URL(request.url);
-  const wallet = url.searchParams.get('wallet');
-
-  if (!wallet || wallet.length < 10) {
-    return errorResponse('Missing or invalid wallet parameter', 400);
-  }
+  const auth = await requireAuth(request, env.DB);
+  if (auth instanceof Response) return auth;
+  const wallet = auth.walletAddress;
 
   try {
     const balance = await getAICreditBalance(env.DB, wallet);
