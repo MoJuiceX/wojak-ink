@@ -2,7 +2,6 @@
 import { jsonResponse, errorResponse, optionsResponse, getAICreditBalance, requireAuth } from '../_shared';
 import type { AIEnv } from '../_shared';
 
-const TREASURY_ADDRESS = 'xch13afmxv0xpyz03t3jfdmcrtv5ecwe5n52977vxd3z2x995f9quunsre5vkd';
 const MAX_POLL_ATTEMPTS = 10;
 const POLL_INTERVAL_MS = 6000;
 
@@ -11,12 +10,13 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Fetch the current treasury balance (mojos) from Spacescan.
- * Uses the /address/xch-balance endpoint — the only reliable free endpoint.
+ * Check the balance of a specific payment address via Spacescan.
+ * Each purchase has its own dedicated address, so any balance > 0
+ * means the user paid. We also verify the amount is at least what's expected.
  */
-async function getTreasuryBalance(apiKey?: string): Promise<number | null> {
+async function getAddressBalance(address: string, apiKey?: string): Promise<number | null> {
   try {
-    const url = `https://api.spacescan.io/address/xch-balance/${TREASURY_ADDRESS}`;
+    const url = `https://api.spacescan.io/address/xch-balance/${address}`;
     const headers: Record<string, string> = {
       'Accept': 'application/json',
       'User-Agent': 'wojak.ink/1.0',
@@ -29,24 +29,10 @@ async function getTreasuryBalance(apiKey?: string): Promise<number | null> {
 
     const data = await res.json() as { status?: string; mojo?: number };
     if (data.status !== 'success' || typeof data.mojo !== 'number') return null;
-
     return data.mojo;
   } catch {
     return null;
   }
-}
-
-/**
- * Detect payment by comparing current treasury balance against the snapshot
- * stored when the purchase was created. If balance grew by at least the
- * expected mojos, the payment arrived.
- */
-function paymentDetected(
-  currentBalance: number,
-  snapshotBalance: number,
-  expectedMojos: number
-): boolean {
-  return currentBalance >= snapshotBalance + expectedMojos;
 }
 
 export const onRequest: PagesFunction<AIEnv> = async (context) => {
@@ -74,7 +60,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
 
   const row = await env.DB
     .prepare(
-      `SELECT id, wallet_address, credits_purchased, xch_paid_mojos, status, created_at, expires_at, treasury_mojo_snapshot
+      `SELECT id, wallet_address, credits_purchased, xch_paid_mojos, status, created_at, expires_at, payment_address
        FROM ai_credit_purchases WHERE id = ? AND wallet_address = ?`
     )
     .bind(purchaseId, walletAddress)
@@ -86,7 +72,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
       status: string;
       created_at: string;
       expires_at: string;
-      treasury_mojo_snapshot: number | null;
+      payment_address: string | null;
     }>();
 
   if (!row) {
@@ -105,15 +91,21 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
       .prepare(`UPDATE ai_credit_purchases SET status = 'expired' WHERE id = ?`)
       .bind(purchaseId)
       .run();
+    // Release the address back to the pool
+    if (row.payment_address) {
+      await env.DB
+        .prepare(`UPDATE ai_payment_addresses SET purchase_id = NULL WHERE address = ?`)
+        .bind(row.payment_address)
+        .run();
+    }
     return errorResponse('Purchase expired. Please start a new purchase.', 410);
   }
 
-  // No snapshot means buy.ts didn't record one (legacy purchase or API was down).
-  // We can't do balance-based detection without a baseline.
-  if (row.treasury_mojo_snapshot == null) {
+  // Must have a dedicated payment address to verify
+  if (!row.payment_address) {
     return jsonResponse({
       confirmed: false,
-      message: 'Balance snapshot missing. Please contact support or try a new purchase.',
+      message: 'No payment address assigned. Please start a new purchase.',
       purchaseId: row.id,
     }, 202);
   }
@@ -122,8 +114,10 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   let found = false;
 
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
-    const currentBalance = await getTreasuryBalance(apiKey);
-    if (currentBalance !== null && paymentDetected(currentBalance, row.treasury_mojo_snapshot, row.xch_paid_mojos)) {
+    const addrBalance = await getAddressBalance(row.payment_address, apiKey);
+    // Any balance on this dedicated address means payment arrived.
+    // Also verify it's at least the expected amount.
+    if (addrBalance !== null && addrBalance >= row.xch_paid_mojos) {
       found = true;
       break;
     }
