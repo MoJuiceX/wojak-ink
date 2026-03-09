@@ -346,14 +346,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const aiEnhanced = body.aiEnhanced === true;
     const aiAttributes = aiEnhanced && Array.isArray(body.aiAttributes) ? body.aiAttributes : [];
     if (aiEnhanced && aiAttributes.length > 0) {
-      attributes.push({ trait_type: 'AI Enhanced', value: 'Yes' });
       for (const attr of aiAttributes) {
         if (attr.category && attr.prompt) {
           const label = attr.category.charAt(0).toUpperCase() + attr.category.slice(1);
           attributes.push({ trait_type: `AI ${label}`, value: attr.prompt });
         }
       }
-      attributes.push({ trait_type: 'AI Edits Count', value: String(aiAttributes.length) });
     }
 
     const metadata = {

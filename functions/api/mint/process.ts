@@ -286,8 +286,8 @@ export async function processJob(
               }
             }
 
-            attributes.push({ trait_type: 'AI Enhanced', value: 'Yes' });
-            attributes.push({ trait_type: 'AI Edits Count', value: String(aiMeta.aiAttributes.length) });
+            // AI trait overrides applied above — no "AI Enhanced" / "AI Edits Count" meta-attributes
+            // (data still tracked in D1 ai_enhancements table if ever needed)
           }
         } catch {
           console.warn(`[MintProcessor] Job ${jobId} has invalid ai_metadata_json, skipping AI attributes`);
