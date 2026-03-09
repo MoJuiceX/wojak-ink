@@ -49,17 +49,25 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
        LIMIT 1`
     )
     .bind(walletAddress)
-    .first();
+    .first<{ id: number; bundle_tier: string; xch_paid_mojos: number; expires_at: string }>();
 
   if (existing) {
-    return jsonResponse({
-      pending: true,
-      purchaseId: existing.id,
-      tier: existing.bundle_tier,
-      amountMojos: String(existing.xch_paid_mojos),
-      treasuryAddress: TREASURY_ADDRESS,
-      expiresAt: existing.expires_at,
-    });
+    // If user switched tiers, expire the old pending purchase and create fresh
+    if (existing.bundle_tier !== bundle.tier) {
+      await env.DB
+        .prepare(`UPDATE ai_credit_purchases SET status = 'expired' WHERE id = ?`)
+        .bind(existing.id)
+        .run();
+    } else {
+      return jsonResponse({
+        pending: true,
+        purchaseId: existing.id,
+        tier: existing.bundle_tier,
+        amountMojos: String(existing.xch_paid_mojos),
+        treasuryAddress: TREASURY_ADDRESS,
+        expiresAt: existing.expires_at,
+      });
+    }
   }
 
   // Generate unique mojo amount: base + random offset (1–9999)
