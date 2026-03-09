@@ -18,6 +18,17 @@ export interface AIStyleFamily {
   options: AIPresetOption[];
 }
 
+/** A family that spans all categories and both modes. */
+export interface MasterFamily {
+  label: string;
+  clothesEnhance:     AIPresetOption[];
+  clothesCreate:      AIPresetOption[];
+  headEnhance:        AIPresetOption[];
+  headCreate:         AIPresetOption[];
+  backgroundEnhance:  AIPresetOption[];
+  backgroundCreate:   AIPresetOption[];
+}
+
 export interface AICategoryPresets {
   enhance?: AIStyleFamily[];
   create_new: AIStyleFamily[];
