@@ -125,7 +125,8 @@ export function AICreditsShop() {
         const confirmData = await confirmRes.json();
 
         if (confirmData.confirmed || confirmData.alreadyConfirmed) {
-          setPurchaseSuccess(`Added ${confirmData.creditsAdded} credits!`);
+          const added = confirmData.creditsAdded ?? selectedBundle?.credits ?? '';
+          setPurchaseSuccess(`+${added} AI credit${added !== 1 ? 's' : ''} added!`);
           setPurchaseState('success');
           setStatusMessage(null);
           await refetchBalance();
@@ -137,7 +138,8 @@ export function AICreditsShop() {
 
       if (!confirmed) {
         // Payment was sent but not detected on-chain yet — not an error
-        setPurchaseSuccess('Payment sent! Credits will appear once confirmed on-chain (1-2 minutes).');
+        const credits = selectedBundle?.credits ?? '';
+        setPurchaseSuccess(`Payment sent! Your ${credits} credit${credits !== 1 ? 's' : ''} will appear once confirmed on-chain (1-2 min). Refresh the page to check.`);
         setPurchaseState('success');
         setStatusMessage(null);
       }

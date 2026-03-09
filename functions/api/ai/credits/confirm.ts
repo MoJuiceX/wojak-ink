@@ -16,14 +16,26 @@ interface SpacescanCoin {
   confirmed_block_index?: number;
 }
 
+/**
+ * Call Spacescan API directly (server-to-server) instead of going through
+ * our own /api/spacescan proxy. The proxy has a 5-minute edge cache which
+ * prevents newly confirmed coins from appearing during the polling window.
+ */
 async function findMatchingCoin(
   expectedMojos: number,
   purchaseCreatedAt: string,
-  baseUrl: string
+  apiKey?: string
 ): Promise<boolean> {
   try {
-    const url = `${baseUrl}/api/spacescan/coin/address/${TREASURY_PUZZLE_HASH}`;
-    const res = await fetch(url);
+    const url = `https://api.spacescan.io/coin/address/${TREASURY_PUZZLE_HASH}`;
+    const headers: Record<string, string> = {
+      'Accept': 'application/json',
+      'User-Agent': 'wojak.ink/1.0',
+    };
+    if (apiKey) {
+      headers['x-api-key'] = apiKey;
+    }
+    const res = await fetch(url, { headers });
     if (!res.ok) return false;
 
     const data = await res.json() as { coins?: SpacescanCoin[] };
@@ -97,11 +109,11 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     return errorResponse('Purchase expired. Please start a new purchase.', 410);
   }
 
-  const baseUrl = new URL(request.url).origin;
+  const apiKey = (env as Record<string, unknown>).SPACESCAN_API_KEY as string | undefined;
   let found = false;
 
   for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
-    found = await findMatchingCoin(row.xch_paid_mojos, row.created_at, baseUrl);
+    found = await findMatchingCoin(row.xch_paid_mojos, row.created_at, apiKey);
     if (found) break;
     if (attempt < MAX_POLL_ATTEMPTS - 1) {
       await sleep(POLL_INTERVAL_MS);
