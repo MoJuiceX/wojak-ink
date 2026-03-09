@@ -153,7 +153,12 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
         }),
       });
       if (!verifyRes.ok) throw new Error('Verification failed');
-      const { sessionToken: token } = await verifyRes.json();
+      const { sessionToken: token, expiresAt } = await verifyRes.json();
+
+      // Persist session so page refreshes don't require re-signing
+      try {
+        localStorage.setItem('ai_session', JSON.stringify({ token, expiresAt, walletAddress: address }));
+      } catch { /* storage unavailable */ }
 
       setSessionToken(token);
     } catch (err) {
@@ -167,6 +172,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   // Re-authenticate on 401 (expired session)
   const handleAuthError = useCallback(async (res: Response): Promise<boolean> => {
     if (res.status === 401) {
+      localStorage.removeItem('ai_session');
       setSessionToken(null);
       await authenticate();
       return true; // Caller should retry
@@ -174,14 +180,29 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     return false;
   }, [authenticate]);
 
-  // Auto-authenticate when wallet connects
+  // Auto-authenticate when wallet connects.
+  // Checks localStorage first so page refreshes don't require re-signing.
   useEffect(() => {
-    if (address && !sessionToken && !isAuthenticating) {
-      authenticate();
-    }
     if (!address) {
       setSessionToken(null);
+      return;
     }
+    if (sessionToken || isAuthenticating) return;
+
+    // Restore stored session if it's valid and belongs to this wallet
+    try {
+      const raw = localStorage.getItem('ai_session');
+      if (raw) {
+        const stored = JSON.parse(raw) as { token: string; expiresAt: string; walletAddress: string };
+        if (stored.walletAddress === address && new Date(stored.expiresAt) > new Date()) {
+          setSessionToken(stored.token);
+          return;
+        }
+      }
+    } catch { /* ignore malformed storage */ }
+    localStorage.removeItem('ai_session'); // clear any stale entry
+
+    authenticate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address]);
 
