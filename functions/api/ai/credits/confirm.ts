@@ -1,18 +1,15 @@
 // functions/api/ai/credits/confirm.ts
+//
+// Lightweight single-check endpoint. The CLIENT handles polling because
+// Cloudflare Workers have a ~30s wall-clock timeout which kills long
+// server-side polling loops. Each call checks Spacescan once and returns.
 import { jsonResponse, errorResponse, optionsResponse, getAICreditBalance, requireAuth } from '../_shared';
 import type { AIEnv } from '../_shared';
-
-const MAX_POLL_ATTEMPTS = 10;
-const POLL_INTERVAL_MS = 6000;
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 /**
  * Check the balance of a specific payment address via Spacescan.
  * Each purchase has its own dedicated address, so any balance > 0
- * means the user paid. We also verify the amount is at least what's expected.
+ * means the user paid.
  */
 async function getAddressBalance(address: string, apiKey?: string): Promise<number | null> {
   try {
@@ -91,7 +88,6 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
       .prepare(`UPDATE ai_credit_purchases SET status = 'expired' WHERE id = ?`)
       .bind(purchaseId)
       .run();
-    // Release the address back to the pool
     if (row.payment_address) {
       await env.DB
         .prepare(`UPDATE ai_payment_addresses SET purchase_id = NULL WHERE address = ?`)
@@ -101,7 +97,6 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     return errorResponse('Purchase expired. Please start a new purchase.', 410);
   }
 
-  // Must have a dedicated payment address to verify
   if (!row.payment_address) {
     return jsonResponse({
       confirmed: false,
@@ -110,30 +105,19 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     }, 202);
   }
 
+  // Single check — no polling loop. Client handles retry timing.
   const apiKey = (env as Record<string, unknown>).SPACESCAN_API_KEY as string | undefined;
-  let found = false;
+  const addrBalance = await getAddressBalance(row.payment_address, apiKey);
 
-  for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
-    const addrBalance = await getAddressBalance(row.payment_address, apiKey);
-    // Any balance on this dedicated address means payment arrived.
-    // Also verify it's at least the expected amount.
-    if (addrBalance !== null && addrBalance >= row.xch_paid_mojos) {
-      found = true;
-      break;
-    }
-    if (attempt < MAX_POLL_ATTEMPTS - 1) {
-      await sleep(POLL_INTERVAL_MS);
-    }
-  }
-
-  if (!found) {
+  if (addrBalance === null || addrBalance < row.xch_paid_mojos) {
     return jsonResponse({
       confirmed: false,
-      message: 'Payment not yet detected on-chain. Try again in a minute.',
+      message: 'Payment not yet detected on-chain.',
       purchaseId: row.id,
     }, 202);
   }
 
+  // Payment detected — confirm the purchase
   await env.DB
     .prepare(
       `UPDATE ai_credit_purchases SET status = 'confirmed', confirmed_at = datetime('now')

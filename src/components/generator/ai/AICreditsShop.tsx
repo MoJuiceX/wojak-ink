@@ -89,57 +89,64 @@ export function AICreditsShop() {
       await sendXCH(data.treasuryAddress, amountXch);
 
       // Step 3: Confirm on-chain
+      // Chia blocks take ~45-90s, then Spacescan needs to index (~30-60s).
+      // Total: ~2-3 minutes. The server does a single check per request
+      // (no long polling that gets killed by CF Worker timeout).
+      // Client polls every 15s for up to 3 minutes.
       setPurchaseState('confirming');
-      setStatusMessage('Verifying transaction on-chain...');
+      setStatusMessage('Transaction sent! Waiting for on-chain confirmation...');
 
-      // Poll confirm endpoint — Chia transactions take ~45-90s to appear on-chain.
-      // The server polls Spacescan internally, but we also retry from the client
-      // in case the first server poll window isn't enough.
-      const maxClientRetries = 3;
+      const POLL_INTERVAL = 15_000; // 15 seconds between checks
+      const MAX_POLLS = 12;         // 12 × 15s = 3 minutes total
       let confirmed = false;
 
-      for (let retry = 0; retry < maxClientRetries; retry++) {
-        if (retry > 0) {
-          setStatusMessage(`Transaction sent! Waiting for on-chain confirmation (attempt ${retry + 1}/${maxClientRetries})...`);
-          await new Promise((r) => setTimeout(r, 5000));
+      for (let attempt = 0; attempt < MAX_POLLS; attempt++) {
+        if (attempt > 0) {
+          const elapsed = attempt * 15;
+          setStatusMessage(`Waiting for on-chain confirmation... (${elapsed}s)`);
+          await new Promise((r) => setTimeout(r, POLL_INTERVAL));
         }
 
-        const confirmRes = await fetch('/api/ai/credits/confirm', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
-          },
-          body: JSON.stringify({
-            purchaseId: data.purchaseId,
-          }),
-        });
+        try {
+          const confirmRes = await fetch('/api/ai/credits/confirm', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+            },
+            body: JSON.stringify({
+              purchaseId: data.purchaseId,
+            }),
+          });
 
-        if (!confirmRes.ok) {
-          setPurchaseError('Confirmation failed. Contact support.');
-          setPurchaseState('error');
-          setStatusMessage(null);
-          return;
+          // 4xx/5xx errors are real failures — stop polling
+          if (confirmRes.status >= 400 && confirmRes.status !== 410) {
+            setPurchaseError('Confirmation failed. Contact support.');
+            setPurchaseState('error');
+            setStatusMessage(null);
+            return;
+          }
+
+          const confirmData = await confirmRes.json();
+
+          if (confirmData.confirmed || confirmData.alreadyConfirmed) {
+            const added = confirmData.creditsAdded ?? selectedBundle?.credits ?? '';
+            setPurchaseSuccess(`+${added} AI credit${added !== 1 ? 's' : ''} added!`);
+            setPurchaseState('success');
+            setStatusMessage(null);
+            await refetchBalance();
+            confirmed = true;
+            break;
+          }
+          // 202: not yet detected, keep polling
+        } catch {
+          // Network error — keep trying (transient)
         }
-
-        const confirmData = await confirmRes.json();
-
-        if (confirmData.confirmed || confirmData.alreadyConfirmed) {
-          const added = confirmData.creditsAdded ?? selectedBundle?.credits ?? '';
-          setPurchaseSuccess(`+${added} AI credit${added !== 1 ? 's' : ''} added!`);
-          setPurchaseState('success');
-          setStatusMessage(null);
-          await refetchBalance();
-          confirmed = true;
-          break;
-        }
-        // 202: not yet detected, try again
       }
 
       if (!confirmed) {
-        // Payment was sent but not detected on-chain yet — not an error
         const credits = selectedBundle?.credits ?? '';
-        setPurchaseSuccess(`Payment sent! Your ${credits} credit${credits !== 1 ? 's' : ''} will appear once confirmed on-chain (1-2 min). Refresh the page to check.`);
+        setPurchaseSuccess(`Payment sent! Your ${credits} credit${credits !== 1 ? 's' : ''} will appear shortly. Refresh the page to check.`);
         setPurchaseState('success');
         setStatusMessage(null);
       }

@@ -1,11 +1,48 @@
-import { q as f } from "./wallet-connect-standalone-wallet-protocol-C4VxITVL.js";
-import { W as m } from "./wallet-connect-standalone-wallet-ui-DuUfeWJu.js";
-const r = "500876ce87398e4721f71b6aa681a193", l = "chia:mainnet", p = "sage-wallet-session";
-let n = null, e = null, o = !1;
+import { q as g } from "./wallet-connect-standalone-wallet-protocol-C4VxITVL.js";
+import { W as u } from "./wallet-connect-standalone-wallet-ui-DuUfeWJu.js";
+const m = {
+  getItem(e) {
+    try {
+      return localStorage.getItem(e);
+    } catch {
+      return console.warn(`[safeStorage] Failed to read key: ${e}`), null;
+    }
+  },
+  setItem(e, t) {
+    try {
+      return localStorage.setItem(e, t), !0;
+    } catch {
+      return console.warn(`[safeStorage] Failed to write key: ${e}`), !1;
+    }
+  },
+  removeItem(e) {
+    try {
+      return localStorage.removeItem(e), !0;
+    } catch {
+      return console.warn(`[safeStorage] Failed to remove key: ${e}`), !1;
+    }
+  },
+  getJSON(e, t) {
+    try {
+      const r = localStorage.getItem(e);
+      return r === null ? t : JSON.parse(r);
+    } catch {
+      return console.warn(`[safeStorage] Failed to parse key: ${e}`), t;
+    }
+  },
+  setJSON(e, t) {
+    try {
+      return localStorage.setItem(e, JSON.stringify(t)), !0;
+    } catch {
+      return console.warn(`[safeStorage] Failed to write JSON key: ${e}`), !1;
+    }
+  }
+}, i = "500876ce87398e4721f71b6aa681a193", l = "chia:mainnet", f = "sage-wallet-session";
+let o = null, a = null, c = !1;
 async function d() {
   try {
-    n = await f.init({
-      projectId: r,
+    o = await g.init({
+      projectId: i,
       metadata: {
         name: "Wojak.ink",
         description: "Tang Gang NFT Collection",
@@ -14,21 +51,21 @@ async function d() {
       },
       relayUrl: "wss://relay.walletconnect.com",
       logger: "error"
-    }), e = new m({
-      projectId: r,
+    }), a = new u({
+      projectId: i,
       themeMode: "dark",
       enableExplorer: !1,
       themeVariables: { "--wcm-z-index": "100000" }
     });
-  } catch (a) {
-    console.warn("[WC] Init failed:", a.message);
+  } catch (e) {
+    console.warn("[WC] Init failed:", e.message);
   }
 }
 async function w() {
-  if (!o && !((!n || !e) && (await d(), !n || !e))) {
-    o = !0;
+  if (!c && !((!o || !a) && (await d(), !o || !a))) {
+    c = !0;
     try {
-      const { uri: a, approval: t } = await n.connect({
+      const { uri: e, approval: t } = await o.connect({
         requiredNamespaces: {
           chia: {
             methods: [
@@ -44,26 +81,26 @@ async function w() {
           }
         }
       });
-      if (a) {
-        await e.openModal({ uri: a });
-        const c = await t();
-        e.closeModal();
-        const s = await n.request({
-          topic: c.topic,
+      if (e) {
+        await a.openModal({ uri: e });
+        const r = await t();
+        a.closeModal();
+        const n = await o.request({
+          topic: r.topic,
           chainId: l,
           request: { method: "chia_getAddress", params: {} }
-        }), i = typeof s == "string" ? s : s?.address || "";
-        i && (localStorage.setItem(p, JSON.stringify({
-          topic: c.topic,
-          address: i
-        })), window.dispatchEvent(new CustomEvent("sage-wallet-connected", { detail: { address: i } })));
+        }), s = typeof n == "string" ? n : n?.address || "";
+        s && (m.setJSON(f, {
+          topic: r.topic,
+          address: s
+        }), window.dispatchEvent(new CustomEvent("sage-wallet-connected", { detail: { address: s } })));
       }
-    } catch (a) {
-      e && e.closeModal();
-      const t = a?.message || "";
+    } catch (e) {
+      a && a.closeModal();
+      const t = e?.message || "";
       !t.includes("dismissed") && !t.includes("Proposal expired") && console.warn("[WC] Connect error:", t);
     } finally {
-      o = !1;
+      c = !1;
     }
   }
 }
