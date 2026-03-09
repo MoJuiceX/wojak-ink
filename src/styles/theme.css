@@ -4139,6 +4139,60 @@ body {
   color: var(--color-success);
 }
 
+/* Earn credits section */
+.ai-shop-earn-section {
+  margin-top: 4px;
+}
+
+.ai-shop-earn-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ai-shop-earn-divider::before,
+.ai-shop-earn-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.ai-shop-earn-divider span {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.ai-shop-earn-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-shop-earn-method {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.ai-shop-earn-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.ai-shop-earn-text {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
 .response-text {
   display: flex;
   gap: var(--space-3);

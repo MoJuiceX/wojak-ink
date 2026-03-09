@@ -260,6 +260,27 @@ export function AICreditsShop() {
           {getBuyButtonText()}
         </motion.button>
 
+        {/* Earn credits info */}
+        <div className="ai-shop-earn-section">
+          <div className="ai-shop-earn-divider">
+            <span>or earn for free</span>
+          </div>
+          <div className="ai-shop-earn-methods">
+            <div className="ai-shop-earn-method">
+              <span className="ai-shop-earn-icon">🎨</span>
+              <span className="ai-shop-earn-text">
+                Mint a Wojak <span className="text-accent">= +1 credit</span>
+              </span>
+            </div>
+            <div className="ai-shop-earn-method">
+              <span className="ai-shop-earn-icon">🌾</span>
+              <span className="ai-shop-earn-text">
+                Trade Farmer Plots <span className="text-accent">= +1 credit per XCH</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* Disclaimer */}
         <p className="text-muted text-xs text-center" style={{ opacity: 0.6 }}>
           Credits are non-refundable. Powered by Reve AI.

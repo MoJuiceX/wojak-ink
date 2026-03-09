@@ -25,6 +25,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useSageWallet } from '@/sage-wallet';
+import { useToast } from '@/contexts/ToastContext';
 import { fetchCollectionStats } from '@/services/tradeValuesService';
 import { useMetadataAttributes, type MetadataAttribute } from '@/components/generator/MetadataPreview';
 import { isValidChiaAddress } from '@/lib/validation';
@@ -166,6 +167,7 @@ function blobToBase64(blob: Blob): Promise<string> {
 
 export function MintProvider({ children }: { children: ReactNode }) {
   const { address, status: walletStatus, takeOffer } = useSageWallet();
+  const { success: showSuccessToast } = useToast();
   const [credits, setCredits] = useState<MintCredits | null>(null);
   const [mintStep, setMintStep] = useState<MintStep>('idle');
   const [currentJob, setCurrentJob] = useState<MintJob | null>(null);
@@ -341,6 +343,13 @@ export function MintProvider({ children }: { children: ReactNode }) {
         postAcceptFastUntilRef.current = 0;
         stopPolling();
         refetchCredits();
+        // Show AI credit earned toast for paid mints
+        if (data.mintType === 'paid') {
+          showSuccessToast('✨ +1 AI Credit earned!', {
+            title: 'Mint Reward',
+            duration: 4000,
+          });
+        }
       }
 
       if (data.step === 'failed' || data.step === 'refunded') {
@@ -428,7 +437,7 @@ export function MintProvider({ children }: { children: ReactNode }) {
 
     // Safety: stop polling after 10 minutes
     pollingTimeoutRef.current = setTimeout(stopPolling, POLL_MAX_DURATION);
-  }, [stopPolling, refetchCredits]);
+  }, [stopPolling, refetchCredits, showSuccessToast]);
 
   // Countdown for rate limit retry (so UI can show "Try again in X seconds")
   useEffect(() => {
