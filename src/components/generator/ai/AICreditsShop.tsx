@@ -92,26 +92,53 @@ export function AICreditsShop() {
       setPurchaseState('confirming');
       setStatusMessage('Verifying transaction on-chain...');
 
-      const confirmRes = await fetch('/api/ai/credits/confirm', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
-        },
-        body: JSON.stringify({
-          purchaseId: data.purchaseId,
-        }),
-      });
+      // Poll confirm endpoint — Chia transactions take ~45-90s to appear on-chain.
+      // The server polls Spacescan internally, but we also retry from the client
+      // in case the first server poll window isn't enough.
+      const maxClientRetries = 3;
+      let confirmed = false;
 
-      if (confirmRes.ok) {
+      for (let retry = 0; retry < maxClientRetries; retry++) {
+        if (retry > 0) {
+          setStatusMessage(`Transaction sent! Waiting for on-chain confirmation (attempt ${retry + 1}/${maxClientRetries})...`);
+          await new Promise((r) => setTimeout(r, 5000));
+        }
+
+        const confirmRes = await fetch('/api/ai/credits/confirm', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+          },
+          body: JSON.stringify({
+            purchaseId: data.purchaseId,
+          }),
+        });
+
+        if (!confirmRes.ok) {
+          setPurchaseError('Confirmation failed. Contact support.');
+          setPurchaseState('error');
+          setStatusMessage(null);
+          return;
+        }
+
         const confirmData = await confirmRes.json();
-        setPurchaseSuccess(`Added ${confirmData.creditsAdded} credits!`);
+
+        if (confirmData.confirmed || confirmData.alreadyConfirmed) {
+          setPurchaseSuccess(`Added ${confirmData.creditsAdded} credits!`);
+          setPurchaseState('success');
+          setStatusMessage(null);
+          await refetchBalance();
+          confirmed = true;
+          break;
+        }
+        // 202: not yet detected, try again
+      }
+
+      if (!confirmed) {
+        // Payment was sent but not detected on-chain yet — not an error
+        setPurchaseSuccess('Payment sent! Credits will appear once confirmed on-chain (1-2 minutes).');
         setPurchaseState('success');
-        setStatusMessage(null);
-        await refetchBalance();
-      } else {
-        setPurchaseError('Confirmation failed. Contact support.');
-        setPurchaseState('error');
         setStatusMessage(null);
       }
     } catch (err: unknown) {
