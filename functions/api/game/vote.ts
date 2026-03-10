@@ -3,7 +3,7 @@
 // Cast a vote on a Your Wojak NFT. 1 = like, -1 = dislike.
 // All users can vote unlimited times. Only holders (DAD + Farmers Plot) earn credits.
 
-import { getTodayString, VOTES_PER_CREDIT, VOTE_CREDIT_AMOUNT, isValidGuestId } from './_shared';
+import { getTodayString, VOTES_PER_CREDIT, VOTE_CREDIT_AMOUNT, MAX_CREDIT_VOTES_PER_DAY, isValidGuestId } from './_shared';
 import { checkRateLimit, getRateLimitKey, GAME_RATE_LIMITS } from '../../lib/rateLimit';
 
 interface Env {
@@ -171,35 +171,50 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const isFirstVote = !isReVote && (player.total_votes_cast as number) === 0;
       const walletAddress = player.wallet_address as string;
 
-      // Track participation credits (1 credit per 20 votes) - only for new votes
+      // Track participation credits (max 10 votes/day count toward credits, 100 eligible votes = 1 free mint)
       if (!isReVote) {
         const voteTracking = await context.env.DB.prepare(
-          'SELECT total_votes, credits_awarded_at FROM vote_credit_tracking WHERE wallet_address = ?'
-        ).bind(walletAddress).first<{ total_votes: number; credits_awarded_at: number }>();
+          'SELECT eligible_votes, credits_awarded_at, votes_today_for_credits, last_vote_date FROM vote_credit_tracking WHERE wallet_address = ?'
+        ).bind(walletAddress).first<{ eligible_votes: number; credits_awarded_at: number; votes_today_for_credits: number; last_vote_date: string | null }>();
 
-        const currentTotalVotes = (voteTracking?.total_votes ?? 0) + 1;
+        const isNewDay = voteTracking?.last_vote_date !== today;
+        const votesTodayForCredits = isNewDay ? 0 : (voteTracking?.votes_today_for_credits ?? 0);
+        const isEligible = votesTodayForCredits < MAX_CREDIT_VOTES_PER_DAY;
+
+        const currentEligibleVotes = (voteTracking?.eligible_votes ?? 0) + (isEligible ? 1 : 0);
         const lastAwardedAt = voteTracking?.credits_awarded_at ?? 0;
-        const votesSinceLastCredit = currentTotalVotes - lastAwardedAt;
+        const eligibleSinceLastCredit = currentEligibleVotes - lastAwardedAt;
 
+        // Always update total_votes + last_vote_date; conditionally update eligible counters
         statements.push(
           context.env.DB.prepare(`
-            INSERT INTO vote_credit_tracking (wallet_address, total_votes, last_vote_date)
-            VALUES (?, 1, ?)
+            INSERT INTO vote_credit_tracking (wallet_address, total_votes, eligible_votes, votes_today_for_credits, last_vote_date)
+            VALUES (?, 1, ?, ?, ?)
             ON CONFLICT(wallet_address) DO UPDATE SET
               total_votes = total_votes + 1,
+              eligible_votes = ?,
+              votes_today_for_credits = ?,
               last_vote_date = ?
-          `).bind(walletAddress, today, today)
+          `).bind(
+            walletAddress,
+            isEligible ? 1 : 0,           // INSERT eligible_votes
+            isEligible ? 1 : 0,           // INSERT votes_today_for_credits
+            today,                          // INSERT last_vote_date
+            currentEligibleVotes,           // UPDATE eligible_votes
+            isEligible ? votesTodayForCredits + 1 : votesTodayForCredits, // UPDATE votes_today_for_credits
+            today                           // UPDATE last_vote_date
+          )
         );
 
-        if (votesSinceLastCredit >= VOTES_PER_CREDIT) {
+        if (isEligible && eligibleSinceLastCredit >= VOTES_PER_CREDIT) {
           statements.push(
             context.env.DB.prepare(`
               UPDATE vote_credit_tracking SET credits_awarded_at = ? WHERE wallet_address = ?
-            `).bind(currentTotalVotes, walletAddress),
+            `).bind(currentEligibleVotes, walletAddress),
             context.env.DB.prepare(`
               INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
               VALUES (?, 'participation_vote', ?, 0, 0, ?, 100, 'participation', 'vote_reward', datetime('now'))
-            `).bind(walletAddress, `vote_credit_${walletAddress}_${currentTotalVotes}`, VOTE_CREDIT_AMOUNT)
+            `).bind(walletAddress, `vote_credit_${walletAddress}_${currentEligibleVotes}`, VOTE_CREDIT_AMOUNT)
           );
         }
       }

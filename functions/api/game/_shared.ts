@@ -99,7 +99,8 @@ export const STREAK_MILESTONES: Record<number, number> = {
   100: 5000, // 50 credits
 };
 
-// Participation credits: 5 credits per 7 votes
-// Math: 10 votes/day × 14 days = 140 votes ÷ 7 = 20 awards × 5 credits = 100 credits = 1 free mint
-export const VOTES_PER_CREDIT = 7;
-export const VOTE_CREDIT_AMOUNT = 500; // 5 display credits = 500 stored units
+// Participation credits: 10 credits per 10 eligible votes (max 10 votes/day count)
+// Math: 10 eligible votes/day × 10 days = 100 eligible votes = 10 awards × 10 credits = 100 credits = 1 free mint
+export const VOTES_PER_CREDIT = 10;           // Award credits every 10 eligible votes
+export const VOTE_CREDIT_AMOUNT = 1000;       // 10 display credits = 1000 stored units
+export const MAX_CREDIT_VOTES_PER_DAY = 10;   // Only 10 votes per day count toward credits
