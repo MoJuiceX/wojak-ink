@@ -85,15 +85,17 @@ CREATE INDEX IF NOT EXISTS idx_ai_auth_wallet ON ai_auth_sessions(wallet_address
 
 ## Endpoint Protection Matrix
 
+> **Updated 2026-03-10:** Balance endpoint changed to public. See `docs/adr/0005-ai-credits-public-balance-lazy-auth.md` for rationale.
+
 | Endpoint | Auth | Change |
 |----------|------|--------|
 | `POST /api/ai/auth/challenge` | Public | **NEW** — generates nonce |
 | `POST /api/ai/auth/verify` | Public | **NEW** — verifies sig, creates session |
-| `GET /api/ai/balance` | **Session required** | Remove `?wallet=` param, use session wallet |
+| `GET /api/ai/balance` | **Public** | Accepts `?wallet=xch1...` — balance is not sensitive (ADR-0005) |
 | `POST /api/ai/enhance` | **Session required** | Ignore body `walletAddress`, use session wallet |
 | `POST /api/ai/credits/buy` | **Session required** | Ignore body `walletAddress`, use session wallet |
 | `POST /api/ai/credits/confirm` | **Session required** | Ignore body `walletAddress`, use session wallet |
-| `GET /api/ai/creations` | **Session required** | Remove `?wallet=` param, use session wallet |
+| `GET /api/ai/creations` | **Session required** | Uses lazy auth via `ensureAuthenticated()` |
 
 ### Auth middleware helper
 
@@ -160,20 +162,24 @@ async function verifyChiaSignature(
 
 ## Frontend Integration
 
+> **Updated 2026-03-10:** Changed from eager auth to lazy auth. See ADR-0005.
+
 ### AIEnhanceContext changes
 
-1. **On wallet connect** → auto-trigger challenge + sign + verify flow
-2. **Store sessionToken in React state** (not localStorage — clears on page reload for security)
-3. **All fetch calls** include `Authorization: Bearer <token>` header
-4. **On 401 response** → re-trigger sign-in flow (session expired)
-5. **On wallet disconnect** → clear session state
+1. **On wallet connect** → fetch balance via public endpoint (no signing); restore cached session from localStorage if valid
+2. **On first credit spend (enhance) or gallery open** → `ensureAuthenticated()` triggers BLS auth if no cached session
+3. **Store sessionToken in React state + localStorage** (localStorage enables session survival across page reloads)
+4. **`authenticate()` returns the token** so callers can use it immediately without waiting for React state update
+5. **On 401 response** → `handleAuthError()` re-authenticates and returns new token for retry
+6. **On wallet disconnect** → clear session state
 
 ### UX Impact
 
-- User sees **one Sage Wallet popup** when they connect, asking to sign a challenge
-- The challenge message is human-readable: the nonce hex string
-- After signing, all AI features work seamlessly for 24 hours
-- If session expires mid-use, another sign popup appears (rare)
+- User sees **no Sage Wallet popup** when they connect — balance shows immediately
+- Only when user tries to **spend a credit** (enhance) or view **gallery** does a signing popup appear
+- If a valid session exists in localStorage from a previous visit, no popup at all
+- After signing once, all AI features work seamlessly for 24 hours
+- If session expires mid-use, another sign popup appears (rare, handled by retry logic)
 
 ## Dependencies
 

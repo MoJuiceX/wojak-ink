@@ -72,6 +72,8 @@ Notes: [anything unexpected]
 | **Brand/Copy** | `docs/BRAND-VOICE.md` |
 | **Generator** | `docs/GENERATOR-CODE-HEALTH.md`, `src/contexts/GeneratorContext.tsx`, `src/lib/wojakRules.ts` |
 | **Credits** | `functions/api/credits/`, `workers/credit-tracker/`, `functions/migrations/030_credit_system.sql` |
+| **AI Credits** | `docs/adr/0005-ai-credits-public-balance-lazy-auth.md`, `functions/api/ai/_shared.ts`, `src/contexts/AIEnhanceContext.tsx` |
+| **AI Enhance** | `functions/api/ai/`, `src/components/generator/ai/`, `docs/plans/2026-03-09-wallet-auth-design.md` |
 
 ## Prompt Templates
 
@@ -95,6 +97,8 @@ Notes: [anything unexpected]
 - **Never change schema without a migration file** — `functions/migrations/NNN_description.sql`
 - **Never `!important` in CSS** — ever
 - **Never add deps without documenting why** — explain in commit message
+- **Never require BLS auth for read-only data** — balance/counts use `?wallet=xch1...` (public); BLS auth only for writes/spends (see ADR-0005)
+- **Never auto-authenticate on wallet connect** — use lazy auth (`ensureAuthenticated()`) that defers BLS signing to first write action
 
 ---
 
