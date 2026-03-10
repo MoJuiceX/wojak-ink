@@ -3394,6 +3394,8 @@ export const MASTER_FAMILIES: MasterFamily[] = [
       { label: 'Dust devil',      prompt: 'mojave desert dust devil column at midday heat, spinning red sand, pale sky' },
       { label: 'Torres wind',     prompt: 'patagonia torres del paine with horizontal wind-driven rain, towers emerging from cloud' },
       { label: 'North Sea',      prompt: 'north sea storm swells at force 9 from trawler deck, grey mountains of water' },
+      { label: 'Blizzard road', prompt: 'highway blizzard whiteout with stranded cars and snowplows, white curtain of driving snow reducing visibility to metres' },
+      { label: 'Typhoon coast', prompt: 'South China Sea typhoon landfall on a coastal town, palm trees horizontal, fishing boats beached, sky green-black' },
     ],
   },
 ];
