@@ -147,12 +147,12 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
               <span className="ai-family-emoji">&#10024;</span>
               <span className="ai-family-name">
                 {isBackgroundCategory
-                  ? 'Make it dramatic'
+                  ? (hasLayer ? 'Make it dramatic' : 'Enhance existing')
                   : hasLayer ? `Enhance my ${layerName}` : 'Enhance existing'}
               </span>
               <span className="ai-family-desc">
                 {isBackgroundCategory
-                  ? 'Intensify existing background'
+                  ? (hasLayer ? 'Intensify existing background' : 'No background selected')
                   : hasLayer ? 'Modify existing style' : 'No layer selected'}
               </span>
             </motion.button>
