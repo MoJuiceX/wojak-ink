@@ -1,4 +1,4 @@
-import { bls12_381 } from '@noble/curves/bls12-381';
+import { bls12_381 } from '@noble/curves/bls12-381.js';
 
 /**
  * AI Enhance shared constants, types, and utilities.
