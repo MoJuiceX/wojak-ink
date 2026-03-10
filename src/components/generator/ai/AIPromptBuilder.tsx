@@ -56,14 +56,7 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
     return keys.some((k) => !isSelectionPathEmpty(selectedLayers[k]));
   })();
 
-  // Background always skips mode (no "enhance" option — background is always create_new)
   const isBackgroundCategory = selectedCategory === 'background';
-
-  // Auto-advance only for background (no mode choice)
-  if (isBackgroundCategory && !selectedMode) {
-    setSelectedMode('create_new');
-    setPromptSubStep('family');
-  }
 
   // Get the layer display name for the enhance card
   const layerName = (() => {
@@ -137,7 +130,7 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
   ) : null;
 
   // --- Sub-step: mode ---
-  if (promptSubStep === 'mode' && !isBackgroundCategory) {
+  if (promptSubStep === 'mode') {
     return (
       <div className="ai-prompt-layout">
         {wojakPreview}
@@ -152,8 +145,16 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
               whileTap={prefersReducedMotion || !hasLayer ? {} : { scale: 0.97 }}
             >
               <span className="ai-family-emoji">&#10024;</span>
-              <span className="ai-family-name">{hasLayer ? `Enhance my ${layerName}` : 'Enhance existing'}</span>
-              <span className="ai-family-desc">{hasLayer ? 'Modify existing style' : 'No layer selected'}</span>
+              <span className="ai-family-name">
+                {isBackgroundCategory
+                  ? 'Make it dramatic'
+                  : hasLayer ? `Enhance my ${layerName}` : 'Enhance existing'}
+              </span>
+              <span className="ai-family-desc">
+                {isBackgroundCategory
+                  ? 'Intensify existing background'
+                  : hasLayer ? 'Modify existing style' : 'No layer selected'}
+              </span>
             </motion.button>
 
             <motion.button
@@ -164,8 +165,12 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
               whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
             >
               <span className="ai-family-emoji">&#127195;</span>
-              <span className="ai-family-name">Create new {categoryConfig.label.toLowerCase()}</span>
-              <span className="ai-family-desc">Start from scratch</span>
+              <span className="ai-family-name">
+                {isBackgroundCategory ? 'New scene' : `Create new ${categoryConfig.label.toLowerCase()}`}
+              </span>
+              <span className="ai-family-desc">
+                {isBackgroundCategory ? 'Replace with fresh background' : 'Start from scratch'}
+              </span>
             </motion.button>
           </div>
         </div>
