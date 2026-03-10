@@ -2691,6 +2691,7 @@ export const MASTER_FAMILIES: MasterFamily[] = [
       { label: 'Tour bus',      prompt: 'band tour bus interior with patches and stickers covering every surface wall' },
       { label: 'VFW hall',      prompt: 'veterans of foreign wars hall with unit flags and shadow box collections on walls' },
       { label: 'Anime con',     prompt: 'anime convention dealer hall with enamel pin display cases and lanyard swaps' },
+      { label: 'Con floor',     prompt: 'comic convention floor with artists alley booths selling enamel pins, patches, and limited edition art prints' },
     ],
   },
   // ── 31. City ─────────────────────────────────────────────────────────────
