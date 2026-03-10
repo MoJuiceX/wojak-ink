@@ -58,6 +58,26 @@ Notes: [anything unexpected]
 3. **Identify the task type** and use the matching prompt template from `prompts/templates/`
 4. **Read the context files** listed in the routing table below for your domain
 
+## Code Navigation (LSP)
+
+Prefer LSP tools over grep/glob for code navigation when available:
+
+| Task | Use LSP |
+|------|---------|
+| Find where a function/class is defined | `goToDefinition` |
+| Find all usages of a symbol | `findReferences` |
+| Get type signatures and docs | `hover` |
+| List symbols in a file | `documentSymbol` |
+| Search symbols project-wide | `workspaceSymbol` |
+| Find interface implementations | `goToImplementation` |
+| Trace call hierarchies | `incomingCalls` / `outgoingCalls` |
+
+**Reserve grep for:** text search in comments, config files, string patterns, non-code files.
+
+**Why:** LSP queries return in ~50ms with semantic accuracy vs 30-60s grep searches.
+
+---
+
 ## Context Routing Table
 
 | Domain | Read These First |
