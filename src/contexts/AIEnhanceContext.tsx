@@ -69,7 +69,7 @@ export interface AIEnhanceContextValue {
   sessionToken: string | null;
   isAuthenticating: boolean;
   isAuthenticated: boolean;
-  authenticate: () => Promise<void>;
+  authenticate: () => Promise<string | null>;
 }
 
 const AIEnhanceContext = createContext<AIEnhanceContextValue | null>(null);
@@ -117,16 +117,10 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
 
   const isAIEnhancedMode = enhancedImage !== null;
 
-  const authHeaders = useCallback((): Record<string, string> => {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (sessionToken) {
-      headers['Authorization'] = `Bearer ${sessionToken}`;
-    }
-    return headers;
-  }, [sessionToken]);
-
-  const authenticate = useCallback(async () => {
-    if (!address || !signMessage) return;
+  // Returns the session token on success (so callers can use it immediately
+  // without waiting for React state to update).
+  const authenticate = useCallback(async (): Promise<string | null> => {
+    if (!address || !signMessage) return null;
     setIsAuthenticating(true);
     try {
       // Step 1: Request challenge nonce
@@ -161,35 +155,57 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
       } catch { /* storage unavailable */ }
 
       setSessionToken(token);
+      return token;
     } catch (err) {
       console.error('[AI Auth] Authentication failed:', err);
       setSessionToken(null);
+      return null;
     } finally {
       setIsAuthenticating(false);
     }
   }, [address, signMessage]);
 
-  // Re-authenticate on 401 (expired session)
-  const handleAuthError = useCallback(async (res: Response): Promise<boolean> => {
+  // Re-authenticate on 401 (expired session) — returns new token or null
+  const handleAuthError = useCallback(async (res: Response): Promise<string | null> => {
     if (res.status === 401) {
       localStorage.removeItem('ai_session');
       setSessionToken(null);
-      await authenticate();
-      return true; // Caller should retry
+      return authenticate(); // returns token or null
     }
-    return false;
+    return null;
   }, [authenticate]);
 
-  // Auto-authenticate when wallet connects.
-  // Checks localStorage first so page refreshes don't require re-signing.
+  // Ensure we have a valid session token (lazy auth).
+  // Returns the current token, restores from localStorage, or authenticates fresh.
+  const ensureAuthenticated = useCallback(async (): Promise<string | null> => {
+    // Already have a token in state
+    if (sessionToken) return sessionToken;
+
+    // Try to restore from localStorage
+    try {
+      const raw = localStorage.getItem('ai_session');
+      if (raw) {
+        const stored = JSON.parse(raw) as { token: string; expiresAt: string; walletAddress: string };
+        if (stored.walletAddress === address && new Date(stored.expiresAt) > new Date()) {
+          setSessionToken(stored.token);
+          return stored.token;
+        }
+      }
+    } catch { /* ignore malformed storage */ }
+    localStorage.removeItem('ai_session');
+
+    // Authenticate fresh (will prompt user to sign)
+    return authenticate();
+  }, [sessionToken, address, authenticate]);
+
+  // Restore cached session on wallet connect (no BLS signing prompt).
+  // BLS auth is deferred to when the user actually tries to spend credits.
   useEffect(() => {
     if (!address) {
       setSessionToken(null);
       return;
     }
-    if (sessionToken || isAuthenticating) return;
-
-    // Restore stored session if it's valid and belongs to this wallet
+    // Only restore from localStorage — never prompt to sign just for connecting
     try {
       const raw = localStorage.getItem('ai_session');
       if (raw) {
@@ -200,22 +216,16 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
         }
       }
     } catch { /* ignore malformed storage */ }
-    localStorage.removeItem('ai_session'); // clear any stale entry
-
-    authenticate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    localStorage.removeItem('ai_session');
   }, [address]);
 
-  // --- Fetch balance ---
+  // --- Fetch balance (public endpoint, no auth needed) ---
   const refetchBalance = useCallback(async () => {
-    if (!address || !sessionToken) return;
+    if (!address) return;
     setIsLoadingBalance(true);
     try {
-      const res = await fetch('/api/ai/balance', { headers: authHeaders() });
-      if (!res.ok) {
-        if (await handleAuthError(res)) return;
-        return;
-      }
+      const res = await fetch(`/api/ai/balance?wallet=${encodeURIComponent(address)}`);
+      if (!res.ok) return;
       const data = await res.json();
       setBalance(data.balance ?? 0);
     } catch (err) {
@@ -223,13 +233,14 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoadingBalance(false);
     }
-  }, [address, sessionToken, authHeaders, handleAuthError]);
+  }, [address]);
 
+  // Fetch balance immediately when wallet connects (no auth needed)
   useEffect(() => {
-    if (sessionToken) {
+    if (address) {
       refetchBalance();
     }
-  }, [sessionToken, refetchBalance]);
+  }, [address, refetchBalance]);
 
   // --- Lightbox ---
   const openLightbox = useCallback(() => {
@@ -280,7 +291,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     }
   }, [promptSubStep, selectedCategory]);
 
-  // --- Submit enhancement ---
+  // --- Submit enhancement (lazy auth — authenticates on first use) ---
   const submitEnhance = useCallback(async (
     imageBase64: string,
     category: AICategory,
@@ -288,34 +299,57 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     parentId?: string,
     layersJson?: string,
   ): Promise<AIEnhanceResult | null> => {
-    if (!address || !sessionToken) return null;
+    if (!address) return null;
     setIsEnhancing(true);
     setEnhanceError(null);
     setWizardStep('loading');
 
     try {
-      const res = await fetch('/api/ai/enhance', {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({
-          imageBase64: imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64,
-          category,
-          prompt,
-          mode: selectedMode ?? 'enhance',
-          parentEnhancementId: parentId,
-          baseLayersJson: layersJson,
-        }),
-      });
+      // Ensure we have a valid session (lazy auth — prompts signing only when needed)
+      const token = await ensureAuthenticated();
+      if (!token) {
+        setEnhanceError('Wallet authentication required. Please sign the message in your wallet.');
+        setWizardStep('prompt');
+        setIsEnhancing(false);
+        return null;
+      }
+
+      const makeRequest = async (authToken: string) => {
+        return fetch('/api/ai/enhance', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({
+            imageBase64: imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64,
+            category,
+            prompt,
+            mode: selectedMode ?? 'enhance',
+            parentEnhancementId: parentId,
+            baseLayersJson: layersJson,
+          }),
+        });
+      };
+
+      let res = await makeRequest(token);
+
+      // If 401, re-authenticate and retry once
+      if (res.status === 401) {
+        const newToken = await handleAuthError(res);
+        if (newToken) {
+          res = await makeRequest(newToken);
+        } else {
+          setEnhanceError('Session expired. Please try again.');
+          setWizardStep('prompt');
+          return null;
+        }
+      }
 
       const data = await res.json();
 
       if (!res.ok) {
-        if (res.status === 401) {
-          await handleAuthError(res);
-          setEnhanceError('Session expired. Please try again.');
-        } else {
-          setEnhanceError(data.error || 'Enhancement failed. Try again.');
-        }
+        setEnhanceError(data.error || 'Enhancement failed. Try again.');
         setWizardStep('prompt');
         return null;
       }
@@ -333,7 +367,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsEnhancing(false);
     }
-  }, [address, sessionToken, selectedMode, authHeaders, handleAuthError]);
+  }, [address, selectedMode, ensureAuthenticated, handleAuthError]);
 
   // --- Accept result ---
   const acceptResult = useCallback(() => {
@@ -356,14 +390,36 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   const clearResult = useCallback(() => setCurrentResult(null), []);
   const clearError = useCallback(() => setEnhanceError(null), []);
 
-  // --- Fetch creations ---
+  // --- Fetch creations (lazy auth — only authenticates when user opens gallery) ---
   const fetchCreations = useCallback(async () => {
-    if (!address || !sessionToken) return;
+    if (!address) return;
     setIsLoadingCreations(true);
     try {
-      const res = await fetch('/api/ai/creations', { headers: authHeaders() });
+      const token = await ensureAuthenticated();
+      if (!token) return;
+
+      const res = await fetch('/api/ai/creations', {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       if (!res.ok) {
-        if (await handleAuthError(res)) return;
+        if (res.status === 401) {
+          const newToken = await handleAuthError(res);
+          if (newToken) {
+            const retryRes = await fetch('/api/ai/creations', {
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${newToken}`,
+              },
+            });
+            if (retryRes.ok) {
+              const data = await retryRes.json();
+              setCreations(data.creations ?? []);
+            }
+          }
+        }
         return;
       }
       const data = await res.json();
@@ -373,7 +429,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoadingCreations(false);
     }
-  }, [address, sessionToken, authHeaders, handleAuthError]);
+  }, [address, ensureAuthenticated, handleAuthError]);
 
   // --- Load gallery creation for further enhancement ---
   const loadImageForEnhancing = useCallback((imageDataUrl: string) => {

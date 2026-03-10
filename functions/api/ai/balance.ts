@@ -1,5 +1,22 @@
-import { jsonResponse, errorResponse, optionsResponse, getAICreditBalance, requireAuth } from './_shared';
+/**
+ * AI Credit Balance API — /api/ai/balance
+ *
+ * GET ?wallet=xch1...
+ *
+ * Returns the AI credit balance for a wallet address.
+ * No BLS auth required — balance is not sensitive data.
+ * Auth is only needed for spending credits (enhance endpoint).
+ *
+ * Response: {
+ *   balance: number,
+ *   creditsPurchased: number,
+ *   creditsEarned: number,
+ *   creditsUsed: number,
+ * }
+ */
+import { jsonResponse, errorResponse, optionsResponse, getAICreditBalance } from './_shared';
 import type { AIEnv } from './_shared';
+import { isValidChiaAddress } from '../../lib/validation';
 
 export const onRequest: PagesFunction<AIEnv> = async (context) => {
   const { request, env } = context;
@@ -7,9 +24,13 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   if (request.method === 'OPTIONS') return optionsResponse();
   if (request.method !== 'GET') return errorResponse('Method not allowed', 405);
 
-  const auth = await requireAuth(request, env.DB);
-  if (auth instanceof Response) return auth;
-  const wallet = auth.walletAddress;
+  // Get wallet from query string (no auth required)
+  const url = new URL(request.url);
+  const wallet = url.searchParams.get('wallet');
+
+  if (!wallet || !isValidChiaAddress(wallet)) {
+    return errorResponse('Missing or invalid wallet parameter. Expected xch1... address.', 400);
+  }
 
   try {
     const balance = await getAICreditBalance(env.DB, wallet);
