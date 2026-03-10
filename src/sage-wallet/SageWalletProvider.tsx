@@ -144,8 +144,14 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
     const client = signClientRef.current;
     if (!client) return;
 
-    client.on('session_delete', () => {
-      handleDisconnect();
+    client.on('session_delete', (event: { id?: number; topic?: string }) => {
+      // WalletConnect fires session_delete for ALL sessions being cleaned up,
+      // not just the currently active one. Only disconnect if OUR session was deleted.
+      const deletedTopic = event?.topic;
+      const currentTopic = currentSessionRef.current?.topic;
+      if (!deletedTopic || !currentTopic || deletedTopic === currentTopic) {
+        handleDisconnect();
+      }
     });
 
     client.on('session_update', async () => {
