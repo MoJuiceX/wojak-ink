@@ -720,12 +720,12 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
         ).bind(job.wallet_address),
         env.DB.prepare(`
           INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
-          VALUES (?, 'onboarding_first_mint', ?, 0, 0, 500, 100, 'onboarding', 'onboarding', datetime('now'))
+          VALUES (?, 'onboarding_first_mint', ?, 0, 0, 4200, 100, 'onboarding', 'onboarding', datetime('now'))
         `).bind(job.wallet_address, `onboarding_mint_${job.wallet_address}`),
         env.DB.prepare(`
           INSERT INTO game_activity (did_id, event_type, event_data)
           VALUES (?, 'mint_milestone', ?)
-        `).bind(player.did_id, JSON.stringify({ milestone: 'first_mint', credits: 500 })),
+        `).bind(player.did_id, JSON.stringify({ milestone: 'first_mint', credits: 4200 })),
       ]);
     }
   } catch (e) {

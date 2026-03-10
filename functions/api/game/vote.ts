@@ -3,7 +3,7 @@
 // Cast a vote on a Your Wojak NFT. 1 = like, -1 = dislike.
 // All users can vote unlimited times. Only holders (DAD + Farmers Plot) earn credits.
 
-import { getTodayString, ONBOARDING_CREDITS, VOTES_PER_CREDIT, VOTE_CREDIT_AMOUNT, isValidGuestId } from './_shared';
+import { getTodayString, VOTES_PER_CREDIT, VOTE_CREDIT_AMOUNT, isValidGuestId } from './_shared';
 import { checkRateLimit, getRateLimitKey, GAME_RATE_LIMITS } from '../../lib/rateLimit';
 
 interface Env {
@@ -204,7 +204,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         }
       }
 
-      // First vote onboarding milestone + activity log + credits
+      // First vote onboarding milestone + activity log (no credit bonus)
       if (isFirstVote) {
         statements.push(
           context.env.DB.prepare(
@@ -212,11 +212,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           ).bind(voterDid),
           context.env.DB.prepare(
             `INSERT INTO game_activity (did_id, event_type, event_data) VALUES (?, 'vote_milestone', ?)`
-          ).bind(voterDid, JSON.stringify({ count: 1, milestone: 'first_vote' })),
-          context.env.DB.prepare(`
-            INSERT INTO credit_events (wallet_address, nft_id, event_id, price_xch, floor_at_time, credits_earned, whale_multiplier, source, event_type, event_timestamp)
-            VALUES (?, 'onboarding_first_vote', ?, 0, 0, ?, 100, 'onboarding', 'onboarding', datetime('now'))
-          `).bind(walletAddress, `onboarding_first_vote_${voterDid}`, ONBOARDING_CREDITS.first_vote)
+          ).bind(voterDid, JSON.stringify({ count: 1, milestone: 'first_vote' }))
         );
       }
 
