@@ -33,9 +33,11 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     return errorResponse('Missing or invalid nonce', 400);
   }
   if (!signature || signature.length < 96) {
+    console.error(`[AI Auth] verify: missing/short signature for ${walletAddress} (len=${signature?.length ?? 0})`);
     return errorResponse('Missing or invalid signature', 400);
   }
-  if (!publicKey || publicKey.length < 48) {
+  if (!publicKey || publicKey.length < 96) {
+    console.error(`[AI Auth] verify: missing/short publicKey for ${walletAddress} (len=${publicKey?.length ?? 0})`);
     return errorResponse('Missing or invalid publicKey', 400);
   }
 
@@ -56,6 +58,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   // Verify BLS signature (CHIP-0002)
   const isValid = await verifyChiaSignature(nonce, signature, publicKey);
   if (!isValid) {
+    console.error(`[AI Auth] verify: BLS failed for ${walletAddress} sig_len=${signature.length} pk_len=${publicKey.length}`);
     return errorResponse('Signature verification failed.', 403);
   }
 

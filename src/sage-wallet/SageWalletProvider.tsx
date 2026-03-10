@@ -372,12 +372,18 @@ export function SageWalletProvider({ children, config: userConfig }: SageWalletP
       },
     });
 
-    const typedResult = result as { signature: string; publicKey: string };
+    // Sage wallet may return different field names across versions.
+    // Try all known variants (same pattern as sendXCH txId fix).
+    const r = result as Record<string, unknown>;
+    console.warn('[SageWallet] chia_signMessageByAddress result:', JSON.stringify(r));
+    const signature = (r.signature ?? '') as string;
+    const publicKey = (r.publicKey ?? r.pubkey ?? r.signingPubkey ?? r.signing_pubkey ?? '') as string;
 
-    return {
-      signature: typedResult.signature,
-      publicKey: typedResult.publicKey,
-    };
+    if (!signature || !publicKey) {
+      throw new Error(`signMessage: missing fields in Sage response. Got keys: ${Object.keys(r).join(', ')}`);
+    }
+
+    return { signature, publicKey };
   }, [state.address]);
 
   const getAssetBalance = useCallback(async (assetId?: string | null): Promise<AssetBalance> => {

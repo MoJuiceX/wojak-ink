@@ -194,11 +194,11 @@ function bytesToHex(bytes: Uint8Array): string {
  * Compute the CHIP-0002 message hash for Chia signed messages.
  * Signs the CLVM tree hash of ("Chia Signed Message" . <raw_message>).
  *
- * IMPORTANT: Sage wallet hex-decodes the message before computing the tree hash
- * when the message is a valid hex string. Our nonces are always hex strings,
- * so we hex-decode the message bytes for the CLVM atom hash.
+ * @param hexDecode - When true, hex-decodes the message bytes before hashing
+ * (older Sage wallet behaviour). When false, uses UTF-8 encoded message bytes
+ * (newer Sage wallet behaviour where message is treated as a plain string).
  */
-async function chiaMessageHash(message: string): Promise<Uint8Array> {
+async function chiaMessageHash(message: string, hexDecode: boolean): Promise<Uint8Array> {
   const encoder = new TextEncoder();
 
   async function atomHash(data: Uint8Array): Promise<Uint8Array> {
@@ -216,20 +216,22 @@ async function chiaMessageHash(message: string): Promise<Uint8Array> {
     return new Uint8Array(await crypto.subtle.digest('SHA-256', buf));
   }
 
-  // Sage wallet hex-decodes hex messages before signing.
-  // Detect hex strings and decode to raw bytes.
   const isHex = /^[0-9a-fA-F]+$/.test(message) && message.length % 2 === 0;
-  const messageBytes = isHex ? hexToBytes(message) : encoder.encode(message);
+  const messageBytes = (hexDecode && isHex) ? hexToBytes(message) : encoder.encode(message);
 
   const prefixHash = await atomHash(encoder.encode('Chia Signed Message'));
   const messageHash = await atomHash(messageBytes);
   return pairHash(prefixHash, messageHash);
 }
 
+const AUG_DST = 'BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_AUG_';
+
 /**
  * Verify a Chia BLS12-381 signature (CHIP-0002 / AugSchemeMPL).
- * AugSchemeMPL prepends the public key to the message before hash-to-curve,
- * and uses the AUG domain separation tag.
+ *
+ * Tries both hex-decoded and UTF-8 message interpretations to handle
+ * different Sage wallet versions (some hex-decode the nonce before hashing,
+ * others treat it as a plain string). Returns true if either passes.
  */
 export async function verifyChiaSignature(
   message: string,
@@ -237,16 +239,23 @@ export async function verifyChiaSignature(
   pubkeyHex: string,
 ): Promise<boolean> {
   try {
-    const msgHash = await chiaMessageHash(message);
     const signature = hexToBytes(signatureHex);
     const pubkey = hexToBytes(pubkeyHex);
-    // AugSchemeMPL: prepend public key bytes to message before hash-to-curve
-    const augMsg = new Uint8Array(pubkey.length + msgHash.length);
-    augMsg.set(pubkey, 0);
-    augMsg.set(msgHash, pubkey.length);
-    return bls12_381.verify(signature, augMsg, pubkey, {
-      DST: 'BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_AUG_',
-    });
+
+    for (const hexDecode of [true, false]) {
+      try {
+        const msgHash = await chiaMessageHash(message, hexDecode);
+        const augMsg = new Uint8Array(pubkey.length + msgHash.length);
+        augMsg.set(pubkey, 0);
+        augMsg.set(msgHash, pubkey.length);
+        if (bls12_381.verify(signature, augMsg, pubkey, { DST: AUG_DST })) {
+          return true;
+        }
+      } catch {
+        // try the other interpretation
+      }
+    }
+    return false;
   } catch {
     return false;
   }
