@@ -121,8 +121,10 @@ export function GeneratorInfo({ isOpen, onClose }: GeneratorInfoProps) {
           <div style={sectionCard}>
             <SectionTitle>Pricing</SectionTitle>
             <p className="mb-2">
-              Base price:{' '}
+              Standard base price:{' '}
               <span className="badge" style={{ fontSize: '0.75rem' }}>0.20 XCH</span>
+              {' '}AI-enhanced:{' '}
+              <span className="badge" style={{ fontSize: '0.75rem' }}>0.30 XCH flat</span>
             </p>
             <ul className="flex flex-col gap-1.5 pl-4" style={{ listStyleType: 'disc' }}>
               <li>
@@ -141,11 +143,17 @@ export function GeneratorInfo({ isOpen, onClose }: GeneratorInfoProps) {
               <li>
                 Prices heal over time. If a trait stops being popular, its surcharge drops back toward zero.
               </li>
+              <li>
+                <strong className="text-primary">AI-enhanced mints</strong> are a flat 0.30 XCH — no surcharges apply regardless of which traits you picked.
+              </li>
+              <li>
+                All mints include a <strong className="text-primary">10% royalty</strong> on top of the listed price — this goes directly to the minter as a permanent on-chain royalty.
+              </li>
             </ul>
             <p className="mt-2.5 text-muted" style={{ fontSize: '0.75rem' }}>
               Example:{' '}
-              <span className="text-accent">0.41 XCH</span>{' '}
-              (base 0.20 + 0.21 Crown surcharge)
+              <span className="text-accent">0.41 XCH + 10% royalty = 0.451 XCH</span>{' '}
+              (base 0.20 + 0.21 Crown surcharge + royalty)
             </p>
           </div>
         </div>

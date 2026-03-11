@@ -10,6 +10,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X, Loader2, CheckCircle, AlertCircle, Copy, ExternalLink, Wallet, Share2, Sparkles } from 'lucide-react';
 import { useMint } from '@/contexts/MintContext';
+import { useAIEnhanceOptional } from '@/contexts/AIEnhanceContext';
 import { useMetadataAttributes } from './MetadataPreview';
 import { generateRandomName, validateName, MAX_NAME_LENGTH, getPlaceholderHint } from '@/lib/nameGenerator';
 import { FighterRevealCard } from './FighterRevealCard';
@@ -97,6 +98,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
     setCustomName,
   } = useMint();
   const metadataAttributes = useMetadataAttributes();
+  const isAIEnhancedMode = useAIEnhanceOptional()?.isAIEnhancedMode ?? false;
   const prefersReducedMotion = useReducedMotion();
   const [timeLeft, setTimeLeft] = useState('');
   const [isExpired, setIsExpired] = useState(false);
@@ -360,7 +362,7 @@ export function MintFlowModal({ isOpen, onClose }: MintFlowModalProps) {
 
               {/* ── Confirming step (pre-mint) ── */}
               {isConfirming && (() => {
-                const price = getTotalMintPrice(metadataAttributes);
+                const price = getTotalMintPrice(metadataAttributes, isAIEnhancedMode);
                 const balance = Math.round((credits?.balance ?? 0) / 100);
                 const creditCost = Math.ceil(100 * price.totalXch / price.basePrice);
                 const isFreeConfirm = pendingMintType === 'free';

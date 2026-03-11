@@ -128,6 +128,14 @@ export const MintPreviewPanel = memo(function MintPreviewPanel({
                   <span className="text-secondary">+{price.surchargeXch.toFixed(3)} XCH</span>
                 </div>
               )}
+              <div className="flex justify-between text-xs">
+                <span className="text-muted">Royalty (10%)</span>
+                <span className="text-secondary">+{(price.totalXch * 0.1).toFixed(3)} XCH</span>
+              </div>
+              <div className="flex justify-between text-xs pt-1" style={{ borderTop: '1px solid var(--color-border)' }}>
+                <span className="text-muted font-medium">Total</span>
+                <span className="text-accent font-semibold">{(price.totalXch * 1.1).toFixed(3)} XCH</span>
+              </div>
             </>
           )}
         </div>

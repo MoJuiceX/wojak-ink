@@ -510,8 +510,21 @@ export function PricingLightbox({ isOpen, onClose }: PricingLightboxProps) {
           >
             Base: {BASE_PRICE} XCH
           </span>
+          <span
+            className="tabular-nums text-primary"
+            style={{
+              fontSize: '13px',
+              fontWeight: 600,
+              background: 'var(--color-white-5)',
+              padding: '5px 12px',
+              borderRadius: '8px',
+              border: '1px solid var(--color-white-6)',
+            }}
+          >
+            AI: 0.30 XCH flat
+          </span>
           <span className="text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
-            All mints cost {BASE_PRICE} XCH base. Popular Head, Clothes & Face Wear traits add a surcharge — only the single highest surcharge applies to your total.
+            Standard mints cost {BASE_PRICE} XCH base. Popular Head, Clothes & Face Wear traits add a surcharge — only the single highest applies. AI-enhanced mints are a flat 0.30 XCH with no surcharges. All mints include a 10% royalty on top.
           </span>
         </div>
       </div>
