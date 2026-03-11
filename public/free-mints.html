@@ -721,6 +721,12 @@
       var aiData = await fetchAIBalance(row.wallet);
       var aiBalance = aiData ? aiData.balance : 0;
 
+      // AI credits cutoff: trades on or after 2026-03-09 earn floor(priceXch) AI credits
+      var AI_CREDITS_CUTOFF = '2026-03-09';
+      var hasAnyAI = purchases.some(function(p) {
+        return p.eventType === 'trade' && p.priceXch >= 1 && p.eventTimestamp >= AI_CREDITS_CUTOFF;
+      });
+
       inner.innerHTML =
         '<div class="expand-header">' +
           '<a href="' + SPACESCAN_ADDR + row.wallet + '" target="_blank" rel="noopener">View wallet on Spacescan</a>' +
@@ -728,12 +734,6 @@
             (aiBalance > 0 ? ' \u00b7 <span style="color:var(--cyan)">' + aiBalance + ' AI credit' + (aiBalance !== 1 ? 's' : '') + '</span>' : '') +
           '</span>' +
         '</div>' +
-        // AI credits cutoff: trades on or after 2026-03-09 earn floor(priceXch) AI credits
-        var AI_CREDITS_CUTOFF = '2026-03-09';
-        var hasAnyAI = purchases.some(function(p) {
-          return p.eventType === 'trade' && p.priceXch >= 1 && p.eventTimestamp >= AI_CREDITS_CUTOFF;
-        });
-
         (purchases.length > 0 ?
           '<table class="purchase-table"><thead><tr><th>Event</th><th>Price (XCH)</th><th>Credits</th>' +
             (hasAnyAI ? '<th style="color:var(--cyan)">AI</th>' : '') +
