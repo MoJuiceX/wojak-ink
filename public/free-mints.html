@@ -219,19 +219,6 @@
       transition: opacity 0.15s;
     }
     .stat-rank:hover { opacity: 0.75; }
-    .stat-divider {
-      width: 1px;
-      background: var(--border);
-      align-self: stretch;
-      margin: 4px 0;
-      flex: none;
-    }
-    .stat-item-ai {
-      background: rgba(0, 212, 255, 0.06);
-      border: 1px solid rgba(0, 212, 255, 0.12);
-    }
-    .stat-item-ai .stat-value { color: var(--cyan); }
-    .stat-item-ai .stat-label { color: rgba(0, 212, 255, 0.5); }
     .no-credits {
       color: var(--text3);
       font-size: 13px;
@@ -416,7 +403,6 @@
     @media (max-width: 600px) {
       .personal-card-grid { flex-wrap: wrap; }
       .personal-card-grid .stat-item { min-width: calc(50% - 6px); }
-      .stat-divider { width: 100%; height: 1px; margin: 2px 0; }
       th, td { padding: 12px 10px; font-size: 13px; }
       th:first-child, td:first-child { padding-left: 14px; }
       td:last-child, th:last-child { padding-right: 14px; }
@@ -443,7 +429,6 @@
       <h1>Free Mint Credits</h1>
       <p class="header-desc">
         Earn credits by buying <strong>Wojak Farmers Plot</strong> NFTs and use them for free mints in&nbsp;the&nbsp;<strong style="white-space:nowrap">Wojak Generator</strong>.
-        Every purchase also earns <strong style="color:var(--cyan)">AI enhancement credits</strong> for editing your Wojaks with AI.
       </p>
       <div class="credits-badge">100 credits = 1 free mint</div>
     </header>
@@ -578,7 +563,6 @@
     var hasMore = true;
     var loadingMore = false;
     var userBalance = null; // from /api/credits/balance
-    var userAIBalance = null; // from /api/ai/balance
 
     function getConnectedWallet() {
       try {
@@ -672,16 +656,6 @@
       }
     }
 
-    async function fetchAIBalance(wallet) {
-      try {
-        var res = await fetch('/api/ai/balance?wallet=' + encodeURIComponent(wallet));
-        if (!res.ok) return null;
-        return await res.json();
-      } catch (_) {
-        return null;
-      }
-    }
-
     async function fetchLeaderboard(offset, limit) {
       offset = offset ?? 0;
       limit = limit || PAGE_SIZE;
@@ -733,21 +707,15 @@
           '<span class="expand-summary">' + mintsUsed + ' free mint' + (mintsUsed !== 1 ? 's' : '') + ' used \u00b7 ' + yourWojakBought + ' paid mint' + (yourWojakBought !== 1 ? 's' : '') + '</span>' +
         '</div>' +
         (purchases.length > 0 ?
-          '<table class="purchase-table"><thead><tr><th>Event</th><th>Price (XCH)</th><th>Credits</th><th style="color:var(--cyan)">\ud83e\udd16 AI</th></tr></thead><tbody>' +
+          '<table class="purchase-table"><thead><tr><th>Event</th><th>Price (XCH)</th><th>Credits</th></tr></thead><tbody>' +
           purchases.map(function(p, i) {
-            // AI credits earned from this trade (client-side: matches worker formula)
-            var aiCredits = p.priceXch > 0 ? Math.floor(p.priceXch) : 0;
-            var aiCell = aiCredits > 0
-              ? '<td class="credits" style="color:var(--cyan)">' + aiCredits + '</td>'
-              : '<td class="credits" style="color:var(--text3)">\u2014</td>';
             // Special event: Holder Airdrop
             if (p.eventType === 'holder_airdrop') {
               return '<tr><td><div class="nft-cell">' +
                 '<div class="nft-thumb-placeholder" style="display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(255,107,0,0.12);border:1px solid rgba(255,107,0,0.25)">\ud83e\ude82</div>' +
                 '<div><span class="nft-link" style="cursor:default;color:var(--primary)">Holder Airdrop</span>' +
                 '<span style="display:block;font-size:10px;color:var(--text3);margin-top:1px">Airdrop for Plot holders</span></div>' +
-                '</div></td><td class="price" style="color:var(--text3)">\u2014</td><td class="credits">' + Math.floor(p.creditsEarned || 0) + '</td>' +
-                '<td class="credits" style="color:var(--text3)">\u2014</td></tr>';
+                '</div></td><td class="price" style="color:var(--text3)">\u2014</td><td class="credits">' + Math.floor(p.creditsEarned || 0) + '</td></tr>';
             }
             // Special events: Vote Reward, First Creation Bonus, etc.
             var special = SPECIAL_EVENTS[p.nftId];
@@ -756,8 +724,7 @@
                 '<div class="nft-thumb-placeholder" style="display:flex;align-items:center;justify-content:center;font-size:22px;background:' + special.color + ';border:1px solid ' + special.border + '">' + special.emoji + '</div>' +
                 '<div><span class="nft-link" style="cursor:default;color:var(--text)" title="' + special.desc + '">' + special.name + '</span>' +
                 '<span style="display:block;font-size:10px;color:var(--text3);margin-top:1px">' + special.desc + '</span></div>' +
-                '</div></td><td class="price" style="color:var(--text3)">\u2014</td><td class="credits">' + Math.floor(p.creditsEarned || 0) + '</td>' +
-                '<td class="credits" style="color:var(--text3)">\u2014</td></tr>';
+                '</div></td><td class="price" style="color:var(--text3)">\u2014</td><td class="credits">' + Math.floor(p.creditsEarned || 0) + '</td></tr>';
             }
             // Regular trade event
             var name = p.nftName || truncateId(p.nftId, 12, 8);
@@ -765,7 +732,7 @@
             return '<tr><td><div class="nft-cell">' +
               '<div class="nft-thumb-placeholder" data-nft-idx="' + i + '"></div>' +
               '<div><a href="' + MINTGARDEN_NFT + p.nftId + '" target="_blank" rel="noopener" class="nft-link" data-nft-name="' + i + '">' + name + '</a></div>' +
-              '</div></td><td class="price">' + priceDisplay + '</td><td class="credits">' + Math.floor(p.creditsEarned || 0) + '</td>' + aiCell + '</tr>';
+              '</div></td><td class="price">' + priceDisplay + '</td><td class="credits">' + Math.floor(p.creditsEarned || 0) + '</td></tr>';
           }).join('') +
           '</tbody></table>'
         : '<p class="expand-summary" style="margin-top:8px">No credit-earning purchases.</p>');
@@ -842,9 +809,7 @@
         document.getElementById('personal-card-addr').textContent = truncateWallet(connectedWallet);
         var grid = document.getElementById('personal-card-grid');
 
-        var aiAvailable = userAIBalance ? userAIBalance.balance : 0;
-
-        if (userRow || userBalance || aiAvailable > 0) {
+        if (userRow || userBalance) {
           var rank = userRow ? userRow.rank : '\u2014';
           var credits = userBalance ? userBalance.earned : (userRow ? userRow.earned : 0);
           var available = userBalance ? userBalance.freeMints : (userRow ? userRow.freeMints : 0);
@@ -861,11 +826,6 @@
             '<div class="stat-item">' +
               '<span class="stat-value">' + available + '</span>' +
               '<span class="stat-label">Free Mints</span>' +
-            '</div>' +
-            '<div class="stat-divider"></div>' +
-            '<div class="stat-item stat-item-ai">' +
-              '<span class="stat-value">' + aiAvailable + '</span>' +
-              '<span class="stat-label">\ud83e\udd16 AI Edits</span>' +
             '</div>';
 
           document.getElementById('scroll-to-rank').addEventListener('click', function() {
@@ -896,13 +856,11 @@
         var promises = [fetchLeaderboard(0, initialLimit)];
         if (connectedWallet) {
           promises.push(fetchBalance(connectedWallet));
-          promises.push(fetchAIBalance(connectedWallet));
         }
 
         var results = await Promise.all(promises);
         var result = results[0];
         if (results[1]) userBalance = results[1];
-        if (results[2]) userAIBalance = results[2];
 
         leaderboard = result.items;
         hasMore = result.hasMore;
@@ -978,9 +936,8 @@
         if (addr && addr !== lastDetectedWallet && leaderboard.length > 0) {
           lastDetectedWallet = addr;
           // Re-fetch both balances for real-time data, then re-render
-          Promise.all([fetchBalance(addr), fetchAIBalance(addr)]).then(function(results) {
-            if (results[0]) userBalance = results[0];
-            if (results[1]) userAIBalance = results[1];
+          fetchBalance(addr).then(function(result) {
+            if (result) userBalance = result;
             renderTable();
           });
         }
