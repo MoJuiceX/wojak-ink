@@ -14,7 +14,7 @@ const loadConfetti = () => import('canvas-confetti').then(m => m.default);
 type PurchaseState = 'idle' | 'buying' | 'sending' | 'confirming' | 'success' | 'error';
 
 export function AICreditsShop() {
-  const { isShopOpen, closeShop, balance, refetchBalance, sessionToken } = useAIEnhance();
+  const { isShopOpen, closeShop, balance, refetchBalance, sessionToken, ensureAuthenticated, reauthenticate } = useAIEnhance();
   const { status, sendXCH } = useSageWallet();
   const isConnected = status === 'connected';
   const prefersReducedMotion = useReducedMotion();
@@ -29,6 +29,7 @@ export function AICreditsShop() {
 
   // On shop open, check for any pending purchase that may have been paid
   // while the user was away (e.g. closed browser during confirmation).
+  // Uses sessionToken if available; skips if not (don't force auth just to check).
   useEffect(() => {
     if (!isShopOpen || !sessionToken) return;
 
@@ -43,7 +44,9 @@ export function AICreditsShop() {
             'Authorization': `Bearer ${sessionToken}`,
           },
         });
-        if (!res.ok || cancelled) return;
+        if (cancelled) return;
+        if (res.status === 401) return; // Session expired — will re-auth on purchase
+        if (!res.ok) return;
 
         const data = await res.json();
         if (cancelled) return;
@@ -52,7 +55,6 @@ export function AICreditsShop() {
           setPurchaseSuccess(`+${data.creditsAdded} AI credit${data.creditsAdded !== 1 ? 's' : ''} added!`);
           setPurchaseState('success');
           await refetchBalance();
-          if (cancelled) return;
         }
       } catch {
         // Silent — this is a best-effort background check
@@ -91,20 +93,57 @@ export function AICreditsShop() {
     setPurchaseSuccess(null);
 
     try {
-      // Step 1: Create purchase intent
+      // Step 0: Ensure we have a valid session (lazy auth — prompts signing only when needed)
       setPurchaseState('buying');
       setStatusMessage('Preparing purchase...');
 
+      let token = await ensureAuthenticated();
+      if (!token) {
+        setPurchaseError('Wallet authentication required. Please sign the message in your wallet.');
+        setPurchaseState('error');
+        setStatusMessage(null);
+        return;
+      }
+
+      // Step 1: Create purchase intent
       const res = await fetch('/api/ai/credits/buy', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           tier: selectedBundle.tier,
         }),
       });
+
+      // Re-authenticate on 401 and retry once
+      if (res.status === 401) {
+        token = await reauthenticate();
+        if (!token) {
+          setPurchaseError('Session expired. Please try again.');
+          setPurchaseState('error');
+          setStatusMessage(null);
+          return;
+        }
+        const retryRes = await fetch('/api/ai/credits/buy', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ tier: selectedBundle.tier }),
+        });
+        const retryData = await retryRes.json();
+        if (!retryRes.ok) {
+          setPurchaseError(retryData.error || 'Purchase failed. Try again.');
+          setPurchaseState('error');
+          setStatusMessage(null);
+          return;
+        }
+        // Continue with retry data
+        return await continuePurchase(retryData, token);
+      }
 
       const data = await res.json();
 
@@ -115,76 +154,7 @@ export function AICreditsShop() {
         return;
       }
 
-      // Step 2: Send XCH via wallet
-      setPurchaseState('sending');
-      setStatusMessage('Approve the transaction in your wallet...');
-
-      // sendXCH takes XCH (not mojos), so convert from mojo string
-      const amountXch = Number(data.amountMojos) / 1_000_000_000_000;
-      await sendXCH(data.treasuryAddress, amountXch);
-
-      // Step 3: Confirm on-chain
-      // Chia blocks take ~45-90s, then Spacescan needs to index (~30-60s).
-      // Total: ~2-3 minutes. The server does a single check per request
-      // (no long polling that gets killed by CF Worker timeout).
-      // Client polls every 15s for up to 3 minutes.
-      setPurchaseState('confirming');
-      setStatusMessage('Transaction sent! Waiting for on-chain confirmation...');
-
-      const POLL_INTERVAL = 15_000; // 15 seconds between checks
-      const MAX_POLLS = 12;         // 12 × 15s = 3 minutes total
-      let confirmed = false;
-
-      for (let attempt = 0; attempt < MAX_POLLS; attempt++) {
-        if (attempt > 0) {
-          const elapsed = attempt * 15;
-          setStatusMessage(`Waiting for on-chain confirmation... (${elapsed}s)`);
-          await new Promise((r) => setTimeout(r, POLL_INTERVAL));
-        }
-
-        try {
-          const confirmRes = await fetch('/api/ai/credits/confirm', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(sessionToken ? { 'Authorization': `Bearer ${sessionToken}` } : {}),
-            },
-            body: JSON.stringify({
-              purchaseId: data.purchaseId,
-            }),
-          });
-
-          // 4xx/5xx errors are real failures — stop polling
-          if (confirmRes.status >= 400 && confirmRes.status !== 410) {
-            setPurchaseError('Confirmation failed. Contact support.');
-            setPurchaseState('error');
-            setStatusMessage(null);
-            return;
-          }
-
-          const confirmData = await confirmRes.json();
-
-          if (confirmData.confirmed || confirmData.alreadyConfirmed) {
-            const added = confirmData.creditsAdded ?? selectedBundle?.credits ?? 0;
-            setPurchaseSuccess(`+${added} AI credit${added !== 1 ? 's' : ''} added!`);
-            setPurchaseState('success');
-            setStatusMessage(null);
-            await refetchBalance();
-            confirmed = true;
-            break;
-          }
-          // 202: not yet detected, keep polling
-        } catch {
-          // Network error — keep trying (transient)
-        }
-      }
-
-      if (!confirmed) {
-        const credits = selectedBundle?.credits ?? 0;
-        setPurchaseSuccess(`Payment sent! Your ${credits} credit${credits !== 1 ? 's' : ''} will appear shortly. Refresh the page to check.`);
-        setPurchaseState('success');
-        setStatusMessage(null);
-      }
+      await continuePurchase(data, token);
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : String(err);
@@ -195,6 +165,96 @@ export function AICreditsShop() {
         setPurchaseError(message || 'Network error. Check your connection.');
       }
       setPurchaseState('error');
+      setStatusMessage(null);
+    }
+  };
+
+  const continuePurchase = async (data: { amountMojos: string; treasuryAddress: string; purchaseId: number }, authToken: string) => {
+    // Step 2: Send XCH via wallet
+    setPurchaseState('sending');
+    setStatusMessage('Approve the transaction in your wallet...');
+
+    // sendXCH takes XCH (not mojos), so convert from mojo string
+    const amountXch = Number(data.amountMojos) / 1_000_000_000_000;
+    await sendXCH(data.treasuryAddress, amountXch);
+
+    // Step 3: Confirm on-chain
+    // Chia blocks take ~45-90s, then Spacescan needs to index (~30-60s).
+    // Total: ~2-3 minutes. The server does a single check per request
+    // (no long polling that gets killed by CF Worker timeout).
+    // Client polls every 15s for up to 3 minutes.
+    setPurchaseState('confirming');
+    setStatusMessage('Transaction sent! Waiting for on-chain confirmation...');
+
+    const POLL_INTERVAL = 15_000; // 15 seconds between checks
+    const MAX_POLLS = 12;         // 12 × 15s = 3 minutes total
+    let confirmed = false;
+    let token = authToken;
+
+    for (let attempt = 0; attempt < MAX_POLLS; attempt++) {
+      if (attempt > 0) {
+        const elapsed = attempt * 15;
+        setStatusMessage(`Waiting for on-chain confirmation... (${elapsed}s)`);
+        await new Promise((r) => setTimeout(r, POLL_INTERVAL));
+      }
+
+      try {
+        let confirmRes = await fetch('/api/ai/credits/confirm', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            purchaseId: data.purchaseId,
+          }),
+        });
+
+        // Re-authenticate on 401 and retry this poll
+        if (confirmRes.status === 401) {
+          const newToken = await reauthenticate();
+          if (newToken) {
+            token = newToken;
+            confirmRes = await fetch('/api/ai/credits/confirm', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+              body: JSON.stringify({ purchaseId: data.purchaseId }),
+            });
+          }
+        }
+
+        // 4xx/5xx errors are real failures — stop polling
+        if (confirmRes.status >= 400 && confirmRes.status !== 410) {
+          setPurchaseError('Confirmation failed. Contact support.');
+          setPurchaseState('error');
+          setStatusMessage(null);
+          return;
+        }
+
+        const confirmData = await confirmRes.json();
+
+        if (confirmData.confirmed || confirmData.alreadyConfirmed) {
+          const added = confirmData.creditsAdded ?? selectedBundle?.credits ?? 0;
+          setPurchaseSuccess(`+${added} AI credit${added !== 1 ? 's' : ''} added!`);
+          setPurchaseState('success');
+          setStatusMessage(null);
+          await refetchBalance();
+          confirmed = true;
+          break;
+        }
+        // 202: not yet detected, keep polling
+      } catch {
+        // Network error — keep trying (transient)
+      }
+    }
+
+    if (!confirmed) {
+      const credits = selectedBundle?.credits ?? 0;
+      setPurchaseSuccess(`Payment sent! Your ${credits} credit${credits !== 1 ? 's' : ''} will appear shortly. Refresh the page to check.`);
+      setPurchaseState('success');
       setStatusMessage(null);
     }
   };

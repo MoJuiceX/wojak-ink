@@ -70,6 +70,9 @@ export interface AIEnhanceContextValue {
   isAuthenticating: boolean;
   isAuthenticated: boolean;
   authenticate: () => Promise<string | null>;
+  ensureAuthenticated: () => Promise<string | null>;
+  /** Clear expired session and re-authenticate fresh (use after 401). */
+  reauthenticate: () => Promise<string | null>;
 }
 
 const AIEnhanceContext = createContext<AIEnhanceContextValue | null>(null);
@@ -173,6 +176,14 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
       return authenticate(); // returns token or null
     }
     return null;
+  }, [authenticate]);
+
+  // Clear expired session and authenticate fresh. Use after a 401 response
+  // instead of ensureAuthenticated (which would return the stale token).
+  const reauthenticate = useCallback(async (): Promise<string | null> => {
+    localStorage.removeItem('ai_session');
+    setSessionToken(null);
+    return authenticate();
   }, [authenticate]);
 
   // Ensure we have a valid session token (lazy auth).
@@ -490,6 +501,8 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     isAuthenticating,
     isAuthenticated,
     authenticate,
+    ensureAuthenticated,
+    reauthenticate,
   };
 
   return <AIEnhanceContext.Provider value={value}>{children}</AIEnhanceContext.Provider>;
