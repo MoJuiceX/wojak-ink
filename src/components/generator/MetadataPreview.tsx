@@ -25,7 +25,7 @@
  *   Mouth: MouthItem > FacialHair > MouthBase
  */
 
-import { useMemo, useContext } from 'react';
+import { useMemo } from 'react';
 import { useGeneratorOptional } from '@/contexts/GeneratorContext';
 import { useAIEnhanceOptional } from '@/contexts/AIEnhanceContext';
 import { isSelectionPathEmpty } from '@/types/generator';

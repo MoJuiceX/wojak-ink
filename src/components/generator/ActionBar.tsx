@@ -24,7 +24,6 @@ import {
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { useMint } from '@/contexts/MintContext';
 import { useSageWallet } from '@/sage-wallet';
-import { useLayout } from '@/hooks/useLayout';
 import { isSelectionPathEmpty, isFavoriteV2 } from '@/types/generator';
 import type { SelectionsSnapshot } from '@/types/generator';
 import { exportImage } from '@/services/canvasRenderer';
@@ -134,7 +133,6 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const { credits, prepareMint, resetMintFlow, maxSupply, getTotalMintPrice, mintingPaused, totalMinted } = useMint();
   const { address, status: walletStatus, connect } = useSageWallet();
   const prefersReducedMotion = useReducedMotion();
-  const { isDesktop } = useLayout();
   const [isRandomizing, setIsRandomizing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showDownloadSuccess, setShowDownloadSuccess] = useState(false);
@@ -170,7 +168,6 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const has7Traits = traitCount >= 7;
   const isSoldOut = totalMinted >= maxSupply && maxSupply > 0;
   const showMintingPaused = mintingPaused || GENERATOR_MINTING_PAUSED;
-  const canMint = canExport && isWalletConnected && has7Traits && !isSoldOut && !showMintingPaused;
 
   // Auto-default to free mint when credits are available
   useEffect(() => {
