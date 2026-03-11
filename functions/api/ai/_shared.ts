@@ -50,7 +50,7 @@ export const AI_CATEGORIES: Record<AICategory, { label: string; icon: string; fr
   clothes:    { label: 'Clothes',    icon: '\u{1F455}', freedom: 'enhance' },
   head:       { label: 'Head',       icon: '\u{1F3A9}', freedom: 'enhance' },
   facewear:   { label: 'Facewear',   icon: '\u{1F3AD}', freedom: 'free' },
-  background: { label: 'Background', icon: '\u{1F5BC}', freedom: 'free' },
+  background: { label: 'Background', icon: '\u{1F5BC}', freedom: 'enhance' },
 };
 
 // --- Art Style Anchor ---
@@ -97,9 +97,9 @@ export const PROMPT_TEMPLATES: Record<AICategory, Partial<Record<AIMode, string>
   },
   background: {
     enhance:
-      `${STYLE} ${PRESERVE} Edit ONLY the background to make it more dramatic: {user_prompt}. Keep the same general scene but intensify it — stronger mood, richer colors, more atmosphere. Apply the same flat cartoon style as the character. Keep ALL character elements (pose, outfit, face, size, position) 100% unchanged. Apply a gentle gaussian blur to keep the background behind the character.`,
+      `${STYLE} ${PRESERVE} FRAMING: This is a TIGHT CLOSE-UP PORTRAIT cropped at chest level. The character fills 85% of the frame. Do NOT zoom out, do NOT show more of the body, do NOT pull back the camera. Maintain the EXACT same crop, zoom, and framing as the input image. Edit ONLY the background to make it more dramatic: {user_prompt}. Keep the same general scene but intensify it — stronger mood, richer colors, more atmosphere. Apply the same flat cartoon style as the character. Keep ALL character elements (pose, outfit, face, size, position) 100% unchanged. Apply a gentle gaussian blur to keep the background behind the character.`,
     create_new:
-      `${STYLE} ${PRESERVE} Replace ONLY the background: {user_prompt}. IMPORTANT STYLE RULES: Draw the background as a simple, minimalistic flat cartoon — like a Wojak meme background. Use only flat solid color fills, thick black outlines, and very simple shapes. NO realistic detail, NO complex textures, NO photorealism, NO gradients, NO lighting effects, NO shadows, NO 3D depth. Think simple MS Paint-level drawing with clean shapes. Apply a gentle gaussian blur to the entire background so it sits behind the character. COMPOSITION: The center of the image MUST be empty and clear — no objects, no detail, no visual clutter in the middle. ALL scene elements (furniture, walls, objects, landscape features) go ONLY on the far left edge, far right edge, top edge, and bottom edge. The middle 50% of the background should be a simple flat color or very minimal. The character must remain EXACTLY the same — same size, same position, same pose, same outfit, same colors, same line-art, same zoom level. Do not alter the character in any way.`,
+      `${STYLE} ${PRESERVE} FRAMING: This is a TIGHT CLOSE-UP PORTRAIT cropped at chest level. The character fills 85% of the frame. Do NOT zoom out, do NOT show more of the body, do NOT pull back the camera, do NOT recompose the scene. Maintain the EXACT same crop, zoom, and framing as the input image. Replace ONLY the background behind the character: {user_prompt}. IMPORTANT STYLE RULES: Draw the background as a simple, minimalistic flat cartoon — like a Wojak meme background. Use only flat solid color fills, thick black outlines, and very simple shapes. NO realistic detail, NO complex textures, NO photorealism, NO gradients, NO lighting effects, NO shadows, NO 3D depth. Think simple MS Paint-level drawing with clean shapes. COMPOSITION: The center of the image MUST remain occupied by the character at their current size. ALL scene elements (furniture, walls, objects, landscape features) go ONLY on the far edges visible behind and around the character. The character must remain EXACTLY the same — same size, same position, same pose, same outfit, same colors, same line-art. Do not alter, resize, or move the character in any way.`,
   },
 };
 
@@ -239,16 +239,22 @@ export async function verifyChiaSignature(
   pubkeyHex: string,
 ): Promise<boolean> {
   try {
-    const signature = hexToBytes(signatureHex);
-    const pubkey = hexToBytes(pubkeyHex);
+    // @noble/curves v2 API: sign/verify use Point objects, not raw bytes.
+    // Must hash-to-curve manually and deserialize pubkey/sig from hex.
+    const pubPoint = bls12_381.G1.Point.fromHex(pubkeyHex);
+    const sigPoint = bls12_381.longSignatures.Signature.fromHex(signatureHex);
+    const pubBytes = pubPoint.toBytes();
 
     for (const hexDecode of [true, false]) {
       try {
         const msgHash = await chiaMessageHash(message, hexDecode);
-        const augMsg = new Uint8Array(pubkey.length + msgHash.length);
-        augMsg.set(pubkey, 0);
-        augMsg.set(msgHash, pubkey.length);
-        if (bls12_381.verify(signature, augMsg, pubkey, { DST: AUG_DST })) {
+        // AugSchemeMPL: augmented message = pubkey_bytes || message_hash
+        const augMsg = new Uint8Array(pubBytes.length + msgHash.length);
+        augMsg.set(pubBytes, 0);
+        augMsg.set(msgHash, pubBytes.length);
+        // Hash augmented message to G2 curve point
+        const msgG2 = bls12_381.G2.hashToCurve(augMsg, { DST: AUG_DST });
+        if (bls12_381.longSignatures.verify(sigPoint, msgG2, pubPoint)) {
           return true;
         }
       } catch {
@@ -256,7 +262,8 @@ export async function verifyChiaSignature(
       }
     }
     return false;
-  } catch {
+  } catch (err) {
+    console.error('[AI Auth] BLS verify error:', err);
     return false;
   }
 }
