@@ -29,6 +29,8 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     mode?: string;
     parentEnhancementId?: number;
     baseLayersJson?: string;
+    traitLabel?: string;
+    parentTraitOverrides?: Record<string, string>;
   };
   try {
     body = await request.json();
@@ -36,7 +38,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     return errorResponse('Invalid JSON', 400);
   }
 
-  const { imageBase64, category, prompt, mode, parentEnhancementId, baseLayersJson } = body;
+  const { imageBase64, category, prompt, mode, parentEnhancementId, baseLayersJson, traitLabel, parentTraitOverrides } = body;
 
   // --- Validate ---
   const walletAddress = auth.walletAddress;
@@ -144,13 +146,24 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     return errorResponse('Failed to save your edit. Try again.', 500);
   }
 
+  // --- Build cumulative trait overrides ---
+  const prevOverrides: Record<string, string> =
+    (parentTraitOverrides && typeof parentTraitOverrides === 'object') ? parentTraitOverrides : {};
+  const mergedOverrides: Record<string, string> = { ...prevOverrides };
+  if (traitLabel && typeof traitLabel === 'string' && traitLabel.trim()) {
+    mergedOverrides[cat] = traitLabel.trim();
+  }
+  const overridesJson = Object.keys(mergedOverrides).length > 0
+    ? JSON.stringify(mergedOverrides)
+    : null;
+
   // --- Record in D1 (enhancement + credit usage) ---
   try {
     const insertResult = await env.DB
       .prepare(
         `INSERT INTO ai_enhancements
-          (wallet_address, r2_key, category, prompt, constrained_prompt, reve_request_id, reve_version, parent_enhancement_id, base_layers_json)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          (wallet_address, r2_key, category, prompt, constrained_prompt, reve_request_id, reve_version, parent_enhancement_id, base_layers_json, ai_trait_overrides)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         walletAddress,
@@ -162,6 +175,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
         reveData.version ?? null,
         parentEnhancementId ?? null,
         baseLayersJson ?? null,
+        overridesJson,
       )
       .run();
 
@@ -189,5 +203,6 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     prompt: trimmedPrompt,
     creditsRemaining: newBalance,
     reveRequestId: reveData.request_id,
+    aiTraitOverrides: mergedOverrides,
   });
 };

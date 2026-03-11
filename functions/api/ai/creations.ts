@@ -17,7 +17,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   try {
     const rows = await env.DB
       .prepare(
-        `SELECT id, r2_key, category, prompt, parent_enhancement_id, created_at
+        `SELECT id, r2_key, category, prompt, parent_enhancement_id, ai_trait_overrides, created_at
          FROM ai_enhancements
          WHERE wallet_address = ?
          ORDER BY created_at DESC
@@ -26,14 +26,21 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
       .bind(wallet, limit)
       .all();
 
-    const creations = (rows.results ?? []).map((row: Record<string, unknown>) => ({
-      id: row.id,
-      r2Key: row.r2_key,
-      category: row.category,
-      prompt: row.prompt,
-      parentEnhancementId: row.parent_enhancement_id,
-      createdAt: row.created_at,
-    }));
+    const creations = (rows.results ?? []).map((row: Record<string, unknown>) => {
+      let aiTraitOverrides: Record<string, string> = {};
+      if (row.ai_trait_overrides && typeof row.ai_trait_overrides === 'string') {
+        try { aiTraitOverrides = JSON.parse(row.ai_trait_overrides); } catch { /* ignore */ }
+      }
+      return {
+        id: row.id,
+        r2Key: row.r2_key,
+        category: row.category,
+        prompt: row.prompt,
+        parentEnhancementId: row.parent_enhancement_id,
+        createdAt: row.created_at,
+        aiTraitOverrides,
+      };
+    });
 
     return jsonResponse({ creations, total: creations.length });
   } catch (err) {

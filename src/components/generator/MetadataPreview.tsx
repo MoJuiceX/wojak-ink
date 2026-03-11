@@ -25,8 +25,9 @@
  *   Mouth: MouthItem > FacialHair > MouthBase
  */
 
-import { useMemo } from 'react';
+import { useMemo, useContext } from 'react';
 import { useGeneratorOptional } from '@/contexts/GeneratorContext';
+import { useAIEnhance } from '@/contexts/AIEnhanceContext';
 import { isSelectionPathEmpty } from '@/types/generator';
 import { lookupTraitName, lookupBackgroundColorName } from '@/lib/traitNameMap';
 import { cleanDisplayName, formatDisplayLabel } from '@/lib/traitOptions';
@@ -155,10 +156,19 @@ export interface MetadataAttribute {
 
 /** Hook to compute the 7 Phase 1 metadata attributes from current selections.
  *  Safe to call outside GeneratorProvider — returns [] when no context available. */
+// AI category → CHIP-0007 trait_type mapping
+const AI_CATEGORY_TO_TRAIT: Record<string, string> = {
+  clothes: 'Clothes',
+  head: 'Head',
+  background: 'Background',
+  facewear: 'Face Wear',
+};
+
 export function useMetadataAttributes(): MetadataAttribute[] {
   const ctx = useGeneratorOptional();
   const selectedLayers = ctx?.selectedLayers;
   const selectedColors = ctx?.selectedColors;
+  const { aiTraitOverrides, isAIEnhancedMode } = useAIEnhance();
 
   return useMemo(() => {
     const selectedLayersMap = selectedLayers ?? {};
@@ -300,8 +310,21 @@ export function useMetadataAttributes(): MetadataAttribute[] {
       });
     }
 
+    // Apply AI trait overrides — replace values for AI-enhanced categories
+    if (isAIEnhancedMode && aiTraitOverrides) {
+      for (const [category, label] of Object.entries(aiTraitOverrides)) {
+        const traitType = AI_CATEGORY_TO_TRAIT[category];
+        if (!traitType || !label) continue;
+        const attr = result.find(a => a.trait_type === traitType);
+        if (attr) {
+          attr.value = label;
+          attr.source = 'map';
+        }
+      }
+    }
+
     return result;
-  }, [selectedLayers, selectedColors]);
+  }, [selectedLayers, selectedColors, isAIEnhancedMode, aiTraitOverrides]);
 }
 
 interface MetadataPreviewProps {

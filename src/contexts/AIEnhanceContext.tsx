@@ -51,6 +51,7 @@ export interface AIEnhanceContextValue {
   isAIEnhancedMode: boolean;
   acceptedOptions: Partial<Record<AICategory, AIPresetOption>>;
   acceptedFamilies: Partial<Record<AICategory, string>>;
+  aiTraitOverrides: Record<string, string>;
 
   // Creations gallery
   creations: AIEnhancement[];
@@ -58,7 +59,7 @@ export interface AIEnhanceContextValue {
   fetchCreations: () => Promise<void>;
 
   // Load a gallery creation for further enhancement
-  loadImageForEnhancing: (imageDataUrl: string) => void;
+  loadImageForEnhancing: (imageDataUrl: string, traitOverrides?: Record<string, string>) => void;
 
   // Shop
   isShopOpen: boolean;
@@ -105,6 +106,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   const [enhancedCategories, setEnhancedCategories] = useState<Set<AICategory>>(new Set());
   const [acceptedOptions, setAcceptedOptions] = useState<Partial<Record<AICategory, AIPresetOption>>>({});
   const [acceptedFamilies, setAcceptedFamilies] = useState<Partial<Record<AICategory, string>>>({});
+  const [aiTraitOverrides, setAiTraitOverrides] = useState<Record<string, string>>({});
 
   // Creations
   const [creations, setCreations] = useState<AIEnhancement[]>([]);
@@ -339,6 +341,8 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
             mode: selectedMode ?? 'enhance',
             parentEnhancementId: parentId,
             baseLayersJson: layersJson,
+            traitLabel: selectedOption?.label ?? null,
+            parentTraitOverrides: Object.keys(aiTraitOverrides).length > 0 ? aiTraitOverrides : undefined,
           }),
         });
       };
@@ -378,7 +382,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsEnhancing(false);
     }
-  }, [address, selectedMode, ensureAuthenticated, handleAuthError]);
+  }, [address, selectedMode, selectedOption, aiTraitOverrides, ensureAuthenticated, handleAuthError]);
 
   // --- Accept result ---
   const acceptResult = useCallback(() => {
@@ -388,6 +392,10 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     setEnhancedCategories((prev) => new Set([...prev, currentResult.category]));
     setAcceptedOptions((prev) => ({ ...prev, [currentResult.category]: selectedOption }));
     setAcceptedFamilies((prev) => ({ ...prev, [currentResult.category]: selectedFamily?.label ?? '' }));
+    // Update cumulative trait overrides from the server response
+    if (currentResult.aiTraitOverrides && Object.keys(currentResult.aiTraitOverrides).length > 0) {
+      setAiTraitOverrides(currentResult.aiTraitOverrides);
+    }
   }, [currentResult, selectedOption, selectedFamily]);
 
   // --- Reset ---
@@ -396,6 +404,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     setEnhancedCategories(new Set());
     setAcceptedOptions({});
     setAcceptedFamilies({});
+    setAiTraitOverrides({});
   }, []);
 
   const clearResult = useCallback(() => setCurrentResult(null), []);
@@ -443,9 +452,14 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   }, [address, ensureAuthenticated, handleAuthError]);
 
   // --- Load gallery creation for further enhancement ---
-  const loadImageForEnhancing = useCallback((imageDataUrl: string) => {
+  const loadImageForEnhancing = useCallback((imageDataUrl: string, traitOverrides?: Record<string, string>) => {
     setEnhancedImage(imageDataUrl);
-    setEnhancedCategories(new Set()); // Reset — we don't know prior edits
+    // Restore prior AI edits from the creation's stored overrides
+    const overrides = traitOverrides ?? {};
+    setAiTraitOverrides(overrides);
+    setEnhancedCategories(new Set(Object.keys(overrides) as AICategory[]));
+    setAcceptedOptions({});
+    setAcceptedFamilies({});
     setIsLightboxOpen(true);
     setWizardStep('category');
     setSelectedCategory(null);
@@ -490,6 +504,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     isAIEnhancedMode,
     acceptedOptions,
     acceptedFamilies,
+    aiTraitOverrides,
     creations,
     isLoadingCreations,
     fetchCreations,

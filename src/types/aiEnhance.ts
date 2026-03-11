@@ -44,7 +44,7 @@ export const AI_CATEGORIES: Record<AICategory, AICategoryConfig> = {
   clothes:    { label: 'Clothes',    icon: '👕', freedom: 'enhance' },
   head:       { label: 'Head',       icon: '🎩', freedom: 'enhance' },
   facewear:   { label: 'Facewear',   icon: '🎭', freedom: 'free' },
-  background: { label: 'Background', icon: '🖼', freedom: 'free' },
+  background: { label: 'Background', icon: '🖼', freedom: 'enhance' },
 };
 
 /** Categories available in the AI wizard. Facewear excluded — too risky for AI edits. */
@@ -57,6 +57,7 @@ export interface AIEnhancement {
   prompt: string;
   parentEnhancementId: number | null;
   createdAt: string;
+  aiTraitOverrides: Record<string, string>;
 }
 
 export interface AIEnhanceResult {
@@ -67,6 +68,7 @@ export interface AIEnhanceResult {
   prompt: string;
   creditsRemaining: number;
   reveRequestId?: string;
+  aiTraitOverrides: Record<string, string>;
 }
 
 export interface AICreditBundle {

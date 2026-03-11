@@ -40,7 +40,7 @@ export function AICreationsGallery({ isOpen, onClose }: AICreationsGalleryProps)
       const reader = new FileReader();
       reader.onload = () => {
         const dataUrl = reader.result as string;
-        loadImageForEnhancing(dataUrl);
+        loadImageForEnhancing(dataUrl, creation.aiTraitOverrides);
         setSelectedCreation(null);
         onClose();
       };
