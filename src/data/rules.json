@@ -442,7 +442,11 @@
       },
       "then": [
         { "action": "disable", "target": "MouthItem", "reason": "Deselect Mask" },
-        { "action": "disable", "target": "FacialHair", "reason": "Deselect Mask" }
+        { "action": "clear", "target": "MouthItem" },
+        { "action": "force", "target": "MouthItem", "value": "" },
+        { "action": "disable", "target": "FacialHair", "reason": "Deselect Mask" },
+        { "action": "clear", "target": "FacialHair" },
+        { "action": "force", "target": "FacialHair", "value": "" }
       ]
     },
     {

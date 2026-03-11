@@ -28,6 +28,7 @@ import { useLayout } from '@/hooks/useLayout';
 import { isSelectionPathEmpty, isFavoriteV2 } from '@/types/generator';
 import type { SelectionsSnapshot } from '@/types/generator';
 import { exportImage } from '@/services/canvasRenderer';
+import { toastService } from '@/services/toastService';
 import { useMetadataAttributes } from './MetadataPreview';
 import { MintFlowModal } from './MintFlowModal';
 import { GeneratorInfo } from './GeneratorInfo';
@@ -244,6 +245,8 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       prepareMint(imageBlob, layersForApi, colorsForApi, effectiveMintType, aiData);
     } catch (err) {
       console.error('[ActionBar] Failed to prepare mint:', err);
+      const msg = err instanceof Error ? err.message : 'Failed to prepare image for minting.';
+      toastService.error(msg, { duration: 8000 });
     }
   }, [isWalletConnected, canExport, has7Traits, selectedLayers, selectedColors, hasFreeMintsAvailable, mintType, connect, prepareMint, g2Selections, isAIEnhancedMode, enhancedImage, acceptedOptions, acceptedFamilies, enhancedCategories]);
 

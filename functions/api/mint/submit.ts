@@ -144,6 +144,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
   }
 
+  // Base layer is required — prevents minting faceless Wojaks
+  if (!selectedLayers['Base'] || !selectedLayers['Base'].trim()) {
+    return errorResponse('Base layer is required', 400);
+  }
+
   // Validate layer names and paths
   for (const [layer, path] of Object.entries(selectedLayers)) {
     if (!VALID_LAYER_NAMES.has(layer)) {

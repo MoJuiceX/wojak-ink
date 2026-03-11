@@ -50,7 +50,23 @@ function evictOldestIfNeeded(): void {
   }
 }
 
-async function loadImage(src: string): Promise<HTMLImageElement> {
+function loadImageOnce(src: string): Promise<HTMLImageElement> {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      evictOldestIfNeeded();
+      imageCache.set(src, img);
+      resolve(img);
+    };
+    img.onerror = () => {
+      reject(new Error(`Failed to load image: ${src}`));
+    };
+    img.src = src;
+  });
+}
+
+async function loadImage(src: string, retries = 2): Promise<HTMLImageElement> {
   const cached = imageCache.get(src);
   if (cached) {
     // LRU: move to end by re-inserting (Map maintains insertion order)
@@ -62,24 +78,22 @@ async function loadImage(src: string): Promise<HTMLImageElement> {
   const loading = loadingPromises.get(src);
   if (loading) return loading;
 
-  const promise = new Promise<HTMLImageElement>((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-
-    img.onload = () => {
-      evictOldestIfNeeded();
-      imageCache.set(src, img);
-      loadingPromises.delete(src);
-      resolve(img);
-    };
-
-    img.onerror = () => {
-      loadingPromises.delete(src);
-      reject(new Error(`Failed to load image: ${src}`));
-    };
-
-    img.src = src;
-  });
+  const promise = (async () => {
+    let lastError: Error | undefined;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        return await loadImageOnce(src);
+      } catch (err) {
+        lastError = err as Error;
+        loadingPromises.delete(src);
+        if (attempt < retries) {
+          // Brief pause before retry (200ms, 400ms)
+          await new Promise(r => setTimeout(r, 200 * (attempt + 1)));
+        }
+      }
+    }
+    throw lastError;
+  })();
 
   loadingPromises.set(src, promise);
   return promise;
@@ -2903,7 +2917,23 @@ export async function exportImage(
   });
 
   type ExportLoaded = RenderLayer & { image: HTMLImageElement | null; isSolidBg: boolean; overlayImage: HTMLImageElement | null };
-  const loadedLayers = (await Promise.all(loadPromises)).filter((l) => l !== null) as ExportLoaded[];
+  const settled = await Promise.all(loadPromises);
+  const loadedLayers = settled.filter((l) => l !== null) as ExportLoaded[];
+
+  // Every layer that was expected to render must load successfully.
+  // If ANY layer fails to load (network glitch, CDN timeout), abort rather
+  // than exporting a broken image that could be minted as an NFT.
+  // G2 layers and solid backgrounds don't need image loads — skip those.
+  const expectedNames = resolvedLayers
+    .filter((l) => !l.g2 && !l.path?.includes(BACKGROUND_SOLID_PATH))
+    .map((l) => l.layerName);
+  const loadedNames = new Set(loadedLayers.map((l) => l.layerName));
+  const failedLayers = expectedNames.filter((name) => !loadedNames.has(name));
+  if (failedLayers.length > 0) {
+    throw new Error(
+      `Layer${failedLayers.length > 1 ? 's' : ''} failed to load: ${failedLayers.join(', ')}. Please check your connection and try again.`
+    );
+  }
 
   loadedLayers.sort((a, b) => a.zIndex - b.zIndex);
 

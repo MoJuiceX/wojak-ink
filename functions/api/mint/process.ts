@@ -713,7 +713,7 @@ export async function finalizeJob(env: ProcessEnv, jobId: number): Promise<void>
       'SELECT did_id, onboarding_minted FROM game_players WHERE wallet_address = ?'
     ).bind(job.wallet_address).first<{ did_id: string; onboarding_minted: number }>();
 
-    if (player && !player.onboarding_minted) {
+    if (player && !player.onboarding_minted && job.mint_type !== 'free') {
       await env.DB.batch([
         env.DB.prepare(
           "UPDATE game_players SET onboarding_minted = 1, updated_at = datetime('now') WHERE wallet_address = ? AND onboarding_minted = 0"

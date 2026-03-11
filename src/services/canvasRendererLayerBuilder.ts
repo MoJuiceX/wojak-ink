@@ -925,6 +925,7 @@ export function buildRenderLayers(selectedLayers: SelectedLayers, g2Selections?:
         break;
 
       case 'FacialHair':
+        if (hasBandana) skipLayer = true;
         if (hasCenturion && pathContains(path, 'stach')) zIndex = LAYER_Z_INDEX.Head + 1;
         // Neckbeard + suit: left 42.6% under suit, right on top
         if (pathContains(path, 'neckbeard') && (isProofOfPrayer(selectedLayers) || isGopherSuit(selectedLayers) || isGooseSuit(selectedLayers))) {
