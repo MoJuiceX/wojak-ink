@@ -1,17 +1,33 @@
 // src/components/generator/ai/AICreditsShop.tsx
 
-import { useState, useEffect } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { useAIEnhance } from '@/contexts/AIEnhanceContext';
 import { AI_CREDIT_BUNDLES } from '@/types/aiEnhance';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Check, Loader2, Clock, Shield } from 'lucide-react';
 import { useSageWallet } from '@/sage-wallet';
 
 const BASE_PRICE_PER_CREDIT = 0.10; // XCH — tier 1 single credit
 const loadConfetti = () => import('canvas-confetti').then(m => m.default);
 
 type PurchaseState = 'idle' | 'buying' | 'sending' | 'confirming' | 'success' | 'error';
+
+const DYK_TIPS = [
+  'Buying a Wojak Farmers Plot NFT on the secondary market earns you free AI credits.',
+  'Buying Wojak Farmers Plot NFTs also earns you free mint credits for the generator.',
+  'You can vote for your favorite Wojaks in Fight Club \u2014 fading and glazing earns you power points.',
+  'Your first image created in the generator earns you a welcome bonus of free mint credits.',
+  'Battling your Wojaks against each other is coming soon. Stay tuned.',
+  'Check the leaderboard to see all your power points and how you rank against others.',
+  'With over 1 billion possible combinations, no two Wojaks look alike.',
+  'AI-enhanced Wojaks can be chained \u2014 enhance an already enhanced creation for unique results.',
+];
+
+/** Rotate through tips every 15 seconds */
+function getDYKIndex(elapsed: number): number {
+  return Math.floor(elapsed / 15) % DYK_TIPS.length;
+}
 
 export function AICreditsShop() {
   const { isShopOpen, closeShop, balance, refetchBalance, sessionToken, ensureAuthenticated, reauthenticate } = useAIEnhance();
@@ -23,9 +39,23 @@ export function AICreditsShop() {
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
   const [purchaseSuccess, setPurchaseSuccess] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [confirmElapsed, setConfirmElapsed] = useState(0);
+  const confirmTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const selectedBundle = AI_CREDIT_BUNDLES.find((b) => b.tier === selectedTier);
   const isPurchasing = purchaseState !== 'idle' && purchaseState !== 'success' && purchaseState !== 'error';
+
+  // Tick elapsed timer during confirmation polling
+  useEffect(() => {
+    if (purchaseState === 'confirming') {
+      setConfirmElapsed(0);
+      confirmTimerRef.current = setInterval(() => setConfirmElapsed(s => s + 1), 1000);
+    } else {
+      if (confirmTimerRef.current) clearInterval(confirmTimerRef.current);
+      confirmTimerRef.current = null;
+    }
+    return () => { if (confirmTimerRef.current) clearInterval(confirmTimerRef.current); };
+  }, [purchaseState]);
 
   // On shop open, check for any pending purchase that may have been paid
   // while the user was away (e.g. closed browser during confirmation).
@@ -364,8 +394,85 @@ export function AICreditsShop() {
           })}
         </div>
 
-        {/* Status message */}
-        {statusMessage && (
+        {/* Confirmation progress tracker */}
+        <AnimatePresence mode="wait">
+          {purchaseState === 'confirming' && (
+            <motion.div
+              className="ai-shop-confirm-tracker"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              key="confirm-tracker"
+            >
+              {/* Steps */}
+              <div className="ai-shop-steps">
+                <ConfirmStep
+                  icon={<Check size={14} />}
+                  label="Payment sent"
+                  status="done"
+                />
+                <ConfirmStep
+                  icon={confirmElapsed >= 90 ? <Check size={14} /> : <Loader2 size={14} className="ai-shop-spinner" />}
+                  label={`Blockchain confirming${confirmElapsed > 0 ? ` (${confirmElapsed}s)` : ''}`}
+                  status={confirmElapsed >= 90 ? 'done' : 'active'}
+                />
+                <ConfirmStep
+                  icon={confirmElapsed >= 90 ? <Loader2 size={14} className="ai-shop-spinner" /> : <Clock size={14} />}
+                  label="Verifying balance"
+                  status={confirmElapsed >= 90 ? 'active' : 'pending'}
+                />
+              </div>
+
+              {/* Reassurance message */}
+              <div className="ai-shop-reassurance">
+                <Shield size={14} />
+                <span>
+                  Your XCH has been sent. Your credit{selectedBundle && selectedBundle.credits !== 1 ? 's are' : ' is'} guaranteed
+                  {' '}&mdash; the blockchain just needs a moment to confirm.
+                </span>
+              </div>
+
+              {/* Rotating "Did you know?" tips */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  className="ai-shop-tip"
+                  key={getDYKIndex(confirmElapsed)}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <span className="ai-shop-tip-label">Did you know?</span>
+                  {' '}{DYK_TIPS[getDYKIndex(confirmElapsed)]}
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Close-safe message after 2 minutes */}
+              {confirmElapsed >= 120 && (
+                <motion.p
+                  className="text-xs text-center text-secondary"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  You can safely close this window and come back later. Your credits will be waiting for you.
+                </motion.p>
+              )}
+
+              {/* Progress bar */}
+              <div className="ai-shop-progress-track">
+                <motion.div
+                  className="ai-shop-progress-fill"
+                  initial={{ width: '5%' }}
+                  animate={{ width: `${Math.min(95, 5 + confirmElapsed * 0.5)}%` }}
+                  transition={{ ease: 'linear', duration: 1 }}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Status message (for non-confirming states) */}
+        {statusMessage && purchaseState !== 'confirming' && (
           <p className="text-sm text-center text-secondary">
             {statusMessage}
           </p>
@@ -416,5 +523,19 @@ export function AICreditsShop() {
         </p>
       </div>
     </Lightbox>
+  );
+}
+
+/** Individual step in the confirmation tracker */
+function ConfirmStep({ icon, label, status }: {
+  icon: React.ReactNode;
+  label: string;
+  status: 'done' | 'active' | 'pending';
+}) {
+  return (
+    <div className={`ai-shop-step ai-shop-step--${status}`}>
+      <span className="ai-shop-step-icon">{icon}</span>
+      <span className="ai-shop-step-label">{label}</span>
+    </div>
   );
 }
