@@ -728,16 +728,30 @@
             (aiBalance > 0 ? ' \u00b7 <span style="color:var(--cyan)">' + aiBalance + ' AI credit' + (aiBalance !== 1 ? 's' : '') + '</span>' : '') +
           '</span>' +
         '</div>' +
+        // AI credits cutoff: trades on or after 2026-03-09 earn floor(priceXch) AI credits
+        var AI_CREDITS_CUTOFF = '2026-03-09';
+        var hasAnyAI = purchases.some(function(p) {
+          return p.eventType === 'trade' && p.priceXch >= 1 && p.eventTimestamp >= AI_CREDITS_CUTOFF;
+        });
+
         (purchases.length > 0 ?
-          '<table class="purchase-table"><thead><tr><th>Event</th><th>Price (XCH)</th><th>Credits</th></tr></thead><tbody>' +
+          '<table class="purchase-table"><thead><tr><th>Event</th><th>Price (XCH)</th><th>Credits</th>' +
+            (hasAnyAI ? '<th style="color:var(--cyan)">AI</th>' : '') +
+          '</tr></thead><tbody>' +
           purchases.map(function(p, i) {
+            var aiCredits = (p.eventType === 'trade' && p.priceXch >= 1 && p.eventTimestamp >= AI_CREDITS_CUTOFF) ? Math.floor(p.priceXch) : 0;
+            var aiCell = hasAnyAI
+              ? (aiCredits > 0
+                ? '<td class="credits" style="color:var(--cyan)">' + aiCredits + '</td>'
+                : '<td class="credits" style="color:var(--text3)">\u2014</td>')
+              : '';
             // Special event: Holder Airdrop
             if (p.eventType === 'holder_airdrop') {
               return '<tr><td><div class="nft-cell">' +
                 '<div class="nft-thumb-placeholder" style="display:flex;align-items:center;justify-content:center;font-size:22px;background:rgba(255,107,0,0.12);border:1px solid rgba(255,107,0,0.25)">\ud83e\ude82</div>' +
                 '<div><span class="nft-link" style="cursor:default;color:var(--primary)">Holder Airdrop</span>' +
                 '<span style="display:block;font-size:10px;color:var(--text3);margin-top:1px">Airdrop for Plot holders</span></div>' +
-                '</div></td><td class="price" style="color:var(--text3)">\u2014</td><td class="credits">' + Math.floor(p.creditsEarned || 0) + '</td></tr>';
+                '</div></td><td class="price" style="color:var(--text3)">\u2014</td><td class="credits">' + Math.floor(p.creditsEarned || 0) + '</td>' + aiCell + '</tr>';
             }
             // Special events: Vote Reward, First Creation Bonus, etc.
             var special = SPECIAL_EVENTS[p.nftId];
@@ -746,7 +760,7 @@
                 '<div class="nft-thumb-placeholder" style="display:flex;align-items:center;justify-content:center;font-size:22px;background:' + special.color + ';border:1px solid ' + special.border + '">' + special.emoji + '</div>' +
                 '<div><span class="nft-link" style="cursor:default;color:var(--text)" title="' + special.desc + '">' + special.name + '</span>' +
                 '<span style="display:block;font-size:10px;color:var(--text3);margin-top:1px">' + special.desc + '</span></div>' +
-                '</div></td><td class="price" style="color:var(--text3)">\u2014</td><td class="credits">' + Math.floor(p.creditsEarned || 0) + '</td></tr>';
+                '</div></td><td class="price" style="color:var(--text3)">\u2014</td><td class="credits">' + Math.floor(p.creditsEarned || 0) + '</td>' + aiCell + '</tr>';
             }
             // Regular trade event
             var name = p.nftName || truncateId(p.nftId, 12, 8);
@@ -754,7 +768,7 @@
             return '<tr><td><div class="nft-cell">' +
               '<div class="nft-thumb-placeholder" data-nft-idx="' + i + '"></div>' +
               '<div><a href="' + MINTGARDEN_NFT + p.nftId + '" target="_blank" rel="noopener" class="nft-link" data-nft-name="' + i + '">' + name + '</a></div>' +
-              '</div></td><td class="price">' + priceDisplay + '</td><td class="credits">' + Math.floor(p.creditsEarned || 0) + '</td></tr>';
+              '</div></td><td class="price">' + priceDisplay + '</td><td class="credits">' + Math.floor(p.creditsEarned || 0) + '</td>' + aiCell + '</tr>';
           }).join('') +
           '</tbody></table>'
         : '<p class="expand-summary" style="margin-top:8px">No credit-earning purchases.</p>');
