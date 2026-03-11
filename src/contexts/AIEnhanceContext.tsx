@@ -530,3 +530,8 @@ export function useAIEnhance(): AIEnhanceContextValue {
   }
   return ctx;
 }
+
+/** Safe version that returns null outside AIEnhanceProvider (for shared hooks). */
+export function useAIEnhanceOptional(): AIEnhanceContextValue | null {
+  return useContext(AIEnhanceContext);
+}

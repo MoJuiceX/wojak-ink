@@ -27,7 +27,7 @@
 
 import { useMemo, useContext } from 'react';
 import { useGeneratorOptional } from '@/contexts/GeneratorContext';
-import { useAIEnhance } from '@/contexts/AIEnhanceContext';
+import { useAIEnhanceOptional } from '@/contexts/AIEnhanceContext';
 import { isSelectionPathEmpty } from '@/types/generator';
 import { lookupTraitName, lookupBackgroundColorName } from '@/lib/traitNameMap';
 import { cleanDisplayName, formatDisplayLabel } from '@/lib/traitOptions';
@@ -168,7 +168,9 @@ export function useMetadataAttributes(): MetadataAttribute[] {
   const ctx = useGeneratorOptional();
   const selectedLayers = ctx?.selectedLayers;
   const selectedColors = ctx?.selectedColors;
-  const { aiTraitOverrides, isAIEnhancedMode } = useAIEnhance();
+  const aiCtx = useAIEnhanceOptional();
+  const aiTraitOverrides = aiCtx?.aiTraitOverrides;
+  const isAIEnhancedMode = aiCtx?.isAIEnhancedMode ?? false;
 
   return useMemo(() => {
     const selectedLayersMap = selectedLayers ?? {};
