@@ -135,7 +135,7 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
       <div className="ai-prompt-layout">
         {wojakPreview}
         <div className="ai-prompt-content">
-          <div className="grid grid-cols-2 gap-3">
+          <div className={`grid gap-3${isBackgroundCategory ? ' grid-cols-1' : ' grid-cols-2'}`}>
             <motion.button
               type="button"
               className={`ai-family-card${!hasLayer ? ' ai-family-card--disabled' : ''}`}
@@ -157,21 +157,22 @@ export function AIPromptBuilder({ currentImage }: AIPromptBuilderProps) {
               </span>
             </motion.button>
 
-            <motion.button
-              type="button"
-              className="ai-family-card"
-              onClick={() => handleModeSelect('create_new')}
-              whileHover={prefersReducedMotion ? {} : { scale: 1.03 }}
-              whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
-            >
-              <span className="ai-family-emoji">&#127195;</span>
-              <span className="ai-family-name">
-                {isBackgroundCategory ? 'New scene' : `Create new ${categoryConfig.label.toLowerCase()}`}
-              </span>
-              <span className="ai-family-desc">
-                {isBackgroundCategory ? 'Replace with fresh background' : 'Start from scratch'}
-              </span>
-            </motion.button>
+            {/* Create new — disabled for backgrounds (Reve recomposes/zooms the scene) */}
+            {!isBackgroundCategory && (
+              <motion.button
+                type="button"
+                className="ai-family-card"
+                onClick={() => handleModeSelect('create_new')}
+                whileHover={prefersReducedMotion ? {} : { scale: 1.03 }}
+                whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
+              >
+                <span className="ai-family-emoji">&#127195;</span>
+                <span className="ai-family-name">
+                  {`Create new ${categoryConfig.label.toLowerCase()}`}
+                </span>
+                <span className="ai-family-desc">Start from scratch</span>
+              </motion.button>
+            )}
           </div>
         </div>
       </div>
