@@ -69,10 +69,18 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     }, 202);
   }
 
+  // Look up the prior balance snapshot so we check the delta, not absolute balance.
+  // This enables safe address reuse — addresses may have balances from prior purchases.
+  const addrInfo = await env.DB
+    .prepare(`SELECT balance_at_assignment FROM ai_payment_addresses WHERE address = ?`)
+    .bind(row.payment_address)
+    .first<{ balance_at_assignment: number | null }>();
+  const priorBalance = addrInfo?.balance_at_assignment ?? 0;
+
   // Single check — no polling loop. Client handles retry timing.
   const addrBalance = await getAddressBalance(row.payment_address, env.SPACESCAN_API_KEY);
 
-  if (addrBalance === null || addrBalance < row.xch_paid_mojos) {
+  if (addrBalance === null || (addrBalance - priorBalance) < row.xch_paid_mojos) {
     return jsonResponse({
       confirmed: false,
       message: 'Payment not yet detected on-chain.',
@@ -80,14 +88,16 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     }, 202);
   }
 
-  // Payment detected — confirm the purchase
-  await env.DB
-    .prepare(
+  // Payment detected — confirm the purchase and release the address back to the pool
+  await env.DB.batch([
+    env.DB.prepare(
       `UPDATE ai_credit_purchases SET status = 'confirmed', confirmed_at = datetime('now')
        WHERE id = ?`
-    )
-    .bind(purchaseId)
-    .run();
+    ).bind(purchaseId),
+    env.DB.prepare(
+      `UPDATE ai_payment_addresses SET purchase_id = NULL WHERE address = ?`
+    ).bind(row.payment_address),
+  ]);
 
   return jsonResponse({
     confirmed: true,

@@ -50,21 +50,30 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     return jsonResponse({ hasPending: true, purchaseId: row.id, confirmed: false });
   }
 
-  // Check on-chain balance
+  // Look up the prior balance snapshot for delta-based confirmation
+  const addrInfo = await env.DB
+    .prepare(`SELECT balance_at_assignment FROM ai_payment_addresses WHERE address = ?`)
+    .bind(row.payment_address)
+    .first<{ balance_at_assignment: number | null }>();
+  const priorBalance = addrInfo?.balance_at_assignment ?? 0;
+
+  // Check on-chain balance delta (not absolute — address may have prior balances)
   const addrBalance = await getAddressBalance(row.payment_address, env.SPACESCAN_API_KEY);
 
-  if (addrBalance === null || addrBalance < row.xch_paid_mojos) {
+  if (addrBalance === null || (addrBalance - priorBalance) < row.xch_paid_mojos) {
     return jsonResponse({ hasPending: true, purchaseId: row.id, confirmed: false });
   }
 
-  // Payment detected — confirm
-  await env.DB
-    .prepare(
+  // Payment detected — confirm and release address back to pool
+  await env.DB.batch([
+    env.DB.prepare(
       `UPDATE ai_credit_purchases SET status = 'confirmed', confirmed_at = datetime('now')
        WHERE id = ?`
-    )
-    .bind(row.id)
-    .run();
+    ).bind(row.id),
+    env.DB.prepare(
+      `UPDATE ai_payment_addresses SET purchase_id = NULL WHERE address = ?`
+    ).bind(row.payment_address),
+  ]);
 
   return jsonResponse({
     hasPending: true,

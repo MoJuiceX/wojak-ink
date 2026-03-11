@@ -1,5 +1,5 @@
 // functions/api/ai/credits/buy.ts
-import { jsonResponse, errorResponse, optionsResponse, AI_CREDIT_BUNDLES, requireAuth, expireAndReleasePurchase } from '../_shared';
+import { jsonResponse, errorResponse, optionsResponse, AI_CREDIT_BUNDLES, requireAuth, expireAndReleasePurchase, getAddressBalance } from '../_shared';
 import type { AIEnv } from '../_shared';
 
 const PURCHASE_EXPIRY_MINUTES = 30;
@@ -115,10 +115,14 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
 
   const purchaseId = result.meta?.last_row_id;
 
-  // Mark the address as assigned to this purchase
+  // Snapshot current on-chain balance so confirmation can check the delta
+  // (addresses may have balances from prior confirmed purchases).
+  const priorBalance = await getAddressBalance(addrRow.address, env.SPACESCAN_API_KEY) ?? 0;
+
+  // Mark the address as assigned to this purchase with its prior balance
   await env.DB
-    .prepare(`UPDATE ai_payment_addresses SET purchase_id = ? WHERE id = ?`)
-    .bind(purchaseId, addrRow.id)
+    .prepare(`UPDATE ai_payment_addresses SET purchase_id = ?, balance_at_assignment = ? WHERE id = ?`)
+    .bind(purchaseId, priorBalance, addrRow.id)
     .run();
 
   return jsonResponse({
