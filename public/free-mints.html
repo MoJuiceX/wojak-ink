@@ -563,6 +563,8 @@
     var hasMore = true;
     var loadingMore = false;
     var userBalance = null; // from /api/credits/balance
+    var userAIBalance = null; // from /api/ai/balance
+    var aiBalanceCache = {}; // wallet -> ai balance
 
     function getConnectedWallet() {
       try {
@@ -656,6 +658,20 @@
       }
     }
 
+    async function fetchAIBalance(wallet) {
+      if (aiBalanceCache[wallet] !== undefined) return aiBalanceCache[wallet];
+      try {
+        var res = await fetch('/api/ai/balance?wallet=' + encodeURIComponent(wallet));
+        if (!res.ok) { aiBalanceCache[wallet] = null; return null; }
+        var data = await res.json();
+        aiBalanceCache[wallet] = data;
+        return data;
+      } catch (_) {
+        aiBalanceCache[wallet] = null;
+        return null;
+      }
+    }
+
     async function fetchLeaderboard(offset, limit) {
       offset = offset ?? 0;
       limit = limit || PAGE_SIZE;
@@ -701,10 +717,16 @@
         return;
       }
 
+      // Fetch real AI balance for this wallet
+      var aiData = await fetchAIBalance(row.wallet);
+      var aiBalance = aiData ? aiData.balance : 0;
+
       inner.innerHTML =
         '<div class="expand-header">' +
           '<a href="' + SPACESCAN_ADDR + row.wallet + '" target="_blank" rel="noopener">View wallet on Spacescan</a>' +
-          '<span class="expand-summary">' + mintsUsed + ' free mint' + (mintsUsed !== 1 ? 's' : '') + ' used \u00b7 ' + yourWojakBought + ' paid mint' + (yourWojakBought !== 1 ? 's' : '') + '</span>' +
+          '<span class="expand-summary">' + mintsUsed + ' free mint' + (mintsUsed !== 1 ? 's' : '') + ' used \u00b7 ' + yourWojakBought + ' paid mint' + (yourWojakBought !== 1 ? 's' : '') +
+            (aiBalance > 0 ? ' \u00b7 <span style="color:var(--cyan)">' + aiBalance + ' AI credit' + (aiBalance !== 1 ? 's' : '') + '</span>' : '') +
+          '</span>' +
         '</div>' +
         (purchases.length > 0 ?
           '<table class="purchase-table"><thead><tr><th>Event</th><th>Price (XCH)</th><th>Credits</th></tr></thead><tbody>' +
@@ -809,7 +831,9 @@
         document.getElementById('personal-card-addr').textContent = truncateWallet(connectedWallet);
         var grid = document.getElementById('personal-card-grid');
 
-        if (userRow || userBalance) {
+        var aiAvailable = userAIBalance ? userAIBalance.balance : 0;
+
+        if (userRow || userBalance || aiAvailable > 0) {
           var rank = userRow ? userRow.rank : '\u2014';
           var credits = userBalance ? userBalance.earned : (userRow ? userRow.earned : 0);
           var available = userBalance ? userBalance.freeMints : (userRow ? userRow.freeMints : 0);
@@ -826,7 +850,12 @@
             '<div class="stat-item">' +
               '<span class="stat-value">' + available + '</span>' +
               '<span class="stat-label">Free Mints</span>' +
-            '</div>';
+            '</div>' +
+            (aiAvailable > 0 ?
+              '<div class="stat-item" style="background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.12)">' +
+                '<span class="stat-value" style="color:var(--cyan)">' + aiAvailable + '</span>' +
+                '<span class="stat-label" style="color:rgba(0,212,255,0.5)">AI Credits</span>' +
+              '</div>' : '');
 
           document.getElementById('scroll-to-rank').addEventListener('click', function() {
             var el = document.querySelector('.user-row');
@@ -856,11 +885,13 @@
         var promises = [fetchLeaderboard(0, initialLimit)];
         if (connectedWallet) {
           promises.push(fetchBalance(connectedWallet));
+          promises.push(fetchAIBalance(connectedWallet));
         }
 
         var results = await Promise.all(promises);
         var result = results[0];
         if (results[1]) userBalance = results[1];
+        if (results[2]) userAIBalance = results[2];
 
         leaderboard = result.items;
         hasMore = result.hasMore;
@@ -936,8 +967,9 @@
         if (addr && addr !== lastDetectedWallet && leaderboard.length > 0) {
           lastDetectedWallet = addr;
           // Re-fetch both balances for real-time data, then re-render
-          fetchBalance(addr).then(function(result) {
-            if (result) userBalance = result;
+          Promise.all([fetchBalance(addr), fetchAIBalance(addr)]).then(function(results) {
+            if (results[0]) userBalance = results[0];
+            if (results[1]) userAIBalance = results[1];
             renderTable();
           });
         }
