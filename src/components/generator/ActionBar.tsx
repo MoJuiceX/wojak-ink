@@ -1,7 +1,8 @@
 /**
  * Action Bar Component
  *
- * Control buttons for randomize, undo/redo, save, export, and MINT.
+ * Row 1: Full icon toolbar (no overflow menu — all actions visible).
+ * Row 2: Mint bar with price display, free/paid toggle, and CTA button.
  */
 
 import { useState, useCallback, useEffect, useRef, useLayoutEffect, lazy, Suspense } from 'react';
@@ -14,12 +15,11 @@ import {
   Download,
   Sparkles,
   Wallet,
-  Coins,
   Trophy,
   Info,
-  MoreHorizontal,
   Tag,
   Wand2,
+  Images,
 } from 'lucide-react';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { useMint } from '@/contexts/MintContext';
@@ -143,8 +143,6 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const [showGeneratorInfo, setShowGeneratorInfo] = useState(false);
   const [isFirstVisitInfo, setIsFirstVisitInfo] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
-  const [showOverflowMenu, setShowOverflowMenu] = useState(false);
-  const overflowMenuRef = useRef<HTMLDivElement>(null);
   const lastRandomizeRef = useRef<number>(0);
   const { openLightbox, creations, isAIEnhancedMode, enhancedImage, isLightboxOpen, isShopOpen, acceptedOptions, acceptedFamilies, enhancedCategories, aiTraitOverrides } = useAIEnhance();
   const [showCreationsGallery, setShowCreationsGallery] = useState(false);
@@ -162,20 +160,8 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     }
   }, []);
 
-  useEffect(() => {
-    if (!showOverflowMenu) return;
-    const handleClick = (e: MouseEvent) => {
-      if (overflowMenuRef.current && !overflowMenuRef.current.contains(e.target as Node)) {
-        setShowOverflowMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [showOverflowMenu]);
-
   // Determine mint readiness
   const isWalletConnected = walletStatus === 'connected' && !!address;
-
   const hasFreeMintsAvailable = (credits?.free_mints_available ?? 0) > 0;
 
   // Use the same consolidated trait count as the metadata panel (7 trait types)
@@ -206,7 +192,6 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       let imageBlob: Blob;
 
       if (isAIEnhancedMode && enhancedImage) {
-        // Convert AI enhanced base64 data URL to a Blob
         const res = await fetch(enhancedImage);
         if (!res.ok) throw new Error(`Failed to fetch image: HTTP ${res.status}`);
         imageBlob = await res.blob();
@@ -282,14 +267,13 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
   const handleRandomize = () => {
     const now = Date.now();
-    if (now - lastRandomizeRef.current < 300) return; // Debounce 300ms
+    if (now - lastRandomizeRef.current < 300) return;
     lastRandomizeRef.current = now;
     setIsRandomizing(true);
     randomize();
     setTimeout(() => setIsRandomizing(false), 500);
   };
 
-  // Generate the next project name
   const getNextProjectName = () => {
     const projectNumbers = favorites
       .map((f) => {
@@ -297,12 +281,10 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         return match ? parseInt(match[1], 10) : 0;
       })
       .filter((n) => n > 0);
-
     const nextNumber = projectNumbers.length > 0 ? Math.max(...projectNumbers) + 1 : 1;
     return `Wojak ${nextNumber}`;
   };
 
-  // Check if current selection already exists in favorites
   const selectionsMatch = (a: SelectionsSnapshot, b: SelectionsSnapshot): boolean => {
     const keysA = Object.keys(a) as (keyof SelectionsSnapshot)[];
     const keysB = Object.keys(b) as (keyof SelectionsSnapshot)[];
@@ -312,7 +294,6 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       const selB = b[key];
       if (!selA || !selB) return false;
       if (selA.path !== selB.path) return false;
-      // Compare G2 data if present
       if (JSON.stringify(selA.g2) !== JSON.stringify(selB.g2)) return false;
     }
     return true;
@@ -325,8 +306,6 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
 
   const handleSaveAndOpenFavorites = async () => {
     if (!hasSelection || isSaving) return;
-
-    // Only save if not already in favorites
     if (!isAlreadyInFavorites) {
       setIsSaving(true);
       try {
@@ -337,11 +316,10 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         setIsSaving(false);
       }
     }
-    // Always open favorites modal
     toggleFavorites(true);
   };
 
-  // Styled action button - icon only, primary for Export/Mint, secondary for others
+  // Icon button component
   const ActionButton = ({
     onClick,
     disabled,
@@ -349,8 +327,8 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     icon,
     label,
     badge,
-    children,
     variant: _variant = 'secondary',
+    hideOnMobile,
   }: {
     onClick: () => void;
     disabled?: boolean;
@@ -358,12 +336,12 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     icon: React.ReactNode;
     label: string;
     badge?: number;
-    children?: React.ReactNode;
     variant?: 'primary' | 'secondary';
+    hideOnMobile?: boolean;
   }) => (
     <motion.button
       type="button"
-      className={`action-btn${isActive ? ' action-btn--active' : ''}${disabled ? ' action-btn--disabled' : ''} relative flex items-center justify-center rounded-lg shrink-0 w-8 h-8`}
+      className={`action-btn${isActive ? ' action-btn--active' : ''}${disabled ? ' action-btn--disabled' : ''} relative flex items-center justify-center rounded-lg shrink-0 w-7 h-7 lg:w-8 lg:h-8${hideOnMobile ? ' hidden lg:flex' : ''}`}
       whileHover={disabled || prefersReducedMotion ? undefined : { scale: 1.02 }}
       whileTap={disabled || prefersReducedMotion ? undefined : { scale: 0.98 }}
       onClick={onClick}
@@ -373,332 +351,256 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       <div className="relative">
         {icon}
         {badge !== undefined && badge > 0 && (
-          <span
-            className="action-btn-badge absolute -top-2 -right-2 min-w-[16px] h-4 flex items-center justify-center text-[10px] font-bold rounded-full"
-          >
+          <span className="action-btn-badge absolute -top-2 -right-2 min-w-[16px] h-4 flex items-center justify-center text-[10px] font-bold rounded-full">
             {badge}
           </span>
         )}
       </div>
-      {children}
     </motion.button>
   );
 
+  // ── Mint bar state ──
+  const showFreePaidToggle = isWalletConnected && hasFreeMintsAvailable && !showMintingPaused && !isSoldOut;
+  const isFreeMint = showFreePaidToggle && mintType === 'free';
+
+  const priceDisplay = (() => {
+    if (showMintingPaused || isSoldOut) return '';
+    if (!isWalletConnected) return '';
+    const p = getTotalMintPrice(metadataAttributes, isAIEnhancedMode);
+    if (isFreeMint) {
+      const creditCost = Math.ceil(100 * p.totalXch / p.basePrice);
+      return `${creditCost} credits`;
+    }
+    return `${p.totalXch.toFixed(2)} XCH`;
+  })();
+
+  const mintCtaLabel = (() => {
+    if (showMintingPaused) return 'Soon';
+    if (isSoldOut) return 'Sold Out';
+    if (!isWalletConnected) return 'Connect';
+    if (!has7Traits) return 'Mint';
+    return 'Mint';
+  })();
+
+  const mintCtaDisabled = showMintingPaused || isSoldOut || (isWalletConnected && !has7Traits);
+
   return (
-    <div
-      className={`action-bar-container flex items-center justify-between px-1 lg:px-2 py-1.5 rounded-none lg:rounded-2xl flex-nowrap w-full ${className}`}
-    >
-      {/* Left group — utility icons (grouped to prevent layout shift when mint section changes) */}
-      <div className="flex items-center gap-0.5">
-      {/* Randomize button — always randomizes all layers + colors */}
-      <ActionBarTooltip content="Randomize">
-        <motion.button
-          type="button"
-          className="relative flex items-center justify-center rounded-lg shrink-0 w-8 h-8 bg-transparent border-none transition-all duration-300"
-          whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
-          whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
-          onClick={handleRandomize}
-          aria-label="Randomize"
-        >
-          <motion.span
-            className="text-lg block"
-            animate={isRandomizing ? {
-              scale: [1, 1.15, 1],
-              rotate: [0, -10, 10, 0],
-            } : { scale: 1, rotate: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            🎲
-          </motion.span>
-        </motion.button>
-      </ActionBarTooltip>
-
-      {/* Undo/Redo side by side */}
-      <ActionBarTooltip content="Undo">
-        <ActionButton
-          onClick={undo}
-          disabled={!canUndo}
-          icon={<Undo2 size={18} />}
-          label="Undo"
-        />
-      </ActionBarTooltip>
-      <ActionBarTooltip content="Redo">
-        <ActionButton
-          onClick={redo}
-          disabled={!canRedo}
-          icon={<Redo2 size={18} />}
-          label="Redo"
-        />
-      </ActionBarTooltip>
-
-      {/* Visual group separator */}
-      <div
-        className="h-6 w-px shrink-0 mx-0.5 bg-[var(--color-border)]"
-      />
-
-      {/* Save to favorites — desktop only in main bar (mobile: in overflow) */}
-      {isDesktop && (
-        <ActionBarTooltip content="Save">
-          <ActionButton
-            onClick={handleSaveAndOpenFavorites}
-            disabled={!hasSelection || isSaving}
-            icon={<Heart size={18} />}
-            label="Save"
-            badge={favorites.length}
-          />
-        </ActionBarTooltip>
-      )}
-
-      {/* Export button - primary */}
-      <div className="download-btn-container relative">
-        <ActionBarTooltip content="Export">
-          <ActionButton
-            variant="primary"
-            onClick={() => {
-              toggleExport(true);
-              if (hasSelection && !prefersReducedMotion) {
-                setShowDownloadSuccess(true);
-                setTimeout(() => setShowDownloadSuccess(false), 800);
-              }
-            }}
-            disabled={!hasSelection}
-            icon={<Download size={18} />}
-            label="Export"
-          />
-        </ActionBarTooltip>
-        {/* Success sparkles */}
-        <AnimatePresence>
-          {showDownloadSuccess && (
-            <div className="success-sparkles">
-              {[...Array(6)].map((_, i) => (
-                <motion.span
-                  key={i}
-                  className="sparkle"
-                  initial={{ scale: 0, x: 0, y: 0 }}
-                  animate={{
-                    scale: [0, 1, 0],
-                    x: Math.cos((i * 60 * Math.PI) / 180) * 30,
-                    y: Math.sin((i * 60 * Math.PI) / 180) * 30,
-                  }}
-                  transition={{ duration: 0.5, delay: i * 0.04 }}
-                />
-              ))}
-            </div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Enhance with AI — hidden when already in AI Enhanced mode */}
-      {!isAIEnhancedMode && (
-        <ActionBarTooltip content="Enhance with AI">
-          <ActionButton
-            onClick={handleEnhanceClick}
-            disabled={!hasSelection}
-            icon={<Wand2 size={18} />}
-            label="Enhance with AI"
-          />
-        </ActionBarTooltip>
-      )}
-
-      {/* How It Works — visible on all screens */}
-      <ActionBarTooltip content="How It Works">
-        <ActionButton
-          onClick={() => setShowGeneratorInfo(true)}
-          icon={<Info size={18} />}
-          label="How It Works"
-        />
-      </ActionBarTooltip>
-
-      {/* Overflow menu — secondary actions */}
-      <div className="relative" ref={overflowMenuRef}>
-        <ActionBarTooltip content="More" disabled={showOverflowMenu}>
-          <ActionButton
-            onClick={() => setShowOverflowMenu((v) => !v)}
-            isActive={showOverflowMenu}
-            icon={<MoreHorizontal size={18} />}
-            label="More options"
-          />
-        </ActionBarTooltip>
-        <AnimatePresence>
-          {showOverflowMenu && (
-            <motion.div
-              initial={{ opacity: 0, y: isDesktop ? 4 : -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: isDesktop ? 4 : -4 }}
-              className={`action-bar-dropdown absolute ${isDesktop ? 'bottom-full mb-2' : 'top-full mt-2'} right-0 z-50 rounded-xl overflow-hidden py-1 whitespace-nowrap`}
-            >
-              {/* Save — mobile only (desktop shows in main bar) */}
-              {!isDesktop && (
-                <button
-                  type="button"
-                  className="action-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-primary"
-                  onClick={() => {
-                    setShowOverflowMenu(false);
-                    handleSaveAndOpenFavorites();
-                  }}
-                  disabled={!hasSelection || isSaving}
-                >
-                  <Heart size={16} className="text-accent" />
-                  <span>Save</span>
-                  {favorites.length > 0 && (
-                    <span
-                      className="action-menu-item-badge ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
-                    >
-                      {favorites.length}
-                    </span>
-                  )}
-                </button>
-              )}
-
-              {/* Free Mints / Leaderboard */}
-              <button
-                type="button"
-                className="action-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-primary"
-                onClick={() => {
-                  setShowOverflowMenu(false);
-                  window.location.href = '/free-mints.html';
-                }}
-              >
-                <Trophy size={16} className="text-accent" />
-                <span>Free Mints</span>
-                {isWalletConnected && (credits?.free_mints_available ?? 0) > 0 && (
-                  <span
-                    className="action-menu-item-badge ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full"
-                  >
-                    {credits!.free_mints_available}
-                  </span>
-                )}
-              </button>
-
-              {/* Trait Prices */}
-              <button
-                type="button"
-                className="action-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-primary"
-                onClick={() => {
-                  setShowOverflowMenu(false);
-                  setShowPricing(true);
-                }}
-              >
-                <Tag size={16} className="text-accent" />
-                <span>Prices</span>
-              </button>
-
-              {/* My AI Creations */}
-              <button
-                type="button"
-                className="action-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-primary"
-                onClick={() => {
-                  setShowOverflowMenu(false);
-                  setShowCreationsGallery(true);
-                }}
-              >
-                <Wand2 size={16} className="text-accent" />
-                <span>AI Creations</span>
-                {creations.length > 0 && (
-                  <span className="action-menu-item-badge ml-auto text-xs font-bold px-1.5 py-0.5 rounded-full">
-                    {creations.length}
-                  </span>
-                )}
-              </button>
-
-              {/* Metadata toggle — desktop only */}
-              {onToggleRightPanel && (
-                <button
-                  type="button"
-                  className="action-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-primary"
-                  onClick={() => {
-                    setShowOverflowMenu(false);
-                    onToggleRightPanel();
-                  }}
-                >
-                  <span className="font-mono text-sm font-bold">{'{ }'}</span>
-                  <span>{rightPanelMode !== 'colors' ? 'Colors' : 'Metadata'}</span>
-                </button>
-              )}
-
-              {/* How It Works moved to main bar */}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-      </div>{/* end left group */}
-
-      {/* ── Mint Section ── */}
-      <div
-        className="flex items-center gap-1 lg:gap-3 pl-1 lg:pl-2 ml-0.5 lg:ml-1 border-l border-[var(--color-border)]"
-      >
-        {/* Free/Paid toggle — desktop: visibility:hidden to keep layout stable; mobile: display:none to save space */}
-        {(isWalletConnected && hasFreeMintsAvailable && !showMintingPaused) ? (
-          <ActionBarTooltip content={mintType === 'free' ? 'Switch to paid mint' : 'Switch to free mint'}>
-            <ActionButton
-              onClick={() => setMintType((t) => (t === 'free' ? 'paid' : 'free'))}
-              isActive={mintType === 'free'}
-              icon={mintType === 'free' ? <Sparkles size={18} /> : <Coins size={18} />}
-              label={mintType === 'free' ? 'Free' : 'Paid'}
-            />
-          </ActionBarTooltip>
-        ) : isDesktop ? (
-          <div style={{ width: 32, height: 32, flexShrink: 0 }} />
-        ) : null}
-
-        {/* Price display — always visible, min-width prevents layout shift */}
-        {!showMintingPaused && (() => {
-          if (isWalletConnected && hasFreeMintsAvailable && mintType === 'free') {
-            // Free mint: show credit cost
-            const price = getTotalMintPrice(metadataAttributes, isAIEnhancedMode);
-            const creditCost = Math.ceil(100 * price.totalXch / price.basePrice);
-            return (
-              <span className="text-xs font-semibold tabular-nums whitespace-nowrap text-accent" style={{ minWidth: isDesktop ? 80 : undefined, textAlign: 'center', flexShrink: 0 }}>
-                {creditCost} credits
-              </span>
-            );
-          }
-          // Paid mint (or not connected): show single total XCH
-          const price = getTotalMintPrice(metadataAttributes, isAIEnhancedMode);
-          return (
-            <span className="text-xs font-semibold tabular-nums whitespace-nowrap text-accent" style={{ minWidth: isDesktop ? 80 : undefined, textAlign: 'center', flexShrink: 0 }}>
-              {price.totalXch.toFixed(2)} XCH
-            </span>
-          );
-        })()}
-
-        {/* Mint / Connect button */}
-        {showMintingPaused ? (
-          <ActionBarTooltip content="Minting continues soon.">
-            <button
-              disabled
-              className="action-btn--paused px-4 py-1.5 rounded-lg text-sm font-semibold"
-            >
-              Soon
-            </button>
-          </ActionBarTooltip>
-        ) : !isWalletConnected ? (
-          <ActionBarTooltip content="Connect to mint">
-            <ActionButton
-              onClick={handleMintClick}
-              icon={<Wallet size={18} />}
-              label="Connect"
-            />
-          </ActionBarTooltip>
-        ) : (
-          <ActionBarTooltip
-            content={isSoldOut ? 'All 4,200 Wojaks minted!' : !has7Traits ? 'Select all 7 traits to mint' : 'Mint your Wojak'}
-          >
+    <div className={`action-bar-wrapper flex flex-col gap-1.5 w-full ${className}`}>
+      {/* ── Row 1: Icon toolbar — all actions visible, spread to fill width ── */}
+      <div className="action-bar-container flex items-center justify-between px-1.5 lg:px-2 py-1 rounded-none lg:rounded-2xl w-full">
+        {/* Left: Creation tools */}
+        <div className="flex items-center gap-px lg:gap-0.5">
+          <ActionBarTooltip content="Randomize">
             <motion.button
               type="button"
-              className="action-bar-mint-btn relative flex items-center justify-center rounded-lg shrink-0 w-8 h-8"
-              whileHover={!canMint || prefersReducedMotion ? undefined : { scale: 1.05 }}
-              whileTap={!canMint || prefersReducedMotion ? undefined : { scale: 0.95 }}
-              onClick={handleMintClick}
-              disabled={!canMint}
-              aria-label="Mint"
+              className="relative flex items-center justify-center rounded-lg shrink-0 w-7 h-7 lg:w-8 lg:h-8 bg-transparent border-none transition-all duration-300"
+              whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
+              whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
+              onClick={handleRandomize}
+              aria-label="Randomize"
             >
-              <Sparkles size={18} />
+              <motion.span
+                className="text-base lg:text-lg block"
+                animate={isRandomizing ? {
+                  scale: [1, 1.15, 1],
+                  rotate: [0, -10, 10, 0],
+                } : { scale: 1, rotate: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                🎲
+              </motion.span>
             </motion.button>
           </ActionBarTooltip>
-        )}
 
-        {/* Supply counter removed — shown in title bar instead */}
+          <ActionBarTooltip content="Undo">
+            <ActionButton onClick={undo} disabled={!canUndo} icon={<Undo2 size={16} />} label="Undo" />
+          </ActionBarTooltip>
+          <ActionBarTooltip content="Redo">
+            <ActionButton onClick={redo} disabled={!canRedo} icon={<Redo2 size={16} />} label="Redo" />
+          </ActionBarTooltip>
+
+          <div className="h-5 w-px shrink-0 mx-0.5 lg:mx-1 bg-[var(--color-border)]" />
+
+          <ActionBarTooltip content="Save">
+            <ActionButton
+              onClick={handleSaveAndOpenFavorites}
+              disabled={!hasSelection || isSaving}
+              icon={<Heart size={16} />}
+              label="Save"
+              badge={favorites.length}
+            />
+          </ActionBarTooltip>
+
+          <div className="download-btn-container relative">
+            <ActionBarTooltip content="Export">
+              <ActionButton
+                variant="primary"
+                onClick={() => {
+                  toggleExport(true);
+                  if (hasSelection && !prefersReducedMotion) {
+                    setShowDownloadSuccess(true);
+                    setTimeout(() => setShowDownloadSuccess(false), 800);
+                  }
+                }}
+                disabled={!hasSelection}
+                icon={<Download size={16} />}
+                label="Export"
+              />
+            </ActionBarTooltip>
+            <AnimatePresence>
+              {showDownloadSuccess && (
+                <div className="success-sparkles">
+                  {[...Array(6)].map((_, i) => (
+                    <motion.span
+                      key={i}
+                      className="sparkle"
+                      initial={{ scale: 0, x: 0, y: 0 }}
+                      animate={{
+                        scale: [0, 1, 0],
+                        x: Math.cos((i * 60 * Math.PI) / 180) * 30,
+                        y: Math.sin((i * 60 * Math.PI) / 180) * 30,
+                      }}
+                      transition={{ duration: 0.5, delay: i * 0.04 }}
+                    />
+                  ))}
+                </div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Enhance with AI — hidden when already in AI Enhanced mode */}
+          {!isAIEnhancedMode && (
+            <ActionBarTooltip content="Enhance with AI">
+              <ActionButton
+                onClick={handleEnhanceClick}
+                disabled={!hasSelection}
+                icon={<Wand2 size={16} />}
+                label="Enhance with AI"
+              />
+            </ActionBarTooltip>
+          )}
+        </div>
+
+        {/* Right: Info & reference tools */}
+        <div className="flex items-center gap-px lg:gap-0.5">
+          <ActionBarTooltip content="How It Works">
+            <ActionButton
+              onClick={() => setShowGeneratorInfo(true)}
+              icon={<Info size={16} />}
+              label="How It Works"
+            />
+          </ActionBarTooltip>
+
+          <ActionBarTooltip content="Free Mints">
+            <ActionButton
+              onClick={() => { window.location.href = '/free-mints.html'; }}
+              icon={<Trophy size={16} />}
+              label="Free Mints"
+              badge={isWalletConnected ? (credits?.free_mints_available ?? 0) : undefined}
+              hideOnMobile
+            />
+          </ActionBarTooltip>
+
+          <ActionBarTooltip content="Prices">
+            <ActionButton
+              onClick={() => setShowPricing(true)}
+              icon={<Tag size={16} />}
+              label="Prices"
+              hideOnMobile
+            />
+          </ActionBarTooltip>
+
+          <ActionBarTooltip content="AI Creations">
+            <ActionButton
+              onClick={() => setShowCreationsGallery(true)}
+              icon={<Images size={16} />}
+              label="AI Creations"
+              badge={creations.length || undefined}
+              hideOnMobile
+            />
+          </ActionBarTooltip>
+
+          {/* Metadata toggle — desktop only */}
+          {onToggleRightPanel && (
+            <ActionBarTooltip content={rightPanelMode !== 'colors' ? 'Colors' : 'Metadata'}>
+              <ActionButton
+                onClick={onToggleRightPanel}
+                isActive={rightPanelMode === 'metadata'}
+                icon={<span className="font-mono text-xs font-bold leading-none">{'{ }'}</span>}
+                label={rightPanelMode !== 'colors' ? 'Colors' : 'Metadata'}
+                hideOnMobile
+              />
+            </ActionBarTooltip>
+          )}
+        </div>
+      </div>
+
+      {/* ── Row 2: Mint bar — price | toggle | CTA ── */}
+      <div className="mint-bar flex items-center w-full rounded-xl overflow-hidden">
+        {/* Price & toggle section */}
+        <div className="mint-bar-info flex items-center gap-2 flex-1 min-w-0 px-3">
+          {priceDisplay ? (
+            <span className="mint-bar-price font-bold text-sm tabular-nums whitespace-nowrap">
+              {priceDisplay}
+            </span>
+          ) : !isWalletConnected && !showMintingPaused && !isSoldOut ? (
+            <span className="mint-bar-hint text-xs whitespace-nowrap">
+              Connect wallet to mint
+            </span>
+          ) : showMintingPaused ? (
+            <span className="mint-bar-hint text-xs whitespace-nowrap">
+              Minting continues soon
+            </span>
+          ) : isSoldOut ? (
+            <span className="mint-bar-hint text-xs whitespace-nowrap">
+              All 4,200 Wojaks minted
+            </span>
+          ) : !has7Traits ? (
+            <span className="mint-bar-hint text-xs whitespace-nowrap">
+              Select all traits
+            </span>
+          ) : null}
+
+          {/* Free/Paid toggle */}
+          {showFreePaidToggle && (
+            <button
+              type="button"
+              className="mint-bar-toggle flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold shrink-0"
+              onClick={() => setMintType((t) => (t === 'free' ? 'paid' : 'free'))}
+              aria-label={isFreeMint ? 'Switch to paid mint' : 'Switch to free mint'}
+            >
+              {isFreeMint ? (
+                <>
+                  <Sparkles size={12} />
+                  <span>Free</span>
+                </>
+              ) : (
+                <>
+                  <Wallet size={12} />
+                  <span>XCH</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+
+        {/* CTA button — the actual mint trigger */}
+        <motion.button
+          type="button"
+          className={`mint-bar-cta flex items-center justify-center gap-1.5 px-5 shrink-0 font-semibold text-sm${mintCtaDisabled ? ' mint-bar-cta--disabled' : ''}`}
+          whileHover={mintCtaDisabled || prefersReducedMotion ? undefined : { scale: 1.02 }}
+          whileTap={mintCtaDisabled || prefersReducedMotion ? undefined : { scale: 0.98 }}
+          onClick={handleMintClick}
+          disabled={mintCtaDisabled}
+          aria-label={mintCtaLabel}
+        >
+          {!isWalletConnected && !showMintingPaused && !isSoldOut ? (
+            <Wallet size={15} />
+          ) : (
+            <Sparkles size={15} />
+          )}
+          <span>{mintCtaLabel}</span>
+        </motion.button>
       </div>
 
       {/* Mint Flow Modal */}
