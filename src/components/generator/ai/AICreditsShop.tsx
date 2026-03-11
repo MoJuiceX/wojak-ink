@@ -14,14 +14,19 @@ const loadConfetti = () => import('canvas-confetti').then(m => m.default);
 type PurchaseState = 'idle' | 'buying' | 'sending' | 'confirming' | 'success' | 'error';
 
 const DYK_TIPS = [
-  'Buying a Wojak Farmers Plot NFT on the secondary market earns you free AI credits.',
-  'Buying Wojak Farmers Plot NFTs also earns you free mint credits for the generator.',
-  'You can vote for your favorite Wojaks in Fight Club \u2014 fading and glazing earns you power points.',
-  'Your first image created in the generator earns you a welcome bonus of free mint credits.',
-  'Battling your Wojaks against each other is coming soon. Stay tuned.',
-  'Check the leaderboard to see all your power points and how you rank against others.',
-  'With over 1 billion possible combinations, no two Wojaks look alike.',
-  'AI-enhanced Wojaks can be chained \u2014 enhance an already enhanced creation for unique results.',
+  'Buying a Wojak Farmers Plot from secondary earns you AI and mint credits.',
+  'Fading and glazing Wojaks in Fight Club increases your power level.',
+  'Your first paid mint earns you a welcome bonus of 42 free mint credits.',
+  'Wojak combat battles are coming soon \u2014 build your strongest Wojak now.',
+  'Check the leaderboard for DIDs and individual Wojaks to see your ranking.',
+  'Over 600 billion unique Wojak combinations are possible with AI enhancement.',
+  'AI enhancements can be chained \u2014 enhance an already enhanced Wojak.',
+  'Every trait and color you choose shapes your Wojak\u2019s combat identity.',
+  'Only 4,200 Farmers Plot NFTs exist, but the Wojak supply is endless.',
+  'What matters is how the community votes and how you battle in the arena.',
+  'You can export your creation as a free image without minting.',
+  'Each Wojak has a combat type, nature, and ability derived from its traits.',
+  'Save your favorite builds and come back to them anytime.',
 ];
 
 /** Rotate through tips every 15 seconds */
@@ -442,8 +447,8 @@ export function AICreditsShop() {
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <span className="ai-shop-tip-label">Did you know?</span>
-                  {' '}{DYK_TIPS[getDYKIndex(confirmElapsed)]}
+                  <span className="ai-shop-tip-label block text-center">Did you know?</span>
+                  <span className="block text-center">{DYK_TIPS[getDYKIndex(confirmElapsed)]}</span>
                 </motion.div>
               </AnimatePresence>
 
