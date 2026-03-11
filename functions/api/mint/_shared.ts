@@ -29,6 +29,7 @@ export { isValidChiaAddress } from '../../lib/validation';
 export const TOTAL_SUPPLY = 4200;
 export const FREE_MINT_CREDITS = 10000; // 100 credits in x100 units
 export const BASE_PRICE_XCH = 0.2;
+export const AI_ENHANCED_PRICE_XCH = 0.3;
 export const OFFER_EXPIRY_MINUTES = 15;
 
 // ─── Surcharge: Universal Power Curve ───

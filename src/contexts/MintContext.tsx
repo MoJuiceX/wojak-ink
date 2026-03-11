@@ -138,13 +138,14 @@ interface MintContextValue {
 
   // Pricing
   getTraitPricing: (category: string, traitDisplayName: string) => TraitPricingEntry | null;
-  getTotalMintPrice: (attrs?: MetadataAttribute[]) => TotalMintPrice;
+  getTotalMintPrice: (attrs?: MetadataAttribute[], aiEnhanced?: boolean) => TotalMintPrice;
   isTop3Trait: (category: string, traitName: string) => boolean;
   top3Traits: Record<string, string[]>;
 }
 
 const DEFAULT_MAX_SUPPLY = 4200;
 const BASE_PRICE_XCH = 0.2;
+const AI_ENHANCED_PRICE_XCH = 0.3;
 const PRICING_REFRESH_MS = 60_000;
 const MintContext = createContext<MintContextValue | null>(null);
 
@@ -272,7 +273,17 @@ export function MintProvider({ children }: { children: ReactNode }) {
     [traitPricing]
   );
 
-  const getTotalMintPrice = useCallback((overrideAttrs?: MetadataAttribute[]): TotalMintPrice => {
+  const getTotalMintPrice = useCallback((overrideAttrs?: MetadataAttribute[], aiEnhanced?: boolean): TotalMintPrice => {
+    // AI-enhanced mints: flat price, no surcharge
+    if (aiEnhanced) {
+      return {
+        basePrice: AI_ENHANCED_PRICE_XCH,
+        surchargeXch: 0,
+        surchargeTraitName: '',
+        totalXch: AI_ENHANCED_PRICE_XCH,
+      };
+    }
+
     const attrs = overrideAttrs ?? metadataAttributes;
     let maxSurcharge = 0;
     let maxSurchargeTrait = '';

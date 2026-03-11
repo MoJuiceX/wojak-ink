@@ -146,7 +146,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const [showOverflowMenu, setShowOverflowMenu] = useState(false);
   const overflowMenuRef = useRef<HTMLDivElement>(null);
   const lastRandomizeRef = useRef<number>(0);
-  const { openLightbox, creations, isAIEnhancedMode, enhancedImage, isLightboxOpen, isShopOpen, acceptedOptions, acceptedFamilies, enhancedCategories } = useAIEnhance();
+  const { openLightbox, creations, isAIEnhancedMode, enhancedImage, isLightboxOpen, isShopOpen, acceptedOptions, acceptedFamilies, enhancedCategories, aiTraitOverrides } = useAIEnhance();
   const [showCreationsGallery, setShowCreationsGallery] = useState(false);
   const [canvasImageBase64, setCanvasImageBase64] = useState<string | null>(null);
 
@@ -227,17 +227,24 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       }
       const colorsForApi: Record<string, string> = { ...(selectedColors || {}) };
 
-      // Build AI attributes from accepted options
-      const aiData = isAIEnhancedMode && enhancedCategories.size > 0
+      // Build AI attributes from cumulative trait overrides (works for fresh + resumed creations)
+      const hasOverrides = Object.keys(aiTraitOverrides).length > 0;
+      const aiData = isAIEnhancedMode && (hasOverrides || enhancedCategories.size > 0)
         ? {
             aiEnhanced: true,
-            aiAttributes: Object.entries(acceptedOptions)
-              .filter(([, opt]) => opt != null)
-              .map(([category, opt]) => ({
-                category,
-                label: opt!.label,
-                familyLabel: (acceptedFamilies as Record<string, string>)[category] ?? '',
-              })),
+            aiAttributes: hasOverrides
+              ? Object.entries(aiTraitOverrides).map(([category, label]) => ({
+                  category,
+                  label,
+                  familyLabel: (acceptedFamilies as Record<string, string>)[category] ?? '',
+                }))
+              : Object.entries(acceptedOptions)
+                  .filter(([, opt]) => opt != null)
+                  .map(([category, opt]) => ({
+                    category,
+                    label: opt!.label,
+                    familyLabel: (acceptedFamilies as Record<string, string>)[category] ?? '',
+                  })),
           }
         : undefined;
 
@@ -248,7 +255,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       const msg = err instanceof Error ? err.message : 'Failed to prepare image for minting.';
       toastService.error(msg, { duration: 8000 });
     }
-  }, [isWalletConnected, canExport, has7Traits, selectedLayers, selectedColors, hasFreeMintsAvailable, mintType, connect, prepareMint, g2Selections, isAIEnhancedMode, enhancedImage, acceptedOptions, acceptedFamilies, enhancedCategories]);
+  }, [isWalletConnected, canExport, has7Traits, selectedLayers, selectedColors, hasFreeMintsAvailable, mintType, connect, prepareMint, g2Selections, isAIEnhancedMode, enhancedImage, acceptedOptions, acceptedFamilies, enhancedCategories, aiTraitOverrides]);
 
   const handleEnhanceClick = useCallback(async () => {
     if (!canExport) return;
@@ -638,7 +645,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         {!showMintingPaused && (() => {
           if (isWalletConnected && hasFreeMintsAvailable && mintType === 'free') {
             // Free mint: show credit cost
-            const price = getTotalMintPrice(metadataAttributes);
+            const price = getTotalMintPrice(metadataAttributes, isAIEnhancedMode);
             const creditCost = Math.ceil(100 * price.totalXch / price.basePrice);
             return (
               <span className="text-xs font-semibold tabular-nums whitespace-nowrap text-accent" style={{ minWidth: isDesktop ? 80 : undefined, textAlign: 'center', flexShrink: 0 }}>
@@ -647,7 +654,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
             );
           }
           // Paid mint (or not connected): show single total XCH
-          const price = getTotalMintPrice(metadataAttributes);
+          const price = getTotalMintPrice(metadataAttributes, isAIEnhancedMode);
           return (
             <span className="text-xs font-semibold tabular-nums whitespace-nowrap text-accent" style={{ minWidth: isDesktop ? 80 : undefined, textAlign: 'center', flexShrink: 0 }}>
               {price.totalXch.toFixed(2)} XCH

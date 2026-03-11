@@ -20,6 +20,7 @@ import {
   TOTAL_SUPPLY,
   FREE_MINT_CREDITS,
   BASE_PRICE_XCH,
+  AI_ENHANCED_PRICE_XCH,
   SURCHARGE_CATEGORIES,
   SURCHARGE_EXEMPT_TRAITS,
   PREMIUM_TOP_N,
@@ -236,80 +237,90 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     let surchargeStored: number | null = null;
     let highestTrait: string | null = null;
 
-    // Query trait usage for surcharge categories
-    const allTraitRows = await env.DB.prepare(
-      `SELECT trait_category, trait_name, effective_usage, last_decay_at
-       FROM trait_usage WHERE trait_category IN ('Head', 'Clothes', 'Face Wear')`
-    ).all<{
-      trait_category: string;
-      trait_name: string;
-      effective_usage: number;
-      last_decay_at: string;
-    }>();
-
-    if (mintType === 'free') {
-      // Free mints: always 100 credits UNLESS the selected trait is
-      // in the top 3 most-used traits for its surcharge category.
-      // Build top-3 lookup per category from DB trait usage data.
-      const top3ByCategory = new Map<string, Set<string>>();
-      for (const cat of SURCHARGE_CATEGORIES) {
-        const catRows = (allTraitRows.results || [])
-          .filter(r => r.trait_category === cat && !SURCHARGE_EXEMPT_TRAITS.has(r.trait_name))
-          .map(r => ({
-            name: r.trait_name,
-            decayed: applyDecay(r.effective_usage, r.last_decay_at),
-          }))
-          .sort((a, b) => b.decayed - a.decayed)
-          .slice(0, PREMIUM_TOP_N);
-        top3ByCategory.set(cat, new Set(catRows.map(r => r.name)));
+    if (aiEnhanced) {
+      // AI-enhanced mints: flat price, no surcharge
+      if (mintType === 'free') {
+        freeMintCreditCost = Math.ceil(FREE_MINT_CREDITS * AI_ENHANCED_PRICE_XCH / BASE_PRICE_XCH);
+      } else {
+        xchPriceMojos = Math.round(AI_ENHANCED_PRICE_XCH * 1_000_000_000_000);
       }
-
-      let maxSurcharge = 0;
-      for (const { traitType, displayName } of consolidated.values()) {
-        if (!SURCHARGE_CATEGORIES.has(traitType)) continue;
-        if (SURCHARGE_EXEMPT_TRAITS.has(displayName)) continue;
-        // Only apply credit surcharge if this trait is in the top 3 for its category
-        const topTraits = top3ByCategory.get(traitType);
-        if (!topTraits || !topTraits.has(displayName)) continue;
-
-        const row = (allTraitRows.results || []).find(
-          r => r.trait_category === traitType && r.trait_name === displayName
-        );
-        const decayedUsage = row ? applyDecay(row.effective_usage, row.last_decay_at) : 0;
-        const traitSurcharge = surchargeXch(decayedUsage, traitType, displayName);
-        if (traitSurcharge > maxSurcharge) {
-          maxSurcharge = traitSurcharge;
-          highestTrait = `${traitType}: ${displayName}`;
-        }
-      }
-
-      // Scale credit cost proportionally only for top-3 traits
-      if (maxSurcharge > 0) {
-        freeMintCreditCost = Math.ceil(
-          FREE_MINT_CREDITS * (BASE_PRICE_XCH + maxSurcharge) / BASE_PRICE_XCH
-        );
-      }
-      surchargeStored = maxSurcharge > 0 ? Math.round(maxSurcharge * 100000) : null;
-
     } else {
-      // Paid: calculate XCH price
-      let maxSurcharge = 0;
-      for (const { traitType, displayName } of consolidated.values()) {
-        if (!SURCHARGE_CATEGORIES.has(traitType)) continue;
-        if (SURCHARGE_EXEMPT_TRAITS.has(displayName)) continue;
-        const row = (allTraitRows.results || []).find(
-          r => r.trait_category === traitType && r.trait_name === displayName
-        );
-        const decayedUsage = row ? applyDecay(row.effective_usage, row.last_decay_at) : 0;
-        const traitSurcharge = surchargeXch(decayedUsage, traitType, displayName);
-        if (traitSurcharge > maxSurcharge) {
-          maxSurcharge = traitSurcharge;
-          highestTrait = `${traitType}: ${displayName}`;
+      // Standard pricing with surcharge calculation
+      // Query trait usage for surcharge categories
+      const allTraitRows = await env.DB.prepare(
+        `SELECT trait_category, trait_name, effective_usage, last_decay_at
+         FROM trait_usage WHERE trait_category IN ('Head', 'Clothes', 'Face Wear')`
+      ).all<{
+        trait_category: string;
+        trait_name: string;
+        effective_usage: number;
+        last_decay_at: string;
+      }>();
+
+      if (mintType === 'free') {
+        // Free mints: always 100 credits UNLESS the selected trait is
+        // in the top 3 most-used traits for its surcharge category.
+        // Build top-3 lookup per category from DB trait usage data.
+        const top3ByCategory = new Map<string, Set<string>>();
+        for (const cat of SURCHARGE_CATEGORIES) {
+          const catRows = (allTraitRows.results || [])
+            .filter(r => r.trait_category === cat && !SURCHARGE_EXEMPT_TRAITS.has(r.trait_name))
+            .map(r => ({
+              name: r.trait_name,
+              decayed: applyDecay(r.effective_usage, r.last_decay_at),
+            }))
+            .sort((a, b) => b.decayed - a.decayed)
+            .slice(0, PREMIUM_TOP_N);
+          top3ByCategory.set(cat, new Set(catRows.map(r => r.name)));
         }
+
+        let maxSurcharge = 0;
+        for (const { traitType, displayName } of consolidated.values()) {
+          if (!SURCHARGE_CATEGORIES.has(traitType)) continue;
+          if (SURCHARGE_EXEMPT_TRAITS.has(displayName)) continue;
+          // Only apply credit surcharge if this trait is in the top 3 for its category
+          const topTraits = top3ByCategory.get(traitType);
+          if (!topTraits || !topTraits.has(displayName)) continue;
+
+          const row = (allTraitRows.results || []).find(
+            r => r.trait_category === traitType && r.trait_name === displayName
+          );
+          const decayedUsage = row ? applyDecay(row.effective_usage, row.last_decay_at) : 0;
+          const traitSurcharge = surchargeXch(decayedUsage, traitType, displayName);
+          if (traitSurcharge > maxSurcharge) {
+            maxSurcharge = traitSurcharge;
+            highestTrait = `${traitType}: ${displayName}`;
+          }
+        }
+
+        // Scale credit cost proportionally only for top-3 traits
+        if (maxSurcharge > 0) {
+          freeMintCreditCost = Math.ceil(
+            FREE_MINT_CREDITS * (BASE_PRICE_XCH + maxSurcharge) / BASE_PRICE_XCH
+          );
+        }
+        surchargeStored = maxSurcharge > 0 ? Math.round(maxSurcharge * 100000) : null;
+
+      } else {
+        // Paid: calculate XCH price
+        let maxSurcharge = 0;
+        for (const { traitType, displayName } of consolidated.values()) {
+          if (!SURCHARGE_CATEGORIES.has(traitType)) continue;
+          if (SURCHARGE_EXEMPT_TRAITS.has(displayName)) continue;
+          const row = (allTraitRows.results || []).find(
+            r => r.trait_category === traitType && r.trait_name === displayName
+          );
+          const decayedUsage = row ? applyDecay(row.effective_usage, row.last_decay_at) : 0;
+          const traitSurcharge = surchargeXch(decayedUsage, traitType, displayName);
+          if (traitSurcharge > maxSurcharge) {
+            maxSurcharge = traitSurcharge;
+            highestTrait = `${traitType}: ${displayName}`;
+          }
+        }
+        const totalPriceXch = BASE_PRICE_XCH + maxSurcharge;
+        xchPriceMojos = Math.round(totalPriceXch * 1_000_000_000_000);
+        surchargeStored = Math.round(maxSurcharge * 100000);
       }
-      const totalPriceXch = BASE_PRICE_XCH + maxSurcharge;
-      xchPriceMojos = Math.round(totalPriceXch * 1_000_000_000_000);
-      surchargeStored = Math.round(maxSurcharge * 100000);
     }
 
     // ── For free mints: check credit balance ──
