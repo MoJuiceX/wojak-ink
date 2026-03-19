@@ -113,5 +113,118 @@ describe('generatorReducer', () => {
       expect(next.selections.Extra1).toBeUndefined();
       expect(next.isPreviewStale).toBe(true);
     });
+
+    it('suspends left-hand extras when skull mask is selected via SET_LAYER', () => {
+      const state = {
+        ...createInitialState(),
+        selections: {
+          Base: { path: DEFAULT_BASE_PATH, traitId: null },
+          Clothes: { path: DEFAULT_CLOTHES_PATH, traitId: null },
+          MouthBase: { path: DEFAULT_MOUTHBASE_PATH, traitId: null },
+          Extra1: { path: '/assets/wojak-layers/EXTRA/extra_hand_diamond.png', traitId: null },
+        },
+      };
+
+      const next = generatorReducer(state, {
+        type: 'SET_LAYER',
+        layer: 'Mask',
+        path: '/assets/wojak-layers/MASK/Mask-skull/Mask-skull-01_Hypno.png',
+      });
+
+      // Left-hand extra should be suspended (removed from selections)
+      expect(next.selections.Extra1).toBeUndefined();
+      expect(next.suspendedExtrasByMask).toHaveLength(1);
+      expect(next.suspendedExtrasByMask[0].selection.path).toBe(
+        '/assets/wojak-layers/EXTRA/extra_hand_diamond.png',
+      );
+    });
+
+    it('suspends left-hand extras when tanginium mask is selected via SET_LAYER', () => {
+      const state = {
+        ...createInitialState(),
+        selections: {
+          Base: { path: DEFAULT_BASE_PATH, traitId: null },
+          Clothes: { path: DEFAULT_CLOTHES_PATH, traitId: null },
+          MouthBase: { path: DEFAULT_MOUTHBASE_PATH, traitId: null },
+          Extra1: { path: '/assets/wojak-layers/EXTRA/extra_hand_GFY_left.png', traitId: null },
+        },
+      };
+
+      const next = generatorReducer(state, {
+        type: 'SET_LAYER',
+        layer: 'Mask',
+        path: '/assets/wojak-layers/MASK/Tanginium_king.png',
+      });
+
+      expect(next.selections.Extra1).toBeUndefined();
+      expect(next.suspendedExtrasByMask).toHaveLength(1);
+    });
+
+    it('suspends left-hand extras when medieval bepe mask is selected via SET_LAYER', () => {
+      const state = {
+        ...createInitialState(),
+        selections: {
+          Base: { path: DEFAULT_BASE_PATH, traitId: null },
+          Clothes: { path: DEFAULT_CLOTHES_PATH, traitId: null },
+          MouthBase: { path: DEFAULT_MOUTHBASE_PATH, traitId: null },
+          Extra1: { path: '/assets/wojak-layers/EXTRA/extra_hand_orange.png', traitId: null },
+        },
+      };
+
+      const next = generatorReducer(state, {
+        type: 'SET_LAYER',
+        layer: 'Mask',
+        path: '/assets/wojak-layers/MASK/MedievalBepe_cowboy.png',
+      });
+
+      expect(next.selections.Extra1).toBeUndefined();
+      expect(next.suspendedExtrasByMask).toHaveLength(1);
+    });
+
+    it('allows right-hand extras with full-face masks', () => {
+      const state = {
+        ...createInitialState(),
+        selections: {
+          Base: { path: DEFAULT_BASE_PATH, traitId: null },
+          Clothes: { path: DEFAULT_CLOTHES_PATH, traitId: null },
+          MouthBase: { path: DEFAULT_MOUTHBASE_PATH, traitId: null },
+          Extra1: { path: '/assets/wojak-layers/EXTRA/extra_hand_coffee.png', traitId: null },
+        },
+      };
+
+      const next = generatorReducer(state, {
+        type: 'SET_LAYER',
+        layer: 'Mask',
+        path: '/assets/wojak-layers/MASK/Mask-skull/Mask-skull-01_Hypno.png',
+      });
+
+      // Right-hand extra should NOT be suspended
+      expect(next.selections.Extra1?.path).toBe('/assets/wojak-layers/EXTRA/extra_hand_coffee.png');
+      expect(next.suspendedExtrasByMask).toHaveLength(0);
+    });
+
+    it('suspends skull mask when left-hand extra is toggled on', () => {
+      const state = {
+        ...createInitialState(),
+        selections: {
+          Base: { path: DEFAULT_BASE_PATH, traitId: null },
+          Clothes: { path: DEFAULT_CLOTHES_PATH, traitId: null },
+          MouthBase: { path: DEFAULT_MOUTHBASE_PATH, traitId: null },
+          Mask: { path: '/assets/wojak-layers/MASK/Mask-skull/Mask-skull-01_Hypno.png', traitId: null },
+        },
+      };
+
+      const next = generatorReducer(state, {
+        type: 'TOGGLE_EXTRA',
+        path: '/assets/wojak-layers/EXTRA/extra_hand_diamond.png',
+      });
+
+      // Mask should be suspended, extra should be placed
+      expect(next.selections.Mask).toBeUndefined();
+      expect(next.suspendedMaskByExtra?.path).toBe(
+        '/assets/wojak-layers/MASK/Mask-skull/Mask-skull-01_Hypno.png',
+      );
+      expect(next.selections.Extra1?.path).toBe('/assets/wojak-layers/EXTRA/extra_hand_diamond.png');
+    });
   });
 });

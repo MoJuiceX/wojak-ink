@@ -307,22 +307,26 @@ function clearSuspensionForLayer(suspended: SuspendedSelection[], layer: UILayer
 
 // ============ Hand Mask ↔ Hand Extra Conflict Helpers ============
 
-/** Check if a path represents the Wojak hand mask */
-function isHandMask(path: string | undefined | null): boolean {
+/** Path substrings for all full-face masks that use the left hand (hand mask, skull, tanginium, medieval bepe). */
+const LEFT_HAND_MASK_SUBSTRINGS = ['hand_mask', 'hand-mask', 'skull_mask', 'skull-mask', 'mask-skull', 'medievalbepe', 'tanginium'];
+
+/** Check if a path represents a left-hand full-face mask (hand mask, skull, tanginium, medieval bepe). */
+function isLeftHandMask(path: string | undefined | null): boolean {
   if (!path) return false;
-  return path.toLowerCase().includes('hand_mask');
+  const lower = path.toLowerCase();
+  return LEFT_HAND_MASK_SUBSTRINGS.some((s) => lower.includes(s));
 }
 
 /**
- * Check if an extra path conflicts with the Wojak hand mask.
- * Conflicting: Diamond, GFY Left, Goose, Gun Left, Orange, TangTalk (all left-hand or both-hand items).
+ * Check if an extra path conflicts with a left-hand mask.
+ * Conflicting: Diamond, GFY Left, Goose, Gun Left, Orange, TangTalk, Seedling, Brick (all left-hand items).
  * Non-conflicting: Coffee, GFY Right (right-hand items), Wings (no hands).
  */
-function extraConflictsWithHandMask(path: string | undefined | null): boolean {
+function extraConflictsWithLeftHandMask(path: string | undefined | null): boolean {
   if (!path) return false;
   const lower = path.toLowerCase();
   if (!lower.includes('extra_hand')) return false; // wings and non-hand items never conflict
-  // Right-hand items don't conflict with the hand mask (left hand holds mask)
+  // Right-hand items don't conflict (left hand holds mask)
   if (lower.includes('coffee')) return false;
   if (lower.includes('gfy_right')) return false;
   return true;
@@ -408,11 +412,11 @@ function processLayerUpdate(
   let newSuspendedMaskByExtra = state.suspendedMaskByExtra;
   let newSuspendedExtrasByMask = state.suspendedExtrasByMask;
   if (!options?.skipBaseAutoMatch && layer === 'Mask') {
-    if (isHandMask(path)) {
+    if (isLeftHandMask(path)) {
       // Selecting hand mask → suspend conflicting extras
       const toSuspend: typeof newSuspendedExtrasByMask = [];
       for (const slot of EXTRA_SLOTS) {
-        if (updated[slot] && extraConflictsWithHandMask(updated[slot]?.path)) {
+        if (updated[slot] && extraConflictsWithLeftHandMask(updated[slot]?.path)) {
           toSuspend.push({ slot, selection: updated[slot]! });
           delete updated[slot];
         }
@@ -800,7 +804,7 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
           // Check if mask should be restored (no remaining conflicting extras)
           if (suspendedMask) {
             const hasConflicting = EXTRA_SLOTS.some(s =>
-              updated[s] && extraConflictsWithHandMask(updated[s]?.path)
+              updated[s] && extraConflictsWithLeftHandMask(updated[s]?.path)
             );
             if (!hasConflicting) {
               updated.Mask = suspendedMask;
@@ -858,7 +862,7 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
       }
 
       // 3. If the new extra conflicts with hand mask, suspend mask
-      if (extraConflictsWithHandMask(newPath) && isHandMask(updated.Mask?.path)) {
+      if (extraConflictsWithLeftHandMask(newPath) && isLeftHandMask(updated.Mask?.path)) {
         suspendedMask = updated.Mask!;
         delete updated.Mask;
       }
