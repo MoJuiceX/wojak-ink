@@ -62,27 +62,27 @@ export type AIMode = 'enhance' | 'create_new';
 export const PROMPT_TEMPLATES: Record<AICategory, Partial<Record<AIMode, string>>> = {
   clothes: {
     enhance:
-      '{user_prompt} on the clothing. Draw in flat cartoon style with thick black outlines. Preserve the character\'s face, headwear, background, size, and position unchanged.',
+      '{user_prompt} on the clothing. Draw in flat cartoon style with thick black outlines. Do not zoom out or reposition. Preserve the character\'s face, headwear, background, size, and position exactly as in the input image.',
     create_new:
-      'Replace the clothing with {user_prompt}. Draw in flat cartoon style with thick black outlines. Preserve the character\'s face, headwear, background, size, and position unchanged.',
+      'Replace the clothing with {user_prompt}. Draw in flat cartoon style with thick black outlines. Do not zoom out or reposition. Preserve the character\'s face, headwear, background, size, and position exactly as in the input image.',
   },
   head: {
     enhance:
-      '{user_prompt} on the headwear. Draw in flat cartoon style with thick black outlines. Preserve the character\'s face, clothing, background, size, and position unchanged.',
+      '{user_prompt} on the headwear. Draw in flat cartoon style with thick black outlines. Do not zoom out or reposition. Preserve the character\'s face, clothing, background, size, and position exactly as in the input image.',
     create_new:
-      'Replace the headwear with {user_prompt}. Draw in flat cartoon style with thick black outlines. Preserve the character\'s face, clothing, background, size, and position unchanged.',
+      'Replace the headwear with {user_prompt}. Draw in flat cartoon style with thick black outlines. Do not zoom out or reposition. Preserve the character\'s face, clothing, background, size, and position exactly as in the input image.',
   },
   facewear: {
     enhance:
-      '{user_prompt} on the face accessory. Draw in flat cartoon style with thick black outlines. Preserve the character\'s face, clothing, headwear, and background unchanged.',
+      '{user_prompt} on the face accessory. Draw in flat cartoon style with thick black outlines. Do not zoom out or reposition. Preserve the character\'s face, clothing, headwear, and background exactly as in the input image.',
     create_new:
-      'Add {user_prompt} as a face accessory. Draw in flat cartoon style with thick black outlines. Preserve the character\'s face, clothing, headwear, and background unchanged.',
+      'Add {user_prompt} as a face accessory. Draw in flat cartoon style with thick black outlines. Do not zoom out or reposition. Preserve the character\'s face, clothing, headwear, and background exactly as in the input image.',
   },
   background: {
     enhance:
-      '{user_prompt} in the background. Preserve the character exactly — same size, position, pose, outfit, and all details unchanged.',
+      '{user_prompt} in the background only. Do not zoom out, do not resize, do not reposition, do not crop differently. The character must stay the exact same size and position as in the input image. Only change what is visible behind the character.',
     create_new:
-      'Replace the background with {user_prompt}. Preserve the character exactly — same size, position, pose, outfit, and all details unchanged.',
+      'Replace the background with {user_prompt}. Do not zoom out, do not resize, do not reposition, do not crop differently. The character must stay the exact same size and position as in the input image. Only change what is visible behind the character.',
   },
 };
 
