@@ -49,7 +49,17 @@ interface ActionBarProps {
 /** When true, mint button is disabled and shows "Minting continues soon." on hover. Set to false to re-enable. */
 const GENERATOR_MINTING_PAUSED = false;
 
-/** Tooltip that renders in a portal above the trigger, so it's never clipped by overflow */
+/**
+ * Tooltip that renders in a portal above the trigger, so it's never clipped by overflow.
+ *
+ * Behavior by input type:
+ *   Desktop (hover: hover) — show on mouseenter, hide on mouseleave or click.
+ *   Mobile (hover: none)   — show on long-press (~400ms hold), auto-dismiss after 1.5s.
+ *                             Normal taps perform the button action without showing tooltip.
+ *   Both                   — dismiss on scroll, touch elsewhere, or any click inside.
+ *                             CSS safety net: `@media (hover: none) { display: none }` in
+ *                             theme.css hides the portal even if JS state is stale.
+ */
 function ActionBarTooltip({
   content,
   children,
@@ -62,6 +72,27 @@ function ActionBarTooltip({
   const [visible, setVisible] = useState(false);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const ref = useRef<HTMLDivElement>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoDismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Reactively track whether the device supports hover (handles hybrid devices)
+  const [hasHover, setHasHover] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(hover: hover)').matches : false
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(hover: hover)');
+    const onChange = (e: MediaQueryListEvent) => setHasHover(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  // Clean up timers on unmount
+  useEffect(() => {
+    return () => {
+      if (longPressTimer.current) clearTimeout(longPressTimer.current);
+      if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
+    };
+  }, []);
 
   const updatePos = useCallback(() => {
     if (ref.current) {
@@ -70,6 +101,7 @@ function ActionBarTooltip({
     }
   }, []);
 
+  // Reposition while visible
   useLayoutEffect(() => {
     if (!visible) return;
     updatePos();
@@ -82,16 +114,76 @@ function ActionBarTooltip({
     };
   }, [visible, updatePos]);
 
+  // When visible: dismiss on any touch or click outside, or scroll
+  useEffect(() => {
+    if (!visible) return;
+    const dismiss = () => setVisible(false);
+    window.addEventListener('touchstart', dismiss, { passive: true, capture: true });
+    window.addEventListener('scroll', dismiss, { passive: true, capture: true });
+    return () => {
+      window.removeEventListener('touchstart', dismiss, { capture: true });
+      window.removeEventListener('scroll', dismiss, { capture: true });
+    };
+  }, [visible]);
+
+  const show = useCallback(() => {
+    updatePos();
+    setVisible(true);
+    // Safety net: auto-dismiss after 3s no matter what (prevents permanent stuck state)
+    if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
+    autoDismissTimer.current = setTimeout(() => setVisible(false), 3000);
+  }, [updatePos]);
+
+  const hide = useCallback(() => {
+    setVisible(false);
+    if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
+  }, []);
+
+  // Desktop: hover to show, leave or click to hide
+  const hoverHandlers = hasHover
+    ? {
+        onMouseEnter: show,
+        onMouseLeave: hide,
+      }
+    : {};
+
+  // Mobile: long-press (400ms hold) to show, auto-dismiss after 1.5s
+  const touchHandlers = !hasHover
+    ? {
+        onTouchStart: () => {
+          longPressTimer.current = setTimeout(() => {
+            show();
+            // Auto-dismiss after 1.5s on mobile
+            if (autoDismissTimer.current) clearTimeout(autoDismissTimer.current);
+            autoDismissTimer.current = setTimeout(() => setVisible(false), 1500);
+          }, 400);
+        },
+        onTouchEnd: () => {
+          // If released before 400ms, it's a normal tap — cancel the tooltip
+          if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = null;
+          }
+        },
+        onTouchMove: () => {
+          // Finger moved — cancel long-press
+          if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = null;
+          }
+        },
+      }
+    : {};
+
   return (
     <>
       <div
         ref={ref}
         className="relative"
-        onMouseEnter={() => {
-          updatePos();
-          setVisible(true);
-        }}
-        onMouseLeave={() => setVisible(false)}
+        {...hoverHandlers}
+        {...touchHandlers}
+        // Dismiss on click — covers desktop clicking button while tooltip is shown
+        onClick={visible ? hide : undefined}
       >
         {children}
       </div>

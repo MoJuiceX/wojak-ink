@@ -854,6 +854,13 @@ body {
   border: 1px solid var(--color-border);
 }
 
+/* Touch-only devices: never show hover tooltips — they get stuck visible */
+@media (hover: none) {
+  .action-bar-tooltip {
+    display: none;
+  }
+}
+
 .action-btn {
   background: transparent;
   color: var(--color-text-secondary);
@@ -3670,8 +3677,10 @@ body {
   z-index: 10;
 }
 
-.ai-info-tooltip-wrapper:hover .ai-info-tooltip {
-  display: block;
+@media (hover: hover) {
+  .ai-info-tooltip-wrapper:hover .ai-info-tooltip {
+    display: block;
+  }
 }
 
 /* --- AI Confirm Card (uses --family-bg for gradient) --- */
