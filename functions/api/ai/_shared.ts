@@ -53,53 +53,36 @@ export const AI_CATEGORIES: Record<AICategory, { label: string; icon: string; fr
   background: { label: 'Background', icon: '\u{1F5BC}', freedom: 'enhance' },
 };
 
-// --- Art Style Anchor ---
-// Strong style anchor to keep Reve faithful to the wojak illustration style.
-// Emphasizes preservation of the original character at all costs.
-// The Wojak art style is: thick uniform black outlines (~3-4px), completely flat
-// solid color fills with ZERO texture/gradient/shading, simple geometric shapes,
-// like a digital marker drawing or MS Paint art. Think cartoon, not painting.
-
-const STYLE =
-  'MANDATORY ART STYLE — Wojak meme-style flat cartoon illustration. ' +
-  'Thick uniform black outlines (like marker strokes). ' +
-  'Completely flat solid color fills — ONE single color per area, no variation. ' +
-  'ABSOLUTELY NO: gradients, shading, shadows, highlights, texture, crosshatching, realistic detail, 3D depth, lighting effects, fabric folds with shadow, painterly strokes, photorealism. ' +
-  'The result must look like a simple digital drawing with clean vector-like shapes and solid flat color blocks separated by thick black lines. ' +
-  'If the user asks for a pattern (e.g. stripes, plaid, checks), draw it as simple flat colored shapes separated by thick black outlines — like a cartoon, NOT like a photograph of real material.';
-
-const PRESERVE =
-  'CRITICAL: The character MUST remain EXACTLY the same size, position, proportions, and zoom level as the reference image. Do NOT resize, zoom out, crop, reposition, or redraw the character. Maintain pixel-perfect fidelity to the original character illustration including all line weights, facial features, and color fills.';
-
-// --- Prompt Templates ---
-// Now mode-aware: each category has templates for 'enhance' and/or 'create_new'.
+// --- Prompt Templates (Pruna AI / Replicate) ---
+// Short, concise prompts using [Modification] [Target] [Preservation] structure.
+// Pruna works best with direct, focused instructions — no long style anchors.
 
 export type AIMode = 'enhance' | 'create_new';
 
 export const PROMPT_TEMPLATES: Record<AICategory, Partial<Record<AIMode, string>>> = {
   clothes: {
     enhance:
-      `${STYLE} ${PRESERVE} Edit ONLY the clothing: {user_prompt}. Keep the same clothing shape and structure. Every color area must be a single flat solid fill with thick black outline borders — no texture, no fabric detail, no realistic material rendering. Preserve all logos, emblems, and markings on other areas. Do not change face, head, skin, headwear, or background. Do not change the character's size or position.`,
+      '{user_prompt} on the clothing. Draw in flat cartoon style with thick black outlines. Preserve the character\'s face, headwear, background, size, and position unchanged.',
     create_new:
-      `${STYLE} ${PRESERVE} Replace the clothing entirely with: {user_prompt}. Draw it as a simple flat cartoon — thick black outlines separating flat solid color blocks. NO realistic fabric texture, NO shading, NO wrinkle shadows, NO material detail. Every area of the clothing must be ONE solid flat color. Keep the character's pose, face, skin, head, and background completely unchanged. Do not change the character's size or position.`,
+      'Replace the clothing with {user_prompt}. Draw in flat cartoon style with thick black outlines. Preserve the character\'s face, headwear, background, size, and position unchanged.',
   },
   head: {
     enhance:
-      `${STYLE} ${PRESERVE} Edit ONLY the headwear: {user_prompt}. Keep the same headwear shape and structure. Every area must be a single flat solid color with thick black outline borders — no texture, no realistic material rendering. Preserve all logos, emblems, and markings on other areas. Do not change face, clothing, skin, or background. Do not change the character's size or position.`,
+      '{user_prompt} on the headwear. Draw in flat cartoon style with thick black outlines. Preserve the character\'s face, clothing, background, size, and position unchanged.',
     create_new:
-      `${STYLE} ${PRESERVE} Replace the headwear entirely with: {user_prompt}. Draw it as a simple flat cartoon with thick black outlines and flat solid color fills — no texture, no shading, no realistic detail. Keep the character's face, clothing, skin, and background completely unchanged. Do not change the character's size or position.`,
+      'Replace the headwear with {user_prompt}. Draw in flat cartoon style with thick black outlines. Preserve the character\'s face, clothing, background, size, and position unchanged.',
   },
   facewear: {
     enhance:
-      `${STYLE} ${PRESERVE} Edit ONLY the face accessory: {user_prompt}. Keep the same accessory shape and structure. Flat solid colors with thick black outlines only — no texture or shading. Preserve all existing details on other areas. Do not change clothing, headwear, or background.`,
+      '{user_prompt} on the face accessory. Draw in flat cartoon style with thick black outlines. Preserve the character\'s face, clothing, headwear, and background unchanged.',
     create_new:
-      `${STYLE} ${PRESERVE} Add face accessory: {user_prompt}. Draw with thick black outlines and flat solid colors matching the cartoon illustration style. No texture, no shading, no realistic detail. Position naturally on the face, sitting under any hat brim. Preserve all existing details on other areas. Do not change clothing, headwear, or background.`,
+      'Add {user_prompt} as a face accessory. Draw in flat cartoon style with thick black outlines. Preserve the character\'s face, clothing, headwear, and background unchanged.',
   },
   background: {
     enhance:
-      `${STYLE} ${PRESERVE} FRAMING: This is a TIGHT CLOSE-UP PORTRAIT cropped at chest level. The character fills 85% of the frame. Do NOT zoom out, do NOT show more of the body, do NOT pull back the camera. Maintain the EXACT same crop, zoom, and framing as the input image. Edit ONLY the background to make it more dramatic: {user_prompt}. Keep the same general scene but intensify it — stronger mood, richer colors, more atmosphere. Apply the same flat cartoon style as the character. Keep ALL character elements (pose, outfit, face, size, position) 100% unchanged. Apply a gentle gaussian blur to keep the background behind the character.`,
+      '{user_prompt} in the background. Preserve the character exactly — same size, position, pose, outfit, and all details unchanged.',
     create_new:
-      `${STYLE} ${PRESERVE} FRAMING: This is a TIGHT CLOSE-UP PORTRAIT cropped at chest level. The character fills 85% of the frame. Do NOT zoom out, do NOT show more of the body, do NOT pull back the camera, do NOT recompose the scene. Maintain the EXACT same crop, zoom, and framing as the input image. Replace ONLY the background behind the character: {user_prompt}. IMPORTANT STYLE RULES: Draw the background as a simple, minimalistic flat cartoon — like a Wojak meme background. Use only flat solid color fills, thick black outlines, and very simple shapes. NO realistic detail, NO complex textures, NO photorealism, NO gradients, NO lighting effects, NO shadows, NO 3D depth. Think simple MS Paint-level drawing with clean shapes. COMPOSITION: The center of the image MUST remain occupied by the character at their current size. ALL scene elements (furniture, walls, objects, landscape features) go ONLY on the far edges visible behind and around the character. The character must remain EXACTLY the same — same size, same position, same pose, same outfit, same colors, same line-art. Do not alter, resize, or move the character in any way.`,
+      'Replace the background with {user_prompt}. Preserve the character exactly — same size, position, pose, outfit, and all details unchanged.',
   },
 };
 
@@ -113,7 +96,7 @@ export function buildConstrainedPrompt(category: AICategory, userPrompt: string,
 
 export interface AIEnv {
   DB: D1Database;
-  REVE_API_KEY?: string;
+  REPLICATE_API_TOKEN?: string;
   AI_EDITS_BUCKET?: R2Bucket;
   SPACESCAN_API_KEY?: string;
 }

@@ -50,5 +50,5 @@ bucket_name = "wojak-ai-edits"
 # - CHAT_JWT_SECRET: Secret for signing chat tokens (generate with: openssl rand -base64 32)
 # - PINATA_JWT: Pinata API JWT for IPFS uploads (already set)
 # - MINTGARDEN_API_KEY: MintGarden Dynamic Minting API key (run: wrangler pages secret put MINTGARDEN_API_KEY)
-# - REVE_API_KEY: Reve AI Edit API key (run: wrangler pages secret put REVE_API_KEY)
+# - REPLICATE_API_TOKEN: Replicate API token for Pruna AI image editing (run: wrangler pages secret put REPLICATE_API_TOKEN)
 # - CREATOR_PAYOUT_ADDRESS: set in Dashboard Variables (paid-mint XCH recipient). If unset, code uses TREASURY_ADDRESS.

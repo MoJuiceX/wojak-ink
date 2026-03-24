@@ -9,7 +9,7 @@ import {
 } from './_shared';
 import type { AIEnv, AICategory, AIMode } from './_shared';
 
-const REVE_EDIT_URL = 'https://api.reve.com/v1/image/edit';
+const REPLICATE_API_URL = 'https://api.replicate.com/v1/models/prunaai/p-image-edit/predictions';
 const MAX_PROMPT_LENGTH = 500;
 
 export const onRequest: PagesFunction<AIEnv> = async (context) => {
@@ -51,7 +51,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   if (!prompt || prompt.trim().length === 0 || prompt.length > MAX_PROMPT_LENGTH) {
     return errorResponse(`Prompt is required (max ${MAX_PROMPT_LENGTH} characters)`, 400);
   }
-  if (!env.REVE_API_KEY) {
+  if (!env.REPLICATE_API_TOKEN) {
     return errorResponse('AI enhancement is not configured', 503);
   }
   if (!env.AI_EDITS_BUCKET) {
@@ -71,82 +71,97 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   const validMode: AIMode = (mode === 'enhance' || mode === 'create_new') ? mode : 'enhance';
   const constrainedPrompt = buildConstrainedPrompt(cat, trimmedPrompt, validMode);
 
-  // --- Call Reve Edit API ---
-  // Abort before CF's function timeout (30s) so we can return a proper JSON error
-  // instead of CF killing the function and returning an HTML 502 page.
-  let reveResponse: Response;
+  // --- Call Replicate API (Pruna AI p-image-edit) ---
+  // Uses `Prefer: wait` for synchronous response (model runs in <1s).
+  let replicateResponse: Response;
   try {
-    reveResponse = await fetch(REVE_EDIT_URL, {
+    replicateResponse = await fetch(REPLICATE_API_URL, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${env.REVE_API_KEY}`,
+        'Authorization': `Bearer ${env.REPLICATE_API_TOKEN}`,
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        'Prefer': 'wait',
       },
       body: JSON.stringify({
-        edit_instruction: constrainedPrompt,
-        reference_image: imageBase64,
-        aspect_ratio: '1:1',
-        version: 'latest',
-        test_time_scaling: 2,
+        input: {
+          prompt: constrainedPrompt,
+          images: [`data:image/png;base64,${imageBase64}`],
+          aspect_ratio: '1:1',
+        },
       }),
-      signal: AbortSignal.timeout(25_000), // 25s — leave 5s headroom for DB writes
     });
   } catch (err) {
-    console.error('Reve API error:', err);
-    const isTimeout = err instanceof DOMException && err.name === 'TimeoutError';
-    if (isTimeout) {
-      return errorResponse('AI enhancement is taking longer than usual. Please try again — it often works on retry.', 504);
-    }
+    console.error('Replicate API network error:', err);
     return errorResponse('AI service is unavailable. Try again.', 502);
   }
 
-  if (reveResponse.status === 429) {
+  if (replicateResponse.status === 429) {
     return errorResponse('Too many requests. Wait a moment and try again.', 429);
   }
 
-  if (!reveResponse.ok) {
-    const errText = await reveResponse.text().catch(() => 'Unknown error');
-    console.error(`Reve API error ${reveResponse.status}:`, errText);
+  if (!replicateResponse.ok) {
+    const errText = await replicateResponse.text().catch(() => 'Unknown error');
+    console.error(`Replicate API error ${replicateResponse.status}:`, errText);
     return errorResponse('AI enhancement failed. Try again.', 502);
   }
 
-  let reveData: {
-    image?: string;
-    content_violation?: boolean;
-    request_id?: string;
+  let replicateData: {
+    id?: string;
+    status?: string;
+    output?: string;
+    error?: string;
+    model?: string;
     version?: string;
-    credits_used?: number;
-    credits_remaining?: number;
   };
   try {
-    reveData = await reveResponse.json();
+    replicateData = await replicateResponse.json();
   } catch {
     return errorResponse('Invalid response from AI service.', 502);
   }
 
-  // --- Content violation check ---
-  if (reveData.content_violation) {
-    return errorResponse('This edit was blocked by content policy. Try a different prompt.', 422);
+  // Check for failed prediction
+  if (replicateData.status === 'failed' || replicateData.error) {
+    console.error('Replicate prediction failed:', replicateData.error);
+    return errorResponse('AI enhancement failed. Try a different option.', 502);
   }
 
-  if (!reveData.image) {
+  if (!replicateData.output) {
     return errorResponse('AI service returned no image. Try again.', 502);
   }
 
-  // Log actual Reve credit usage for cost tracking
-  if (reveData.credits_used) {
-    console.log(`Reve credits used: ${reveData.credits_used}, remaining: ${reveData.credits_remaining}, version: ${reveData.version}`);
+  // --- Download the output image from Replicate's URL ---
+  // Replicate returns a temporary URL to the generated image (JPEG).
+  let imageBase64Result: string;
+  try {
+    const imageResponse = await fetch(replicateData.output);
+    if (!imageResponse.ok) {
+      console.error('Failed to download Replicate output image:', imageResponse.status);
+      return errorResponse('Failed to retrieve enhanced image. Try again.', 502);
+    }
+    const imageArrayBuffer = await imageResponse.arrayBuffer();
+    const imageBytes = new Uint8Array(imageArrayBuffer);
+    // Convert to base64 for R2 storage and frontend display
+    imageBase64Result = btoa(String.fromCharCode(...imageBytes));
+  } catch (err) {
+    console.error('Image download error:', err);
+    return errorResponse('Failed to retrieve enhanced image. Try again.', 502);
   }
 
+  // Log prediction ID for debugging
+  console.log(`Replicate prediction: ${replicateData.id}, model: ${replicateData.model}, status: ${replicateData.status}`);
+
   // --- Save to R2 ---
-  const enhancementId = Date.now(); // Temporary; will be replaced by DB insert ID
-  const r2Key = `ai-edits/${walletAddress}/${enhancementId}.png`;
+  const enhancementId = Date.now();
+  // Replicate returns JPEG; detect format from the output URL
+  const isJpeg = replicateData.output.includes('.jpeg') || replicateData.output.includes('.jpg');
+  const ext = isJpeg ? 'jpg' : 'png';
+  const contentType = isJpeg ? 'image/jpeg' : 'image/png';
+  const r2Key = `ai-edits/${walletAddress}/${enhancementId}.${ext}`;
 
   try {
-    const imageBuffer = Uint8Array.from(atob(reveData.image), (c) => c.charCodeAt(0));
+    const imageBuffer = Uint8Array.from(atob(imageBase64Result), (c) => c.charCodeAt(0));
     await env.AI_EDITS_BUCKET.put(r2Key, imageBuffer, {
-      httpMetadata: { contentType: 'image/png' },
+      httpMetadata: { contentType },
     });
   } catch (err) {
     console.error('R2 upload error:', err);
@@ -178,8 +193,8 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
         cat,
         trimmedPrompt,
         constrainedPrompt,
-        reveData.request_id ?? null,
-        reveData.version ?? null,
+        replicateData.id ?? null,       // reuse reve_request_id column for Replicate prediction ID
+        replicateData.model ?? null,     // reuse reve_version column for model name
         parentEnhancementId ?? null,
         baseLayersJson ?? null,
         overridesJson,
@@ -194,8 +209,6 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
       .run();
   } catch (err) {
     console.error('D1 insert error:', err);
-    // Image is saved to R2 but credit not deducted — acceptable state
-    // User got the image, we just failed to track it
     return errorResponse('Edit succeeded but failed to record. Contact support.', 500);
   }
 
@@ -203,13 +216,13 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   const newBalance = await getAICreditBalance(env.DB, walletAddress);
 
   return jsonResponse({
-    imageBase64: reveData.image,
+    imageBase64: imageBase64Result,
     r2Key,
     enhancementId: r2Key,
     category: cat,
     prompt: trimmedPrompt,
     creditsRemaining: newBalance,
-    reveRequestId: reveData.request_id,
+    reveRequestId: replicateData.id,   // kept for frontend compatibility
     aiTraitOverrides: mergedOverrides,
   });
 };
