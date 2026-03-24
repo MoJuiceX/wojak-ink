@@ -400,29 +400,32 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
 
       // Step 4: Parse response
       step = 'response';
-      console.log('[AI Enhance] Response status:', res.status);
+      console.log('[AI Enhance] Response status:', res.status, 'ok:', res.ok);
 
-      // Handle non-JSON error responses (e.g. Cloudflare 502 HTML page when function times out)
-      const contentType = res.headers.get('content-type') ?? '';
+      // Handle error responses — must parse carefully since CF may return HTML on 502
       if (!res.ok) {
-        if (contentType.includes('application/json')) {
-          try {
-            const data = await res.json();
-            console.error('[AI Enhance] Server error:', data);
-            setEnhanceError(data.error || 'Enhancement failed. Try again.');
-          } catch {
-            setEnhanceError('Enhancement failed. Try again.');
-          }
-        } else {
-          console.error('[AI Enhance] Non-JSON error response:', res.status, contentType);
-          if (res.status === 502 || res.status === 504) {
-            setEnhanceError('The AI service took too long to respond. Please try again — it usually works on retry.');
-          } else if (res.status === 413) {
-            setEnhanceError('Image too large. Try a simpler Wojak design.');
+        let errorMsg = `Server error (${res.status}). Please try again.`;
+        try {
+          const text = await res.text();
+          // Try to parse as JSON (our backend returns { error: "..." })
+          if (text.startsWith('{')) {
+            const parsed = JSON.parse(text);
+            errorMsg = parsed.error || errorMsg;
           } else {
-            setEnhanceError(`Server error (${res.status}). Please try again.`);
+            // HTML error page from Cloudflare (function timeout/crash)
+            console.error('[AI Enhance] Non-JSON error response:', res.status, text.slice(0, 100));
+            if (res.status === 502 || res.status === 504) {
+              errorMsg = 'The AI service took too long to respond. Please try again — it usually works on retry.';
+            }
+          }
+        } catch {
+          // Failed to read body — use status-based message
+          if (res.status === 502 || res.status === 504) {
+            errorMsg = 'The AI service took too long to respond. Please try again.';
           }
         }
+        console.error('[AI Enhance] Error:', errorMsg);
+        setEnhanceError(errorMsg);
         setWizardStep('prompt');
         return null;
       }
