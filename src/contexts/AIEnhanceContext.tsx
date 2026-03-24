@@ -401,14 +401,33 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
       // Step 4: Parse response
       step = 'response';
       console.log('[AI Enhance] Response status:', res.status);
-      const data = await res.json();
 
+      // Handle non-JSON error responses (e.g. Cloudflare 502 HTML page when function times out)
+      const contentType = res.headers.get('content-type') ?? '';
       if (!res.ok) {
-        console.error('[AI Enhance] Server error:', data);
-        setEnhanceError(data.error || 'Enhancement failed. Try again.');
+        if (contentType.includes('application/json')) {
+          try {
+            const data = await res.json();
+            console.error('[AI Enhance] Server error:', data);
+            setEnhanceError(data.error || 'Enhancement failed. Try again.');
+          } catch {
+            setEnhanceError('Enhancement failed. Try again.');
+          }
+        } else {
+          console.error('[AI Enhance] Non-JSON error response:', res.status, contentType);
+          if (res.status === 502 || res.status === 504) {
+            setEnhanceError('The AI service took too long to respond. Please try again — it usually works on retry.');
+          } else if (res.status === 413) {
+            setEnhanceError('Image too large. Try a simpler Wojak design.');
+          } else {
+            setEnhanceError(`Server error (${res.status}). Please try again.`);
+          }
+        }
         setWizardStep('prompt');
         return null;
       }
+
+      const data = await res.json();
 
       const result: AIEnhanceResult = data;
       setCurrentResult(result);

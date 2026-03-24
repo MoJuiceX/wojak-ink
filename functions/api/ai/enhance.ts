@@ -72,6 +72,8 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   const constrainedPrompt = buildConstrainedPrompt(cat, trimmedPrompt, validMode);
 
   // --- Call Reve Edit API ---
+  // Abort before CF's function timeout (30s) so we can return a proper JSON error
+  // instead of CF killing the function and returning an HTML 502 page.
   let reveResponse: Response;
   try {
     reveResponse = await fetch(REVE_EDIT_URL, {
@@ -88,9 +90,14 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
         version: 'latest',
         test_time_scaling: 2,
       }),
+      signal: AbortSignal.timeout(25_000), // 25s — leave 5s headroom for DB writes
     });
   } catch (err) {
-    console.error('Reve API network error:', err);
+    console.error('Reve API error:', err);
+    const isTimeout = err instanceof DOMException && err.name === 'TimeoutError';
+    if (isTimeout) {
+      return errorResponse('AI enhancement is taking longer than usual. Please try again — it often works on retry.', 504);
+    }
     return errorResponse('AI service is unavailable. Try again.', 502);
   }
 
