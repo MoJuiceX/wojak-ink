@@ -202,11 +202,18 @@
     order: 0;
   }
 
-  /* Extra top/bottom padding so content and buttons are never under browser chrome */
+  /* Extra bottom padding so buttons are never under browser chrome.
+     Top padding only needed when no header (external close mode) —
+     when header is present, it already accounts for browser chrome. */
   .lightbox-body {
     padding: 1rem;
     padding-top: calc(1rem + env(safe-area-inset-top, 0) + 56px);
     padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0) + 72px);
+  }
+
+  /* When header is present, body doesn't need extra top padding */
+  .lightbox-header + .lightbox-body {
+    padding-top: 0.75rem;
   }
 }
 

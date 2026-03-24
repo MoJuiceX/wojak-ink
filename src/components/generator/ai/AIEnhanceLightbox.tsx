@@ -122,7 +122,7 @@ export function AIEnhanceLightbox({ currentImage }: AIEnhanceLightboxProps) {
       <div className="ai-wizard-accent" />
 
       {/* Wizard steps */}
-      <div className="flex flex-col gap-4 mt-2">
+      <div className="flex flex-col gap-2 sm:gap-4 mt-1 sm:mt-2">
         {wizardStep === 'category' && (
           <AICategoryPicker currentImage={activeImage} />
         )}
