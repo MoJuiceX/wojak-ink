@@ -54,35 +54,35 @@ export const AI_CATEGORIES: Record<AICategory, { label: string; icon: string; fr
 };
 
 // --- Prompt Templates (Pruna AI / Replicate) ---
-// Short, concise prompts using [Modification] [Target] [Preservation] structure.
-// Pruna works best with direct, focused instructions — no long style anchors.
+// Tested format: [Action across target]. Preserve [everything else] and all other elements unchanged.
+// This exact structure produced correct results in Replicate playground testing.
 
 export type AIMode = 'enhance' | 'create_new';
 
 export const PROMPT_TEMPLATES: Record<AICategory, Partial<Record<AIMode, string>>> = {
   clothes: {
     enhance:
-      '{user_prompt} on the clothing. Draw in flat cartoon style with thick black outlines. Do not zoom out or reposition. Preserve the character\'s face, headwear, background, size, and position exactly as in the input image.',
+      'Apply {user_prompt} across the clothing only. Preserve the character\'s face, headwear, background, and all other elements unchanged.',
     create_new:
-      'Replace the clothing with {user_prompt}. Draw in flat cartoon style with thick black outlines. Do not zoom out or reposition. Preserve the character\'s face, headwear, background, size, and position exactly as in the input image.',
+      'Replace the clothing with {user_prompt}. Draw it in flat cartoon style with thick black outlines. Preserve the character\'s face, headwear, background, and all other elements unchanged.',
   },
   head: {
     enhance:
-      '{user_prompt} on the headwear. Draw in flat cartoon style with thick black outlines. Do not zoom out or reposition. Preserve the character\'s face, clothing, background, size, and position exactly as in the input image.',
+      'Apply {user_prompt} to the headwear only. Preserve the character\'s face, clothing, background, and all other elements unchanged.',
     create_new:
-      'Replace the headwear with {user_prompt}. Draw in flat cartoon style with thick black outlines. Do not zoom out or reposition. Preserve the character\'s face, clothing, background, size, and position exactly as in the input image.',
+      'Replace the headwear with {user_prompt}. Draw it in flat cartoon style with thick black outlines. Preserve the character\'s face, clothing, background, and all other elements unchanged.',
   },
   facewear: {
     enhance:
-      '{user_prompt} on the face accessory. Draw in flat cartoon style with thick black outlines. Do not zoom out or reposition. Preserve the character\'s face, clothing, headwear, and background exactly as in the input image.',
+      'Apply {user_prompt} to the face accessory only. Preserve the character\'s face, clothing, headwear, background, and all other elements unchanged.',
     create_new:
-      'Add {user_prompt} as a face accessory. Draw in flat cartoon style with thick black outlines. Do not zoom out or reposition. Preserve the character\'s face, clothing, headwear, and background exactly as in the input image.',
+      'Add {user_prompt} as a face accessory in flat cartoon style with thick black outlines. Preserve the character\'s face, clothing, headwear, background, and all other elements unchanged.',
   },
   background: {
     enhance:
-      '{user_prompt} in the background only. Do not zoom out, do not resize, do not reposition, do not crop differently. The character must stay the exact same size and position as in the input image. Only change what is visible behind the character.',
+      'Add {user_prompt} in the background behind the character. Preserve the character exactly — same size, position, pose, outfit, and all other elements unchanged.',
     create_new:
-      'Replace the background with {user_prompt}. Do not zoom out, do not resize, do not reposition, do not crop differently. The character must stay the exact same size and position as in the input image. Only change what is visible behind the character.',
+      'Replace the background with {user_prompt}. Preserve the character exactly — same size, position, pose, outfit, and all other elements unchanged.',
   },
 };
 
