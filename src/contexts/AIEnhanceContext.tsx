@@ -336,8 +336,8 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
         return null;
       }
 
-      // Validate token is clean ASCII hex (Safari throws DOMException on invalid header chars)
-      if (!/^[a-f0-9]+$/i.test(token)) {
+      // Validate token is clean ASCII hex with correct length (128 hex chars = 64 bytes)
+      if (!/^[a-f0-9]{128}$/i.test(token)) {
         console.error('[AI Enhance] Invalid session token format — clearing and re-authenticating');
         localStorage.removeItem('ai_session');
         setSessionToken(null);

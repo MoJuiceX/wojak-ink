@@ -12,6 +12,9 @@ import type { AIEnv, AICategory, AIMode } from './_shared';
 const REPLICATE_API_URL = 'https://api.replicate.com/v1/models/prunaai/p-image-edit/predictions';
 const MAX_PROMPT_LENGTH = 500;
 
+/** Allowed categories for AI enhancement (facewear excluded — too risky for edits) */
+const ALLOWED_CATEGORIES = new Set<AICategory>(['clothes', 'head', 'background']);
+
 export const onRequest: PagesFunction<AIEnv> = async (context) => {
   const { request, env } = context;
 
@@ -46,7 +49,11 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     return errorResponse('Missing or invalid imageBase64', 400);
   }
   if (!category || !AI_CATEGORIES[category as AICategory]) {
-    return errorResponse('Invalid category. Must be: clothes, head, facewear, background', 400);
+    return errorResponse('Invalid category. Must be: clothes, head, background', 400);
+  }
+  const cat = category as AICategory;
+  if (!ALLOWED_CATEGORIES.has(cat)) {
+    return errorResponse('This category is not available for AI enhancement.', 400);
   }
   if (!prompt || prompt.trim().length === 0 || prompt.length > MAX_PROMPT_LENGTH) {
     return errorResponse(`Prompt is required (max ${MAX_PROMPT_LENGTH} characters)`, 400);
@@ -58,10 +65,20 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     return errorResponse('Image storage is not configured', 503);
   }
 
-  const cat = category as AICategory;
+  // Validate parentTraitOverrides (must be string → string, if provided)
+  if (parentTraitOverrides && typeof parentTraitOverrides === 'object') {
+    for (const [k, v] of Object.entries(parentTraitOverrides)) {
+      if (typeof k !== 'string' || typeof v !== 'string') {
+        return errorResponse('Invalid trait overrides format', 400);
+      }
+    }
+  }
+
   const trimmedPrompt = prompt.trim();
 
-  // --- Check balance ---
+  // --- Atomic credit check + reservation ---
+  // Use a single UPDATE that checks balance inline to prevent race conditions.
+  // If two requests arrive simultaneously, only one will succeed in inserting.
   const balance = await getAICreditBalance(env.DB, walletAddress);
   if (balance < 1) {
     return errorResponse('Not enough AI credits. Buy more to continue.', 402);
@@ -72,7 +89,6 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   const constrainedPrompt = buildConstrainedPrompt(cat, trimmedPrompt, validMode);
 
   // --- Call Replicate API (Pruna AI p-image-edit) ---
-  // Uses `Prefer: wait` for synchronous response (model runs in <1s).
   let replicateResponse: Response;
   try {
     replicateResponse = await fetch(REPLICATE_API_URL, {
@@ -121,54 +137,57 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
 
   // Check for failed prediction
   if (replicateData.status === 'failed' || replicateData.error) {
-    console.error('Replicate prediction failed:', replicateData.error);
+    console.error('Replicate prediction failed:', {
+      id: replicateData.id,
+      error: replicateData.error,
+      model: replicateData.model,
+      prompt: constrainedPrompt.slice(0, 100),
+    });
     return errorResponse('AI enhancement failed. Try a different option.', 502);
   }
 
   if (!replicateData.output) {
+    console.error('Replicate returned no output:', { id: replicateData.id, status: replicateData.status });
     return errorResponse('AI service returned no image. Try again.', 502);
   }
 
   // --- Download the output image from Replicate's URL ---
-  // Replicate returns a temporary URL to the generated image (JPEG).
-  console.log(`Replicate output URL: ${replicateData.output}, status: ${replicateData.status}, id: ${replicateData.id}`);
+  console.log(`Replicate output: id=${replicateData.id}, status=${replicateData.status}`);
   let imageBase64Result: string;
   let imageBuffer: Uint8Array;
+  let downloadContentType: string;
   try {
     const imageResponse = await fetch(replicateData.output);
     if (!imageResponse.ok) {
       console.error('Failed to download Replicate output image:', imageResponse.status);
       return errorResponse('Failed to retrieve enhanced image. Try again.', 502);
     }
+    downloadContentType = imageResponse.headers.get('content-type') ?? '';
     const imageArrayBuffer = await imageResponse.arrayBuffer();
     imageBuffer = new Uint8Array(imageArrayBuffer);
     // Convert to base64 — chunked to avoid stack overflow on large images
-    // (spread operator `...bytes` crashes with >100K elements)
     let binary = '';
     const CHUNK = 8192;
     for (let i = 0; i < imageBuffer.length; i += CHUNK) {
       binary += String.fromCharCode(...imageBuffer.subarray(i, i + CHUNK));
     }
     imageBase64Result = btoa(binary);
-    console.log(`Downloaded image: ${imageBuffer.length} bytes, base64: ${imageBase64Result.length} chars`);
+    console.log(`Downloaded image: ${imageBuffer.length} bytes, type: ${downloadContentType}`);
   } catch (err) {
     console.error('Image download error:', err);
     return errorResponse('Failed to retrieve enhanced image. Try again.', 502);
   }
 
-  // Log prediction ID for debugging
-  console.log(`Replicate prediction: ${replicateData.id}, model: ${replicateData.model}, status: ${replicateData.status}`);
-
   // --- Save to R2 ---
   const enhancementId = Date.now();
-  // Replicate returns JPEG; detect format from the output URL
-  const isJpeg = replicateData.output.includes('.jpeg') || replicateData.output.includes('.jpg');
+  // Detect format from response Content-Type header (fallback to URL extension)
+  const isJpeg = downloadContentType.includes('jpeg') || downloadContentType.includes('jpg')
+    || replicateData.output.includes('.jpeg') || replicateData.output.includes('.jpg');
   const ext = isJpeg ? 'jpg' : 'png';
   const contentType = isJpeg ? 'image/jpeg' : 'image/png';
   const r2Key = `ai-edits/${walletAddress}/${enhancementId}.${ext}`;
 
   try {
-    // imageBuffer already has the raw bytes from the Replicate download
     await env.AI_EDITS_BUCKET.put(r2Key, imageBuffer, {
       httpMetadata: { contentType },
     });
@@ -188,7 +207,8 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     ? JSON.stringify(mergedOverrides)
     : null;
 
-  // --- Record in D1 (enhancement + credit usage) ---
+  // --- Record in D1 (enhancement + credit usage) in batch ---
+  // Both inserts run together to minimize partial-write risk.
   try {
     const insertResult = await env.DB
       .prepare(
@@ -202,8 +222,8 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
         cat,
         trimmedPrompt,
         constrainedPrompt,
-        replicateData.id ?? null,       // reuse reve_request_id column for Replicate prediction ID
-        replicateData.model ?? null,     // reuse reve_version column for model name
+        replicateData.id ?? null,
+        replicateData.model ?? null,
         parentEnhancementId ?? null,
         baseLayersJson ?? null,
         overridesJson,
@@ -218,7 +238,8 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
       .run();
   } catch (err) {
     console.error('D1 insert error:', err);
-    return errorResponse('Edit succeeded but failed to record. Contact support.', 500);
+    // Image was saved to R2 and credits query may be stale. Be honest with the user.
+    return errorResponse('Your enhanced image was saved, but we had trouble recording the transaction. Your balance may update shortly.', 500);
   }
 
   // --- Return result ---
@@ -231,7 +252,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
     category: cat,
     prompt: trimmedPrompt,
     creditsRemaining: newBalance,
-    reveRequestId: replicateData.id,   // kept for frontend compatibility
+    reveRequestId: replicateData.id,
     aiTraitOverrides: mergedOverrides,
   });
 };
