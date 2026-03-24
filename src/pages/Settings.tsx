@@ -5,11 +5,12 @@
  */
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { Monitor } from 'lucide-react';
+import { Monitor, Wallet, LogOut } from 'lucide-react';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { PageSEO } from '@/components/seo';
 import { useLayout } from '@/hooks/useLayout';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useSageWallet } from '@/sage-wallet';
 import {
   AudioSettings,
   AboutSection,
@@ -20,6 +21,8 @@ import { settingsPageVariants, settingsSectionVariants } from '@/config/settings
 export default function Settings() {
   const { contentPadding, isDesktop } = useLayout();
   const prefersReducedMotion = useReducedMotion();
+  const { address, status: walletStatus, connect, disconnect } = useSageWallet();
+  const isConnected = walletStatus === 'connected';
   const {
     settings,
     updateAppSettings,
@@ -49,6 +52,75 @@ export default function Settings() {
           className="space-y-8 pb-24"
           style={{ maxWidth: isDesktop ? '1000px' : undefined, margin: '0 auto' }}
         >
+          {/* Wallet */}
+          <motion.section
+            variants={prefersReducedMotion ? undefined : settingsSectionVariants}
+            initial="initial"
+            animate="animate"
+            className="space-y-4"
+            aria-labelledby="wallet-section-heading"
+          >
+            <div className="flex items-center gap-2">
+              <Wallet size={20} className="text-accent" />
+              <h2
+                id="wallet-section-heading"
+                className="text-lg font-bold text-primary"
+              >
+                Wallet
+              </h2>
+            </div>
+
+            <div
+              className="p-4 rounded-xl"
+              style={{
+                background: 'var(--color-surface)',
+                border: '1px solid var(--color-border)',
+              }}
+            >
+              {isConnected ? (
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-primary">Connected</p>
+                    <p className="text-xs mt-0.5 text-muted font-mono">
+                      {address ? `${address.slice(0, 10)}...${address.slice(-6)}` : ''}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-ghost text-sm flex items-center gap-1.5"
+                    onClick={disconnect}
+                  >
+                    <LogOut size={14} />
+                    Disconnect
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-primary">Sage Wallet</p>
+                    <p className="text-xs mt-0.5 text-muted">
+                      Connect to mint, enhance, and earn
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-primary text-sm flex items-center gap-1.5"
+                    onClick={connect}
+                  >
+                    <Wallet size={14} />
+                    Connect
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.section>
+
+          {/* Divider */}
+          <div
+            className="h-px"
+            style={{ background: 'var(--color-border)' }}
+          />
+
           {/* Audio */}
           <AudioSettings
             audio={settings.audio}

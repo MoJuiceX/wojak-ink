@@ -155,6 +155,7 @@ export function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
               borderTop: '1px solid var(--color-white-8)',
               borderRadius: '20px 20px 0 0',
               maxHeight: 'calc(100vh - 160px)',
+              overflowY: 'auto',
               boxShadow: '0 -8px 32px var(--color-black-50)',
             }}
             initial={{ y: '100%', opacity: 0.5 }}
