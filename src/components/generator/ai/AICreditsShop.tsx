@@ -5,8 +5,9 @@ import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { useAIEnhance } from '@/contexts/AIEnhanceContext';
 import { AI_CREDIT_BUNDLES } from '@/types/aiEnhance';
-import { Sparkles, Check, Loader2, Clock, Shield } from 'lucide-react';
+import { Sparkles, Check, Loader2, Clock, Shield, ExternalLink } from 'lucide-react';
 import { useSageWallet } from '@/sage-wallet';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const BASE_PRICE_PER_CREDIT = 0.10; // XCH — tier 1 single credit
 const loadConfetti = () => import('canvas-confetti').then(m => m.default);
@@ -38,6 +39,7 @@ export function AICreditsShop() {
   const { isShopOpen, closeShop, balance, refetchBalance, sessionToken, ensureAuthenticated, reauthenticate } = useAIEnhance();
   const { status, sendXCH } = useSageWallet();
   const isConnected = status === 'connected';
+  const isMobile = useMediaQuery('(max-width: 1023px)');
   const prefersReducedMotion = useReducedMotion();
   const [selectedTier, setSelectedTier] = useState('25');
   const [purchaseState, setPurchaseState] = useState<PurchaseState>('idle');
@@ -207,7 +209,11 @@ export function AICreditsShop() {
   const continuePurchase = async (data: { amountMojos: string; treasuryAddress: string; purchaseId: number }, authToken: string) => {
     // Step 2: Send XCH via wallet
     setPurchaseState('sending');
-    setStatusMessage('Approve the transaction in your wallet...');
+    setStatusMessage(
+      isMobile
+        ? 'Open your Sage Wallet app and approve the pending transaction.'
+        : 'Approve the transaction in your wallet...'
+    );
 
     // sendXCH takes XCH (not mojos), so convert from mojo string
     const amountXch = Number(data.amountMojos) / 1_000_000_000_000;
@@ -299,7 +305,7 @@ export function AICreditsShop() {
       case 'buying':
         return 'Preparing...';
       case 'sending':
-        return 'Waiting for wallet...';
+        return isMobile ? 'Approve in Sage Wallet...' : 'Waiting for wallet...';
       case 'confirming':
         return 'Verifying on-chain...';
       case 'success':
@@ -476,8 +482,21 @@ export function AICreditsShop() {
           )}
         </AnimatePresence>
 
+        {/* Mobile: prominent prompt to switch to Sage Wallet during sending */}
+        {purchaseState === 'sending' && isMobile && (
+          <div className="card-static p-4 flex flex-col items-center gap-2 text-center">
+            <ExternalLink size={20} className="text-accent" />
+            <p className="text-sm font-medium">
+              Open your Sage Wallet app and approve the pending transaction.
+            </p>
+            <p className="text-xs text-secondary">
+              We&apos;ll detect it automatically once approved.
+            </p>
+          </div>
+        )}
+
         {/* Status message (for non-confirming states) */}
-        {statusMessage && purchaseState !== 'confirming' && (
+        {statusMessage && purchaseState !== 'confirming' && !(purchaseState === 'sending' && isMobile) && (
           <p className="text-sm text-center text-secondary">
             {statusMessage}
           </p>
