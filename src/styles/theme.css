@@ -2604,6 +2604,13 @@ body {
   cursor: not-allowed;
 }
 
+/* iOS auto-zooms inputs with font-size < 16px — prevent that on mobile */
+@media (max-width: 1023px) {
+  .input {
+    font-size: 1rem;
+  }
+}
+
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    BADGES & TAGS
