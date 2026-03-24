@@ -324,8 +324,10 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     setEnhanceError(null);
     setWizardStep('loading');
 
+    let step = 'init';
     try {
-      // Ensure we have a valid session (lazy auth — prompts signing only when needed)
+      // Step 1: Authenticate
+      step = 'auth';
       const token = await ensureAuthenticated();
       if (!token) {
         setEnhanceError('Wallet authentication required. Please sign the message in your wallet.');
@@ -334,6 +336,42 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
         return null;
       }
 
+      // Validate token is clean ASCII hex (Safari throws DOMException on invalid header chars)
+      if (!/^[a-f0-9]+$/i.test(token)) {
+        console.error('[AI Enhance] Invalid session token format — clearing and re-authenticating');
+        localStorage.removeItem('ai_session');
+        setSessionToken(null);
+        setEnhanceError('Session corrupted. Please try again.');
+        setWizardStep('prompt');
+        setIsEnhancing(false);
+        return null;
+      }
+
+      // Step 2: Build payload
+      step = 'payload';
+      const rawImage = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
+      const payload = {
+        imageBase64: rawImage,
+        category,
+        prompt,
+        mode: selectedMode ?? 'enhance',
+        parentEnhancementId: parentId ?? undefined,
+        baseLayersJson: layersJson ?? undefined,
+        traitLabel: selectedOption?.label ?? null,
+        parentTraitOverrides: Object.keys(aiTraitOverrides).length > 0 ? aiTraitOverrides : undefined,
+      };
+      console.log('[AI Enhance] Payload meta:', {
+        category: payload.category,
+        mode: payload.mode,
+        prompt: payload.prompt?.slice(0, 60),
+        imageSize: rawImage.length,
+        traitLabel: payload.traitLabel,
+        hasParentId: !!parentId,
+        tokenLen: token.length,
+      });
+
+      // Step 3: Send request
+      step = 'fetch';
       const makeRequest = async (authToken: string) => {
         return fetch('/api/ai/enhance', {
           method: 'POST',
@@ -341,16 +379,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${authToken}`,
           },
-          body: JSON.stringify({
-            imageBase64: imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64,
-            category,
-            prompt,
-            mode: selectedMode ?? 'enhance',
-            parentEnhancementId: parentId,
-            baseLayersJson: layersJson,
-            traitLabel: selectedOption?.label ?? null,
-            parentTraitOverrides: Object.keys(aiTraitOverrides).length > 0 ? aiTraitOverrides : undefined,
-          }),
+          body: JSON.stringify(payload),
         });
       };
 
@@ -358,6 +387,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
 
       // If 401, re-authenticate and retry once
       if (res.status === 401) {
+        step = 'reauth';
         const newToken = await handleAuthError(res);
         if (newToken) {
           res = await makeRequest(newToken);
@@ -368,9 +398,13 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      // Step 4: Parse response
+      step = 'response';
+      console.log('[AI Enhance] Response status:', res.status);
       const data = await res.json();
 
       if (!res.ok) {
+        console.error('[AI Enhance] Server error:', data);
         setEnhanceError(data.error || 'Enhancement failed. Try again.');
         setWizardStep('prompt');
         return null;
@@ -382,16 +416,25 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
       setWizardStep('result');
       return result;
     } catch (err) {
-      console.error('Enhance error:', err);
+      console.error(`[AI Enhance] Error at step "${step}":`, err);
       const message = err instanceof Error ? err.message : String(err);
+      const errName = err instanceof Error ? err.constructor.name : typeof err;
+
+      // Log diagnostic info for debugging
+      console.error('[AI Enhance] Error details:', { step, errName, message });
+
+      // User-friendly error messages
       if (/rejected|denied|cancel/i.test(message)) {
         setEnhanceError('Wallet signing was cancelled. Try again.');
       } else if (/timeout|abort/i.test(message)) {
         setEnhanceError('Request timed out. Check your connection and try again.');
       } else if (/network|fetch|failed to fetch/i.test(message)) {
         setEnhanceError('Network error. Check your connection and try again.');
+      } else if (/pattern|did not match/i.test(message)) {
+        // Safari DOMException from crypto/URL — likely auth or request construction issue
+        setEnhanceError('Connection error. Please disconnect and reconnect your wallet, then try again.');
       } else {
-        setEnhanceError(message || 'Something went wrong. Try again.');
+        setEnhanceError('Enhancement failed. Please try again.');
       }
       setWizardStep('prompt');
       return null;
