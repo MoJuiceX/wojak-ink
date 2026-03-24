@@ -1,10 +1,14 @@
 /**
  * More Menu Component
  *
- * Premium slide-up sheet for secondary navigation on mobile.
- * Supports swipe-to-dismiss gesture.
+ * Full-screen slide-up overlay for secondary navigation on mobile.
+ * - Covers the entire viewport including behind the bottom nav
+ * - Body scroll is locked while open
+ * - Menu content scrolls independently if it exceeds viewport
+ * - Swipe-to-dismiss gesture supported
  */
 
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
@@ -17,6 +21,7 @@ import {
   MessageCircle,
   Lightbulb,
   Gamepad2,
+  X,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -108,6 +113,29 @@ interface MoreMenuProps {
 export function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
   const navigate = useNavigate();
 
+  // Lock body scroll while menu is open (robust iOS fix)
+  useEffect(() => {
+    if (!isOpen) return;
+    const scrollY = window.scrollY;
+    const original = {
+      overflow: document.body.style.overflow,
+      position: document.body.style.position,
+      width: document.body.style.width,
+      top: document.body.style.top,
+    };
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = `-${scrollY}px`;
+    return () => {
+      document.body.style.overflow = original.overflow;
+      document.body.style.position = original.position;
+      document.body.style.width = original.width;
+      document.body.style.top = original.top;
+      window.scrollTo(0, scrollY);
+    };
+  }, [isOpen]);
+
   const handleItemClick = (route: string) => {
     navigate(route);
     onClose();
@@ -131,7 +159,7 @@ export function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
     <AnimatePresence mode="wait">
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Full-screen backdrop */}
           <motion.div
             className="fixed inset-0 z-[9998]"
             style={{
@@ -146,17 +174,11 @@ export function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
             onClick={handleBackdropClick}
           />
 
-          {/* Sheet - positioned above the bottom nav (80px) */}
+          {/* Full-screen sheet — covers entire viewport, scrollable content */}
           <motion.div
-            className="fixed left-0 right-0 z-[9999] glass-strong"
+            className="fixed inset-0 z-[9999] flex flex-col"
             style={{
-              bottom: 80, // Above the mobile navigation bar
-              background: '#1a1a24', // Solid dark background
-              borderTop: '1px solid var(--color-white-8)',
-              borderRadius: '20px 20px 0 0',
-              maxHeight: 'calc(100vh - 160px)',
-              overflowY: 'auto',
-              boxShadow: '0 -8px 32px var(--color-black-50)',
+              background: '#1a1a24',
             }}
             initial={{ y: '100%', opacity: 0.5 }}
             animate={{ y: 0, opacity: 1 }}
@@ -171,31 +193,52 @@ export function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
             dragElastic={{ top: 0, bottom: 0.4 }}
             onDragEnd={handleDragEnd}
           >
-            {/* Drag handle */}
-            <div 
-              className="flex justify-center pt-3 pb-1"
-              style={{ touchAction: 'none' }}
+            {/* Top safe area + drag handle + header */}
+            <div
+              className="flex-shrink-0"
+              style={{
+                paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+              }}
             >
+              {/* Drag handle */}
               <div
-                className="w-10 h-1 rounded-full"
-                style={{ background: 'var(--color-white-25)' }}
-              />
-            </div>
-
-            {/* Header */}
-            <div className="px-5 pt-1 pb-3">
-              <h2 
-                className="text-base font-semibold"
-                style={{ color: 'rgba(255, 255, 255, 0.9)' }}
+                className="flex justify-center pb-1"
+                style={{ touchAction: 'none' }}
               >
-                Menu
-              </h2>
+                <div
+                  className="w-10 h-1 rounded-full"
+                  style={{ background: 'var(--color-white-25)' }}
+                />
+              </div>
+
+              {/* Header with close button */}
+              <div className="px-5 pt-1 pb-3 flex items-center justify-between">
+                <h2
+                  className="text-base font-semibold"
+                  style={{ color: 'rgba(255, 255, 255, 0.9)' }}
+                >
+                  Menu
+                </h2>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg"
+                  style={{ background: 'var(--color-white-5)' }}
+                  aria-label="Close menu"
+                >
+                  <X size={16} style={{ color: 'var(--color-white-60)' }} />
+                </button>
+              </div>
             </div>
 
-            {/* Menu items */}
-            <nav 
-              className="px-3 pb-4 flex flex-col gap-1.5"
-              style={{ touchAction: 'pan-y' }}
+            {/* Scrollable menu items */}
+            <nav
+              className="flex-1 overflow-y-auto px-3 pb-4 flex flex-col gap-1.5"
+              style={{
+                touchAction: 'pan-y',
+                overscrollBehavior: 'contain',
+                paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
+              }}
               role="menu"
               aria-label="Secondary navigation"
             >
@@ -203,7 +246,7 @@ export function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
                 const Icon = item.icon;
                 const isDisabled = item.badge === 'Soon';
                 const isSpecialBadge = item.badge && item.badge !== 'Soon';
-                
+
                 return (
                   <button
                     key={item.route}
