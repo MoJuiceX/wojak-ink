@@ -334,10 +334,14 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const handleEnhanceClick = useCallback(async () => {
     if (!canExport) return;
     try {
+      // Use 512px for AI enhance — smaller payload prevents Safari mobile
+      // from throwing DOMException on large fetch POST bodies.
+      // Reve API handles 512px well; 1024px base64 PNG can exceed ~2MB
+      // which triggers "The string did not match the expected pattern" on iOS Safari.
       const blob = await exportImage(selectedLayers, {
         format: 'png',
         includeBackground: true,
-        size: { preset: '1024' },
+        size: { preset: '512' },
       }, g2Selections, selectedColors);
       const reader = new FileReader();
       reader.onload = () => {
