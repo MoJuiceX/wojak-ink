@@ -272,13 +272,20 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   // --- Category ---
   const selectCategory = useCallback((cat: AICategory) => {
     setSelectedCategory(cat);
-    setSelectedMode(null);
-    setPromptSubStep('mode');
     setSelectedFamily(null);
     setSelectedOption(null);
     setWizardStep('prompt');
     setEnhanceError(null);
     setCurrentResult(null);
+
+    // Background only has "enhance" mode — skip the mode selection step
+    if (cat === 'background') {
+      setSelectedMode('enhance');
+      setPromptSubStep('family');
+    } else {
+      setSelectedMode(null);
+      setPromptSubStep('mode');
+    }
   }, []);
 
   // --- Prompt back navigation (called by lightbox header back button) ---
