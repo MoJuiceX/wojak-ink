@@ -80,7 +80,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
       headers: {
         'Authorization': `Bearer ${env.REPLICATE_API_TOKEN}`,
         'Content-Type': 'application/json',
-        'Prefer': 'wait',
+        'Prefer': 'wait=25',
       },
       body: JSON.stringify({
         input: {
@@ -131,7 +131,9 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
 
   // --- Download the output image from Replicate's URL ---
   // Replicate returns a temporary URL to the generated image (JPEG).
+  console.log(`Replicate output URL: ${replicateData.output}, status: ${replicateData.status}, id: ${replicateData.id}`);
   let imageBase64Result: string;
+  let imageBuffer: Uint8Array;
   try {
     const imageResponse = await fetch(replicateData.output);
     if (!imageResponse.ok) {
@@ -139,9 +141,16 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
       return errorResponse('Failed to retrieve enhanced image. Try again.', 502);
     }
     const imageArrayBuffer = await imageResponse.arrayBuffer();
-    const imageBytes = new Uint8Array(imageArrayBuffer);
-    // Convert to base64 for R2 storage and frontend display
-    imageBase64Result = btoa(String.fromCharCode(...imageBytes));
+    imageBuffer = new Uint8Array(imageArrayBuffer);
+    // Convert to base64 — chunked to avoid stack overflow on large images
+    // (spread operator `...bytes` crashes with >100K elements)
+    let binary = '';
+    const CHUNK = 8192;
+    for (let i = 0; i < imageBuffer.length; i += CHUNK) {
+      binary += String.fromCharCode(...imageBuffer.subarray(i, i + CHUNK));
+    }
+    imageBase64Result = btoa(binary);
+    console.log(`Downloaded image: ${imageBuffer.length} bytes, base64: ${imageBase64Result.length} chars`);
   } catch (err) {
     console.error('Image download error:', err);
     return errorResponse('Failed to retrieve enhanced image. Try again.', 502);
@@ -159,7 +168,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   const r2Key = `ai-edits/${walletAddress}/${enhancementId}.${ext}`;
 
   try {
-    const imageBuffer = Uint8Array.from(atob(imageBase64Result), (c) => c.charCodeAt(0));
+    // imageBuffer already has the raw bytes from the Replicate download
     await env.AI_EDITS_BUCKET.put(r2Key, imageBuffer, {
       httpMetadata: { contentType },
     });
