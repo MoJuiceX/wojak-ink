@@ -189,13 +189,13 @@
   .lightbox-header {
     padding: 0.875rem 1rem;
     /* Safe area for notches + space below browser address bar */
-    padding-top: calc(0.875rem + env(safe-area-inset-top, 0) + 56px);
+    padding-top: calc(0.875rem + env(safe-area-inset-top, 0) + 20px);
   }
 
   /* On mobile, external close below browser address bar; ensure on top of content */
   .lightbox-close--external {
     position: absolute;
-    top: calc(0.75rem + env(safe-area-inset-top, 0) + 56px);
+    top: calc(0.75rem + env(safe-area-inset-top, 0) + 20px);
     right: 0.75rem;
     z-index: 20;
     margin-top: 0;
@@ -207,7 +207,7 @@
      when header is present, it already accounts for browser chrome. */
   .lightbox-body {
     padding: 1rem;
-    padding-top: calc(1rem + env(safe-area-inset-top, 0) + 56px);
+    padding-top: calc(1rem + env(safe-area-inset-top, 0) + 20px);
     padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0) + 72px);
   }
 

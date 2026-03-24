@@ -383,7 +383,16 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
       return result;
     } catch (err) {
       console.error('Enhance error:', err);
-      setEnhanceError('Network error. Check your connection and try again.');
+      const message = err instanceof Error ? err.message : String(err);
+      if (/rejected|denied|cancel/i.test(message)) {
+        setEnhanceError('Wallet signing was cancelled. Try again.');
+      } else if (/timeout|abort/i.test(message)) {
+        setEnhanceError('Request timed out. Check your connection and try again.');
+      } else if (/network|fetch|failed to fetch/i.test(message)) {
+        setEnhanceError('Network error. Check your connection and try again.');
+      } else {
+        setEnhanceError(message || 'Something went wrong. Try again.');
+      }
       setWizardStep('prompt');
       return null;
     } finally {
