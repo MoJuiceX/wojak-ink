@@ -62,6 +62,8 @@ export interface AIEnhancement {
 
 export interface AIEnhanceResult {
   imageBase64: string;
+  /** MIME type of the image (image/jpeg or image/png) */
+  contentType?: string;
   r2Key: string;
   enhancementId: string;
   category: AICategory;

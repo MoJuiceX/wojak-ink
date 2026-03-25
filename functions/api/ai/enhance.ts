@@ -350,6 +350,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
 
   return jsonResponse({
     imageBase64: imageBase64Result,
+    contentType,
     r2Key,
     enhancementId: r2Key,
     category: cat,

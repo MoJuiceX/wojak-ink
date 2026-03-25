@@ -500,17 +500,42 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // Convert any image (JPEG or PNG) to PNG data URL via canvas
+  const ensurePng = useCallback(async (base64: string, ct?: string): Promise<string> => {
+    const mime = ct?.includes('jpeg') || ct?.includes('jpg') ? 'image/jpeg' : 'image/png';
+    // If already PNG, return directly
+    if (mime === 'image/png') return `data:image/png;base64,${base64}`;
+    // Convert JPEG to PNG via canvas
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = () => {
+        // Fallback: assume PNG if conversion fails
+        resolve(`data:image/png;base64,${base64}`);
+      };
+      img.src = `data:${mime};base64,${base64}`;
+    });
+  }, []);
+
   // --- Accept result ---
   const acceptResult = useCallback(async () => {
     if (!currentResult || !selectedOption) return;
 
     let imageData: string;
 
-    // For background-only results, composite with character overlay
+    // For background-only results, composite with character overlay (already outputs PNG)
     if (currentResult.isBgOnly && characterOverlay) {
       imageData = await compositeImages(currentResult.imageBase64, characterOverlay);
     } else {
-      imageData = `data:image/png;base64,${currentResult.imageBase64}`;
+      // Convert to PNG if Pruna returned JPEG — mint pipeline requires PNG
+      imageData = await ensurePng(currentResult.imageBase64, currentResult.contentType);
     }
 
     setEnhancedImage(imageData);
@@ -521,7 +546,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     if (currentResult.aiTraitOverrides && Object.keys(currentResult.aiTraitOverrides).length > 0) {
       setAiTraitOverrides(currentResult.aiTraitOverrides);
     }
-  }, [currentResult, selectedOption, selectedFamily, characterOverlay, compositeImages]);
+  }, [currentResult, selectedOption, selectedFamily, characterOverlay, compositeImages, ensurePng]);
 
   // --- Reset ---
   const resetToLayers = useCallback(() => {
