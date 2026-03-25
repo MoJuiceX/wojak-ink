@@ -79,13 +79,17 @@ export interface AICreditBundle {
   priceXch: number;
   discount: string;
   badge?: string;
+  /** Original credits before promo — shown crossed out in shop */
+  originalCredits?: number;
 }
 
+// PROMO: 2x credits for the same price (50% off) — ends April 1, 2026
+// To revert: remove originalCredits, change credits back to 1/10/25/50, update discounts
 export const AI_CREDIT_BUNDLES: AICreditBundle[] = [
-  { tier: '1',  credits: 1,  priceXch: 0.10, discount: '' },
-  { tier: '10', credits: 10, priceXch: 0.80, discount: '20% off' },
-  { tier: '25', credits: 25, priceXch: 1.50, discount: '40% off', badge: 'POPULAR' },
-  { tier: '50', credits: 50, priceXch: 2.40, discount: '52% off', badge: 'BEST VALUE' },
+  { tier: '1',  credits: 2,   priceXch: 0.10, discount: '2x credits', badge: '50% OFF', originalCredits: 1 },
+  { tier: '10', credits: 20,  priceXch: 0.80, discount: '2x credits', badge: '50% OFF', originalCredits: 10 },
+  { tier: '25', credits: 50,  priceXch: 1.50, discount: '2x credits', badge: 'POPULAR', originalCredits: 25 },
+  { tier: '50', credits: 100, priceXch: 2.40, discount: '2x credits', badge: 'BEST VALUE', originalCredits: 50 },
 ];
 
 export type AIWizardStep = 'category' | 'prompt' | 'loading' | 'result';

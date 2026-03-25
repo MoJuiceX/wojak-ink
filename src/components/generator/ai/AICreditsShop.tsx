@@ -366,6 +366,11 @@ export function AICreditsShop() {
               >
                 {/* Left: credits number + label + badge inline */}
                 <div className="ai-shop-bundle-left">
+                  {bundle.originalCredits && (
+                    <span className="ai-shop-bundle-credits" style={{ textDecoration: 'line-through', opacity: 0.4, fontSize: '0.85em', marginRight: '0.25rem' }}>
+                      {bundle.originalCredits}
+                    </span>
+                  )}
                   <span className="ai-shop-bundle-credits">
                     {bundle.credits}
                   </span>
@@ -377,7 +382,9 @@ export function AICreditsShop() {
                       className={`ai-bundle-badge ${
                         bundle.badge === 'POPULAR'
                           ? 'ai-bundle-badge--popular'
-                          : 'ai-bundle-badge--value'
+                          : bundle.badge === '50% OFF'
+                            ? 'ai-bundle-badge--popular'
+                            : 'ai-bundle-badge--value'
                       }`}
                     >
                       {bundle.badge}
