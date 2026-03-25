@@ -60,12 +60,16 @@ const PROMO_END = new Date('2026-04-01T00:00:00Z');
 function AIPromoBanner() {
   const [dismissed, setDismissed] = useState(() => {
     const stored = safeStorage.getItem('ai_promo_dismissed');
-    return stored === 'true';
+    if (stored === 'true') return true;
+    // Check expiry during initial state (not during render)
+    return new Date() > PROMO_END;
   });
 
-  if (dismissed || Date.now() > PROMO_END.getTime()) return null;
+  const [daysLeft] = useState(() =>
+    Math.max(0, Math.ceil((PROMO_END.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
+  );
 
-  const daysLeft = Math.max(0, Math.ceil((PROMO_END.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+  if (dismissed) return null;
 
   const handleDismiss = () => {
     setDismissed(true);

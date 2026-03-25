@@ -25,6 +25,7 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
   // For background-only results, composite a preview with the character overlay
   useEffect(() => {
     if (!currentResult?.isBgOnly || !characterOverlay) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCompositedPreview(null);
       return;
     }

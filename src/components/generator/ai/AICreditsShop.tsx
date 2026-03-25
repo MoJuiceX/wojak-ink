@@ -55,6 +55,7 @@ export function AICreditsShop() {
   // Tick elapsed timer during confirmation polling
   useEffect(() => {
     if (purchaseState === 'confirming') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setConfirmElapsed(0);
       confirmTimerRef.current = setInterval(() => setConfirmElapsed(s => s + 1), 1000);
     } else {

@@ -371,7 +371,8 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
         traitLabel: selectedOption?.label ?? null,
         parentTraitOverrides: Object.keys(aiTraitOverrides).length > 0 ? aiTraitOverrides : undefined,
       };
-      console.log('[AI Enhance] Payload meta:', {
+      // Debug payload (warn level allowed by lint)
+      console.warn('[AI Enhance] Payload meta:', {
         category: payload.category,
         mode: payload.mode,
         prompt: payload.prompt?.slice(0, 60),
@@ -411,7 +412,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
 
       // Step 4: Parse response
       step = 'response';
-      console.log('[AI Enhance] Response status:', res.status, 'ok:', res.ok);
+      console.warn('[AI Enhance] Response status:', res.status, 'ok:', res.ok);
 
       // Handle error responses — must parse carefully since CF may return HTML on 502
       if (!res.ok) {
