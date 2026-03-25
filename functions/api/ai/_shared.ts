@@ -80,9 +80,9 @@ export const PROMPT_TEMPLATES: Record<AICategory, Partial<Record<AIMode, string>
   },
   background: {
     enhance:
-      'Add {user_prompt} in the background behind the character. Preserve the character exactly — same size, position, pose, outfit, and all other elements unchanged.',
+      'Change the background behind the character to {user_prompt}, while maintaining the character in the exact same position, size, and pose. Keep the character\'s outfit, face, and all details unchanged.',
     create_new:
-      'Replace the background with {user_prompt}. Preserve the character exactly — same size, position, pose, outfit, and all other elements unchanged.',
+      'Change the background behind the character to {user_prompt}, while maintaining the character in the exact same position, size, and pose. Keep the character\'s outfit, face, and all details unchanged.',
   },
 };
 
