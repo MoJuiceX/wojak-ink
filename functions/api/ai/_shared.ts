@@ -80,9 +80,9 @@ export const PROMPT_TEMPLATES: Record<AICategory, Partial<Record<AIMode, string>
   },
   background: {
     enhance:
-      'Change the background behind the character to {user_prompt}, while maintaining the character in the exact same position, size, and pose. Keep the character\'s outfit, face, and all details unchanged.',
+      'Create a scene: {user_prompt}. Fill the entire image with this scene. No people, characters, or figures. Flat cartoon illustration style.',
     create_new:
-      'Change the background behind the character to {user_prompt}, while maintaining the character in the exact same position, size, and pose. Keep the character\'s outfit, face, and all details unchanged.',
+      'Create a scene: {user_prompt}. Fill the entire image with this scene. No people, characters, or figures. Flat cartoon illustration style.',
   },
 };
 
@@ -90,6 +90,13 @@ export function buildConstrainedPrompt(category: AICategory, userPrompt: string,
   const categoryTemplates = PROMPT_TEMPLATES[category];
   const template = categoryTemplates[mode] ?? categoryTemplates.create_new ?? '';
   return template.replace('{user_prompt}', userPrompt.trim());
+}
+
+/** Simple hash for R2 cache keys. Not cryptographic — just deterministic. */
+export async function hashPrompt(prompt: string): Promise<string> {
+  const data = new TextEncoder().encode(prompt);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
 }
 
 // --- Env Bindings ---

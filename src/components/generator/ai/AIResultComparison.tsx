@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useAIEnhance } from '@/contexts/AIEnhanceContext';
 
@@ -16,21 +16,48 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
     submitEnhance,
     isEnhancing,
     balance,
+    characterOverlay,
   } = useAIEnhance();
   const prefersReducedMotion = useReducedMotion();
   const [shimmerVisible, setShimmerVisible] = useState(true);
+  const [compositedPreview, setCompositedPreview] = useState<string | null>(null);
+
+  // For background-only results, composite a preview with the character overlay
+  useEffect(() => {
+    if (!currentResult?.isBgOnly || !characterOverlay) {
+      setCompositedPreview(null);
+      return;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d')!;
+
+    const bgImg = new Image();
+    bgImg.onload = () => {
+      ctx.drawImage(bgImg, 0, 0, 512, 512);
+      const charImg = new Image();
+      charImg.onload = () => {
+        ctx.drawImage(charImg, 0, 0, 512, 512);
+        setCompositedPreview(canvas.toDataURL('image/png'));
+      };
+      charImg.src = characterOverlay;
+    };
+    bgImg.src = `data:image/jpeg;base64,${currentResult.imageBase64}`;
+  }, [currentResult, characterOverlay]);
 
   if (!currentResult) return null;
 
-  const resultImageSrc = `data:image/png;base64,${currentResult.imageBase64}`;
+  // Show composited preview for backgrounds, raw result for other categories
+  const resultImageSrc = compositedPreview ?? `data:image/png;base64,${currentResult.imageBase64}`;
 
-  const handleAcceptAndDone = () => {
-    acceptResult();
+  const handleAcceptAndDone = async () => {
+    await acceptResult();
     closeLightbox();
   };
 
-  const handleAcceptAndContinue = () => {
-    acceptResult();
+  const handleAcceptAndContinue = async () => {
+    await acceptResult();
     setWizardStep('category');
   };
 

@@ -234,7 +234,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const [isFirstVisitInfo, setIsFirstVisitInfo] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const lastRandomizeRef = useRef<number>(0);
-  const { openLightbox, creations, isAIEnhancedMode, enhancedImage, isLightboxOpen, isShopOpen, acceptedOptions, acceptedFamilies, enhancedCategories, aiTraitOverrides } = useAIEnhance();
+  const { openLightbox, creations, isAIEnhancedMode, enhancedImage, isLightboxOpen, isShopOpen, acceptedOptions, acceptedFamilies, enhancedCategories, aiTraitOverrides, setCharacterOverlay } = useAIEnhance();
   const [showCreationsGallery, setShowCreationsGallery] = useState(false);
   const [canvasImageBase64, setCanvasImageBase64] = useState<string | null>(null);
 
@@ -334,26 +334,41 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const handleEnhanceClick = useCallback(async () => {
     if (!canExport) return;
     try {
-      // Use 512px for AI enhance — smaller payload prevents Safari mobile
-      // from throwing DOMException on large fetch POST bodies.
-      // Reve API handles 512px well; 1024px base64 PNG can exceed ~2MB
-      // which triggers "The string did not match the expected pattern" on iOS Safari.
-      const blob = await exportImage(selectedLayers, {
+      // Export full image (with background) for clothes/head enhancements
+      const fullBlob = await exportImage(selectedLayers, {
         format: 'png',
         includeBackground: true,
         size: { preset: '512' },
       }, g2Selections, selectedColors);
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = reader.result as string;
-        setCanvasImageBase64(dataUrl);
-        openLightbox();
-      };
-      reader.readAsDataURL(blob);
+
+      // Export character-only (no background, transparent) for background compositing
+      const charBlob = await exportImage(selectedLayers, {
+        format: 'png',
+        includeBackground: false,
+        size: { preset: '512' },
+      }, g2Selections, selectedColors);
+
+      // Convert both to data URLs
+      const [fullDataUrl, charDataUrl] = await Promise.all([
+        new Promise<string>((resolve) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result as string);
+          r.readAsDataURL(fullBlob);
+        }),
+        new Promise<string>((resolve) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result as string);
+          r.readAsDataURL(charBlob);
+        }),
+      ]);
+
+      setCanvasImageBase64(fullDataUrl);
+      setCharacterOverlay(charDataUrl);
+      openLightbox();
     } catch (err) {
       console.error('[ActionBar] Failed to capture canvas for AI enhance:', err);
     }
-  }, [canExport, selectedLayers, g2Selections, selectedColors, openLightbox]);
+  }, [canExport, selectedLayers, g2Selections, selectedColors, openLightbox, setCharacterOverlay]);
 
   const basePath = selectedLayers.Base;
   const hasSelection = !isSelectionPathEmpty(basePath);

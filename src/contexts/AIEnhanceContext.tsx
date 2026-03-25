@@ -43,6 +43,10 @@ export interface AIEnhanceContextValue {
   currentResult: AIEnhanceResult | null;
   clearResult: () => void;
 
+  // Character overlay (transparent PNG without background — for background compositing)
+  characterOverlay: string | null;
+  setCharacterOverlay: (overlay: string | null) => void;
+
   // Enhanced image state
   enhancedImage: string | null;  // base64 of currently accepted AI image
   enhancedCategories: Set<AICategory>;
@@ -100,6 +104,9 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [enhanceError, setEnhanceError] = useState<string | null>(null);
   const [currentResult, setCurrentResult] = useState<AIEnhanceResult | null>(null);
+
+  // Character overlay (transparent PNG — used for background compositing)
+  const [characterOverlay, setCharacterOverlay] = useState<string | null>(null);
 
   // AI Enhanced Mode
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
@@ -349,7 +356,11 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
 
       // Step 2: Build payload
       step = 'payload';
-      const rawImage = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
+      // Background: no image needed (backend generates scene-only, frontend composites)
+      // Other categories: send the current image for editing
+      const rawImage = category === 'background'
+        ? undefined
+        : imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
       const payload = {
         imageBase64: rawImage,
         category,
@@ -364,7 +375,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
         category: payload.category,
         mode: payload.mode,
         prompt: payload.prompt?.slice(0, 60),
-        imageSize: rawImage.length,
+        imageSize: rawImage?.length ?? 0,
         traitLabel: payload.traitLabel,
         hasParentId: !!parentId,
         tokenLen: token.length,
@@ -465,10 +476,42 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     }
   }, [address, selectedMode, selectedOption, aiTraitOverrides, ensureAuthenticated, handleAuthError]);
 
+  // --- Composite background + character overlay ---
+  const compositeImages = useCallback(async (bgBase64: string, overlayDataUrl: string): Promise<string> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d')!;
+
+      const bgImg = new Image();
+      bgImg.onload = () => {
+        ctx.drawImage(bgImg, 0, 0, 512, 512);
+
+        const charImg = new Image();
+        charImg.onload = () => {
+          ctx.drawImage(charImg, 0, 0, 512, 512);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        charImg.src = overlayDataUrl;
+      };
+      bgImg.src = `data:image/jpeg;base64,${bgBase64}`;
+    });
+  }, []);
+
   // --- Accept result ---
-  const acceptResult = useCallback(() => {
+  const acceptResult = useCallback(async () => {
     if (!currentResult || !selectedOption) return;
-    const imageData = `data:image/png;base64,${currentResult.imageBase64}`;
+
+    let imageData: string;
+
+    // For background-only results, composite with character overlay
+    if (currentResult.isBgOnly && characterOverlay) {
+      imageData = await compositeImages(currentResult.imageBase64, characterOverlay);
+    } else {
+      imageData = `data:image/png;base64,${currentResult.imageBase64}`;
+    }
+
     setEnhancedImage(imageData);
     setEnhancedCategories((prev) => new Set([...prev, currentResult.category]));
     setAcceptedOptions((prev) => ({ ...prev, [currentResult.category]: selectedOption }));
@@ -477,7 +520,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     if (currentResult.aiTraitOverrides && Object.keys(currentResult.aiTraitOverrides).length > 0) {
       setAiTraitOverrides(currentResult.aiTraitOverrides);
     }
-  }, [currentResult, selectedOption, selectedFamily]);
+  }, [currentResult, selectedOption, selectedFamily, characterOverlay, compositeImages]);
 
   // --- Reset ---
   const resetToLayers = useCallback(() => {
@@ -578,6 +621,8 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     submitEnhance,
     currentResult,
     clearResult,
+    characterOverlay,
+    setCharacterOverlay,
     enhancedImage,
     enhancedCategories,
     acceptResult,

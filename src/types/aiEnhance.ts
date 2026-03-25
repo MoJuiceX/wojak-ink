@@ -69,6 +69,8 @@ export interface AIEnhanceResult {
   creditsRemaining: number;
   reveRequestId?: string;
   aiTraitOverrides: Record<string, string>;
+  /** True when the result is a background-only scene (needs frontend compositing with character overlay) */
+  isBgOnly?: boolean;
 }
 
 export interface AICreditBundle {
