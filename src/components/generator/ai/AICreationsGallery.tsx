@@ -13,10 +13,14 @@ interface AICreationsGalleryProps {
 }
 
 export function AICreationsGallery({ isOpen, onClose }: AICreationsGalleryProps) {
-  const { creations, isLoadingCreations, fetchCreations, loadImageForEnhancing } = useAIEnhance();
+  const { creations, isLoadingCreations, fetchCreations, loadImageForEnhancing, sessionToken } = useAIEnhance();
   const prefersReducedMotion = useReducedMotion();
   const [selectedCreation, setSelectedCreation] = useState<AIEnhancement | null>(null);
   const [isLoadingImage, setIsLoadingImage] = useState(false);
+
+  // Build authenticated image URL (token in query param for <img> tags)
+  const imageUrl = (r2Key: string) =>
+    sessionToken ? `/api/ai/image/${r2Key}?token=${sessionToken}` : `/api/ai/image/${r2Key}`;
 
   // Reset selection when gallery closes so it opens fresh next time
   const handleClose = () => {
@@ -34,7 +38,9 @@ export function AICreationsGallery({ isOpen, onClose }: AICreationsGalleryProps)
   const handleContinueEnhancing = useCallback(async (creation: AIEnhancement) => {
     setIsLoadingImage(true);
     try {
-      const res = await fetch(`/api/ai/image/${creation.r2Key}`);
+      const headers: Record<string, string> = {};
+      if (sessionToken) headers['Authorization'] = `Bearer ${sessionToken}`;
+      const res = await fetch(`/api/ai/image/${creation.r2Key}`, { headers });
       if (!res.ok) throw new Error('Failed to fetch image');
       const blob = await res.blob();
       const reader = new FileReader();
@@ -50,7 +56,7 @@ export function AICreationsGallery({ isOpen, onClose }: AICreationsGalleryProps)
     } finally {
       setIsLoadingImage(false);
     }
-  }, [loadImageForEnhancing, onClose]);
+  }, [loadImageForEnhancing, onClose, sessionToken]);
 
   return (
     <Lightbox
@@ -79,7 +85,7 @@ export function AICreationsGallery({ isOpen, onClose }: AICreationsGalleryProps)
         {selectedCreation && (
           <div className="flex flex-col items-center gap-4">
             <img
-              src={`/api/ai/image/${selectedCreation.r2Key}`}
+              src={imageUrl(selectedCreation.r2Key)}
               alt={`AI ${selectedCreation.category} creation`}
               className="w-64 h-64 md:w-80 md:h-80 object-contain"
               style={{ borderRadius: 'var(--radius-lg)' }}
@@ -123,7 +129,7 @@ export function AICreationsGallery({ isOpen, onClose }: AICreationsGalleryProps)
                 whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
               >
                 <img
-                  src={`/api/ai/image/${creation.r2Key}`}
+                  src={imageUrl(creation.r2Key)}
                   alt={`AI ${creation.category}`}
                   className="w-full aspect-square object-cover"
                   style={{ borderRadius: 'var(--radius-md)' }}

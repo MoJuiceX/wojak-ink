@@ -1,14 +1,49 @@
 /**
  * Serve AI-enhanced images from R2.
  * Route: /api/ai/image/<r2Key>
- * Example: /api/ai/image/ai-edits/xch1abc.../1234567890.png
+ * Example: /api/ai/image/ai-edits/xch1abc.../1234567890.png?token=SESSION_TOKEN
  *
- * Security: Requires auth. Users can only access their own images
- * (wallet address in the R2 key must match the authenticated session).
+ * Security: Requires auth via Authorization header OR ?token= query param.
+ * Users can only access their own images (wallet in R2 key must match session).
+ * The ?token= param allows <img src=""> tags to authenticate (they can't send headers).
  */
 
-import { optionsResponse, errorResponse, requireAuth } from '../_shared';
+import { optionsResponse, errorResponse } from '../_shared';
 import type { AIEnv } from '../_shared';
+
+/** Validate session token from either Authorization header or ?token= query param */
+async function authenticateRequest(request: Request, db: D1Database): Promise<{ walletAddress: string } | Response> {
+  // Try Authorization header first
+  let token: string | null = null;
+  const authHeader = request.headers.get('Authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    token = authHeader.slice(7);
+  }
+
+  // Fall back to ?token= query param (for <img> tags)
+  if (!token) {
+    const url = new URL(request.url);
+    token = url.searchParams.get('token');
+  }
+
+  if (!token || token.length < 64) {
+    return errorResponse('Authentication required', 401);
+  }
+
+  const session = await db
+    .prepare(
+      `SELECT id, wallet_address FROM ai_auth_sessions
+       WHERE session_token = ? AND expires_at > datetime('now')`
+    )
+    .bind(token)
+    .first<{ id: number; wallet_address: string }>();
+
+  if (!session) {
+    return errorResponse('Session expired', 401);
+  }
+
+  return { walletAddress: session.wallet_address };
+}
 
 export const onRequest: PagesFunction<AIEnv> = async (context) => {
   const { request, env, params } = context;
@@ -21,7 +56,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   }
 
   // Authenticate — users can only access their own images
-  const auth = await requireAuth(request, env.DB);
+  const auth = await authenticateRequest(request, env.DB);
   if (auth instanceof Response) return auth;
 
   // Reconstruct the R2 key from path segments
@@ -38,12 +73,11 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   }
 
   // Ownership check: R2 key format is ai-edits/{walletAddress}/{id}.{ext}
-  // The wallet address in the path must match the authenticated user
   const keyParts = r2Key.split('/');
   if (keyParts.length < 3) {
     return errorResponse('Invalid image path', 400);
   }
-  const keyWallet = keyParts[1]; // ai-edits/{walletAddress}/...
+  const keyWallet = keyParts[1];
   if (keyWallet !== auth.walletAddress) {
     return errorResponse('Access denied', 403);
   }
