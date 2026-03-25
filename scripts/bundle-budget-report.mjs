@@ -56,6 +56,7 @@ function classifyChunk(filePath) {
   if (file.startsWith('html2canvas.esm-')) return 'vendor-html2canvas';
   if (file.startsWith('confetti.module-')) return 'app-shared';
   if (file.startsWith('feature-generator-core-')) return 'feature-generator-core';
+  if (file.startsWith('AIEnhanceLightbox-')) return 'feature-ai-enhance';
   if (/^[A-Z][A-Za-z0-9]+-/.test(file)) return 'route-chunk';
   if (/^[a-z][A-Za-z0-9]+-/.test(file)) return 'app-shared';
   return 'js-other';
@@ -69,6 +70,7 @@ const BUDGETS = {
   'vendor-wallet-crypto': { softKb: 120, hardKb: 160 },
   'vendor-html2canvas': { softKb: 210, hardKb: 260 },
   'feature-generator-core': { softKb: 180, hardKb: 240 },
+  'feature-ai-enhance': { softKb: 260, hardKb: 320 },
   'route-chunk': { softKb: 180, hardKb: 240 },
 };
 
