@@ -624,7 +624,6 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               icon={<Images size={16} />}
               label="AI Creations"
               badge={creations.length || undefined}
-              hideOnMobile
             />
           </ActionBarTooltip>
 
