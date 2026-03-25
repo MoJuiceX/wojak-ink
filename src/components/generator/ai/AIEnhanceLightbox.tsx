@@ -30,12 +30,10 @@ export function AIEnhanceLightbox({ currentImage }: AIEnhanceLightboxProps) {
     handlePromptBack,
   } = useAIEnhance();
 
-  // Always use the original clean canvas for AI input — the layer-based render
-  // has crisp structure that Pruna can reliably parse. Using a previous AI result
-  // as input causes the model to reinterpret/redraw the character.
-  // The enhancedImage is only used for display (preview thumbnail + result comparison).
-  const displayImage = enhancedImage ?? currentImage;
-  const aiInputImage = currentImage;
+  // Always use the latest image (enhanced or original) for both display and AI input.
+  // If the user has accepted a previous enhancement (e.g., background), subsequent
+  // enhancements (e.g., clothing) must build on that result to preserve prior work.
+  const activeImage = enhancedImage ?? currentImage;
 
   const handleBack = () => {
     if (wizardStep === 'result') {
@@ -128,16 +126,16 @@ export function AIEnhanceLightbox({ currentImage }: AIEnhanceLightboxProps) {
       {/* Wizard steps */}
       <div className="flex flex-col gap-2 sm:gap-4 mt-1 sm:mt-2">
         {wizardStep === 'category' && (
-          <AICategoryPicker currentImage={displayImage} />
+          <AICategoryPicker currentImage={activeImage} />
         )}
         {wizardStep === 'prompt' && (
-          <AIPromptBuilder currentImage={aiInputImage} />
+          <AIPromptBuilder currentImage={activeImage} />
         )}
         {wizardStep === 'loading' && (
-          <AILoadingState currentImage={displayImage} />
+          <AILoadingState currentImage={activeImage} />
         )}
         {wizardStep === 'result' && (
-          <AIResultComparison currentImage={aiInputImage} />
+          <AIResultComparison currentImage={activeImage} />
         )}
       </div>
     </Lightbox>
