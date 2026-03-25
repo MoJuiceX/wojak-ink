@@ -16,6 +16,17 @@ const MAX_PROMPT_LENGTH = 500;
 /** Allowed categories for AI enhancement (facewear excluded — too risky for edits) */
 const ALLOWED_CATEGORIES = new Set<AICategory>(['clothes', 'head', 'background']);
 
+/**
+ * Minimal 64x64 solid dark grey PNG as a placeholder for background generation.
+ * p-image-edit requires at least one input image — this gives it a blank canvas
+ * to "edit" into a full scene based on the prompt.
+ */
+const PLACEHOLDER_IMAGE_DATA_URI = (() => {
+  // Generate a tiny 4x4 PNG programmatically (smallest valid PNG)
+  // Using a pre-encoded base64 of a 4x4 dark grey PNG
+  return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAADklEQVQI12NggIJhygAABDABATLhMa8AAAAASUVORK5CYII=';
+})();
+
 /** Convert Uint8Array to base64 string in chunks (avoids stack overflow) */
 function bufferToBase64(buffer: Uint8Array): string {
   let binary = '';
@@ -141,8 +152,8 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
           body: JSON.stringify({
             input: {
               prompt: constrainedPrompt,
+              images: [PLACEHOLDER_IMAGE_DATA_URI],
               aspect_ratio: '1:1',
-              // No images array — Pruna generates from prompt only
             },
           }),
         });
