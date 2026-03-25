@@ -188,7 +188,7 @@ describe('submit.ts', () => {
 
   it('rejects invalid layer names', async () => {
     const env = createEnvWithQueries({});
-    const body = { ...VALID_SUBMIT_BODY, selectedLayers: { 'InvalidLayer': 'some/path.png' } };
+    const body = { ...VALID_SUBMIT_BODY, selectedLayers: { ...VALID_SUBMIT_BODY.selectedLayers, 'InvalidLayer': 'some/path.png' } };
     const req = makeRequest(body);
     const ctx = createContext(env, req);
     const res = await onRequest(ctx);
@@ -199,7 +199,7 @@ describe('submit.ts', () => {
 
   it('rejects path traversal attempt', async () => {
     const env = createEnvWithQueries({});
-    const body = { ...VALID_SUBMIT_BODY, selectedLayers: { Background: '../../../etc/passwd' } };
+    const body = { ...VALID_SUBMIT_BODY, selectedLayers: { ...VALID_SUBMIT_BODY.selectedLayers, Background: '../../../etc/passwd' } };
     const req = makeRequest(body);
     const ctx = createContext(env, req);
     const res = await onRequest(ctx);
