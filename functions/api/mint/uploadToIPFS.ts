@@ -34,6 +34,17 @@ function isValidPNG(buffer: Uint8Array): boolean {
   );
 }
 
+/** Validate JPEG magic bytes: 0xFF 0xD8 0xFF at offset 0 */
+function isValidJPEG(buffer: Uint8Array): boolean {
+  if (buffer.length < 3) return false;
+  return buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+}
+
+/** Check if buffer is a valid image (PNG or JPEG) */
+function isValidImage(buffer: Uint8Array): boolean {
+  return isValidPNG(buffer) || isValidJPEG(buffer);
+}
+
 /**
  * Generate redundant IPFS URIs for an IPFS CID.
  * Order: HTTPS gateways first (for MintGarden/explorer compatibility), ipfs:// last.
@@ -103,16 +114,19 @@ export async function uploadToIPFS(
   pinataGateway?: string
 ): Promise<IPFSUploadResult> {
   const imageBytes = base64ToUint8Array(imageBase64);
-  if (!isValidPNG(imageBytes)) {
-    throw new Error('Invalid image format: expected PNG');
+  if (!isValidImage(imageBytes)) {
+    throw new Error('Invalid image format: expected PNG or JPEG');
   }
+  const isPng = isValidPNG(imageBytes);
   if (imageBytes.length > 5 * 1024 * 1024) {
     throw new Error('Image too large (max 5MB)');
   }
 
   const dataHash = await sha256Hex(imageBytes);
   const form = new FormData();
-  form.append('file', new Blob([imageBytes], { type: 'image/png' }), 'image.png');
+  const mimeType = isPng ? 'image/png' : 'image/jpeg';
+  const fileName = isPng ? 'image.png' : 'image.jpg';
+  form.append('file', new Blob([imageBytes], { type: mimeType }), fileName);
 
   const pinFileRes = await fetch(PINATA_PIN_FILE, {
     method: 'POST',
