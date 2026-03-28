@@ -12,6 +12,7 @@
 const MINTGARDEN_API = 'https://api.mintgarden.io';
 const KV_KEY_LAST_TIMESTAMP = 'last_credit_event_timestamp';
 const KV_KEY_LAST_FLOOR_DATE = 'last_floor_snapshot_date';
+const AI_CREDITS_PER_XCH_SPENT = 8;
 // === Economic constants ===
 // Royalty: 10% on Farmers Plot sales. Your Wojak mint: 0.1 XCH.
 // CREDITS_PER_XCH = (0.10 / 0.10) * 100 = 100
@@ -371,9 +372,9 @@ async function processEvents(env: Env): Promise<{ processed: number; inserted: n
         console.error('[CreditTracker] Batch insert error:', e);
       }
 
-      // Grant AI credits for Farmer Plot trades (1 per 1.0 XCH)
+      // Grant AI credits for Farmer Plot trades proportionally to XCH spent.
       for (const r of batch) {
-        const aiCredits = Math.floor(r.price_xch);
+        const aiCredits = Math.floor(r.price_xch * AI_CREDITS_PER_XCH_SPENT);
         if (aiCredits > 0) {
           try {
             await env.DB.prepare(
@@ -385,7 +386,11 @@ async function processEvents(env: Env): Promise<{ processed: number; inserted: n
               `farmer_plot_${r.event_id}`,
               aiCredits,
               r.nft_id,
-              JSON.stringify({ priceXch: r.price_xch, collection: 'farmer_plot' }),
+              JSON.stringify({
+                priceXch: r.price_xch,
+                collection: 'farmer_plot',
+                aiCreditsPerXchSpent: AI_CREDITS_PER_XCH_SPENT,
+              }),
               r.timestamp
             ).run();
           } catch (e) {

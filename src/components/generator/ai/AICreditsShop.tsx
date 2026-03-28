@@ -543,7 +543,7 @@ export function AICreditsShop() {
             <div className="ai-shop-earn-method">
               <span className="ai-shop-earn-icon">🌾</span>
               <span className="ai-shop-earn-text">
-                Buy a Wojak Farmers Plot <span className="text-accent">= +1 credit per XCH</span>
+                Buy a Wojak Farmers Plot <span className="text-accent">= +8 credits per XCH spent</span>
               </span>
             </div>
           </div>
@@ -551,7 +551,7 @@ export function AICreditsShop() {
 
         {/* Disclaimer */}
         <p className="text-muted text-xs text-center" style={{ opacity: 0.6 }}>
-          Credits are non-refundable. Powered by Reve AI.
+          Credits are non-refundable.
         </p>
       </div>
     </Lightbox>
