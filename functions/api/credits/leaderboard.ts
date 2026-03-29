@@ -18,6 +18,10 @@ const corsHeaders = {
   'Content-Type': 'application/json',
 };
 
+const HIDDEN_LEADERBOARD_WALLETS = new Set([
+  'xch18tcyy0knvfcgg5dld7gt2zev3qvu0dz5vplhq9gnhwvz9fxyl53qnyppxk',
+]);
+
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
 
@@ -80,10 +84,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       LEFT JOIN earned e ON w.wallet_address = e.wallet_address
       LEFT JOIN spent s ON w.wallet_address = s.wallet_address
       LEFT JOIN bought b ON w.wallet_address = b.wallet_address
+      WHERE w.wallet_address NOT IN (${Array.from(HIDDEN_LEADERBOARD_WALLETS).map(() => '?').join(', ')})
     `;
     let rows: { results?: { wallet: string; earned: number; spent: number; yourWojakBought: number }[] };
     try {
-      rows = await env.DB.prepare(`${query} ORDER BY ${orderBy} LIMIT ? OFFSET ?`).bind(limit, offset).all<
+      rows = await env.DB.prepare(`${query} ORDER BY ${orderBy} LIMIT ? OFFSET ?`).bind(...Array.from(HIDDEN_LEADERBOARD_WALLETS), limit, offset).all<
         { wallet: string; earned: number; spent: number; yourWojakBought: number }
       >();
     } catch (e) {
@@ -101,9 +106,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
           FROM wallets w
           LEFT JOIN earned e ON w.wallet_address = e.wallet_address
           LEFT JOIN spent s ON w.wallet_address = s.wallet_address
+          WHERE w.wallet_address NOT IN (${Array.from(HIDDEN_LEADERBOARD_WALLETS).map(() => '?').join(', ')})
           ORDER BY ${orderBy}
           LIMIT ? OFFSET ?`
-        ).bind(limit, offset).all<{ wallet: string; earned: number; spent: number; yourWojakBought: number }>();
+        ).bind(...Array.from(HIDDEN_LEADERBOARD_WALLETS), limit, offset).all<{ wallet: string; earned: number; spent: number; yourWojakBought: number }>();
       } else {
         throw e;
       }
