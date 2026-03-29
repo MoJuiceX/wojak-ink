@@ -22,6 +22,7 @@ import { MaskVariantPicker } from './MaskVariantPicker';
 import { isFullFaceMaskSelected } from './maskData';
 import { BeerHatUnderlayerPicker } from './BeerHatUnderlayerPicker';
 import { usePrimarySlot } from '@/hooks/usePrimarySlot';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { KNOWN_TRAIT_IDS } from '@/lib/generatorTraitIds';
 
 /** Layers where G1 traits can be colored (Base, Mouth, etc. cannot) */
@@ -35,6 +36,7 @@ const isBackgroundSolidColor = (path: string | undefined) =>
 const SOLID_BG_DEFAULT_COLOR = '#38BDF8';
 
 export function GeneratorRightPanel() {
+  const compactPalette = useMediaQuery('(max-width: 1320px)');
   const { activeLayer, selectedLayers, g2Selections, selectedColors, setColor, setG2Color, setG2Detail, selectLayer, selectG2Layer, isInitialized } = useGenerator();
   const setChiaFarmerDetail = (activeColorSlot?: 'fill0' | 'fill1', chiaFarmerUnderlayer?: 'tee' | 'tanktop') => {
     setG2Detail(activeLayer, activeColorSlot, chiaFarmerUnderlayer ? { chiaFarmerUnderlayer } : undefined);
@@ -195,16 +197,7 @@ export function GeneratorRightPanel() {
   }, [hexDisplay]);
 
   return (
-    <div
-      className="generator-right-panel flex flex-col gap-3 overflow-y-auto"
-      style={{
-        padding: '12px',
-        borderRadius: 'var(--radius-lg)',
-        background: 'rgba(255, 255, 255, 0.015)',
-        border: '1px solid var(--color-white-5)',
-        maxHeight: '100%',
-      }}
-    >
+    <div className="generator-right-panel flex h-full min-h-0 flex-col gap-3 overflow-y-auto px-3 pb-3">
       {/* G1 Military Beret: "Pick a color to use new design" — swatches switch to G2 */}
       {isG1MilitaryBeret && (
         <div className="generator-panel-section flex-shrink-0">
@@ -217,59 +210,57 @@ export function GeneratorRightPanel() {
       )}
       {/* Single color palette — hidden for full-face masks (no colorable parts) and Topless (tattoo slots replace it) */}
       {!isG1MilitaryBeret && !(activeLayer === 'Mask' && isFullFaceMaskSelected(selectedLayers.Mask)) && g2Sel?.traitId !== KNOWN_TRAIT_IDS.Clothes_Topless && (
-        <div className="flex-shrink-0" style={{ overflow: 'visible' }}>
-          <div className="flex items-center justify-between mb-1.5" style={{ height: '14px', overflow: 'visible' }}>
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">Color</span>
-            {/* Reset button — inline, no vertical padding so it doesn't change row height */}
-            {(colorPickerProps.defaultColor || colorPickerProps.onReset) && (() => {
-              const norm = (h: string) => (h.startsWith('#') ? h : '#' + h).toUpperCase();
-              const isAtDefault = colorPickerProps.defaultColor
-                ? norm(colorPickerProps.selectedColor) === norm(colorPickerProps.defaultColor)
-                : false;
-              return (
+        <div className="generator-right-panel__palette flex-shrink-0">
+          {hexDisplay && (
+            <div className="generator-right-panel__hex mb-1">
+              <span className="generator-right-panel__hex-label">Active color</span>
+              <div className="generator-right-panel__hex-middle">
+                {(colorPickerProps.defaultColor || colorPickerProps.onReset) && (() => {
+                  const norm = (h: string) => (h.startsWith('#') ? h : '#' + h).toUpperCase();
+                  const isAtDefault = colorPickerProps.defaultColor
+                    ? norm(colorPickerProps.selectedColor) === norm(colorPickerProps.defaultColor)
+                    : false;
+
+                  return (
+                    <button
+                      type="button"
+                      className="generator-right-panel__hex-reset"
+                      onClick={() => {
+                        if (isAtDefault || colorPickerProps.disabled) return;
+                        if (colorPickerProps.onReset) colorPickerProps.onReset();
+                        else if (colorPickerProps.defaultColor) colorPickerProps.onColorChange(colorPickerProps.defaultColor);
+                      }}
+                      disabled={isAtDefault || colorPickerProps.disabled}
+                      title={colorPickerProps.onReset ? 'Use original design' : 'Reset to default color'}
+                      aria-label={colorPickerProps.onReset ? 'Use original design' : 'Reset to default color'}
+                    >
+                      <RotateCcw size={11} />
+                    </button>
+                  );
+                })()}
+              </div>
+              <div className="generator-right-panel__hex-actions">
                 <button
                   type="button"
-                  className="flex items-center gap-0.5 transition-colors"
-                  style={{
-                    color: isAtDefault ? 'var(--color-text-muted)' : 'var(--color-primary)',
-                    opacity: isAtDefault ? 0.4 : 1,
-                    cursor: isAtDefault || colorPickerProps.disabled ? 'default' : 'pointer',
-                    fontSize: '0.5625rem',
-                    fontWeight: 600,
-                    lineHeight: 1,
-                  }}
-                  onClick={() => {
-                    if (isAtDefault || colorPickerProps.disabled) return;
-                    if (colorPickerProps.onReset) colorPickerProps.onReset();
-                    else if (colorPickerProps.defaultColor) colorPickerProps.onColorChange(colorPickerProps.defaultColor);
-                  }}
-                  disabled={isAtDefault || colorPickerProps.disabled}
-                  title={colorPickerProps.onReset ? 'Use original design' : 'Reset to default color'}
+                  onClick={copyHexToClipboard}
+                  className="generator-right-panel__hex-copy"
+                  title="Copy to clipboard"
+                  aria-label={`Copy ${hexDisplay} to clipboard`}
                 >
-                  <RotateCcw size={8} />
-                  <span>{colorPickerProps.onReset ? 'Original' : 'Reset'}</span>
+                  <span className="generator-right-panel__hex-value">{hexDisplay}</span>
+                  {showCopied ? (
+                    <Check size={10} className="text-success" />
+                  ) : (
+                    <Copy size={10} />
+                  )}
                 </button>
-              );
-            })()}
-            {hexDisplay && (
-              <button
-                type="button"
-                onClick={copyHexToClipboard}
-                className="flex items-center gap-1 font-mono text-[10px] text-secondary hover:text-white transition-colors cursor-pointer"
-                title="Copy to clipboard"
-              >
-                {hexDisplay}
-                {showCopied ? (
-                  <Check size={10} className="text-success" />
-                ) : (
-                  <Copy size={10} />
-                )}
-              </button>
-            )}
-          </div>
+              </div>
+            </div>
+          )}
           <ColorPicker
             {...colorPickerProps}
             onHexDisplay={handleHexDisplay}
+            compact={compactPalette}
           />
         </div>
       )}

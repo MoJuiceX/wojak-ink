@@ -12,11 +12,11 @@ import { useLocation } from 'react-router-dom';
 import { ArrowLeft, Grid3X3, Tag, Hash, Crown, DollarSign, ChevronUp, ChevronDown, Wallet, LogOut } from 'lucide-react';
 import { useLayout } from '@/hooks/useLayout';
 import { useGallery } from '@/hooks/useGallery';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { LAYOUT } from '@/config/layout';
 import { Logo } from './Logo';
 import { PriceBadges } from './PriceBadges';
 import { useSageWallet } from '@/sage-wallet';
-import { useMint } from '@/contexts/MintContext';
 import { getNavItemByPath } from '@/config/routes';
 import type { SortMode, FilterMode } from '@/types/nft';
 
@@ -30,7 +30,6 @@ const PAGE_TITLES: Record<string, string> = {
   generator: 'Wojak Generator',
   bigpulp: 'BigPulp Intelligence',
 };
-
 
 // Sort helper types
 type SortBase = 'id' | 'rarity' | 'price';
@@ -141,8 +140,10 @@ function MobileGalleryControls() {
 
 export function Header({ transparent = false }: HeaderProps) {
   const { isMobile, sidebarWidth, isScrolled, headerTransparent, headerBreadcrumb } = useLayout();
+  const isCompactHeader = useMediaQuery('(min-width: 1024px) and (max-width: 1439px)');
+  const canShowGeneratorTitle = useMediaQuery('(min-width: 1180px)');
+  const canShowGeneratorPrices = useMediaQuery('(min-width: 1240px)');
   const { address, status, connect, disconnect } = useSageWallet();
-  const { totalMinted, maxSupply } = useMint();
   const isWalletConnected = status === 'connected' && !!address;
   const location = useLocation();
   const prevSidebarWidth = useRef(sidebarWidth);
@@ -168,9 +169,12 @@ export function Header({ transparent = false }: HeaderProps) {
   // Get current page title
   const navItem = getNavItemByPath(location.pathname);
   const isBigPulpPage = navItem?.id === 'bigpulp';
+  const isGeneratorPage = navItem?.id === 'generator';
   const pageTitle = navItem
     ? PAGE_TITLES[navItem.id] || navItem.label
     : '';
+  const showGeneratorTitle = !isGeneratorPage || canShowGeneratorTitle;
+  const showGeneratorPrices = !isGeneratorPage || canShowGeneratorPrices;
 
   // Spring animation for title overshoot effect
   const titleX = useSpring(0, {
@@ -273,8 +277,13 @@ export function Header({ transparent = false }: HeaderProps) {
           <>
             {/* Left: Page title OR breadcrumb (not both) */}
             <motion.div
-              className="flex-shrink-0 flex items-center gap-3"
-              style={{ x: titleX }}
+              className="header-title-cluster flex-shrink-0 flex items-center gap-3"
+              style={{
+                x: titleX,
+                maxWidth: isCompactHeader
+                  ? `calc(58vw - ${Math.max(sidebarWidth - 24, 0)}px)`
+                  : `calc(50vw - ${sidebarWidth}px - 124px)`,
+              }}
             >
               <AnimatePresence mode="wait">
                 {headerBreadcrumb ? (
@@ -332,31 +341,23 @@ export function Header({ transparent = false }: HeaderProps) {
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                     >
-                      <h1
-                        className="text-3xl font-bold text-primary"
-                      >
-                        {pageTitle}
-                      </h1>
-                      {navItem?.id === 'generator' && isWalletConnected && maxSupply > 0 && (
-                        <span
-                          className="text-[11px] tabular-nums whitespace-nowrap font-semibold px-2 py-0.5 rounded-md text-muted"
-                          style={{
-                            background: 'rgba(255, 255, 255, 0.04)',
-                            border: '1px solid var(--color-white-6)',
-                          }}
+                      {showGeneratorTitle && (
+                        <h1
+                          className={`generator-header-title ${isCompactHeader ? 'text-[1.82rem] leading-[0.99]' : 'text-[1.8rem] leading-[1.03]'} font-semibold`}
                         >
-                          {totalMinted}/{maxSupply}
-                        </span>
+                          {pageTitle}
+                        </h1>
                       )}
                     </motion.div>
                   )
                 )}
               </AnimatePresence>
+
             </motion.div>
 
             {/* Right: Price badges + Wallet */}
-            <div className="flex-shrink-0 flex items-center gap-3">
-              <PriceBadges size="md" />
+            <div className="flex-shrink-0 flex items-center gap-2.5">
+              {showGeneratorPrices && <PriceBadges size={isCompactHeader ? 'sm' : 'md'} />}
               <div className="relative" ref={walletMenuRef}>
                 <button
                   type="button"
@@ -369,7 +370,7 @@ export function Header({ transparent = false }: HeaderProps) {
                   }}
                   title={isWalletConnected ? `Connected: ${address.slice(0, 8)}…${address.slice(-4)}` : 'Connect Wallet'}
                   aria-label={isWalletConnected ? `Wallet connected: ${address.slice(0, 8)}…${address.slice(-4)}` : 'Connect Wallet'}
-                  className="flex items-center gap-2 px-3 rounded-lg transition-all"
+                  className={`generator-header-wallet generator-header-wallet-button flex items-center gap-2 transition-all ${isCompactHeader ? 'px-2.5' : 'px-3'}`}
                   style={{
                     background: isWalletConnected ? 'rgba(74, 222, 128, 0.1)' : 'var(--color-white-5)',
                     border: `1px solid ${isWalletConnected ? 'rgba(74, 222, 128, 0.3)' : 'var(--color-white-8)'}`,

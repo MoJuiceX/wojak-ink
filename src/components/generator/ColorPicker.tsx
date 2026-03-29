@@ -12,7 +12,8 @@ import { useLayout } from '@/hooks/useLayout';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 /** Number of color rows shown by default on mobile before "Show all" */
-const MOBILE_COLLAPSED_ROWS = 8;
+const MOBILE_COLLAPSED_ROWS = 5;
+const COMPACT_COLLAPSED_ROWS = 5;
 
 // ============ Generator color palette ============
 // V2 palette: 15 families × 6 colors = 90 unique colors. All 18 combat types reachable (3–8 primary colors each).
@@ -99,6 +100,8 @@ interface ColorPickerProps {
   onReset?: () => void;
   /** Called with the hex code to display (hovered or selected). Parent can render it in a header. */
   onHexDisplay?: (hex: string) => void;
+  /** Compact mode for narrow layouts: smaller swatches and fewer rows by default */
+  compact?: boolean;
 }
 
 export const ColorPicker = memo(function ColorPicker({
@@ -106,20 +109,22 @@ export const ColorPicker = memo(function ColorPicker({
   onColorChange,
   disabled = false,
   onHexDisplay,
+  compact = false,
 }: ColorPickerProps) {
   const { isDesktop } = useLayout();
   const norm = useCallback((h: string) => (h.startsWith('#') ? h : '#' + h).toUpperCase(), []);
   const selectedNorm = norm(selectedColor);
+  const collapsedRows = compact ? COMPACT_COLLAPSED_ROWS : MOBILE_COLLAPSED_ROWS;
 
   const [hoverHex, setHoverHex] = useState<string | null>(null);
   const [userExpanded, setUserExpanded] = useState(false);
 
-  // Auto-expand if selected color is in hidden rows (mobile only)
+  // Auto-expand if selected color is in hidden rows
   const autoExpand = useMemo(() => {
-    if (isDesktop) return false;
-    const hiddenFamilies = COLOR_FAMILIES.slice(MOBILE_COLLAPSED_ROWS);
+    if (isDesktop && !compact) return false;
+    const hiddenFamilies = COLOR_FAMILIES.slice(collapsedRows);
     return hiddenFamilies.some((f) => f.colors.some((c) => norm(c) === selectedNorm));
-  }, [selectedNorm, norm, isDesktop]);
+  }, [selectedNorm, norm, isDesktop, compact, collapsedRows]);
   const expanded = userExpanded || autoExpand;
 
   // Notify parent of display hex (hover takes priority over selected)
@@ -131,87 +136,73 @@ export const ColorPicker = memo(function ColorPicker({
   const Swatch = ({ hex, cornerRadius = '0' }: { hex: string; cornerRadius?: string }) => {
     const isSelected = selectedNorm === norm(hex);
     const isWhite = norm(hex) === '#FFFFFF' || hex.toLowerCase() === '#ffffff';
-    const isBlack = hex === '#000000';
     const hexDisplay = (hex.startsWith('#') ? hex : '#' + hex).toUpperCase();
     return (
-      <div
-        className="relative"
-        style={{ zIndex: isSelected ? 2 : 0 }}
+      <button
+        type="button"
+        className={`generator-color-swatch${compact ? ' generator-color-swatch--compact' : ''} w-full transition-opacity${isSelected ? ' color-picker-rainbow-swatch' : ''}`}
+        style={{
+          zIndex: isSelected ? 2 : 0,
+          background: isSelected
+            ? `linear-gradient(${hex}, ${hex}) padding-box, conic-gradient(from var(--rainbow-angle), #ff0000, #ff8800, #ffff00, #00ff00, #00ffff, #0088ff, #8800ff, #ff00ff, #ff0000) border-box`
+            : hex,
+          border: isSelected
+            ? '2px solid transparent'
+            : '0 solid transparent',
+          boxShadow: !isSelected && isWhite
+            ? 'inset 0 0 0 1px rgba(255,255,255,0.18)'
+            : 'none',
+          boxSizing: 'border-box',
+          borderRadius: cornerRadius,
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          pointerEvents: disabled ? 'none' : 'auto',
+          outline: 'none',
+        }}
         onMouseEnter={() => setHoverHex(hex)}
         onMouseLeave={() => setHoverHex(null)}
-      >
-        <button
-          type="button"
-          className={`w-full aspect-square transition-opacity${isSelected ? ' color-picker-rainbow-swatch' : ''}`}
-          style={{
-            background: isSelected
-              ? `linear-gradient(${hex}, ${hex}) padding-box, conic-gradient(from var(--rainbow-angle), #ff0000, #ff8800, #ffff00, #00ff00, #00ffff, #0088ff, #8800ff, #ff00ff, #ff0000) border-box`
-              : hex,
-            border: isSelected
-              ? '2px solid transparent'
-              : isWhite
-                ? '2px solid rgba(255,255,255,0.25)'
-                : isBlack
-                  ? '2px solid var(--color-border)'
-                  : '2px solid rgba(255,255,255,0.12)',
-            boxSizing: 'border-box',
-            borderRadius: cornerRadius,
-            cursor: disabled ? 'not-allowed' : 'pointer',
-            pointerEvents: disabled ? 'none' : 'auto',
-            outline: 'none',
-          }}
-          onClick={() => !disabled && onColorChange(hex)}
-          disabled={disabled}
-          aria-label={`Select color ${hexDisplay}`}
-        />
-      </div>
+        onClick={() => !disabled && onColorChange(hex)}
+        disabled={disabled}
+        aria-label={`Select color ${hexDisplay}`}
+      />
     );
   };
 
-  // On mobile, show collapsed rows by default; desktop always shows all
-  const isMobileCollapsed = !isDesktop && !expanded;
-  const visibleFamilies = isMobileCollapsed
-    ? COLOR_FAMILIES.slice(0, MOBILE_COLLAPSED_ROWS)
+  // On narrow layouts, show collapsed rows by default; wide desktop shows all
+  const isCompactCollapsed = (!isDesktop || compact) && !expanded;
+  const visibleFamilies = isCompactCollapsed
+    ? COLOR_FAMILIES.slice(0, collapsedRows)
     : COLOR_FAMILIES;
-  const totalVisible = visibleFamilies.length;
-  const hasHiddenRows = !isDesktop && COLOR_FAMILIES.length > MOBILE_COLLAPSED_ROWS;
+  const hasHiddenRows = (!isDesktop || compact) && COLOR_FAMILIES.length > collapsedRows;
 
   return (
-    <div style={{ opacity: disabled ? 0.5 : 1 }}>
+    <div className={`generator-color-picker${compact ? ' generator-color-picker--compact' : ''}`} style={{ opacity: disabled ? 0.5 : 1 }}>
+      {hasHiddenRows && (
+        <div className="generator-color-picker__toggle-row">
+          <button
+            type="button"
+            className="generator-color-picker__toggle"
+            onClick={() => setUserExpanded((v) => !v)}
+          >
+            {expanded ? (
+              <>Less colors <ChevronUp size={14} /></>
+            ) : (
+              <>All colors <ChevronDown size={14} /></>
+            )}
+          </button>
+        </div>
+      )}
+
       {/* Color swatches — zero-gap color chart */}
-      <div className="flex flex-col gap-0">
-        {visibleFamilies.map((family, familyIdx) => (
-          <div key={family.label} className="grid grid-cols-6 gap-0">
+      <div className="generator-color-picker-grid generator-color-picker-grid--shell flex flex-col gap-0">
+        {visibleFamilies.map((family) => (
+          <div key={family.label} className="generator-color-row grid grid-cols-6 gap-0">
             {family.colors.map((hex, i) => {
               // Compute corner radius for the 4 outer corners
-              let borderRadius = '0';
-              const r = '14px';
-              if (familyIdx === 0 && i === 0) borderRadius = `${r} 0 0 0`;
-              else if (familyIdx === 0 && i === 5) borderRadius = `0 ${r} 0 0`;
-              else if (familyIdx === totalVisible - 1 && i === 0 && !isMobileCollapsed) borderRadius = `0 0 0 ${r}`;
-              else if (familyIdx === totalVisible - 1 && i === 5 && !isMobileCollapsed) borderRadius = `0 0 ${r} 0`;
-
-              return <Swatch key={`${family.label}-${i}`} hex={hex} cornerRadius={borderRadius} />;
+              return <Swatch key={`${family.label}-${i}`} hex={hex} cornerRadius="0" />;
             })}
           </div>
         ))}
       </div>
-
-      {/* Mobile: show all / collapse toggle */}
-      {hasHiddenRows && (
-        <button
-          type="button"
-          className="w-full flex items-center justify-center gap-1 py-2 text-xs text-muted font-medium transition-colors"
-          onClick={() => setUserExpanded((v) => !v)}
-          style={{ background: 'transparent' }}
-        >
-          {expanded ? (
-            <>Less colors <ChevronUp size={14} /></>
-          ) : (
-            <>All colors <ChevronDown size={14} /></>
-          )}
-        </button>
-      )}
     </div>
   );
 });

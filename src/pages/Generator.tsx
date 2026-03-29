@@ -7,8 +7,7 @@
 
 import { useState, useRef, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, RotateCcw, Images, Wand2, X, Zap } from 'lucide-react';
-import { safeStorage } from '@/utils/safeStorage';
+import { Sparkles, RotateCcw, Images, Wand2 } from 'lucide-react';
 import './Generator.css';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -54,66 +53,6 @@ function GeneratorErrorBanner() {
   );
 }
 
-/** Promo banner — 50% off AI credits (2x credits for same price). Ends April 1, 2026. */
-const PROMO_END = new Date('2026-04-01T00:00:00Z');
-
-function AIPromoBanner() {
-  const [dismissed, setDismissed] = useState(() => {
-    const stored = safeStorage.getItem('ai_promo_dismissed');
-    if (stored === 'true') return true;
-    // Check expiry during initial state (not during render)
-    return new Date() > PROMO_END;
-  });
-
-  const [daysLeft] = useState(() =>
-    Math.max(0, Math.ceil((PROMO_END.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
-  );
-
-  if (dismissed) return null;
-
-  const handleDismiss = () => {
-    setDismissed(true);
-    safeStorage.setItem('ai_promo_dismissed', 'true');
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden mb-3"
-      style={{
-        background: 'linear-gradient(135deg, rgba(255, 107, 0, 0.15) 0%, rgba(255, 215, 0, 0.1) 100%)',
-        border: '1px solid rgba(255, 107, 0, 0.25)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '0.75rem 1rem',
-      }}
-    >
-      <button
-        type="button"
-        onClick={handleDismiss}
-        className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full"
-        style={{ background: 'rgba(255, 255, 255, 0.08)' }}
-        aria-label="Dismiss"
-      >
-        <X size={12} style={{ color: 'var(--color-white-60)' }} />
-      </button>
-      <div className="flex items-center gap-2">
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0" style={{ background: 'rgba(255, 107, 0, 0.2)' }}>
-          <Zap size={16} className="text-accent" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold" style={{ color: 'var(--color-primary)' }}>
-            AI Enhancement — 50% Off
-          </p>
-          <p className="text-xs text-secondary">
-            Get <strong>2x credits</strong> for the same price. {daysLeft} day{daysLeft !== 1 ? 's' : ''} left.
-          </p>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
 function GeneratorContent() {
   // Use 1024px breakpoint to match Generator.css media queries
   const isDesktop = useMediaQuery('(min-width: 1024px)');
@@ -142,7 +81,6 @@ function GeneratorContent() {
     </div>
   ) : (
     <>
-      <AIPromoBanner />
       <div className="generator-content">
         {/* Left: Preview Section */}
         <div className="generator-preview">

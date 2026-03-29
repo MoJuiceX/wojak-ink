@@ -234,9 +234,6 @@ export function PriceBadges({ size = 'md' }: PriceBadgesProps) {
   // Use delayed floor USD for display
   const floorUsd = delayedFloorUsd ?? calculatedFloorUsd;
 
-  const textSize = size === 'sm' ? 'text-xs' : 'text-sm';
-  const gap = size === 'sm' ? 'gap-3' : 'gap-4';
-
   // Format prices for display
   const formatFloorXch = (price: number) => {
     if (price < 1) {
@@ -254,73 +251,38 @@ export function PriceBadges({ size = 'md' }: PriceBadgesProps) {
   const xchPriceText = formatUsd(displayXchPrice);
 
   return (
-    <div className={`flex items-center ${gap}`}>
-      {/* Floor Price Badge */}
+    <div className={`header-market-badge header-market-badge--${size}`}>
       <div
-        className={`flex items-center px-3 rounded-lg`}
-        style={{
-          fontSize: size === 'sm' ? '0.75rem' : '0.875rem',
-          background: 'rgba(74, 222, 128, 0.1)',
-          border: '1px solid rgba(74, 222, 128, 0.2)',
-          height: 'var(--header-badge-height)',
-        }}
+        className="header-market-segment header-market-segment--floor"
       >
-        <span
-          className={`${textSize} font-medium uppercase tracking-wide mr-2`}
-          style={{ color: 'rgba(74, 222, 128, 0.7)' }}
-        >
-          Floor
-        </span>
+        <span className="header-market-label">Floor</span>
         {isLoading ? (
-          <span
-            className={`${textSize} font-bold text-muted`}
-          >
-            ...
-          </span>
+          <span className="header-market-loading">...</span>
         ) : (
-          <div className="flex items-center">
+          <div className="header-market-value">
             <PriceFlapDisplay text={floorXchText} muted />
-            <span
-              className="font-bold ml-1 mr-3"
-              style={{ color: '#4ade80' }}
-            >
-              XCH
-            </span>
-            <span style={{ color: 'rgba(74, 222, 128, 0.7)' }}>($</span>
+            <span className="header-market-unit">XCH</span>
+            <span className="header-market-usd-prefix">($</span>
             <PriceFlapDisplay text={floorUsdText} muted />
-            <span style={{ color: 'rgba(74, 222, 128, 0.7)' }}>)</span>
+            <span className="header-market-usd-prefix">)</span>
           </div>
         )}
       </div>
 
-      {/* XCH Price Badge with Live Indicator */}
-      <div
-        className={`flex items-center gap-2 px-3 rounded-lg`}
-        style={{
-          fontSize: size === 'sm' ? '0.75rem' : '0.875rem',
-          background: 'rgba(74, 222, 128, 0.1)',
-          border: '1px solid rgba(74, 222, 128, 0.2)',
-          height: 'var(--header-badge-height)',
-        }}
-      >
-        {/* Live indicator dot */}
-        {!xchLoading && simulatedXchPrice !== null && <LiveIndicator />}
+      <div className="header-market-divider" aria-hidden="true" />
 
-        <span
-          className={`${textSize} font-medium uppercase tracking-wide`}
-          style={{ color: 'rgba(74, 222, 128, 0.7)' }}
-        >
-          XCH
-        </span>
-        {xchLoading && simulatedXchPrice === null ? (
-          <span
-            className={`${textSize} font-bold text-muted`}
-          >
-            ...
+      <div className="header-market-segment header-market-segment--spot">
+        {!xchLoading && simulatedXchPrice !== null && (
+          <span className="header-market-live">
+            <LiveIndicator />
           </span>
+        )}
+        <span className="header-market-label">XCH</span>
+        {xchLoading && simulatedXchPrice === null ? (
+          <span className="header-market-loading">...</span>
         ) : (
-          <div className="flex items-center">
-            <span style={{ color: 'rgba(74, 222, 128, 0.7)' }}>$</span>
+          <div className="header-market-value">
+            <span className="header-market-usd-prefix">$</span>
             <PriceFlapDisplay text={xchPriceText} muted />
           </div>
         )}

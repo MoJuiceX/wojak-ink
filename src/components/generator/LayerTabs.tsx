@@ -126,7 +126,7 @@ export function LayerTabs({ className = '' }: LayerTabsProps) {
   return (
     <LayoutGroup>
     <div
-      className={`generator-layer-tab-bar flex justify-between px-1 lg:px-2 py-1.5 rounded-none lg:rounded-2xl overflow-x-auto w-full ${className}`}
+      className={`generator-layer-tab-bar flex justify-between px-1 lg:px-2 py-1.5 overflow-x-auto w-full ${className}`}
       role="tablist"
       aria-label="Layer selection tabs"
     >

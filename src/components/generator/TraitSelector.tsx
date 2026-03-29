@@ -26,9 +26,6 @@ import {
 import type { LayerImage } from '@/services/generatorService';
 import type { UnifiedTrait } from '@/services/generatorService';
 import { isSelectionPathEmpty } from '@/types/generator';
-import { TYPE_EMOJI, TYPE_NAME } from '@/lib/combat/combatDisplayNames';
-import { calculateCombatIdentity } from '@/lib/combat/identity-calculator';
-import { deriveCombatTraitIdFromPath } from '@/lib/combat/selectionTraitId';
 
 export type TraitSortMode = 'hot' | 'not' | 'az' | 'za';
 
@@ -335,48 +332,6 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
 
   // All traits in one grid (no separate Customizable section)
 
-  // Combat identity — computed from all current selections for sort bar display
-  const combatIdentity = useMemo(() => {
-    const traits: { traitId: string; layer: string }[] = [];
-    const colors: Record<string, string> = {};
-    const details: Record<string, string> = {};
-    let logoOption: string | undefined;
-
-    if (g2Selections) {
-      for (const [layer, sel] of Object.entries(g2Selections)) {
-        if (!sel?.traitId) continue;
-        traits.push({ traitId: sel.traitId, layer });
-        if (sel.colors) {
-          for (const hex of Object.values(sel.colors)) {
-            if (hex) colors[sel.traitId] = hex;
-          }
-        }
-        if (sel.options.detail) details[sel.traitId] = sel.options.detail as string;
-        if (sel.options.logo) logoOption = sel.options.logo as string;
-      }
-    }
-
-    if (selectedLayers) {
-      for (const [layer, path] of Object.entries(selectedLayers)) {
-        if (!path || typeof path !== 'string') continue;
-        const traitId = deriveCombatTraitIdFromPath(layer, path);
-        if (!traitId) continue;
-        if (!traits.some(t => t.layer === layer)) {
-          traits.push({ traitId, layer });
-          const layerColor = (selectedColors as Record<string, string | undefined>)?.[layer];
-          if (layerColor) colors[traitId] = layerColor;
-        }
-      }
-    }
-
-    if (traits.length === 0) return null;
-    try {
-      return calculateCombatIdentity({ traits, colors, details, logoOption });
-    } catch {
-      return null;
-    }
-  }, [selectedLayers, selectedColors, g2Selections]);
-
   // Use MouthLayerSelector for mouth-related layers (combines MouthBase + MouthItem)
   if (isMouthLayer) {
     return (
@@ -384,9 +339,6 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
         className={className}
         sortMode={sortMode}
         onSortChange={setSortMode}
-        combatType={combatIdentity ? TYPE_NAME[combatIdentity.type] : undefined}
-        combatTypeEmoji={combatIdentity ? TYPE_EMOJI[combatIdentity.type] : undefined}
-        combatNature={combatIdentity?.nature}
       />
     );
   }
@@ -394,7 +346,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
   // Loading skeleton - also show when data is stale (from a different layer)
   if (isLoading || !isInitialized || imagesAreStale) {
     return (
-      <div className={`space-y-4 ${className}`}>
+      <div className={`flex flex-col ${className}`}>
         <div className="generator-options-grid">
           {Array.from({ length: 12 }).map((_, i) => (
             <TraitCardSkeleton key={i} />
@@ -413,7 +365,7 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
   };
 
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div className={`flex flex-col ${className}`}>
       {/* Blocked overlay */}
       {isBlocked && (
         <div
@@ -458,9 +410,6 @@ export function TraitSelector({ className = '' }: TraitSelectorProps) {
             (activeLayer !== 'Mask' || (!selectedLayers['Extra1'] && !selectedLayers['Extra2'] && !selectedLayers['Extra3']))
           }
           onClear={handleClearSelection}
-          combatType={combatIdentity ? TYPE_NAME[combatIdentity.type] : undefined}
-          combatTypeEmoji={combatIdentity ? TYPE_EMOJI[combatIdentity.type] : undefined}
-          combatNature={combatIdentity?.nature}
           gridCols={mobileGridCols}
           onGridColsChange={setMobileGridCols}
         />

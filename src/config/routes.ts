@@ -4,7 +4,8 @@
  * Centralized route definitions with navigation metadata.
  *
  * Navigation hierarchy:
- * - PRIMARY (Bottom Nav + Sidebar top): Gallery, Generator, BigPulp, Fight Club, Games
+ * - PRIMARY (shared source): Gallery, BigPulp, Generator, Fight Club, Games
+ * - SIDEBAR PRIMARY (desktop order): Gallery, Generator, Fight Club, Games, BigPulp
  * - SECONDARY (More Menu + Sidebar bottom): Games, Chat, Shop, Guild, Treasury, Settings
  * - Account: Handled separately by UserAccountButton at sidebar bottom
  */
@@ -76,7 +77,6 @@ export const PRIMARY_NAV_ITEMS: NavItem[] = [
     label: 'BigPulp',
     shortLabel: 'BigPulp',
     icon: Lightbulb,
-    badge: 'dot', // Draw attention to the AI feature
     featured: true, // Center FAB in mobile nav
   },
   {
@@ -105,6 +105,18 @@ export const PRIMARY_NAV_ITEMS: NavItem[] = [
     shortLabel: 'Games',
     icon: Gamepad2,
   },
+];
+
+/**
+ * Desktop sidebar order.
+ * BigPulp no longer gets desktop priority treatment, but sits ahead of Games.
+ */
+export const SIDEBAR_PRIMARY_NAV_ITEMS: NavItem[] = [
+  PRIMARY_NAV_ITEMS[0], // Gallery
+  PRIMARY_NAV_ITEMS[2], // Generator
+  PRIMARY_NAV_ITEMS[3], // Fight Club
+  PRIMARY_NAV_ITEMS[1], // BigPulp
+  PRIMARY_NAV_ITEMS[4], // Games
 ];
 
 /**

@@ -73,6 +73,7 @@ export function GeneratorMobileColorPanel() {
             selectedColor={g2Sel.colors?.[slot ?? 'fill'] || '#FFFFFF'}
             onColorChange={(color) => setG2Color(activeLayer, slot, color)}
             defaultColor={defColor}
+            compact
           />
         </div>
       );
@@ -88,6 +89,7 @@ export function GeneratorMobileColorPanel() {
             selectedColor={selectedColors?.[activeLayer] || (isBgSolid ? SOLID_BG_DEFAULT_COLOR : '#FFFFFF')}
             onColorChange={(color) => setColor(activeLayer, color)}
             defaultColor={isBgSolid ? SOLID_BG_DEFAULT_COLOR : undefined}
+            compact
           />
         </div>
       );
@@ -178,6 +180,7 @@ export function GeneratorMobileColorPanel() {
             setG2Detail('Head', undefined, { beerHatUnderlayerG2: updated });
           }}
           defaultColor={defColor}
+          compact
         />
       </div>
     );

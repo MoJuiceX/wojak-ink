@@ -52,7 +52,7 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  gap: 12px;
+  gap: 10px;
   padding: 12px;
   overflow: hidden;
 }
@@ -62,8 +62,8 @@
   .generator-content {
     flex: none;
     min-height: 0;
-    padding: 4px 0;
-    gap: 6px;
+    padding: 2px 0 0;
+    gap: 4px;
   }
 }
 
@@ -72,7 +72,7 @@
   .generator-content {
     flex-direction: row;
     gap: 16px;
-    padding: 16px 24px;
+    padding: 10px 24px 16px;
     max-width: 1800px;
     margin: 0 auto;
     width: 100%;
@@ -81,9 +81,10 @@
 
 /* === PREVIEW SECTION (Left on desktop) === */
 .generator-preview {
+  --generator-preview-stack-gap: 8px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--generator-preview-stack-gap);
 }
 
 /* Mobile: preview takes reasonable height without overlapping options */
@@ -94,7 +95,7 @@
     z-index: 2;
     background: var(--color-bg);
     /* Small side padding for canvas centering; edge-to-edge for tabs+action bar */
-    padding: 0 6px 6px;
+    padding: 0 6px 8px;
     border-bottom: 1px solid var(--color-border);
     margin-bottom: 2px;
   }
@@ -103,6 +104,7 @@
     aspect-ratio: 1;
     width: 100%;
     margin: 0 auto;
+    border-radius: 20px;
   }
 
   .generator-preview-canvas {
@@ -134,6 +136,7 @@
   .generator-preview-canvas-wrapper {
     width: 100%;
     flex: none;
+    border-radius: 20px;
   }
 }
 
@@ -188,10 +191,64 @@
     width: clamp(200px, 18vw, 280px);
     flex-shrink: 0;
     overflow: hidden;
+    border-radius: var(--generator-surface-radius);
     padding: 0;
     display: flex;
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+/* Mid desktop: tighten widths before panels get too close */
+@media (min-width: 1321px) and (max-width: 1479px) {
+  .generator-content {
+    gap: 12px;
+    padding: 10px 16px 14px;
+  }
+
+  .generator-preview {
+    width: clamp(360px, 35vw, 470px);
+  }
+
+  .generator-options {
+    gap: 12px;
+  }
+
+  .generator-details-panel {
+    width: clamp(172px, 15vw, 220px);
+  }
+}
+
+/* Narrow desktop: stack the right-side panel under the trait grid before overlap can happen */
+@media (min-width: 1024px) and (max-width: 1320px) {
+  .generator-content {
+    gap: 12px;
+    padding: 10px 14px 14px;
+  }
+
+  .generator-preview {
+    width: clamp(320px, 33vw, 400px);
+  }
+
+  .generator-options {
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .generator-options-grid-wrapper {
+    min-height: 0;
+  }
+
+  .generator-options-grid-container {
+    min-height: 360px;
+  }
+
+  .generator-details-panel {
+    width: 100%;
+    max-width: 100%;
+    max-height: 340px;
+    flex-shrink: 1;
   }
 }
 
@@ -239,13 +296,16 @@
 .generator-options-grid-container {
   flex: 1;
   min-height: 0;
-  border-radius: 16px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border-radius: var(--generator-surface-radius);
+  background: rgba(16, 16, 22, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
   /* Thin inset scrollbar */
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
@@ -319,8 +379,10 @@
 
 /* === OPTIONS GRID === */
 .generator-options-grid {
+  --generator-trait-grid-gap: 10px;
   display: grid;
-  gap: 12px;
+  column-gap: var(--generator-trait-grid-gap);
+  row-gap: var(--generator-trait-grid-gap);
   padding: 12px;
   flex: 1;
   align-content: start;
@@ -329,9 +391,9 @@
 /* Mobile: 3 columns by default; grid grows with content (part of page scroll) */
 @media (max-width: 1023px) {
   .generator-options-grid {
+    --generator-trait-grid-gap: 6px;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    padding: 8px;
+    padding: 6px;
     flex: none;
     min-height: 0;
   }
@@ -339,16 +401,16 @@
   /* 2-column mode — larger trait previews, toggled via sort bar */
   .generator-options-grid[data-grid-cols="2"] {
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    --generator-trait-grid-gap: 6px;
   }
 }
 
 /* Desktop: adaptive columns — 3 on most screens, 4 when space allows */
 @media (min-width: 1024px) {
   .generator-options-grid {
+    --generator-trait-grid-gap: clamp(8px, 0.7vw, 10px);
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: clamp(8px, 0.8vw, 12px);
-    padding: clamp(10px, 1vw, 14px);
+    padding: clamp(8px, 0.9vw, 12px);
   }
 }
 
@@ -509,13 +571,13 @@
 /* === ACTION BUTTONS === */
 .generator-actions {
   display: flex;
-  gap: 8px;
+  gap: 0;
   justify-content: center;
-  flex-wrap: wrap;
   flex-shrink: 0;
   position: relative;
   z-index: 10;
-  background: var(--color-bg);
+  background: transparent;
+  padding: 0;
 }
 
 /* Desktop: no margin-top:auto — action bar sits tight under canvas */
@@ -523,7 +585,6 @@
 /* Mobile: action bar fits all items without horizontal scroll (Save + Info moved to overflow) */
 @media (max-width: 1023px) {
   .generator-actions {
-    padding: 4px 4px;
     overflow: hidden;
   }
 }
@@ -582,23 +643,72 @@
 .generator-preview-canvas {
   border-radius: 20px;
   overflow: hidden;
-  border: 2px solid var(--color-border);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   transition: box-shadow 0.3s ease;
   box-shadow:
-    0 0 60px rgba(255, 107, 0, 0.06),
-    0 0 120px rgba(255, 107, 0, 0.03),
-    0 8px 40px rgba(0, 0, 0, 0.35),
-    0 2px 8px rgba(0, 0, 0, 0.25);
+    0 0 32px rgba(255, 107, 0, 0.035),
+    0 12px 36px rgba(0, 0, 0, 0.28),
+    0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.generator-preview-frame {
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--generator-surface-radius);
+  padding: 11px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 176, 105, 0.08), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.012) 100%),
+    rgba(12, 12, 18, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  box-shadow:
+    0 20px 48px rgba(0, 0, 0, 0.28),
+    0 0 28px rgba(255, 107, 0, 0.035),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.generator-preview-frame::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: calc(var(--generator-surface-radius) - 2px);
+  border: 1px solid rgba(255, 255, 255, 0.035);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.generator-preview-frame::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border-radius: 18px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 0 0 1px rgba(255, 255, 255, 0.025);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.generator-preview-frame > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Mobile: reduce glow radius to avoid overwhelming smaller viewport */
 @media (max-width: 1023px) {
   .generator-preview-canvas {
     box-shadow:
-      0 0 36px rgba(255, 107, 0, 0.05),
-      0 0 72px rgba(255, 107, 0, 0.02),
-      0 6px 28px rgba(0, 0, 0, 0.3),
-      0 2px 6px rgba(0, 0, 0, 0.2);
+      0 0 24px rgba(255, 107, 0, 0.03),
+      0 10px 26px rgba(0, 0, 0, 0.24),
+      0 2px 6px rgba(0, 0, 0, 0.18);
+  }
+
+  .generator-preview-frame {
+    padding: 8px;
+  }
+
+  .generator-preview-frame::after {
+    inset: 8px;
   }
 }
 

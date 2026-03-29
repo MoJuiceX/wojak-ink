@@ -15,11 +15,8 @@ export function PreviewWithControls({ className = '' }: { className?: string }) 
   return (
     <div className={className}>
       <div
-        className="generator-preview-canvas relative overflow-hidden flex items-center justify-center"
-        style={{
-          aspectRatio: '1 / 1',
-          backgroundColor: 'var(--color-bg)',
-        }}
+        className="generator-preview-frame relative overflow-hidden flex items-center justify-center"
+        style={{ aspectRatio: '1 / 1' }}
       >
         {isAIEnhancedMode && enhancedImage ? (
           <img

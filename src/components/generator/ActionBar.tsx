@@ -5,7 +5,7 @@
  * Row 2: Mint bar with price display, free/paid toggle, and CTA button.
  */
 
-import { useState, useCallback, useEffect, useRef, useLayoutEffect, lazy, Suspense } from 'react';
+import { useState, useCallback, useEffect, useRef, useLayoutEffect, lazy, Suspense, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
@@ -34,11 +34,16 @@ import { GeneratorInfo } from './GeneratorInfo';
 import { PricingLightbox } from './PricingLightbox';
 import { useAIEnhance } from '@/contexts/AIEnhanceContext';
 import { safeStorage } from '@/utils/safeStorage';
+import { calculateCombatIdentity } from '@/lib/combat/identity-calculator';
+import { TYPE_EMOJI, TYPE_NAME } from '@/lib/combat/combatDisplayNames';
+import { deriveCombatTraitIdFromPath } from '@/lib/combat/selectionTraitId';
 
 // Lazy-load AI components — only needed when user opens the AI wizard
 const AIEnhanceLightbox = lazy(() => import('./ai/AIEnhanceLightbox').then(m => ({ default: m.AIEnhanceLightbox })));
 const AICreationsGallery = lazy(() => import('./ai/AICreationsGallery').then(m => ({ default: m.AICreationsGallery })));
 const AICreditsShop = lazy(() => import('./ai/AICreditsShop').then(m => ({ default: m.AICreditsShop })));
+
+const AI_PROMO_END = new Date('2026-04-01T00:00:00Z');
 
 interface ActionBarProps {
   className?: string;
@@ -437,6 +442,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     badge,
     variant: _variant = 'secondary',
     hideOnMobile,
+    className,
   }: {
     onClick: () => void;
     disabled?: boolean;
@@ -446,10 +452,11 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     badge?: number;
     variant?: 'primary' | 'secondary';
     hideOnMobile?: boolean;
+    className?: string;
   }) => (
     <motion.button
       type="button"
-      className={`action-btn${isActive ? ' action-btn--active' : ''}${disabled ? ' action-btn--disabled' : ''} relative flex items-center justify-center rounded-lg shrink-0 w-7 h-7 lg:w-8 lg:h-8${hideOnMobile ? ' hidden lg:flex' : ''}`}
+      className={`action-btn${isActive ? ' action-btn--active' : ''}${disabled ? ' action-btn--disabled' : ''}${className ? ` ${className}` : ''} relative flex items-center justify-center rounded-lg shrink-0 w-7 h-7 lg:w-8 lg:h-8${hideOnMobile ? ' hidden lg:flex' : ''}`}
       whileHover={disabled || prefersReducedMotion ? undefined : { scale: 1.02 }}
       whileTap={disabled || prefersReducedMotion ? undefined : { scale: 0.98 }}
       onClick={onClick}
@@ -470,6 +477,10 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   // ── Mint bar state ──
   const showFreePaidToggle = isWalletConnected && hasFreeMintsAvailable && !showMintingPaused && !isSoldOut;
   const isFreeMint = showFreePaidToggle && mintType === 'free';
+  const promoDaysLeft = Math.max(0, Math.ceil((AI_PROMO_END.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)));
+  const showMintBarPromo = promoDaysLeft > 0;
+  const showMintBarMeta = showFreePaidToggle;
+  const promoDaysLabel = promoDaysLeft === 1 ? '1 day left' : `${promoDaysLeft} days left`;
 
   const priceDisplay = (() => {
     if (showMintingPaused || isSoldOut) return '';
@@ -482,6 +493,44 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     return `${p.totalXch.toFixed(2)} XCH`;
   })();
 
+  const combatIdentity = useMemo(() => {
+    const traits: { traitId: string; layer: string }[] = [];
+    const colors: Record<string, string> = {};
+    const details: Record<string, string> = {};
+    let logoOption: string | undefined;
+
+    for (const [layer, sel] of Object.entries(g2Selections ?? {})) {
+      if (!sel?.traitId) continue;
+      traits.push({ traitId: sel.traitId, layer });
+      if (sel.colors) {
+        for (const hex of Object.values(sel.colors)) {
+          if (hex) colors[sel.traitId] = hex;
+        }
+      }
+      if (sel.options.detail) details[sel.traitId] = sel.options.detail as string;
+      if (sel.options.logo) logoOption = sel.options.logo as string;
+    }
+
+    for (const [layer, path] of Object.entries(selectedLayers)) {
+      if (!path || typeof path !== 'string') continue;
+      const traitId = deriveCombatTraitIdFromPath(layer, path);
+      if (!traitId) continue;
+      if (!traits.some((trait) => trait.layer === layer)) {
+        traits.push({ traitId, layer });
+        const layerColor = (selectedColors as Record<string, string | undefined>)?.[layer];
+        if (layerColor) colors[traitId] = layerColor;
+      }
+    }
+
+    if (traits.length === 0) return null;
+
+    try {
+      return calculateCombatIdentity({ traits, colors, details, logoOption });
+    } catch {
+      return null;
+    }
+  }, [g2Selections, selectedColors, selectedLayers]);
+
   const mintCtaLabel = (() => {
     if (showMintingPaused) return 'Soon';
     if (isSoldOut) return 'Sold Out';
@@ -493,201 +542,265 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const mintCtaDisabled = showMintingPaused || isSoldOut || (isWalletConnected && !has7Traits);
 
   return (
-    <div className={`action-bar-wrapper flex flex-col gap-1.5 w-full ${className}`}>
+    <div className={`action-bar-wrapper flex flex-col w-full ${className}`}>
       {/* ── Row 1: Icon toolbar — all actions visible, spread to fill width ── */}
-      <div className="action-bar-container flex items-center justify-between px-1.5 lg:px-2 py-1 rounded-none lg:rounded-2xl w-full">
-        {/* Left: Creation tools */}
-        <div className="flex items-center gap-px lg:gap-0.5">
-          <ActionBarTooltip content="Randomize">
-            <motion.button
-              type="button"
-              className="relative flex items-center justify-center rounded-lg shrink-0 w-7 h-7 lg:w-8 lg:h-8 bg-transparent border-none transition-all duration-300"
-              whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
-              whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
-              onClick={handleRandomize}
-              aria-label="Randomize"
-            >
-              <motion.span
-                className="text-base lg:text-lg block"
-                animate={isRandomizing ? {
-                  scale: [1, 1.15, 1],
-                  rotate: [0, -10, 10, 0],
-                } : { scale: 1, rotate: 0 }}
-                transition={{ duration: 0.3 }}
+      <div className="action-bar-container action-bar-container--scrollable flex items-center px-1.5 lg:px-2 py-1 w-full overflow-x-auto overflow-y-hidden">
+        <div className="action-bar-scroll flex items-center justify-start min-w-full w-max gap-2 lg:gap-4">
+          {/* Left: Creation tools */}
+          <div className="action-bar-cluster action-bar-cluster--creation flex items-center gap-px lg:gap-0.5 shrink-0 lg:flex-1">
+            <ActionBarTooltip content="Randomize">
+              <motion.button
+                type="button"
+                className="relative flex items-center justify-center rounded-lg shrink-0 w-7 h-7 lg:w-8 lg:h-8 bg-transparent border-none transition-all duration-300"
+                whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
+                whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
+                onClick={handleRandomize}
+                aria-label="Randomize"
               >
-                🎲
-              </motion.span>
-            </motion.button>
-          </ActionBarTooltip>
+                <motion.span
+                  className="text-base lg:text-lg block"
+                  animate={isRandomizing ? {
+                    scale: [1, 1.15, 1],
+                    rotate: [0, -10, 10, 0],
+                  } : { scale: 1, rotate: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  🎲
+                </motion.span>
+              </motion.button>
+            </ActionBarTooltip>
 
-          <ActionBarTooltip content="Undo">
-            <ActionButton onClick={undo} disabled={!canUndo} icon={<Undo2 size={16} />} label="Undo" />
-          </ActionBarTooltip>
-          <ActionBarTooltip content="Redo">
-            <ActionButton onClick={redo} disabled={!canRedo} icon={<Redo2 size={16} />} label="Redo" />
-          </ActionBarTooltip>
+            <ActionBarTooltip content="Undo">
+              <ActionButton onClick={undo} disabled={!canUndo} icon={<Undo2 size={16} />} label="Undo" />
+            </ActionBarTooltip>
+            <ActionBarTooltip content="Redo">
+              <ActionButton onClick={redo} disabled={!canRedo} icon={<Redo2 size={16} />} label="Redo" />
+            </ActionBarTooltip>
 
-          <div className="h-5 w-px shrink-0 mx-0.5 lg:mx-1 bg-[var(--color-border)]" />
+            <div className="h-5 w-px shrink-0 mx-0.5 lg:mx-1 bg-[var(--color-border)]" />
 
-          <ActionBarTooltip content="Save">
-            <ActionButton
-              onClick={handleSaveAndOpenFavorites}
-              disabled={!hasSelection || isSaving}
-              icon={<Heart size={16} />}
-              label="Save"
-              badge={favorites.length}
-            />
-          </ActionBarTooltip>
-
-          <div className="download-btn-container relative">
-            <ActionBarTooltip content="Export">
+            <ActionBarTooltip content="Save">
               <ActionButton
-                variant="primary"
-                onClick={() => {
-                  toggleExport(true);
-                  if (hasSelection && !prefersReducedMotion) {
-                    setShowDownloadSuccess(true);
-                    setTimeout(() => setShowDownloadSuccess(false), 800);
-                  }
-                }}
-                disabled={!hasSelection}
-                icon={<Download size={16} />}
-                label="Export"
+                onClick={handleSaveAndOpenFavorites}
+                disabled={!hasSelection || isSaving}
+                icon={<Heart size={16} />}
+                label="Save"
+                badge={favorites.length}
               />
             </ActionBarTooltip>
-            <AnimatePresence>
-              {showDownloadSuccess && (
-                <div className="success-sparkles">
-                  {[...Array(6)].map((_, i) => (
-                    <motion.span
-                      key={i}
-                      className="sparkle"
-                      initial={{ scale: 0, x: 0, y: 0 }}
-                      animate={{
-                        scale: [0, 1, 0],
-                        x: Math.cos((i * 60 * Math.PI) / 180) * 30,
-                        y: Math.sin((i * 60 * Math.PI) / 180) * 30,
-                      }}
-                      transition={{ duration: 0.5, delay: i * 0.04 }}
-                    />
-                  ))}
-                </div>
-              )}
-            </AnimatePresence>
+
+            <div className="download-btn-container relative">
+              <ActionBarTooltip content="Export">
+                <ActionButton
+                  variant="primary"
+                  onClick={() => {
+                    toggleExport(true);
+                    if (hasSelection && !prefersReducedMotion) {
+                      setShowDownloadSuccess(true);
+                      setTimeout(() => setShowDownloadSuccess(false), 800);
+                    }
+                  }}
+                  disabled={!hasSelection}
+                  icon={<Download size={16} />}
+                  label="Export"
+                />
+              </ActionBarTooltip>
+              <AnimatePresence>
+                {showDownloadSuccess && (
+                  <div className="success-sparkles">
+                    {[...Array(6)].map((_, i) => (
+                      <motion.span
+                        key={i}
+                        className="sparkle"
+                        initial={{ scale: 0, x: 0, y: 0 }}
+                        animate={{
+                          scale: [0, 1, 0],
+                          x: Math.cos((i * 60 * Math.PI) / 180) * 30,
+                          y: Math.sin((i * 60 * Math.PI) / 180) * 30,
+                        }}
+                        transition={{ duration: 0.5, delay: i * 0.04 }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
-          {/* Enhance with AI — hidden when already in AI Enhanced mode */}
+          {/* Center: Featured AI action */}
           {!isAIEnhancedMode && (
-            <ActionBarTooltip content="Enhance with AI">
+            <div className="action-bar-featured-wrap shrink-0">
+              <ActionBarTooltip content="Enhance with AI">
+                <ActionButton
+                  onClick={handleEnhanceClick}
+                  disabled={!hasSelection}
+                  className="action-btn--ai-enhance action-btn--featured"
+                  icon={
+                    <span className="ai-enhance-action-icon">
+                      <span className="ai-enhance-action-glow" aria-hidden="true" />
+                      <span className="ai-enhance-action-sparkle ai-enhance-action-sparkle--one" aria-hidden="true" />
+                      <span className="ai-enhance-action-sparkle ai-enhance-action-sparkle--two" aria-hidden="true" />
+                      <span className="ai-enhance-action-sparkle ai-enhance-action-sparkle--three" aria-hidden="true" />
+                      <Wand2 size={16} />
+                    </span>
+                  }
+                  label="Enhance with AI"
+                />
+              </ActionBarTooltip>
+            </div>
+          )}
+
+          {/* Right: Info & reference tools */}
+          <div className={`action-bar-cluster action-bar-cluster--utility flex items-center gap-px lg:gap-0.5 shrink-0 ${!isAIEnhancedMode ? 'lg:flex-1 lg:justify-end' : 'lg:ml-auto'}`}>
+            <ActionBarTooltip content="How It Works">
               <ActionButton
-                onClick={handleEnhanceClick}
-                disabled={!hasSelection}
-                icon={<Wand2 size={16} />}
-                label="Enhance with AI"
+                onClick={() => setShowGeneratorInfo(true)}
+                className="action-btn--utility"
+                icon={<Info size={16} />}
+                label="How It Works"
               />
             </ActionBarTooltip>
-          )}
-        </div>
 
-        {/* Right: Info & reference tools */}
-        <div className="flex items-center gap-px lg:gap-0.5">
-          <ActionBarTooltip content="How It Works">
-            <ActionButton
-              onClick={() => setShowGeneratorInfo(true)}
-              icon={<Info size={16} />}
-              label="How It Works"
-            />
-          </ActionBarTooltip>
-
-          <ActionBarTooltip content="Free Mints">
-            <ActionButton
-              onClick={() => { window.location.href = '/free-mints.html'; }}
-              icon={<Trophy size={16} />}
-              label="Free Mints"
-              badge={isWalletConnected ? (credits?.free_mints_available ?? 0) : undefined}
-              hideOnMobile
-            />
-          </ActionBarTooltip>
-
-          <ActionBarTooltip content="Prices">
-            <ActionButton
-              onClick={() => setShowPricing(true)}
-              icon={<Tag size={16} />}
-              label="Prices"
-              hideOnMobile
-            />
-          </ActionBarTooltip>
-
-          <ActionBarTooltip content="AI Creations">
-            <ActionButton
-              onClick={() => setShowCreationsGallery(true)}
-              icon={<Images size={16} />}
-              label="AI Creations"
-              badge={creations.length || undefined}
-            />
-          </ActionBarTooltip>
-
-          {/* Metadata toggle — desktop only */}
-          {onToggleRightPanel && (
-            <ActionBarTooltip content={rightPanelMode !== 'colors' ? 'Colors' : 'Metadata'}>
+            <ActionBarTooltip content="Free Mints">
               <ActionButton
-                onClick={onToggleRightPanel}
-                isActive={rightPanelMode === 'metadata'}
-                icon={<span className="font-mono text-xs font-bold leading-none">{'{ }'}</span>}
-                label={rightPanelMode !== 'colors' ? 'Colors' : 'Metadata'}
-                hideOnMobile
+                onClick={() => { window.location.href = '/free-mints.html'; }}
+                className="action-btn--utility"
+                icon={<Trophy size={16} />}
+                label="Free Mints"
+                badge={isWalletConnected ? (credits?.free_mints_available ?? 0) : undefined}
               />
             </ActionBarTooltip>
-          )}
+
+            <ActionBarTooltip content="Prices">
+              <ActionButton
+                onClick={() => setShowPricing(true)}
+                className="action-btn--utility"
+                icon={<Tag size={16} />}
+                label="Prices"
+              />
+            </ActionBarTooltip>
+
+            <ActionBarTooltip content="AI Creations">
+              <ActionButton
+                onClick={() => setShowCreationsGallery(true)}
+                className="action-btn--utility"
+                icon={<Images size={16} />}
+                label="AI Creations"
+                badge={creations.length || undefined}
+              />
+            </ActionBarTooltip>
+
+            {/* Metadata toggle — desktop only */}
+            {onToggleRightPanel && (
+              <ActionBarTooltip content={rightPanelMode !== 'colors' ? 'Colors' : 'Metadata'}>
+                <ActionButton
+                  onClick={onToggleRightPanel}
+                  isActive={rightPanelMode === 'metadata'}
+                  className="action-btn--utility"
+                  icon={<span className="font-mono text-xs font-bold leading-none">{'{ }'}</span>}
+                  label={rightPanelMode !== 'colors' ? 'Colors' : 'Metadata'}
+                />
+              </ActionBarTooltip>
+            )}
+          </div>
         </div>
       </div>
 
       {/* ── Row 2: Mint bar — price | toggle | CTA ── */}
-      <div className="mint-bar flex items-center w-full rounded-xl overflow-hidden">
+      <div className="mint-bar flex items-center w-full overflow-hidden">
         {/* Price & toggle section */}
         <div className="mint-bar-info flex items-center gap-2 flex-1 min-w-0 px-3">
-          {priceDisplay ? (
-            <span className="mint-bar-price font-bold text-sm tabular-nums whitespace-nowrap">
-              {priceDisplay}
-            </span>
-          ) : !isWalletConnected && !showMintingPaused && !isSoldOut ? (
-            <span className="mint-bar-hint text-xs whitespace-nowrap">
-              Connect wallet to mint
-            </span>
-          ) : showMintingPaused ? (
-            <span className="mint-bar-hint text-xs whitespace-nowrap">
-              Minting continues soon
-            </span>
-          ) : isSoldOut ? (
-            <span className="mint-bar-hint text-xs whitespace-nowrap">
-              All 4,200 Wojaks minted
-            </span>
-          ) : !has7Traits ? (
-            <span className="mint-bar-hint text-xs whitespace-nowrap">
-              Select all traits
-            </span>
-          ) : null}
-
-          {/* Free/Paid toggle */}
-          {showFreePaidToggle && (
-            <button
-              type="button"
-              className="mint-bar-toggle flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold shrink-0"
-              onClick={() => setMintType((t) => (t === 'free' ? 'paid' : 'free'))}
-              aria-label={isFreeMint ? 'Switch to paid mint' : 'Switch to free mint'}
-            >
-              {isFreeMint ? (
-                <>
+          <div className="mint-bar-status flex items-center gap-2 min-w-0">
+            {showMintBarPromo && (
+              <div
+                className="mint-bar-chip mint-bar-promo"
+                role="status"
+                aria-label={`AI Enhance is 50 percent off for ${promoDaysLeft} more day${promoDaysLeft !== 1 ? 's' : ''}.`}
+                title={`AI Enhance is 50% off. Get 2x credits for the same price. ${promoDaysLeft} day${promoDaysLeft !== 1 ? 's' : ''} left.`}
+              >
+                <span className="mint-bar-chip__icon mint-bar-promo__icon" aria-hidden="true">
                   <Sparkles size={12} />
-                  <span>Free</span>
-                </>
-              ) : (
-                <>
-                  <Wallet size={12} />
-                  <span>XCH</span>
-                </>
+                </span>
+                <span className="mint-bar-chip__label mint-bar-promo__label">AI 50% Off</span>
+                <span className="mint-bar-chip__meta mint-bar-promo__meta">{promoDaysLabel}</span>
+              </div>
+            )}
+
+            {showMintBarPromo && combatIdentity && (
+              <div className="mint-bar-status-divider" aria-hidden="true" />
+            )}
+
+            {combatIdentity && (
+              <>
+                <div
+                  className="mint-bar-chip mint-bar-identity"
+                  aria-label={`Type: ${TYPE_NAME[combatIdentity.type]}, Nature: ${combatIdentity.nature}`}
+                  title={`${TYPE_NAME[combatIdentity.type]} · ${combatIdentity.nature}`}
+                >
+                  <span className="mint-bar-chip__icon mint-bar-identity__icon" aria-hidden="true">
+                    {TYPE_EMOJI[combatIdentity.type]}
+                  </span>
+                  <span className="mint-bar-chip__label mint-bar-identity__label">
+                    {TYPE_NAME[combatIdentity.type]}
+                  </span>
+                  <span className="mint-bar-chip__meta mint-bar-identity__meta">
+                    {combatIdentity.nature}
+                  </span>
+                </div>
+              </>
+            )}
+
+            {(showMintBarPromo || combatIdentity) && (
+              <div className="mint-bar-status-divider" aria-hidden="true" />
+            )}
+
+            {priceDisplay ? (
+              <span className="mint-bar-price font-bold text-sm tabular-nums whitespace-nowrap">
+                {priceDisplay}
+              </span>
+            ) : !isWalletConnected && !showMintingPaused && !isSoldOut ? (
+              <span className="mint-bar-hint text-xs whitespace-nowrap">
+                Connect wallet to mint
+              </span>
+            ) : showMintingPaused ? (
+              <span className="mint-bar-hint text-xs whitespace-nowrap">
+                Minting continues soon
+              </span>
+            ) : isSoldOut ? (
+              <span className="mint-bar-hint text-xs whitespace-nowrap">
+                All 4,200 Wojaks minted
+              </span>
+            ) : !has7Traits ? (
+              <span className="mint-bar-hint text-xs whitespace-nowrap">
+                Select all traits
+              </span>
+            ) : null}
+          </div>
+
+          {showMintBarMeta && (
+            <div className="mint-bar-meta flex items-center gap-2 ml-auto shrink-0">
+              {/* Free/Paid toggle */}
+              {showFreePaidToggle && (
+                <button
+                  type="button"
+                  className="mint-bar-toggle flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold shrink-0"
+                  onClick={() => setMintType((t) => (t === 'free' ? 'paid' : 'free'))}
+                  aria-label={isFreeMint ? 'Switch to paid mint' : 'Switch to free mint'}
+                >
+                  {isFreeMint ? (
+                    <>
+                      <Sparkles size={12} />
+                      <span>Free</span>
+                    </>
+                  ) : (
+                    <>
+                      <Wallet size={12} />
+                      <span>XCH</span>
+                    </>
+                  )}
+                </button>
               )}
-            </button>
+            </div>
           )}
         </div>
 

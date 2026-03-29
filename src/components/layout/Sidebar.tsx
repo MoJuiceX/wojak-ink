@@ -10,7 +10,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Pin, PinOff } from 'lucide-react';
 import { LAYOUT } from '@/config/layout';
-import { PRIMARY_NAV_ITEMS, SECONDARY_NAV_ITEMS, isPathActive } from '@/config/routes';
+import {
+  SIDEBAR_PRIMARY_NAV_ITEMS,
+  SECONDARY_NAV_ITEMS,
+  isPathActive,
+} from '@/config/routes';
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery';
 import { NavItem } from './NavItem';
 import { Logo } from './Logo';
@@ -201,7 +205,7 @@ export function Sidebar({
       >
         {/* Primary items */}
         <ul className="flex flex-col gap-1">
-          {PRIMARY_NAV_ITEMS.map((item) => (
+          {SIDEBAR_PRIMARY_NAV_ITEMS.map((item) => (
             <li key={item.id}>
               <NavItem
                 icon={item.icon}
@@ -214,7 +218,6 @@ export function Sidebar({
                 tooltip={item.tooltip}
                 variant="sidebar"
                 path={item.path || undefined}
-                featured={item.featured}
               />
             </li>
           ))}
