@@ -19,6 +19,7 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
     balance,
     characterOverlay,
     targetOverlays,
+    foregroundOverlays,
   } = useAIEnhance();
   const prefersReducedMotion = useReducedMotion();
   const [shimmerVisible, setShimmerVisible] = useState(true);
@@ -48,7 +49,11 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
         if (targetOverlay) {
           const enhancedDataUrl = `data:${currentResult.contentType ?? 'image/png'};base64,${currentResult.imageBase64}`;
           const composited = await compositeMaskedEnhancement(currentImage, enhancedDataUrl, targetOverlay);
-          if (!cancelled) setCompositedPreview(composited);
+          const foregroundOverlay = foregroundOverlays[currentResult.category];
+          const finalPreview = foregroundOverlay
+            ? await compositeOverlay(composited, foregroundOverlay)
+            : composited;
+          if (!cancelled) setCompositedPreview(finalPreview);
           return;
         }
       }
@@ -60,7 +65,7 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
     return () => {
       cancelled = true;
     };
-  }, [currentResult, characterOverlay, currentImage, targetOverlays]);
+  }, [currentResult, characterOverlay, currentImage, foregroundOverlays, targetOverlays]);
 
   if (!currentResult) return null;
 

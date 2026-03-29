@@ -4747,6 +4747,7 @@ body {
 }
 
 .ai-category-btn {
+  position: relative;
   background: rgba(18, 18, 26, 0.6);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -4776,6 +4777,39 @@ body {
   background: rgba(18, 18, 26, 0.6);
   border-color: rgba(255, 255, 255, 0.08);
   transform: none;
+}
+
+.ai-category-restriction-toggle {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 12, 18, 0.82);
+  color: rgba(255, 255, 255, 0.86);
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+  pointer-events: none;
+}
+
+.ai-category-btn--disabled:hover .ai-category-restriction-toggle,
+.ai-category-btn--disabled:focus-visible .ai-category-restriction-toggle {
+  opacity: 1;
+  transform: translateY(0);
+  border-color: rgba(255, 107, 0, 0.28);
+}
+
+.ai-category-restriction-copy {
+  margin-top: 0.45rem;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.7rem;
+  line-height: 1.4;
 }
 
 .ai-category-icon {

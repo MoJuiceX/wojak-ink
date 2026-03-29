@@ -6,6 +6,7 @@ import { useAIEnhance } from '@/contexts/AIEnhanceContext';
 import { useGenerator } from '@/contexts/GeneratorContext';
 import { AI_CATEGORIES, AI_WIZARD_CATEGORIES } from '@/types/aiEnhance';
 import type { AICategory } from '@/types/aiEnhance';
+import { getAIEnhanceRestriction } from '@/lib/aiEnhanceRules';
 
 interface AICategoryPickerProps {
   currentImage: string | null;
@@ -13,10 +14,12 @@ interface AICategoryPickerProps {
 
 export function AICategoryPicker({ currentImage }: AICategoryPickerProps) {
   const { selectCategory, enhancedCategories } = useAIEnhance();
-  const { isLayerDisabled, getDisabledReason } = useGenerator();
+  const { isLayerDisabled, getDisabledReason, g2Selections } = useGenerator();
   const prefersReducedMotion = useReducedMotion();
 
   const isHeadDisabled = isLayerDisabled('Head');
+  const aiRestriction = getAIEnhanceRestriction(g2Selections);
+  const restrictedCategories = new Set(aiRestriction?.blockedCategories ?? []);
 
   // Background must be enhanced first — disable if clothing or head was already enhanced
   const hasNonBgEnhancement = enhancedCategories.has('clothes') || enhancedCategories.has('head');
@@ -42,6 +45,21 @@ export function AICategoryPicker({ currentImage }: AICategoryPickerProps) {
         </div>
       )}
 
+      {aiRestriction && (
+        <div
+          className="flex items-start gap-2 p-3 rounded-lg text-xs"
+          style={{
+            background: 'rgba(255, 107, 0, 0.08)',
+            border: '1px solid rgba(255, 107, 0, 0.15)',
+          }}
+        >
+          <Info size={14} className="text-accent shrink-0 mt-0.5" />
+          <span className="text-secondary">
+            {aiRestriction.reason}
+          </span>
+        </div>
+      )}
+
       <div className="flex flex-col gap-4 md:flex-row">
         {/* Preview */}
         {currentImage && (
@@ -60,7 +78,15 @@ export function AICategoryPicker({ currentImage }: AICategoryPickerProps) {
         {categories.map(([key, config]) => {
           const isEnhanced = enhancedCategories.has(key);
           const isBgLockedOut = key === 'background' && hasNonBgEnhancement && !enhancedCategories.has('background');
-          const isDisabled = (key === 'head' && isHeadDisabled) || isBgLockedOut;
+          const isTraitRestricted = restrictedCategories.has(key);
+          const isDisabled = (key === 'head' && isHeadDisabled) || isBgLockedOut || isTraitRestricted;
+          const disabledReason = isTraitRestricted
+            ? aiRestriction?.reason
+            : isBgLockedOut
+              ? 'Enhance background before clothing or head'
+              : isDisabled
+                ? (getDisabledReason('Head') || 'Head disabled by suit')
+                : undefined;
           return (
             <motion.button
               type="button"
@@ -70,15 +96,22 @@ export function AICategoryPicker({ currentImage }: AICategoryPickerProps) {
               whileHover={prefersReducedMotion || isDisabled ? {} : { scale: 1.03 }}
               whileTap={prefersReducedMotion || isDisabled ? {} : { scale: 0.97 }}
               disabled={isDisabled}
-              title={isBgLockedOut ? 'Enhance background before clothing or head' : isDisabled ? (getDisabledReason('Head') || 'Head disabled by suit') : undefined}
+              title={disabledReason}
             >
+              {isTraitRestricted && (
+                <span className="ai-category-restriction-toggle" aria-hidden="true">
+                  <Info size={12} />
+                </span>
+              )}
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xl ai-category-icon">{config.icon}</span>
                 <span className="font-semibold ai-category-text">{config.label}</span>
                 {isEnhanced && <span className="text-sm text-success">&#10003;</span>}
               </div>
               <p className="text-secondary text-xs">
-                {isBgLockedOut
+                {isTraitRestricted
+                  ? 'These layers are too special for quality purposes.'
+                  : isBgLockedOut
                   ? 'Enhance background first'
                   : isDisabled
                     ? 'Suit includes helmet'
@@ -86,6 +119,11 @@ export function AICategoryPicker({ currentImage }: AICategoryPickerProps) {
                       ? 'Enhance existing style'
                       : 'Full creative freedom'}
               </p>
+              {isTraitRestricted && (
+                <p className="ai-category-restriction-copy">
+                  They are disabled for AI enhancement. Come back later.
+                </p>
+              )}
             </motion.button>
           );
         })}

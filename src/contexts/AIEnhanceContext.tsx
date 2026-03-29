@@ -49,6 +49,8 @@ export interface AIEnhanceContextValue {
   setCharacterOverlay: (overlay: string | null) => void;
   targetOverlays: Partial<Record<'clothes' | 'head', string>>;
   setTargetOverlay: (category: 'clothes' | 'head', overlay: string | null) => void;
+  foregroundOverlays: Partial<Record<'clothes' | 'head', string>>;
+  setForegroundOverlay: (category: 'clothes' | 'head', overlay: string | null) => void;
 
   // Enhanced image state
   enhancedImage: string | null;  // base64 of currently accepted AI image
@@ -111,6 +113,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   // Character overlay (transparent PNG — used for background compositing)
   const [characterOverlay, setCharacterOverlay] = useState<string | null>(null);
   const [targetOverlays, setTargetOverlays] = useState<Partial<Record<'clothes' | 'head', string>>>({});
+  const [foregroundOverlays, setForegroundOverlays] = useState<Partial<Record<'clothes' | 'head', string>>>({});
 
   // AI Enhanced Mode
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
@@ -362,9 +365,12 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
       step = 'payload';
       // Background: no image needed (backend generates scene-only, frontend composites)
       // Other categories: send the current image for editing
-      const rawImage = category === 'background'
+      const sourceImage = category === 'background'
         ? undefined
-        : imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
+        : (category === 'clothes' || category === 'head')
+          ? (targetOverlays[category] ?? imageBase64)
+          : imageBase64;
+      const rawImage = sourceImage && sourceImage.includes(',') ? sourceImage.split(',')[1] : sourceImage;
       const payload = {
         imageBase64: rawImage,
         category,
@@ -479,7 +485,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsEnhancing(false);
     }
-  }, [address, selectedMode, selectedOption, aiTraitOverrides, ensureAuthenticated, handleAuthError]);
+  }, [address, selectedMode, selectedOption, aiTraitOverrides, ensureAuthenticated, handleAuthError, targetOverlays]);
 
   // Convert any image (JPEG or PNG) to PNG data URL via canvas
   const ensurePng = useCallback(async (base64: string, ct?: string): Promise<string> => {
@@ -521,12 +527,17 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
       const targetOverlay = targetOverlays[result.category];
       if (targetOverlay) {
         const enhancedDataUrl = await ensurePng(result.imageBase64, result.contentType);
-        return compositeMaskedEnhancement(currentImage, enhancedDataUrl, targetOverlay);
+        const composited = await compositeMaskedEnhancement(currentImage, enhancedDataUrl, targetOverlay);
+        const foregroundOverlay = foregroundOverlays[result.category];
+        if (foregroundOverlay) {
+          return compositeOverlay(composited, foregroundOverlay);
+        }
+        return composited;
       }
     }
 
     return ensurePng(result.imageBase64, result.contentType);
-  }, [characterOverlay, ensurePng, targetOverlays]);
+  }, [characterOverlay, ensurePng, foregroundOverlays, targetOverlays]);
 
   // --- Accept result ---
   const acceptResult = useCallback(async (currentImage?: string | null) => {
@@ -557,6 +568,14 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   const clearError = useCallback(() => setEnhanceError(null), []);
   const setTargetOverlay = useCallback((category: 'clothes' | 'head', overlay: string | null) => {
     setTargetOverlays((prev) => {
+      if (overlay) return { ...prev, [category]: overlay };
+      const next = { ...prev };
+      delete next[category];
+      return next;
+    });
+  }, []);
+  const setForegroundOverlay = useCallback((category: 'clothes' | 'head', overlay: string | null) => {
+    setForegroundOverlays((prev) => {
       if (overlay) return { ...prev, [category]: overlay };
       const next = { ...prev };
       delete next[category];
@@ -655,6 +674,8 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     setCharacterOverlay,
     targetOverlays,
     setTargetOverlay,
+    foregroundOverlays,
+    setForegroundOverlay,
     enhancedImage,
     enhancedCategories,
     acceptResult,

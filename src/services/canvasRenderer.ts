@@ -2669,6 +2669,43 @@ function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
+type G2RenderPass = 'all' | 'fills-only' | 'foreground-only';
+
+function filterG2LayerDataForRenderPass(g2: G2LayerData, renderPass: G2RenderPass = 'all'): G2LayerData {
+  if (renderPass === 'all') return g2;
+
+  const orderedDrawItems = g2.orderedDrawItems?.filter((item) =>
+    renderPass === 'fills-only' ? item.type === 'fill' : item.type !== 'fill',
+  );
+
+  if (renderPass === 'fills-only') {
+    return {
+      fills: g2.fills,
+      outlines: [],
+      orderedDrawItems,
+    };
+  }
+
+  return {
+    fills: [],
+    outlines: g2.outlines,
+    orderedDrawItems,
+    detail: g2.detail,
+    details: g2.details,
+    frame: g2.frame,
+    logoOption: g2.logoOption,
+    logoPos: g2.logoPos,
+    logoFrame: g2.logoFrame,
+    flagOption: g2.flagOption,
+    frame1: g2.frame1,
+    frame2: g2.frame2,
+    detailOverlay: g2.detailOverlay,
+    name1: g2.name1,
+    name2: g2.name2,
+    supersample: g2.supersample,
+  };
+}
+
 export async function renderPreview(
   selectedLayers: SelectedLayers,
   g2Selections?: G2Selections,
@@ -2701,7 +2738,12 @@ export async function exportImage(
   selectedLayers: SelectedLayers,
   options: ExportOptions,
   g2Selections?: G2Selections,
-  selectedColors?: Partial<Record<UILayerName, string>>
+  selectedColors?: Partial<Record<UILayerName, string>>,
+  renderFilter?: {
+    renderPass?: G2RenderPass;
+    minZIndexExclusive?: number;
+    maxZIndexInclusive?: number;
+  }
 ): Promise<Blob> {
   let size: number;
   if ('preset' in options.size) {
@@ -2887,6 +2929,14 @@ export async function exportImage(
     resolvedLayers = expanded;
   }
 
+  if (renderFilter?.renderPass && renderFilter.renderPass !== 'all') {
+    resolvedLayers = resolvedLayers.map((layer) =>
+      layer.g2
+        ? { ...layer, g2: filterG2LayerDataForRenderPass(layer.g2, renderFilter.renderPass) }
+        : layer,
+    );
+  }
+
   // Warm G2 assets in parallel so drawG2Layer hits cache instead of serial network loads.
   await preloadG2Assets(resolvedLayers);
 
@@ -2940,6 +2990,15 @@ export async function exportImage(
   const bgColor = selectedColors?.Background ?? SOLID_BG_DEFAULT_COLOR;
 
   for (const layer of loadedLayers) {
+    if (
+      renderFilter &&
+      (
+        (renderFilter.minZIndexExclusive !== undefined && layer.zIndex <= renderFilter.minZIndexExclusive) ||
+        (renderFilter.maxZIndexInclusive !== undefined && layer.zIndex > renderFilter.maxZIndexInclusive)
+      )
+    ) {
+      continue;
+    }
     if (!options.includeBackground && layer.layerName === 'Background') {
       continue;
     }
