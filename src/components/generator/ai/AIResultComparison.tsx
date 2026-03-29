@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useAIEnhance } from '@/contexts/AIEnhanceContext';
+import { compositeMaskedEnhancement, compositeOverlay } from '@/lib/aiEnhanceImage';
 
 interface AIResultComparisonProps {
   currentImage: string | null;
@@ -17,48 +18,62 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
     isEnhancing,
     balance,
     characterOverlay,
+    targetOverlays,
   } = useAIEnhance();
   const prefersReducedMotion = useReducedMotion();
   const [shimmerVisible, setShimmerVisible] = useState(true);
   const [compositedPreview, setCompositedPreview] = useState<string | null>(null);
 
-  // For background-only results, composite a preview with the character overlay
   useEffect(() => {
-    if (!currentResult?.isBgOnly || !characterOverlay) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCompositedPreview(null);
-      return;
-    }
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
-    const ctx = canvas.getContext('2d')!;
+    let cancelled = false;
 
-    const bgImg = new Image();
-    bgImg.onload = () => {
-      ctx.drawImage(bgImg, 0, 0, 512, 512);
-      const charImg = new Image();
-      charImg.onload = () => {
-        ctx.drawImage(charImg, 0, 0, 512, 512);
-        setCompositedPreview(canvas.toDataURL('image/png'));
-      };
-      charImg.src = characterOverlay;
+    const buildPreview = async () => {
+      if (!currentResult) {
+        setCompositedPreview(null);
+        return;
+      }
+
+      if (currentResult.isBgOnly && characterOverlay) {
+        const bgDataUrl = `data:${currentResult.contentType ?? 'image/png'};base64,${currentResult.imageBase64}`;
+        const composited = await compositeOverlay(bgDataUrl, characterOverlay);
+        if (!cancelled) setCompositedPreview(composited);
+        return;
+      }
+
+      if (
+        currentImage &&
+        (currentResult.category === 'clothes' || currentResult.category === 'head')
+      ) {
+        const targetOverlay = targetOverlays[currentResult.category];
+        if (targetOverlay) {
+          const enhancedDataUrl = `data:${currentResult.contentType ?? 'image/png'};base64,${currentResult.imageBase64}`;
+          const composited = await compositeMaskedEnhancement(currentImage, enhancedDataUrl, targetOverlay);
+          if (!cancelled) setCompositedPreview(composited);
+          return;
+        }
+      }
+
+      setCompositedPreview(null);
     };
-    bgImg.src = `data:image/jpeg;base64,${currentResult.imageBase64}`;
-  }, [currentResult, characterOverlay]);
+
+    void buildPreview();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentResult, characterOverlay, currentImage, targetOverlays]);
 
   if (!currentResult) return null;
 
   // Show composited preview for backgrounds, raw result for other categories
-  const resultImageSrc = compositedPreview ?? `data:image/png;base64,${currentResult.imageBase64}`;
+  const resultImageSrc = compositedPreview ?? `data:${currentResult.contentType ?? 'image/png'};base64,${currentResult.imageBase64}`;
 
   const handleAcceptAndDone = async () => {
-    await acceptResult();
+    await acceptResult(currentImage);
     closeLightbox();
   };
 
   const handleAcceptAndContinue = async () => {
-    await acceptResult();
+    await acceptResult(currentImage);
     setWizardStep('category');
   };
 

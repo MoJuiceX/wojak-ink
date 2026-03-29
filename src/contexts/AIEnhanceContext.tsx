@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { useSageWallet } from '@/sage-wallet';
 import type { AICategory, AIEnhancement, AIEnhanceResult, AIWizardStep, PromptSubStep } from '@/types/aiEnhance';
 import type { AIStyleFamily, AIPresetOption } from '@/types/aiEnhance';
+import { compositeMaskedEnhancement, compositeOverlay } from '@/lib/aiEnhanceImage';
 
 export interface AIEnhanceContextValue {
   // Balance
@@ -46,11 +47,13 @@ export interface AIEnhanceContextValue {
   // Character overlay (transparent PNG without background — for background compositing)
   characterOverlay: string | null;
   setCharacterOverlay: (overlay: string | null) => void;
+  targetOverlays: Partial<Record<'clothes' | 'head', string>>;
+  setTargetOverlay: (category: 'clothes' | 'head', overlay: string | null) => void;
 
   // Enhanced image state
   enhancedImage: string | null;  // base64 of currently accepted AI image
   enhancedCategories: Set<AICategory>;
-  acceptResult: () => void;
+  acceptResult: (currentImage?: string | null) => void;
   resetToLayers: () => void;
   isAIEnhancedMode: boolean;
   acceptedOptions: Partial<Record<AICategory, AIPresetOption>>;
@@ -107,6 +110,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
 
   // Character overlay (transparent PNG — used for background compositing)
   const [characterOverlay, setCharacterOverlay] = useState<string | null>(null);
+  const [targetOverlays, setTargetOverlays] = useState<Partial<Record<'clothes' | 'head', string>>>({});
 
   // AI Enhanced Mode
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
@@ -477,29 +481,6 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     }
   }, [address, selectedMode, selectedOption, aiTraitOverrides, ensureAuthenticated, handleAuthError]);
 
-  // --- Composite background + character overlay ---
-  const compositeImages = useCallback(async (bgBase64: string, overlayDataUrl: string): Promise<string> => {
-    return new Promise((resolve) => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 512;
-      canvas.height = 512;
-      const ctx = canvas.getContext('2d')!;
-
-      const bgImg = new Image();
-      bgImg.onload = () => {
-        ctx.drawImage(bgImg, 0, 0, 512, 512);
-
-        const charImg = new Image();
-        charImg.onload = () => {
-          ctx.drawImage(charImg, 0, 0, 512, 512);
-          resolve(canvas.toDataURL('image/png'));
-        };
-        charImg.src = overlayDataUrl;
-      };
-      bgImg.src = `data:image/jpeg;base64,${bgBase64}`;
-    });
-  }, []);
-
   // Convert any image (JPEG or PNG) to PNG data URL via canvas
   const ensurePng = useCallback(async (base64: string, ct?: string): Promise<string> => {
     const mime = ct?.includes('jpeg') || ct?.includes('jpg') ? 'image/jpeg' : 'image/png';
@@ -524,19 +505,34 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const buildCompositedEnhancement = useCallback(async (
+    result: AIEnhanceResult,
+    currentImage?: string | null,
+  ): Promise<string> => {
+    if (result.isBgOnly && characterOverlay) {
+      const bgDataUrl = await ensurePng(result.imageBase64, result.contentType);
+      return compositeOverlay(bgDataUrl, characterOverlay);
+    }
+
+    if (
+      currentImage &&
+      (result.category === 'clothes' || result.category === 'head')
+    ) {
+      const targetOverlay = targetOverlays[result.category];
+      if (targetOverlay) {
+        const enhancedDataUrl = await ensurePng(result.imageBase64, result.contentType);
+        return compositeMaskedEnhancement(currentImage, enhancedDataUrl, targetOverlay);
+      }
+    }
+
+    return ensurePng(result.imageBase64, result.contentType);
+  }, [characterOverlay, ensurePng, targetOverlays]);
+
   // --- Accept result ---
-  const acceptResult = useCallback(async () => {
+  const acceptResult = useCallback(async (currentImage?: string | null) => {
     if (!currentResult || !selectedOption) return;
 
-    let imageData: string;
-
-    // For background-only results, composite with character overlay (already outputs PNG)
-    if (currentResult.isBgOnly && characterOverlay) {
-      imageData = await compositeImages(currentResult.imageBase64, characterOverlay);
-    } else {
-      // Convert to PNG if Pruna returned JPEG — mint pipeline requires PNG
-      imageData = await ensurePng(currentResult.imageBase64, currentResult.contentType);
-    }
+    const imageData = await buildCompositedEnhancement(currentResult, currentImage);
 
     setEnhancedImage(imageData);
     setEnhancedCategories((prev) => new Set([...prev, currentResult.category]));
@@ -546,7 +542,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     if (currentResult.aiTraitOverrides && Object.keys(currentResult.aiTraitOverrides).length > 0) {
       setAiTraitOverrides(currentResult.aiTraitOverrides);
     }
-  }, [currentResult, selectedOption, selectedFamily, characterOverlay, compositeImages, ensurePng]);
+  }, [buildCompositedEnhancement, currentResult, selectedOption, selectedFamily]);
 
   // --- Reset ---
   const resetToLayers = useCallback(() => {
@@ -559,6 +555,14 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
 
   const clearResult = useCallback(() => setCurrentResult(null), []);
   const clearError = useCallback(() => setEnhanceError(null), []);
+  const setTargetOverlay = useCallback((category: 'clothes' | 'head', overlay: string | null) => {
+    setTargetOverlays((prev) => {
+      if (overlay) return { ...prev, [category]: overlay };
+      const next = { ...prev };
+      delete next[category];
+      return next;
+    });
+  }, []);
 
   // --- Fetch creations (lazy auth — only authenticates when user opens gallery) ---
   const fetchCreations = useCallback(async () => {
@@ -649,6 +653,8 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     clearResult,
     characterOverlay,
     setCharacterOverlay,
+    targetOverlays,
+    setTargetOverlay,
     enhancedImage,
     enhancedCategories,
     acceptResult,
