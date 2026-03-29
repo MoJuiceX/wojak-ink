@@ -76,21 +76,21 @@ export type AIMode = 'enhance' | 'create_new';
 export const PROMPT_TEMPLATES: Record<AICategory, Partial<Record<AIMode, string>>> = {
   clothes: {
     enhance:
-      'Apply {user_prompt} across the clothing only. Preserve the character\'s face, headwear, background, and all other elements unchanged.',
+      'Apply {user_prompt} to the clothing only, confined strictly inside the existing clothing silhouette. Treat the request as a fabric, texture, print, embroidery, or surface treatment on the clothing itself, not as a full-scene overlay or environmental effect. Do not place the effect on the face, skin, hands, props, headwear, or background. Preserve all non-clothing pixels unchanged.',
     create_new:
-      'Replace the clothing with {user_prompt}. Draw it in flat cartoon style with thick black outlines. Preserve the character\'s face, headwear, background, and all other elements unchanged.',
+      'Replace the clothing only with {user_prompt}. Keep the result confined strictly to the clothing silhouette in flat cartoon style with thick black outlines. Do not alter the face, skin, hands, props, headwear, or background. Preserve all non-clothing pixels unchanged.',
   },
   head: {
     enhance:
-      'Apply {user_prompt} to the headwear only. Preserve the character\'s face, clothing, background, and all other elements unchanged.',
+      'Apply {user_prompt} to the headwear only, confined strictly inside the existing headwear silhouette. Treat the request as a material, texture, pattern, or surface treatment on the headwear itself, not as a full-scene overlay or environmental effect. Do not place the effect on the face, skin, clothing, props, or background. Preserve all non-headwear pixels unchanged.',
     create_new:
-      'Replace the headwear with {user_prompt}. Draw it in flat cartoon style with thick black outlines. Preserve the character\'s face, clothing, background, and all other elements unchanged.',
+      'Replace the headwear only with {user_prompt}. Keep the result confined strictly to the headwear silhouette in flat cartoon style with thick black outlines. Do not alter the face, skin, clothing, props, or background. Preserve all non-headwear pixels unchanged.',
   },
   facewear: {
     enhance:
-      'Apply {user_prompt} to the face accessory only. Preserve the character\'s face, clothing, headwear, background, and all other elements unchanged.',
+      'Apply {user_prompt} to the face accessory only, confined strictly inside the existing face-accessory silhouette. Treat the request as a material, texture, pattern, or surface treatment on the accessory itself, not as a full-scene overlay or environmental effect. Do not place the effect on the face, skin, clothing, headwear, props, or background. Preserve all non-face-accessory pixels unchanged.',
     create_new:
-      'Add {user_prompt} as a face accessory in flat cartoon style with thick black outlines. Preserve the character\'s face, clothing, headwear, background, and all other elements unchanged.',
+      'Add {user_prompt} as a face accessory only, confined strictly to the face-accessory area in flat cartoon style with thick black outlines. Do not alter the face, skin, clothing, headwear, props, or background. Preserve all non-face-accessory pixels unchanged.',
   },
   background: {
     enhance:
