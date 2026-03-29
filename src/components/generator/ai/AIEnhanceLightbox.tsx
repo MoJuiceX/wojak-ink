@@ -37,15 +37,10 @@ export function AIEnhanceLightbox({ currentImage }: AIEnhanceLightboxProps) {
   // If the user has accepted a previous enhancement (e.g., background), subsequent
   // enhancements (e.g., clothing) must build on that result to preserve prior work.
   const activeImage = enhancedImage ?? currentImage;
+  const isInfoVisible = isLightboxOpen && isInfoOpen;
 
   useEffect(() => {
-    if (!isLightboxOpen) {
-      setIsInfoOpen(false);
-    }
-  }, [isLightboxOpen]);
-
-  useEffect(() => {
-    if (!isInfoOpen) return;
+    if (!isInfoVisible) return;
 
     const handlePointerDown = (event: MouseEvent) => {
       if (!infoRef.current?.contains(event.target as Node)) {
@@ -65,7 +60,12 @@ export function AIEnhanceLightbox({ currentImage }: AIEnhanceLightboxProps) {
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isInfoOpen]);
+  }, [isInfoVisible]);
+
+  const handleClose = () => {
+    setIsInfoOpen(false);
+    closeLightbox();
+  };
 
   const handleBack = () => {
     if (wizardStep === 'result') {
@@ -135,13 +135,13 @@ export function AIEnhanceLightbox({ currentImage }: AIEnhanceLightboxProps) {
       <div className="ai-wizard-header-right">
         <div
           ref={infoRef}
-          className={`ai-info-tooltip-wrapper${isInfoOpen ? ' ai-info-tooltip-wrapper--open' : ''}`}
+          className={`ai-info-tooltip-wrapper${isInfoVisible ? ' ai-info-tooltip-wrapper--open' : ''}`}
         >
           <button
             type="button"
             className="ai-info-btn"
             aria-label="AI Enhance info"
-            aria-expanded={isInfoOpen}
+            aria-expanded={isInfoVisible}
             aria-haspopup="dialog"
             onClick={() => setIsInfoOpen((open) => !open)}
           >
@@ -170,7 +170,7 @@ export function AIEnhanceLightbox({ currentImage }: AIEnhanceLightboxProps) {
   return (
     <Lightbox
       isOpen={isLightboxOpen}
-      onClose={closeLightbox}
+      onClose={handleClose}
       headerContent={header}
       contentClassName="ai-enhance-lightbox"
       size="xl"
