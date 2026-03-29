@@ -1,5 +1,5 @@
 // functions/api/ai/credits/buy.ts
-import { jsonResponse, errorResponse, optionsResponse, AI_CREDIT_BUNDLES, requireAuth, expireAndReleasePurchase, getAddressBalance } from '../_shared';
+import { jsonResponse, errorResponse, optionsResponse, getServerAICreditBundles, getAICreditBundleByTier, requireAuth, expireAndReleasePurchase, getAddressBalance } from '../_shared';
 import type { AIEnv } from '../_shared';
 
 const PURCHASE_EXPIRY_MINUTES = 30;
@@ -23,10 +23,10 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
 
   const { tier } = body;
 
-  const bundle = AI_CREDIT_BUNDLES.find((b) => b.tier === tier);
+  const bundle = tier ? getAICreditBundleByTier(tier) : undefined;
   if (!bundle) {
     return errorResponse(
-      `Invalid tier. Valid tiers: ${AI_CREDIT_BUNDLES.map((b) => b.tier).join(', ')}`,
+      `Invalid tier. Valid tiers: ${getServerAICreditBundles().map((b) => b.tier).join(', ')}`,
       400
     );
   }
@@ -98,7 +98,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   }
 
   // Generate unique mojo amount: base + random offset (1–9999)
-  const baseMojos = Number(bundle.mojos);
+  const baseMojos = Math.round(bundle.priceXch * 1_000_000_000_000);
   const offset = Math.floor(Math.random() * 9999) + 1;
   const uniqueMojos = baseMojos + offset;
 

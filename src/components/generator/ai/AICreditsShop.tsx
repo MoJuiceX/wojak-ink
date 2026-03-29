@@ -4,12 +4,11 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { useAIEnhance } from '@/contexts/AIEnhanceContext';
-import { AI_CREDIT_BUNDLES } from '@/types/aiEnhance';
+import { getAICreditBundles } from '@/types/aiEnhance';
 import { Sparkles, Check, Loader2, Clock, Shield, ExternalLink } from 'lucide-react';
 import { useSageWallet } from '@/sage-wallet';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-
-const BASE_PRICE_PER_CREDIT = 0.10; // XCH — tier 1 single credit
+import farmersPlotLogo from '@/assets/wojak-farmers-plot-logo.webp';
 const loadConfetti = () => import('canvas-confetti').then(m => m.default);
 
 type PurchaseState = 'idle' | 'buying' | 'sending' | 'confirming' | 'success' | 'error';
@@ -37,7 +36,7 @@ function getDYKIndex(elapsed: number): number {
 
 export function AICreditsShop() {
   const { isShopOpen, closeShop, balance, refetchBalance, sessionToken, ensureAuthenticated, reauthenticate } = useAIEnhance();
-  const { status, sendXCH } = useSageWallet();
+  const { status, sendXCH, connect } = useSageWallet();
   const isConnected = status === 'connected';
   const isMobile = useMediaQuery('(max-width: 1023px)');
   const prefersReducedMotion = useReducedMotion();
@@ -48,8 +47,9 @@ export function AICreditsShop() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [confirmElapsed, setConfirmElapsed] = useState(0);
   const confirmTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const aiCreditBundles = getAICreditBundles();
 
-  const selectedBundle = AI_CREDIT_BUNDLES.find((b) => b.tier === selectedTier);
+  const selectedBundle = aiCreditBundles.find((b) => b.tier === selectedTier);
   const isPurchasing = purchaseState !== 'idle' && purchaseState !== 'success' && purchaseState !== 'error';
 
   // Tick elapsed timer during confirmation polling
@@ -302,6 +302,10 @@ export function AICreditsShop() {
   };
 
   const getBuyButtonText = () => {
+    if (!isConnected) {
+      return 'Connect wallet';
+    }
+
     switch (purchaseState) {
       case 'buying':
         return 'Preparing...';
@@ -312,8 +316,32 @@ export function AICreditsShop() {
       case 'success':
         return 'Done!';
       default:
-        return `Buy ${selectedBundle?.credits ?? 0} credits \u2014 ${selectedBundle?.priceXch ?? 0} XCH`;
+        return `Get ${selectedBundle?.credits ?? 0} credits for ${selectedBundle?.priceXch ?? 0} XCH`;
     }
+  };
+
+  const getBundleBadgeClass = (badge: string) => {
+    if (badge.startsWith('SAVE ')) {
+      return 'ai-bundle-badge ai-bundle-badge--value';
+    }
+    if (badge === 'STARTER PACK') {
+      return 'ai-bundle-badge ai-bundle-badge--neutral';
+    }
+    return 'ai-bundle-badge ai-bundle-badge--popular';
+  };
+
+  const handlePrimaryAction = async () => {
+    if (purchaseState === 'success') {
+      handleClose();
+      return;
+    }
+
+    if (!isConnected) {
+      await connect();
+      return;
+    }
+
+    await handlePurchase();
   };
 
   return (
@@ -321,40 +349,56 @@ export function AICreditsShop() {
       isOpen={isShopOpen}
       onClose={handleClose}
       title="AI Credits"
+      headerContent={(
+        <div className="ai-shop-header">
+          <div className="ai-shop-header-pill">
+            <Sparkles size={14} />
+            <span>Buy AI credits</span>
+          </div>
+          <div className="ai-shop-header-copy">
+            <h2 id="lightbox-title" className="ai-shop-header-title sr-only">AI Credits</h2>
+          </div>
+        </div>
+      )}
       size="md"
+      contentClassName="ai-credits-shop-lightbox"
     >
-      <div className="flex flex-col gap-4">
+      <div className="ai-shop-stack">
         {/* Hero balance + info */}
         <div className="ai-shop-balance">
-          <div className="ai-shop-balance-icon">
-            <Sparkles size={18} />
+          <div className="ai-shop-balance-left">
+            <div className="ai-shop-balance-icon">
+              <Sparkles size={18} />
+            </div>
+            <div className="ai-shop-balance-copy">
+              <span className="ai-shop-balance-kicker">Available now</span>
+              <div className="ai-shop-balance-main">
+                <span className="ai-shop-balance-count">{balance}</span>
+                <span className="ai-shop-balance-label">
+                  credit{balance !== 1 ? 's' : ''} remaining
+                </span>
+              </div>
+            </div>
           </div>
-          <span className="ai-shop-balance-count">{balance}</span>
-          <span className="ai-shop-balance-label">
-            credit{balance !== 1 ? 's' : ''} remaining
-          </span>
-          <span className="ai-shop-info-pill">
-            1 credit = 1 enhancement
-          </span>
+          <div className="ai-shop-balance-meta">
+            <span className="ai-shop-info-pill">
+              1 credit = 1 enhancement
+            </span>
+          </div>
         </div>
 
         {/* Wallet not connected warning */}
         {!isConnected && (
-          <p className="text-sm text-center text-secondary">
-            Connect your wallet to purchase credits
-          </p>
+          <div className="ai-shop-wallet-note">
+            <Shield size={14} />
+            <span>Connect your wallet to unlock purchases.</span>
+          </div>
         )}
 
         {/* Bundle list */}
         <div className="flex flex-col gap-2">
-          {AI_CREDIT_BUNDLES.map((bundle) => {
+          {aiCreditBundles.map((bundle) => {
             const isSelected = selectedTier === bundle.tier;
-            const perCredit = bundle.priceXch / bundle.credits;
-            const savings =
-              bundle.credits > 1
-                ? (BASE_PRICE_PER_CREDIT * bundle.credits - bundle.priceXch)
-                : 0;
-
             return (
               <motion.button
                 type="button"
@@ -365,47 +409,39 @@ export function AICreditsShop() {
                 whileHover={prefersReducedMotion ? {} : { scale: 1.01 }}
                 whileTap={prefersReducedMotion ? {} : { scale: 0.99 }}
               >
-                {/* Left: credits number + label + badge inline */}
+                {isSelected && (
+                  <span className="ai-shop-bundle-selected-mark" aria-hidden="true">
+                    <Check size={12} />
+                  </span>
+                )}
                 <div className="ai-shop-bundle-left">
-                  {bundle.originalCredits && (
-                    <span className="ai-shop-bundle-credits" style={{ textDecoration: 'line-through', opacity: 0.4, fontSize: '0.85em', marginRight: '0.25rem' }}>
-                      {bundle.originalCredits}
-                    </span>
-                  )}
-                  <span className="ai-shop-bundle-credits">
-                    {bundle.credits}
-                  </span>
-                  <span className="ai-shop-bundle-label">
-                    credit{bundle.credits !== 1 ? 's' : ''}
-                  </span>
-                  {bundle.badge && (
-                    <span
-                      className={`ai-bundle-badge ${
-                        bundle.badge === 'POPULAR'
-                          ? 'ai-bundle-badge--popular'
-                          : bundle.badge === '50% OFF'
-                            ? 'ai-bundle-badge--popular'
-                            : 'ai-bundle-badge--value'
-                      }`}
-                    >
-                      {bundle.badge}
-                    </span>
-                  )}
+                  <div className="ai-shop-bundle-copy">
+                    <div className="ai-shop-bundle-topline">
+                      <div className="ai-shop-bundle-count">
+                        <span className="ai-shop-bundle-credits">
+                          {bundle.credits}
+                        </span>
+                        <span className="ai-shop-bundle-label">
+                          credit{bundle.credits !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                      <div className="ai-shop-bundle-badge-slot">
+                        {bundle.badge && (
+                          <span className={getBundleBadgeClass(bundle.badge)}>
+                            {bundle.badge}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Right: price top, details bottom */}
                 <div className="ai-shop-bundle-right">
                   <span className="ai-shop-bundle-price">
                     {bundle.priceXch} XCH
                   </span>
                   <span className="ai-shop-bundle-details">
-                    {perCredit.toFixed(3)}/credit
-                    {bundle.discount && (
-                      <> &middot; <span className="ai-shop-bundle-discount">{bundle.discount}</span></>
-                    )}
-                    {savings > 0 && (
-                      <> &middot; <span className="ai-shop-bundle-savings">save {savings.toFixed(2)}</span></>
-                    )}
+                    <span className="ai-shop-bundle-rate">{bundle.perCreditXch.toFixed(3)} / credit</span>
                   </span>
                 </div>
               </motion.button>
@@ -522,35 +558,60 @@ export function AICreditsShop() {
           </p>
         )}
 
-        {/* Buy button */}
-        <motion.button
-          type="button"
-          className="btn btn-primary w-full"
-          onClick={purchaseState === 'success' ? handleClose : handlePurchase}
-          disabled={(isPurchasing || !selectedBundle || !isConnected) && purchaseState !== 'success'}
-          whileHover={!isPurchasing && !prefersReducedMotion ? { scale: 1.02 } : {}}
-          whileTap={!isPurchasing && !prefersReducedMotion ? { scale: 0.98 } : {}}
-        >
-          {getBuyButtonText()}
-        </motion.button>
+        <div className="ai-shop-cta-stack">
+          <motion.button
+            type="button"
+            className="btn btn-primary w-full ai-shop-buy-button"
+            onClick={handlePrimaryAction}
+            disabled={(isPurchasing || !selectedBundle) && purchaseState !== 'success'}
+            whileHover={!isPurchasing && !prefersReducedMotion ? { scale: 1.02 } : {}}
+            whileTap={!isPurchasing && !prefersReducedMotion ? { scale: 0.98 } : {}}
+          >
+            {getBuyButtonText()}
+          </motion.button>
+
+          <div className="ai-shop-cta-note">
+            <Shield size={14} />
+            <span>Your credit balance updates automatically after purchase confirmation.</span>
+          </div>
+        </div>
 
         {/* Earn credits info */}
         <div className="ai-shop-earn-section">
           <div className="ai-shop-earn-divider">
-            <span>or earn for free</span>
+            <span>or earn</span>
           </div>
           <div className="ai-shop-earn-methods">
             <div className="ai-shop-earn-method">
-              <span className="ai-shop-earn-icon">🌾</span>
-              <span className="ai-shop-earn-text">
-                Buy a Wojak Farmers Plot <span className="text-accent">= +8 credits per XCH spent</span>
+              <span className="ai-shop-earn-icon ai-shop-earn-icon--image">
+                <img
+                  src={farmersPlotLogo}
+                  alt="Wojak Farmers Plot logo"
+                  className="ai-shop-earn-logo"
+                />
               </span>
+              <div className="ai-shop-earn-copy">
+                <span className="ai-shop-earn-title-row">
+                  <span className="ai-shop-earn-title">Buy a Wojak Farmers Plot</span>
+                  <a
+                    className="ai-shop-earn-link ai-shop-earn-link--icon"
+                    href="https://mintgarden.io/collections/wojak-farmers-plot-col10hfq4hml2z0z0wutu3a9hvt60qy9fcq4k4dznsfncey4lu6kpt3su7u9ah"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="View Wojak Farmers Plot on MintGarden"
+                    title="View on MintGarden"
+                  >
+                    <ExternalLink size={14} />
+                  </a>
+                </span>
+                <span className="ai-shop-earn-text">Get <span className="text-accent">+8 credits per XCH spent</span> automatically from secondary purchases.</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Disclaimer */}
-        <p className="text-muted text-xs text-center" style={{ opacity: 0.6 }}>
+        <p className="ai-shop-footer-note">
           Credits are non-refundable.
         </p>
       </div>

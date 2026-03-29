@@ -1,4 +1,9 @@
 import { bls12_381 } from '@noble/curves/bls12-381.js';
+import {
+  getAICreditBundles,
+  getCurrentAICreditDiscountPercent,
+  getCurrentAICreditDiscountEndsAt,
+} from '../../../src/lib/aiCreditPricing';
 
 /**
  * AI Enhance shared constants, types, and utilities.
@@ -24,23 +29,30 @@ export function optionsResponse(): Response {
   return new Response(null, { headers: corsHeaders });
 }
 
-// --- AI Credit Bundles ---
-// PROMO: 2x credits for the same price (50% off) — ends April 1, 2026
-// To revert: change credits back to 1/10/25/50 and remove PROMO comments
-
 export interface AICreditBundle {
   tier: string;
+  baseCredits: number;
   credits: number;
   priceXch: number;
-  mojos: bigint;
+  badge?: string;
+  perCreditXch: number;
+  savingsVsStarterXch: number;
 }
 
-export const AI_CREDIT_BUNDLES: readonly AICreditBundle[] = [
-  { tier: '1',  credits: 2,   priceXch: 0.10, mojos: 100_000_000_000n },
-  { tier: '10', credits: 20,  priceXch: 0.80, mojos: 800_000_000_000n },
-  { tier: '25', credits: 50,  priceXch: 1.50, mojos: 1_500_000_000_000n },
-  { tier: '50', credits: 100, priceXch: 2.40, mojos: 2_400_000_000_000n },
-] as const;
+export function getServerAICreditBundles(now = new Date()): readonly AICreditBundle[] {
+  return getAICreditBundles(now);
+}
+
+export function getAICreditBundleByTier(tier: string, now = new Date()): AICreditBundle | undefined {
+  return getServerAICreditBundles(now).find((bundle) => bundle.tier === tier);
+}
+
+export function getCurrentAICreditPricingMeta(now = new Date()) {
+  return {
+    discountPercent: getCurrentAICreditDiscountPercent(now),
+    discountEndsAt: getCurrentAICreditDiscountEndsAt(now),
+  };
+}
 
 // --- Category Config ---
 

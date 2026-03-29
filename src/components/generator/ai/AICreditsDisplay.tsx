@@ -7,7 +7,11 @@ export function AICreditsDisplay() {
   const { balance, isLoadingBalance, openShop } = useAIEnhance();
 
   const badgeClass = `ai-credits-badge${balance === 0 && !isLoadingBalance ? ' ai-credits-badge--empty' : ''}`;
-  const showBuyHint = balance === 0 && !isLoadingBalance;
+  const showFullBuyHint = balance === 0 && !isLoadingBalance;
+  const showLowBalanceHint = balance > 0 && balance <= 3 && !isLoadingBalance;
+  const calloutClass = `ai-credits-callout${showLowBalanceHint ? ' ai-credits-callout--subtle' : ''}`;
+  const calloutCopy = showLowBalanceHint ? 'Top up credits' : 'Buy credits';
+  const calloutAriaLabel = showLowBalanceHint ? 'Top up AI credits' : 'Click here to buy AI credits';
 
   return (
     <div className="ai-credits-rail">
@@ -19,29 +23,35 @@ export function AICreditsDisplay() {
         {isLoadingBalance ? '...' : `\u{1FA99} ${balance} credit${balance !== 1 ? 's' : ''}`}
       </button>
 
-      {showBuyHint ? (
+      {showFullBuyHint || showLowBalanceHint ? (
         <button
           type="button"
-          className="ai-credits-callout"
+          className={calloutClass}
           onClick={openShop}
-          aria-label="Click here to buy AI credits"
+          aria-label={calloutAriaLabel}
         >
-          <span className="ai-credits-callout-bridge" aria-hidden="true">
-            <span className="ai-credits-callout-chevron" />
-            <span className="ai-credits-callout-chevron" />
-            <span className="ai-credits-callout-chevron" />
-            <span className="ai-credits-callout-chevron" />
-            <span className="ai-credits-callout-chevron" />
-          </span>
+          {showFullBuyHint ? (
+            <span className="ai-credits-callout-bridge" aria-hidden="true">
+              <span className="ai-credits-callout-chevron" />
+              <span className="ai-credits-callout-chevron" />
+              <span className="ai-credits-callout-chevron" />
+              <span className="ai-credits-callout-chevron" />
+              <span className="ai-credits-callout-chevron" />
+            </span>
+          ) : null}
           <span className="ai-credits-callout-surface">
-            <span className="ai-credits-callout-glint" aria-hidden="true" />
-            <span className="ai-credits-callout-sparkle ai-credits-callout-sparkle--one" aria-hidden="true" />
-            <span className="ai-credits-callout-sparkle ai-credits-callout-sparkle--two" aria-hidden="true" />
+            {showFullBuyHint ? (
+              <>
+                <span className="ai-credits-callout-glint" aria-hidden="true" />
+                <span className="ai-credits-callout-sparkle ai-credits-callout-sparkle--one" aria-hidden="true" />
+                <span className="ai-credits-callout-sparkle ai-credits-callout-sparkle--two" aria-hidden="true" />
+              </>
+            ) : null}
             <span className="ai-credits-callout-icon">
               <Sparkles size={12} />
             </span>
             <span className="ai-credits-callout-copy">
-              Buy credits
+              {calloutCopy}
             </span>
           </span>
         </button>

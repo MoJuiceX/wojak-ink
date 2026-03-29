@@ -37,13 +37,12 @@ import { safeStorage } from '@/utils/safeStorage';
 import { calculateCombatIdentity } from '@/lib/combat/identity-calculator';
 import { TYPE_EMOJI, TYPE_NAME } from '@/lib/combat/combatDisplayNames';
 import { deriveCombatTraitIdFromPath } from '@/lib/combat/selectionTraitId';
+import { getCurrentAICreditDiscountDaysLeft, getCurrentAICreditDiscountPercent } from '@/lib/aiCreditPricing';
 
 // Lazy-load AI components — only needed when user opens the AI wizard
 const AIEnhanceLightbox = lazy(() => import('./ai/AIEnhanceLightbox').then(m => ({ default: m.AIEnhanceLightbox })));
 const AICreationsGallery = lazy(() => import('./ai/AICreationsGallery').then(m => ({ default: m.AICreationsGallery })));
 const AICreditsShop = lazy(() => import('./ai/AICreditsShop').then(m => ({ default: m.AICreditsShop })));
-
-const AI_PROMO_END = new Date('2026-04-01T00:00:00Z');
 
 interface ActionBarProps {
   className?: string;
@@ -239,7 +238,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const [isFirstVisitInfo, setIsFirstVisitInfo] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const lastRandomizeRef = useRef<number>(0);
-  const { openLightbox, creations, isAIEnhancedMode, enhancedImage, isLightboxOpen, isShopOpen, acceptedOptions, acceptedFamilies, enhancedCategories, aiTraitOverrides, setCharacterOverlay } = useAIEnhance();
+  const { openLightbox, openShop, creations, isAIEnhancedMode, enhancedImage, isLightboxOpen, isShopOpen, acceptedOptions, acceptedFamilies, enhancedCategories, aiTraitOverrides, setCharacterOverlay } = useAIEnhance();
   const [showCreationsGallery, setShowCreationsGallery] = useState(false);
   const [canvasImageBase64, setCanvasImageBase64] = useState<string | null>(null);
 
@@ -477,8 +476,9 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   // ── Mint bar state ──
   const showFreePaidToggle = isWalletConnected && hasFreeMintsAvailable && !showMintingPaused && !isSoldOut;
   const isFreeMint = showFreePaidToggle && mintType === 'free';
-  const promoDaysLeft = Math.max(0, Math.ceil((AI_PROMO_END.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)));
-  const showMintBarPromo = promoDaysLeft > 0;
+  const currentAICreditDiscountPercent = getCurrentAICreditDiscountPercent();
+  const promoDaysLeft = getCurrentAICreditDiscountDaysLeft();
+  const showMintBarPromo = currentAICreditDiscountPercent > 0;
   const showMintBarMeta = showFreePaidToggle;
   const promoDaysLabel = promoDaysLeft === 1 ? '1 day left' : `${promoDaysLeft} days left`;
 
@@ -711,27 +711,26 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         {/* Price & toggle section */}
         <div className="mint-bar-info flex items-center gap-2 flex-1 min-w-0 px-3">
           <div className="mint-bar-status flex items-center gap-2 min-w-0">
-            {showMintBarPromo && (
-              <div
-                className="mint-bar-chip mint-bar-promo"
-                role="status"
-                aria-label={`AI Enhance is 50 percent off for ${promoDaysLeft} more day${promoDaysLeft !== 1 ? 's' : ''}.`}
-                title={`AI Enhance is 50% off. Get 2x credits for the same price. ${promoDaysLeft} day${promoDaysLeft !== 1 ? 's' : ''} left.`}
-              >
-                <span className="mint-bar-chip__icon mint-bar-promo__icon" aria-hidden="true">
-                  <Sparkles size={12} />
-                </span>
-                <span className="mint-bar-chip__label mint-bar-promo__label">AI 50% Off</span>
-                <span className="mint-bar-chip__meta mint-bar-promo__meta">{promoDaysLabel}</span>
-              </div>
-            )}
+            <div className="mint-bar-zone mint-bar-zone--left">
+              {showMintBarPromo && (
+                <button
+                  type="button"
+                  className="mint-bar-chip mint-bar-promo mint-bar-promo-button"
+                  onClick={openShop}
+                  aria-label={`Open AI credits shop. AI Enhance is ${currentAICreditDiscountPercent} percent off for ${promoDaysLeft} more day${promoDaysLeft !== 1 ? 's' : ''}.`}
+                  title={`AI Enhance is ${currentAICreditDiscountPercent}% off. ${promoDaysLeft} day${promoDaysLeft !== 1 ? 's' : ''} left until the next price step.`}
+                >
+                  <span className="mint-bar-chip__icon mint-bar-promo__icon" aria-hidden="true">
+                    <Sparkles size={12} />
+                  </span>
+                  <span className="mint-bar-chip__label mint-bar-promo__label">AI {currentAICreditDiscountPercent}% Off</span>
+                  <span className="mint-bar-chip__meta mint-bar-promo__meta">{promoDaysLabel}</span>
+                </button>
+              )}
+            </div>
 
-            {showMintBarPromo && combatIdentity && (
-              <div className="mint-bar-status-divider" aria-hidden="true" />
-            )}
-
-            {combatIdentity && (
-              <>
+            <div className="mint-bar-zone mint-bar-zone--center">
+              {combatIdentity && (
                 <div
                   className="mint-bar-chip mint-bar-identity"
                   aria-label={`Type: ${TYPE_NAME[combatIdentity.type]}, Nature: ${combatIdentity.nature}`}
@@ -747,34 +746,28 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
                     {combatIdentity.nature}
                   </span>
                 </div>
-              </>
-            )}
+              )}
+            </div>
 
-            {(showMintBarPromo || combatIdentity) && (
-              <div className="mint-bar-status-divider" aria-hidden="true" />
-            )}
-
-            {priceDisplay ? (
-              <span className="mint-bar-price font-bold text-sm tabular-nums whitespace-nowrap">
-                {priceDisplay}
-              </span>
-            ) : !isWalletConnected && !showMintingPaused && !isSoldOut ? (
-              <span className="mint-bar-hint text-xs whitespace-nowrap">
-                Connect wallet to mint
-              </span>
-            ) : showMintingPaused ? (
-              <span className="mint-bar-hint text-xs whitespace-nowrap">
-                Minting continues soon
-              </span>
-            ) : isSoldOut ? (
-              <span className="mint-bar-hint text-xs whitespace-nowrap">
-                All 4,200 Wojaks minted
-              </span>
-            ) : !has7Traits ? (
-              <span className="mint-bar-hint text-xs whitespace-nowrap">
-                Select all traits
-              </span>
-            ) : null}
+            <div className="mint-bar-zone mint-bar-zone--right">
+              {priceDisplay ? (
+                <span className="mint-bar-price font-bold text-sm tabular-nums whitespace-nowrap">
+                  {priceDisplay}
+                </span>
+              ) : showMintingPaused ? (
+                <span className="mint-bar-hint text-xs whitespace-nowrap">
+                  Minting continues soon
+                </span>
+              ) : isSoldOut ? (
+                <span className="mint-bar-hint text-xs whitespace-nowrap">
+                  All 4,200 Wojaks minted
+                </span>
+              ) : !has7Traits ? (
+                <span className="mint-bar-hint text-xs whitespace-nowrap">
+                  Select all traits
+                </span>
+              ) : null}
+            </div>
           </div>
 
           {showMintBarMeta && (
