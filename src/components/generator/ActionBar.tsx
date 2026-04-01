@@ -238,7 +238,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
   const [isFirstVisitInfo, setIsFirstVisitInfo] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const lastRandomizeRef = useRef<number>(0);
-  const { openLightbox, openShop, creations, isAIEnhancedMode, enhancedImage, isLightboxOpen, isShopOpen, acceptedOptions, acceptedFamilies, enhancedCategories, aiTraitOverrides, setCharacterOverlay, setTargetOverlay, setForegroundOverlay } = useAIEnhance();
+  const { openLightbox, openShop, creations, isAIEnhancedMode, enhancedImage, isLightboxOpen, isShopOpen, acceptedOptions, acceptedFamilies, enhancedCategories, aiTraitOverrides, setCharacterOverlay, setTopOverlay, setTargetOverlay, setForegroundOverlay } = useAIEnhance();
   const [showCreationsGallery, setShowCreationsGallery] = useState(false);
   const [canvasImageBase64, setCanvasImageBase64] = useState<string | null>(null);
 
@@ -344,6 +344,15 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
       const headSelections = selectedLayers.Head
         ? ({ Head: selectedLayers.Head } as typeof selectedLayers)
         : null;
+      const topSelections = (['Mask', 'MouthBase', 'MouthItem', 'FacialHair', 'Extra1', 'Extra2', 'Extra3'] as const)
+        .reduce((acc, key) => {
+          const value = selectedLayers[key];
+          if (value) {
+            acc[key] = value;
+          }
+          return acc;
+        }, {} as Partial<typeof selectedLayers>);
+      const hasTopSelections = Object.keys(topSelections).length > 0;
 
       // Export full image (with background) for clothes/head enhancements
       const fullBlob = await exportImage(selectedLayers, {
@@ -359,7 +368,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
         size: { preset: '512' },
       }, g2Selections, selectedColors);
 
-      const [clothesBlob, headBlob, clothesForegroundBlob, headForegroundBlob] = await Promise.all([
+      const [clothesBlob, headBlob, clothesForegroundBlob, headForegroundBlob, topBlob] = await Promise.all([
         clothesSelections
           ? exportImage(clothesSelections, {
               format: 'png',
@@ -387,11 +396,18 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               includeBackground: false,
               size: { preset: '512' },
             }, g2Selections, selectedColors, { renderPass: 'foreground-only' })
+          : Promise.resolve(null),
+        hasTopSelections
+          ? exportImage(topSelections, {
+              format: 'png',
+              includeBackground: false,
+              size: { preset: '512' },
+            }, g2Selections, selectedColors)
           : Promise.resolve(null),
       ]);
 
       // Convert both to data URLs
-      const [fullDataUrl, charDataUrl, clothesDataUrl, headDataUrl, clothesForegroundDataUrl, headForegroundDataUrl] = await Promise.all([
+      const [fullDataUrl, charDataUrl, clothesDataUrl, headDataUrl, clothesForegroundDataUrl, headForegroundDataUrl, topDataUrl] = await Promise.all([
         new Promise<string>((resolve) => {
           const r = new FileReader();
           r.onload = () => resolve(r.result as string);
@@ -430,10 +446,18 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
               r.readAsDataURL(headForegroundBlob);
             })
           : Promise.resolve(''),
+        topBlob
+          ? new Promise<string>((resolve) => {
+              const r = new FileReader();
+              r.onload = () => resolve(r.result as string);
+              r.readAsDataURL(topBlob);
+            })
+          : Promise.resolve(''),
       ]);
 
       setCanvasImageBase64(fullDataUrl);
       setCharacterOverlay(charDataUrl);
+      setTopOverlay(topDataUrl || null);
       setTargetOverlay('clothes', clothesDataUrl || null);
       setTargetOverlay('head', headDataUrl || null);
       setForegroundOverlay('clothes', clothesForegroundDataUrl || null);
@@ -442,7 +466,7 @@ export function ActionBar({ className = '', rightPanelMode, onToggleRightPanel }
     } catch (err) {
       console.error('[ActionBar] Failed to capture canvas for AI enhance:', err);
     }
-  }, [canExport, selectedLayers, g2Selections, selectedColors, openLightbox, setCharacterOverlay, setTargetOverlay, setForegroundOverlay]);
+  }, [canExport, selectedLayers, g2Selections, selectedColors, openLightbox, setCharacterOverlay, setTopOverlay, setTargetOverlay, setForegroundOverlay]);
 
   const basePath = selectedLayers.Base;
   const hasSelection = !isSelectionPathEmpty(basePath);

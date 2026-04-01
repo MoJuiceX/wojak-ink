@@ -17,7 +17,7 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
   try {
     const rows = await env.DB
       .prepare(
-        `SELECT id, r2_key, category, prompt, parent_enhancement_id, ai_trait_overrides, created_at
+        `SELECT id, r2_key, category, prompt, parent_enhancement_id, ai_trait_overrides, base_layers_json, created_at
          FROM ai_enhancements
          WHERE wallet_address = ?
          ORDER BY created_at DESC
@@ -28,8 +28,12 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
 
     const creations = (rows.results ?? []).map((row: Record<string, unknown>) => {
       let aiTraitOverrides: Record<string, string> = {};
+      let generatorSnapshot: Record<string, unknown> | null = null;
       if (row.ai_trait_overrides && typeof row.ai_trait_overrides === 'string') {
         try { aiTraitOverrides = JSON.parse(row.ai_trait_overrides); } catch { /* ignore */ }
+      }
+      if (row.base_layers_json && typeof row.base_layers_json === 'string') {
+        try { generatorSnapshot = JSON.parse(row.base_layers_json); } catch { /* ignore */ }
       }
       return {
         id: row.id,
@@ -39,6 +43,8 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
         parentEnhancementId: row.parent_enhancement_id,
         createdAt: row.created_at,
         aiTraitOverrides,
+        generatorSnapshot,
+        isLegacy: !generatorSnapshot,
       };
     });
 

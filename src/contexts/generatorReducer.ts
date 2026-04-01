@@ -74,6 +74,7 @@ export type GeneratorAction =
   | { type: 'REMOVE_FAVORITE'; id: string }
   | { type: 'RENAME_FAVORITE'; id: string; name: string }
   | { type: 'LOAD_FAVORITE_UNIFIED'; unifiedSelections: SelectionsSnapshot }
+  | { type: 'LOAD_GENERATOR_SNAPSHOT'; unifiedSelections: SelectionsSnapshot; selectedColors: Partial<Record<UILayerName, string>> }
   | { type: 'TOGGLE_EXPORT'; isOpen: boolean }
   | { type: 'SET_SCROLL_POSITION'; position: number }
   | { type: 'SET_STICKY_PREVIEW'; show: boolean }
@@ -734,6 +735,28 @@ export function generatorReducer(state: GeneratorState, action: GeneratorAction)
         ...newState,
         selections: newSelections,
         suspendedSelections: [], // Clear all suspensions when loading a favorite
+        suspendedMaskByExtra: null,
+        suspendedExtrasByMask: [],
+        disabledLayers: result.disabledLayers,
+        disabledOptions: result.disabledOptions,
+        disabledReasons: result.reasons,
+        disabledOptionReasons: result.disabledOptionReasons,
+        isPreviewStale: true,
+        isFavoritesOpen: false,
+        generatorError: null,
+      };
+    }
+
+    case 'LOAD_GENERATOR_SNAPSHOT': {
+      const pathMap = pathMapForReducer();
+      const { newSelections, result } = applyRulesUnified(action.unifiedSelections, pathMap);
+      const newState = pushHistoryUnified(state, newSelections);
+
+      return {
+        ...newState,
+        selections: newSelections,
+        selectedColors: { ...action.selectedColors },
+        suspendedSelections: [],
         suspendedMaskByExtra: null,
         suspendedExtrasByMask: [],
         disabledLayers: result.disabledLayers,

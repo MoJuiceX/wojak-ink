@@ -2930,11 +2930,19 @@ export async function exportImage(
   }
 
   if (renderFilter?.renderPass && renderFilter.renderPass !== 'all') {
-    resolvedLayers = resolvedLayers.map((layer) =>
-      layer.g2
-        ? { ...layer, g2: filterG2LayerDataForRenderPass(layer.g2, renderFilter.renderPass) }
-        : layer,
-    );
+    resolvedLayers = resolvedLayers
+      .filter((layer) => {
+        // G1 layers (no g2 data) have no separate foreground/outline elements —
+        // the entire PNG IS the fill. Exclude them from 'foreground-only' so the
+        // foreground overlay doesn't redraw the original on top of an AI enhancement.
+        if (renderFilter.renderPass === 'foreground-only' && !layer.g2) return false;
+        return true;
+      })
+      .map((layer) =>
+        layer.g2
+          ? { ...layer, g2: filterG2LayerDataForRenderPass(layer.g2, renderFilter.renderPass) }
+          : layer,
+      );
   }
 
   // Warm G2 assets in parallel so drawG2Layer hits cache instead of serial network loads.

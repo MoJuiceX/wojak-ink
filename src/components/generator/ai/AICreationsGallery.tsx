@@ -36,6 +36,7 @@ export function AICreationsGallery({ isOpen, onClose }: AICreationsGalleryProps)
 
   // Fetch the R2 image, convert to base64 data URL, load into AI wizard
   const handleContinueEnhancing = useCallback(async (creation: AIEnhancement) => {
+    if (creation.isLegacy || !creation.generatorSnapshot) return;
     setIsLoadingImage(true);
     try {
       const headers: Record<string, string> = {};
@@ -46,7 +47,7 @@ export function AICreationsGallery({ isOpen, onClose }: AICreationsGalleryProps)
       const reader = new FileReader();
       reader.onload = () => {
         const dataUrl = reader.result as string;
-        loadImageForEnhancing(dataUrl, creation.aiTraitOverrides);
+        loadImageForEnhancing(dataUrl, creation.aiTraitOverrides, creation.generatorSnapshot);
         setSelectedCreation(null);
         onClose();
       };
@@ -96,15 +97,26 @@ export function AICreationsGallery({ isOpen, onClose }: AICreationsGalleryProps)
               <p className="text-muted text-xs mt-1">
                 {new Date(selectedCreation.createdAt).toLocaleDateString()}
               </p>
+              {selectedCreation.isLegacy && (
+                <p className="text-muted text-xs mt-2">
+                  Legacy creation. View or download only.
+                </p>
+              )}
             </div>
             <div className="flex gap-2">
               <button
                 className="btn btn-primary text-sm"
                 onClick={() => handleContinueEnhancing(selectedCreation)}
-                disabled={isLoadingImage}
+                disabled={isLoadingImage || selectedCreation.isLegacy}
               >
                 <Wand2 size={14} />
-                <span>{isLoadingImage ? 'Loading...' : 'Continue Enhancing'}</span>
+                <span>
+                  {selectedCreation.isLegacy
+                    ? 'Minting unavailable'
+                    : isLoadingImage
+                      ? 'Loading...'
+                      : 'Continue Enhancing'}
+                </span>
               </button>
               <button
                 className="btn btn-ghost text-sm"

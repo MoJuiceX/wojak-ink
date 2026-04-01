@@ -19,6 +19,7 @@ import {
 } from 'react';
 import type { FavoriteWojak, ExportOptions, G2Selection, G2Selections, SelectionsSnapshot, SelectionKey } from '@/types/generator';
 import { isFavoriteV2, isSelectionPathEmpty } from '@/types/generator';
+import type { AIGeneratorSnapshot } from '@/types/aiEnhance';
 import { getDisabledLayers, type SelectedLayers, type UILayerName } from '@/lib/wojakRules';
 import { DEFAULT_SELECTIONS, DEFAULT_BASE_PATH, DEFAULT_CLOTHES_PATH, DEFAULT_MOUTHBASE_PATH } from '@/config/layers';
 import { SCENE_BACKGROUNDS } from '@/lib/layerRegistry';
@@ -167,6 +168,7 @@ interface GeneratorContextValue extends GeneratorState {
   removeFavorite: (id: string) => void;
   renameFavorite: (id: string, name: string) => void;
   loadFavorite: (favorite: FavoriteWojak) => void;
+  loadGeneratorSnapshot: (snapshot: AIGeneratorSnapshot) => void;
 
   // Export
   toggleExport: (isOpen: boolean) => void;
@@ -754,6 +756,15 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
     }
   }, []);
 
+  const loadGeneratorSnapshot = useCallback((snapshot: AIGeneratorSnapshot) => {
+    const unified = fromExternal(snapshot.selectedLayers, snapshot.g2Selections, getPathToTraitIdMap());
+    dispatch({
+      type: 'LOAD_GENERATOR_SNAPSHOT',
+      unifiedSelections: unified,
+      selectedColors: snapshot.selectedColors ?? {},
+    });
+  }, []);
+
   // Export
   const toggleExport = useCallback((isOpen: boolean) => {
     dispatch({ type: 'TOGGLE_EXPORT', isOpen });
@@ -829,6 +840,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
       removeFavorite,
       renameFavorite,
       loadFavorite,
+      loadGeneratorSnapshot,
       toggleExport,
       exportWojak,
       canExport,
@@ -868,6 +880,7 @@ export function GeneratorProvider({ children }: GeneratorProviderProps) {
       removeFavorite,
       renameFavorite,
       loadFavorite,
+      loadGeneratorSnapshot,
       toggleExport,
       exportWojak,
       canExport,

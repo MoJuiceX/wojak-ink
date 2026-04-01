@@ -1,7 +1,7 @@
 /**
  * Serve AI-enhanced images from R2.
  * Route: /api/ai/image/<r2Key>
- * Example: /api/ai/image/ai-edits/xch1abc.../1234567890.png?token=SESSION_TOKEN
+ * Example: /api/ai/image/ai-creations/xch1abc.../1234567890.png?token=SESSION_TOKEN
  *
  * Security: Requires auth via Authorization header OR ?token= query param.
  * Users can only access their own images (wallet in R2 key must match session).
@@ -67,12 +67,13 @@ export const onRequest: PagesFunction<AIEnv> = async (context) => {
 
   const r2Key = Array.isArray(pathSegments) ? pathSegments.join('/') : pathSegments;
 
-  // Must start with 'ai-edits/'
-  if (!r2Key.startsWith('ai-edits/')) {
+  // Must start with an allowed AI image prefix
+  if (!r2Key.startsWith('ai-edits/') && !r2Key.startsWith('ai-creations/')) {
     return errorResponse('Invalid image path', 400);
   }
 
   // Ownership check: R2 key format is ai-edits/{walletAddress}/{id}.{ext}
+  // or ai-creations/{walletAddress}/{id}.{ext}
   const keyParts = r2Key.split('/');
   if (keyParts.length < 3) {
     return errorResponse('Invalid image path', 400);

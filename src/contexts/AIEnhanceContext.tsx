@@ -4,9 +4,11 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useSageWallet } from '@/sage-wallet';
-import type { AICategory, AIEnhancement, AIEnhanceResult, AIWizardStep, PromptSubStep } from '@/types/aiEnhance';
+import { useGenerator } from '@/contexts/GeneratorContext';
+import type { AICategory, AIEnhancement, AIEnhanceResult, AIWizardStep, PromptSubStep, AIGeneratorSnapshot } from '@/types/aiEnhance';
 import type { AIStyleFamily, AIPresetOption } from '@/types/aiEnhance';
 import { compositeMaskedEnhancement, compositeOverlay } from '@/lib/aiEnhanceImage';
+import { toastService } from '@/services/toastService';
 
 export interface AIEnhanceContextValue {
   // Balance
@@ -43,10 +45,13 @@ export interface AIEnhanceContextValue {
   // Result
   currentResult: AIEnhanceResult | null;
   clearResult: () => void;
+  updateCurrentResultR2Key: (r2Key: string) => void;
 
   // Character overlay (transparent PNG without background — for background compositing)
   characterOverlay: string | null;
   setCharacterOverlay: (overlay: string | null) => void;
+  topOverlay: string | null;
+  setTopOverlay: (overlay: string | null) => void;
   targetOverlays: Partial<Record<'clothes' | 'head', string>>;
   setTargetOverlay: (category: 'clothes' | 'head', overlay: string | null) => void;
   foregroundOverlays: Partial<Record<'clothes' | 'head', string>>;
@@ -68,7 +73,7 @@ export interface AIEnhanceContextValue {
   fetchCreations: () => Promise<void>;
 
   // Load a gallery creation for further enhancement
-  loadImageForEnhancing: (imageDataUrl: string, traitOverrides?: Record<string, string>) => void;
+  loadImageForEnhancing: (imageDataUrl: string, traitOverrides?: Record<string, string>, snapshot?: AIGeneratorSnapshot | null) => void;
 
   // Shop
   isShopOpen: boolean;
@@ -89,6 +94,7 @@ const AIEnhanceContext = createContext<AIEnhanceContextValue | null>(null);
 
 export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   const { address, signMessage } = useSageWallet();
+  const { selectedLayers, g2Selections, selectedColors, loadGeneratorSnapshot } = useGenerator();
 
   // Balance
   const [balance, setBalance] = useState(0);
@@ -112,6 +118,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
 
   // Character overlay (transparent PNG — used for background compositing)
   const [characterOverlay, setCharacterOverlay] = useState<string | null>(null);
+  const [topOverlay, setTopOverlay] = useState<string | null>(null);
   const [targetOverlays, setTargetOverlays] = useState<Partial<Record<'clothes' | 'head', string>>>({});
   const [foregroundOverlays, setForegroundOverlays] = useState<Partial<Record<'clothes' | 'head', string>>>({});
 
@@ -377,7 +384,11 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
         prompt,
         mode: selectedMode ?? 'enhance',
         parentEnhancementId: parentId ?? undefined,
-        baseLayersJson: layersJson ?? undefined,
+        baseLayersJson: layersJson ?? JSON.stringify({
+          selectedLayers,
+          g2Selections,
+          selectedColors,
+        }),
         traitLabel: selectedOption?.label ?? null,
         parentTraitOverrides: Object.keys(aiTraitOverrides).length > 0 ? aiTraitOverrides : undefined,
       };
@@ -485,7 +496,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsEnhancing(false);
     }
-  }, [address, selectedMode, selectedOption, aiTraitOverrides, ensureAuthenticated, handleAuthError, targetOverlays]);
+  }, [address, selectedMode, selectedOption, aiTraitOverrides, ensureAuthenticated, handleAuthError, targetOverlays, selectedLayers, g2Selections, selectedColors]);
 
   // Convert any image (JPEG or PNG) to PNG data URL via canvas
   const ensurePng = useCallback(async (base64: string, ct?: string): Promise<string> => {
@@ -529,15 +540,18 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
         const enhancedDataUrl = await ensurePng(result.imageBase64, result.contentType);
         const composited = await compositeMaskedEnhancement(currentImage, enhancedDataUrl, targetOverlay);
         const foregroundOverlay = foregroundOverlays[result.category];
-        if (foregroundOverlay) {
-          return compositeOverlay(composited, foregroundOverlay);
+        const withForeground = foregroundOverlay
+          ? await compositeOverlay(composited, foregroundOverlay)
+          : composited;
+        if (topOverlay) {
+          return compositeOverlay(withForeground, topOverlay);
         }
-        return composited;
+        return withForeground;
       }
     }
 
     return ensurePng(result.imageBase64, result.contentType);
-  }, [characterOverlay, ensurePng, foregroundOverlays, targetOverlays]);
+  }, [characterOverlay, ensurePng, foregroundOverlays, targetOverlays, topOverlay]);
 
   // --- Accept result ---
   const acceptResult = useCallback(async (currentImage?: string | null) => {
@@ -553,7 +567,37 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     if (currentResult.aiTraitOverrides && Object.keys(currentResult.aiTraitOverrides).length > 0) {
       setAiTraitOverrides(currentResult.aiTraitOverrides);
     }
-  }, [buildCompositedEnhancement, currentResult, selectedOption, selectedFamily]);
+
+    try {
+      const token = await ensureAuthenticated();
+      if (!token) return;
+
+      const res = await fetch('/api/ai/accept', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          sourceR2Key: currentResult.r2Key,
+          imageDataUrl: imageData,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json() as { r2Key?: string };
+        if (data.r2Key) {
+          setCurrentResult((prev) => (prev ? { ...prev, r2Key: data.r2Key, enhancementId: data.r2Key } : prev));
+        }
+        return;
+      }
+
+      toastService.error('Accepted image applied, but saving to your AI creations failed.');
+    } catch (err) {
+      console.error('Failed to persist accepted AI creation:', err);
+      toastService.error('Accepted image applied, but saving to your AI creations failed.');
+    }
+  }, [buildCompositedEnhancement, currentResult, selectedOption, selectedFamily, ensureAuthenticated]);
 
   // --- Reset ---
   const resetToLayers = useCallback(() => {
@@ -565,6 +609,9 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const clearResult = useCallback(() => setCurrentResult(null), []);
+  const updateCurrentResultR2Key = useCallback((r2Key: string) => {
+    setCurrentResult((prev) => (prev ? { ...prev, r2Key, enhancementId: r2Key } : prev));
+  }, []);
   const clearError = useCallback(() => setEnhanceError(null), []);
   const setTargetOverlay = useCallback((category: 'clothes' | 'head', overlay: string | null) => {
     setTargetOverlays((prev) => {
@@ -625,7 +672,10 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
   }, [address, ensureAuthenticated, handleAuthError]);
 
   // --- Load gallery creation for further enhancement ---
-  const loadImageForEnhancing = useCallback((imageDataUrl: string, traitOverrides?: Record<string, string>) => {
+  const loadImageForEnhancing = useCallback((imageDataUrl: string, traitOverrides?: Record<string, string>, snapshot?: AIGeneratorSnapshot | null) => {
+    if (snapshot) {
+      loadGeneratorSnapshot(snapshot);
+    }
     setEnhancedImage(imageDataUrl);
     // Restore prior AI edits from the creation's stored overrides
     const overrides = traitOverrides ?? {};
@@ -638,7 +688,7 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     setSelectedCategory(null);
     setCurrentResult(null);
     setEnhanceError(null);
-  }, []);
+  }, [loadGeneratorSnapshot]);
 
   // --- Shop ---
   const openShop = useCallback(() => setIsShopOpen(true), []);
@@ -670,8 +720,11 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
     submitEnhance,
     currentResult,
     clearResult,
+    updateCurrentResultR2Key,
     characterOverlay,
     setCharacterOverlay,
+    topOverlay,
+    setTopOverlay,
     targetOverlays,
     setTargetOverlay,
     foregroundOverlays,

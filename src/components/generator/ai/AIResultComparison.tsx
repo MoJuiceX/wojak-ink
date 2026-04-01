@@ -18,6 +18,7 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
     isEnhancing,
     balance,
     characterOverlay,
+    topOverlay,
     targetOverlays,
     foregroundOverlays,
   } = useAIEnhance();
@@ -50,9 +51,12 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
           const enhancedDataUrl = `data:${currentResult.contentType ?? 'image/png'};base64,${currentResult.imageBase64}`;
           const composited = await compositeMaskedEnhancement(currentImage, enhancedDataUrl, targetOverlay);
           const foregroundOverlay = foregroundOverlays[currentResult.category];
-          const finalPreview = foregroundOverlay
+          const withForeground = foregroundOverlay
             ? await compositeOverlay(composited, foregroundOverlay)
             : composited;
+          const finalPreview = topOverlay
+            ? await compositeOverlay(withForeground, topOverlay)
+            : withForeground;
           if (!cancelled) setCompositedPreview(finalPreview);
           return;
         }
@@ -65,7 +69,7 @@ export function AIResultComparison({ currentImage }: AIResultComparisonProps) {
     return () => {
       cancelled = true;
     };
-  }, [currentResult, characterOverlay, currentImage, foregroundOverlays, targetOverlays]);
+  }, [currentResult, characterOverlay, currentImage, foregroundOverlays, targetOverlays, topOverlay]);
 
   if (!currentResult) return null;
 

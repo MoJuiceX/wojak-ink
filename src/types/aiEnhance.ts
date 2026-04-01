@@ -1,6 +1,8 @@
 // src/types/aiEnhance.ts
 import type { DerivedAICreditBundle } from '@/lib/aiCreditPricing';
 export { getAICreditBundles } from '@/lib/aiCreditPricing';
+import type { G2Selections, SelectedLayers } from '@/types/generator';
+import type { UILayerName } from '@/lib/layerRegistry';
 
 export type AICategory = 'clothes' | 'head' | 'facewear' | 'background';
 export type AICategoryFreedom = 'enhance' | 'free';
@@ -60,6 +62,14 @@ export interface AIEnhancement {
   parentEnhancementId: number | null;
   createdAt: string;
   aiTraitOverrides: Record<string, string>;
+  generatorSnapshot: AIGeneratorSnapshot | null;
+  isLegacy: boolean;
+}
+
+export interface AIGeneratorSnapshot {
+  selectedLayers: SelectedLayers;
+  g2Selections: G2Selections;
+  selectedColors: Partial<Record<UILayerName, string>>;
 }
 
 export interface AIEnhanceResult {
