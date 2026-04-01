@@ -586,8 +586,9 @@ export function AIEnhanceProvider({ children }: { children: ReactNode }) {
 
       if (res.ok) {
         const data = await res.json() as { r2Key?: string };
-        if (data.r2Key) {
-          setCurrentResult((prev) => (prev ? { ...prev, r2Key: data.r2Key, enhancementId: data.r2Key } : prev));
+        const acceptedKey = data.r2Key;
+        if (acceptedKey) {
+          setCurrentResult((prev) => (prev ? { ...prev, r2Key: acceptedKey, enhancementId: acceptedKey } : prev));
         }
         return;
       }
