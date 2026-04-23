@@ -1,7 +1,7 @@
 /**
  * Credit Tracker Worker
  *
- * Runs every 30 minutes via Cron. Fetches MintGarden trade events for the
+ * Runs hourly via Cron. Fetches MintGarden trade events for the
  * Wojak collection, calculates credits (XCH-only), and writes to D1.
  * Once per day writes a floor price snapshot.
  *

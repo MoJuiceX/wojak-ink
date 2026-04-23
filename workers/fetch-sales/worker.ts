@@ -1,6 +1,6 @@
 /**
  * Cloudflare Worker - Trade Values Fetcher
- * Runs every 30 minutes via Cron Trigger
+ * Runs hourly via Cron Trigger
  * Fetches NFT sales from Dexie API, calculates trait statistics, stores in KV
  * Also persists all trades to D1 (sales_history) as the server-side source of truth
  */

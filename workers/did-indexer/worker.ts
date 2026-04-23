@@ -1,5 +1,5 @@
 // DID Holdings Indexer
-// Runs every 30 minutes. For each registered game player:
+// Runs hourly. For each registered game player:
 // 1. Fetches their DID's NFT holdings from MintGarden
 // 2. Updates did_holdings table (add new, remove transferred)
 // 3. Triggers Power Level recalculation if holdings changed
@@ -667,4 +667,3 @@ async function discoverNewHolders(env: Env): Promise<number> {
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-

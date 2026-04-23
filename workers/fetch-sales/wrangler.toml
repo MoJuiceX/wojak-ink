@@ -2,9 +2,9 @@ name = "wojak-fetch-sales"
 main = "worker.ts"
 compatibility_date = "2024-01-01"
 
-# Cron trigger: every 30 minutes
+# Cron trigger: hourly
 [triggers]
-crons = ["*/30 * * * *"]
+crons = ["0 * * * *"]
 
 # D1 Database binding (same as Pages and credit-tracker)
 [[d1_databases]]
