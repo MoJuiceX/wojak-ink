@@ -77,6 +77,7 @@ export const PRIMARY_NAV_ITEMS: NavItem[] = [
     label: 'BigPulp',
     shortLabel: 'BigPulp',
     icon: Lightbulb,
+    badge: 'dot',
     featured: true, // Center FAB in mobile nav
   },
   {

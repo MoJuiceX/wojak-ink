@@ -10,9 +10,13 @@
  */
 const rawLayerBase = (import.meta.env.VITE_LAYER_BASE_URL || '/assets/wojak-layers').replace(/\/$/, '');
 const isAbsoluteLayerBase = /^https?:\/\//i.test(rawLayerBase);
+const shouldUseDevLayerProxy =
+  import.meta.env.DEV &&
+  !import.meta.env.VITEST &&
+  isAbsoluteLayerBase;
 
 export const LAYER_BASE =
-  import.meta.env.DEV && isAbsoluteLayerBase ? '/__layer_proxy' : rawLayerBase;
+  shouldUseDevLayerProxy ? '/__layer_proxy' : rawLayerBase;
 
 /** G2 (YourWojak colorable layers) base path */
 export const G2_LAYER_BASE = `${LAYER_BASE}/YourWojak-layers`;
